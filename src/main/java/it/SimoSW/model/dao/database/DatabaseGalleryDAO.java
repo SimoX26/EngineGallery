@@ -1,13 +1,19 @@
 package it.SimoSW.model.dao.database;
 
 import it.SimoSW.model.Folder;
-import it.SimoSW.model.Image;
 import it.SimoSW.model.dao.GalleryDAO;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO per la gestione della struttura delle cartelle della galleria.
+ * Le immagini NON sono gestite da questo DAO.
+ */
 public class DatabaseGalleryDAO implements GalleryDAO {
 
     private final ConnectionFactory connectionFactory =
@@ -39,59 +45,45 @@ public class DatabaseGalleryDAO implements GalleryDAO {
     }
 
     @Override
-    public List<Image> loadImagesInFolder(long folderId) {
+    public List<Folder> loadSubFolders(long parentFolderId) {
         String sql = """
-            SELECT id, file_path, folder_id, upload_date
-            FROM images
-            WHERE folder_id = ?
+            SELECT id, name, parent_id
+            FROM folders
+            WHERE parent_id = ?
         """;
 
-        List<Image> images = new ArrayList<>();
+        List<Folder> folders = new ArrayList<>();
 
         try (Connection conn = connectionFactory.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, folderId);
-            ResultSet rs = ps.executeQuery();
+            ps.setLong(1, parentFolderId);
 
-            while (rs.next()) {
-                images.add(mapRowToImage(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    folders.add(mapRowToFolder(rs));
+                }
             }
 
-            return images;
+            return folders;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error loading images in folder", e);
+            throw new RuntimeException("Error loading subfolders", e);
         }
     }
 
-    // =========================
-    // Metodi di supporto
-    // =========================
+    /* =========================
+       Mapping
+       ========================= */
 
     private Folder mapRowToFolder(ResultSet rs) throws SQLException {
         Folder folder = new Folder();
         folder.setId(rs.getLong("id"));
         folder.setName(rs.getString("name"));
 
-        long parentId = rs.getLong("parent_id");
-        if (!rs.wasNull()) {
-            folder.setParentId(parentId);
-        } else {
-            folder.setParentId(null);
-        }
+        Long parentId = rs.getObject("parent_id", Long.class);
+        folder.setParentId(parentId);
 
         return folder;
-    }
-
-    private Image mapRowToImage(ResultSet rs) throws SQLException {
-        Image image = new Image();
-        image.setId(rs.getLong("id"));
-        image.setFilePath(rs.getString("file_path"));
-        image.setFolderId(rs.getLong("folder_id"));
-        image.setUploadDate(
-                rs.getTimestamp("upload_date").toInstant()
-        );
-        return image;
     }
 }

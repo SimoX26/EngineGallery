@@ -1,56 +1,56 @@
 package it.SimoSW.model;
 
-import java.time.Instant;
+import java.util.List;
 
 public class Image {
 
     private long id;
+    private long engineId;
     private String filePath;
-    private long folderId;
-    private Instant uploadDate;
 
-    public Image() {
-        // costruttore vuoto richiesto per mapping DAO
-    }
+    private String description;
+    private List<String> keywords;
 
-    public Image(String filePath, long folderId) {
+    public Image(long id, long engineId, String filePath, String description, List<String> keywords) {
+        this.id = id;
+        this.engineId = engineId;
         this.filePath = filePath;
-        this.folderId = folderId;
+        this.description = description;
+        this.keywords = keywords;
     }
 
-    // =========================
-    // Getter & Setter
-    // =========================
+    public Image(long engineId, String filePath, String description, List<String> keywords) {
+        this.engineId = engineId;
+        this.filePath = filePath;
+        this.description = description;
+        this.keywords = keywords;
+    }
 
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public long getEngineId() {
+        return engineId;
     }
 
     public String getFilePath() {
         return filePath;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public String getDescription() {
+        return description;
     }
 
-    public long getFolderId() {
-        return folderId;
+    public List<String> getKeywords() {
+        return keywords;
     }
 
-    public void setFolderId(long folderId) {
-        this.folderId = folderId;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Instant getUploadDate() {
-        return uploadDate;
-    }
-
-    public void setUploadDate(Instant uploadDate) {
-        this.uploadDate = uploadDate;
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
     }
 }

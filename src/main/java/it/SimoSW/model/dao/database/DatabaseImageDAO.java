@@ -1,191 +1,157 @@
 package it.SimoSW.model.dao.database;
 
-import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.Image;
 import it.SimoSW.model.dao.ImageDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Implementazione JDBC di ImageDAO.
+ */
 public class DatabaseImageDAO implements ImageDAO {
 
-    private final ConnectionFactory connectionFactory =
-            ConnectionFactory.getInstance();
+    private static final String INSERT_SQL =
+            "INSERT INTO image (engine_id, file_path, description, keywords) VALUES (?, ?, ?, ?)";
+
+    private static final String UPDATE_SQL =
+            "UPDATE image SET file_path = ?, description = ?, keywords = ? WHERE id = ?";
+
+    private static final String DELETE_SQL =
+            "DELETE FROM image WHERE id = ?";
+
+    private static final String FIND_BY_ID_SQL =
+            "SELECT * FROM image WHERE id = ?";
+
+    private static final String FIND_BY_ENGINE_SQL =
+            "SELECT * FROM image WHERE engine_id = ?";
 
     @Override
-    public void save(Image image) {
-        String sql = """
-            INSERT INTO images (file_path, folder_id)
-            VALUES (?, ?)
-        """;
+    public Image save(Image image) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt =
+                     conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
-        try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setLong(1, image.getEngineId());
+            stmt.setString(2, image.getFilePath());
+            stmt.setString(3, image.getDescription());
+            stmt.setString(4, String.join(",", image.getKeywords()));
 
-            ps.setString(1, image.getFilePath());
-            ps.setLong(2, image.getFolderId());
-            ps.executeUpdate();
+            stmt.executeUpdate();
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    image.setId(rs.getLong(1));
+                    return new Image(
+                            rs.getLong(1),
+                            image.getEngineId(),
+                            image.getFilePath(),
+                            image.getDescription(),
+                            image.getKeywords()
+                    );
                 }
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving image", e);
+            throw new RuntimeException("Errore durante il salvataggio dell'immagine", e);
+        }
+
+        throw new RuntimeException("Errore durante il salvataggio dell'immagine");
+    }
+
+    @Override
+    public Image update(Image image) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+
+            stmt.setString(1, image.getFilePath());
+            stmt.setString(2, image.getDescription());
+            stmt.setString(3, String.join(",", image.getKeywords()));
+            stmt.setLong(4, image.getId());
+
+            stmt.executeUpdate();
+            return image;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante l'aggiornamento dell'immagine", e);
         }
     }
 
     @Override
     public void delete(long imageId) {
-        String sql = "DELETE FROM images WHERE id = ?";
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
 
-        try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setLong(1, imageId);
-            ps.executeUpdate();
+            stmt.setLong(1, imageId);
+            stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting image", e);
+            throw new RuntimeException("Errore durante l'eliminazione dell'immagine", e);
         }
     }
 
     @Override
-    public Image findById(long imageId) {
-        String sql = """
-            SELECT id, file_path, folder_id, upload_date
-            FROM images
-            WHERE id = ?
-        """;
+    public Optional<Image> findById(long imageId) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
 
-        try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            stmt.setLong(1, imageId);
 
-            ps.setLong(1, imageId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return mapRowToImage(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
             }
 
-            return null;
-
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding image by id", e);
+            throw new RuntimeException("Errore durante il recupero dell'immagine", e);
         }
+
+        return Optional.empty();
     }
 
     @Override
-    public List<Image> findByFolder(long folderId) {
-        String sql = """
-            SELECT id, file_path, folder_id, upload_date
-            FROM images
-            WHERE folder_id = ?
-        """;
-
+    public List<Image> findByEngineId(long engineId) {
         List<Image> images = new ArrayList<>();
 
-        try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ENGINE_SQL)) {
 
-            ps.setLong(1, folderId);
-            ResultSet rs = ps.executeQuery();
+            stmt.setLong(1, engineId);
 
-            while (rs.next()) {
-                images.add(mapRowToImage(rs));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    images.add(mapRow(rs));
+                }
             }
 
-            return images;
-
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding images by folder", e);
+            throw new RuntimeException("Errore durante il recupero delle immagini del motore", e);
         }
+
+        return images;
     }
 
-    @Override
-    public List<Image> findByClientName(String clientName) {
-        String sql = """
-            SELECT i.id, i.file_path, i.folder_id, i.upload_date
-            FROM images i
-            JOIN image_metadata m ON i.id = m.image_id
-            WHERE m.client_name LIKE ?
-        """;
+    /* =========================
+       Mapping
+       ========================= */
 
-        return search(sql, "%" + clientName + "%");
-    }
+    private Image mapRow(ResultSet rs) throws SQLException {
+        List<String> keywords = new ArrayList<>();
+        String rawKeywords = rs.getString("keywords");
 
-    @Override
-    public List<Image> findByEngineCode(String engineCode) {
-        String sql = """
-            SELECT i.id, i.file_path, i.folder_id, i.upload_date
-            FROM images i
-            JOIN image_metadata m ON i.id = m.image_id
-            WHERE m.engine_code = ?
-        """;
-
-        return search(sql, engineCode);
-    }
-
-    @Override
-    public List<Image> findByMetadataKeyword(String keyword) {
-        String sql = """
-            SELECT i.id, i.file_path, i.folder_id, i.upload_date
-            FROM images i
-            JOIN image_metadata m ON i.id = m.image_id
-            WHERE MATCH(m.description) AGAINST (?)
-        """;
-
-        return search(sql, keyword);
-    }
-
-    @Override
-    public List<Image> findByEngineStatus(EngineStatus status) {
-        String sql = """
-            SELECT i.id, i.file_path, i.folder_id, i.upload_date
-            FROM images i
-            JOIN image_metadata m ON i.id = m.image_id
-            WHERE m.engine_status = ?
-        """;
-
-        return search(sql, status.name());
-    }
-
-    // =========================
-    // Metodi di supporto
-    // =========================
-
-    private List<Image> search(String sql, String param) {
-        List<Image> images = new ArrayList<>();
-
-        try (Connection conn = connectionFactory.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, param);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                images.add(mapRowToImage(rs));
-            }
-
-            return images;
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Error executing image search", e);
+        if (rawKeywords != null && !rawKeywords.isEmpty()) {
+            keywords = Arrays.asList(rawKeywords.split(","));
         }
-    }
 
-    private Image mapRowToImage(ResultSet rs) throws SQLException {
-        Image image = new Image();
-        image.setId(rs.getLong("id"));
-        image.setFilePath(rs.getString("file_path"));
-        image.setFolderId(rs.getLong("folder_id"));
-        image.setUploadDate(
-                rs.getTimestamp("upload_date").toInstant()
+        return new Image(
+                rs.getLong("id"),
+                rs.getLong("engine_id"),
+                rs.getString("file_path"),
+                rs.getString("description"),
+                keywords
         );
-        return image;
     }
 }
