@@ -1,29 +1,45 @@
- body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f5f6f7;
+/* =====================
+   GLOBAL VARIABLES
+   ===================== */
+:root {
+    --bg-main: #f5f6f7;
+    --bg-dark: #1f2933;
+    --bg-card: #ffffff;
+
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+
+    --text-main: #212529;
+    --text-muted: #6b7280;
+
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.08);
+    --shadow-strong: 0 20px 50px rgba(0,0,0,0.25);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
 }
 
 /* =====================
-   LOGIN CARD
+   BASE
    ===================== */
-.login-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 40px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
 }
 
-.login-card h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
+
+/* =====================
+   CARD
+   ===================== */
+.card-base {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 25px;
+    box-shadow: var(--shadow-soft);
 }
 
-.login-card p {
-    color: #6b7280;
-    font-size: 0.95rem;
-}
 
 /* =====================
    PAGE HEADER
@@ -36,27 +52,39 @@
     font-weight: 700;
 }
 
-/* =====================
-   FORM
-   ===================== */
-.form-control {
-    height: 48px;
+.page-header p {
+    color: var(--text-muted);
 }
 
+
+/* =====================
+   BUTTONS
+   ===================== */
 .btn-engine {
-    background-color: #2563eb;
+    background-color: var(--primary);
     border: none;
     height: 48px;
     font-weight: 600;
+    color: #fff;
 }
 
 .btn-engine:hover {
-    background-color: #1d4ed8;
+    background-color: var(--primary-hover);
 }
 
+
 /* =====================
-   FOOTER
+   LOGIN
    ===================== */
+.login-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-strong);
+}
+
 .login-footer {
     font-size: 0.85rem;
     color: #9ca3af;
@@ -69,20 +97,29 @@
     letter-spacing: 0.5px;
 }
 
+.login-page {
+    background-color: var(--bg-dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
 /* =====================
-   KPI CARDS
+   KPI
    ===================== */
 .kpi-card {
-    background-color: #ffffff;
-    border-radius: 12px;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
     padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow-soft);
     height: 100%;
 }
 
 .kpi-title {
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -93,14 +130,15 @@
     margin-top: 10px;
 }
 
+
 /* =====================
    TABLE
    ===================== */
 .table-container {
-    background-color: #ffffff;
-    border-radius: 12px;
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
     padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow-soft);
 }
 
 .table th {
@@ -108,10 +146,15 @@
     color: #374151;
 }
 
+
+/* =====================
+   STATUS BADGES
+   ===================== */
 .badge-status {
     padding: 6px 12px;
     font-size: 0.8rem;
     border-radius: 20px;
+    font-weight: 600;
 }
 
 .status-stoccato {
@@ -129,12 +172,65 @@
     color: #065f46;
 }
 
+
+/* =====================
+   NAVBAR
+   ===================== */
 .navbar .nav-link {
     font-weight: 500;
     margin-right: 12px;
 }
 
 .navbar .nav-link.active {
-    color: #2563eb !important;
+    color: var(--primary) !important;
     font-weight: 600;
+}
+
+
+/* =====================
+   ENGINE GALLERY
+   ===================== */
+.engine-gallery-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.15s ease;
+    height: 100%;
+}
+
+.engine-gallery-card:hover {
+    transform: translateY(-4px);
+}
+
+.engine-image {
+    height: 180px;
+    background-color: #e5e7eb;
+    background-size: cover;
+    background-position: center;
+}
+
+.engine-body {
+    padding: 20px;
+}
+
+.engine-code {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.engine-client {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.engine-detail-section {
+    margin-bottom: 30px;
+}
+
+.engine-footer {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

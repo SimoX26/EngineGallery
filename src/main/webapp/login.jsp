@@ -14,22 +14,11 @@
           rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1f2933;
-            color: #212529;
-            min-height: 100vh;
-            align-items: center;
-            justify-content: center;
-            display: flex;
-        }
-    </style>
+    <link rel="stylesheet"
+          href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
-<body>
+<body class="login-page">
 
 <div class="login-card">
 

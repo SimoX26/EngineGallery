@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -10,21 +12,21 @@
           rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet"
+          href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
-
-<body>
+<body class="dashboard-page">
 
 <!-- NAVBAR -->
-<jsp:include page="/WEB-INF/jsp/navbar.jsp"/>
+<jsp:include page="/WEB-INF/jsp/includes/navbar.jsp"/>
 
 <div class="container">
 
     <!-- HEADER -->
     <div class="page-header">
         <h1>Dashboard</h1>
-        <p class="text-muted">
+        <p>
             Panoramica generale del sistema Engine Gallery
         </p>
     </div>
@@ -35,36 +37,28 @@
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">Clienti</div>
-                <div class="kpi-value">
-                    ${totClienti}
-                </div>
+                <div class="kpi-value">${totClienti}</div>
             </div>
         </div>
 
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">Motori Totali</div>
-                <div class="kpi-value">
-                    ${totMotori}
-                </div>
+                <div class="kpi-value">${totMotori}</div>
             </div>
         </div>
 
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">In lavorazione</div>
-                <div class="kpi-value">
-                    ${motoriInLavorazione}
-                </div>
+                <div class="kpi-value">${motoriInLavorazione}</div>
             </div>
         </div>
 
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">Consegnati</div>
-                <div class="kpi-value">
-                    ${motoriConsegnati}
-                </div>
+                <div class="kpi-value">${motoriConsegnati}</div>
             </div>
         </div>
 
