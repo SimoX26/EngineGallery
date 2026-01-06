@@ -60,3 +60,20 @@ ON image (keywords);
 
 CREATE FULLTEXT INDEX idx_image_description
 ON image (description);
+
+
+
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'inspector',
+    SHA2('1234', 256),
+    'INSPECTOR'
+);
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'operator',
+    SHA2('1234', 256),
+    'OPERATOR'
+);
