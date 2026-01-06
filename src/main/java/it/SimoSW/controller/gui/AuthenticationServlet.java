@@ -9,9 +9,6 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.Optional;
 
-/**
- * Servlet che gestisce l'autenticazione degli utenti.
- */
 @WebServlet("/auth")
 public class AuthenticationServlet extends HttpServlet {
 
@@ -42,7 +39,7 @@ public class AuthenticationServlet extends HttpServlet {
         }
 
         // Mostra pagina di login
-        request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
     }
 
     /* =========================
