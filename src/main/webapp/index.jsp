@@ -105,7 +105,7 @@
             e consultazione dei motori.
         </p>
         <div class="mt-4">
-            <a href="<%= request.getContextPath() %>/login"
+            <a href="<%= request.getContextPath() %>/auth"
                class="btn btn-engine btn-lg me-3">
                 Accedi al sistema
             </a>
@@ -224,7 +224,7 @@
             Engine Gallery è progettato per ambienti tecnici,
             dove precisione e ordine fanno la differenza.
         </p>
-        <a href="<%= request.getContextPath() %>/login"
+        <a href="<%= request.getContextPath() %>/auth"
            class="btn btn-engine btn-lg">
             Entra in Engine Gallery
         </a>

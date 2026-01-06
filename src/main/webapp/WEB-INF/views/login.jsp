@@ -41,7 +41,7 @@
     %>
 
     <!-- LOGIN FORM -->
-    <form action="<%= request.getContextPath() %>/login" method="post">
+    <form action="<%= request.getContextPath() %>/auth" method="post">
 
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
