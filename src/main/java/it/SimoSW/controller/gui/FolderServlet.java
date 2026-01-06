@@ -1,4 +1,4 @@
 package it.SimoSW.controller.gui;
 
-public class LoginServlet {
+public class FolderServlet {
 }
