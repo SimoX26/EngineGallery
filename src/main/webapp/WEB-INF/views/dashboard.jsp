@@ -25,7 +25,7 @@
     <div class="page-header">
         <h1>Dashboard</h1>
         <p>
-            Panoramica generale del sistema Engine Gallery
+            Panoramica generale
         </p>
     </div>
 
