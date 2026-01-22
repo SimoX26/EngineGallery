@@ -22,7 +22,7 @@ public interface EngineDAO {
 
     List<Engine> findByKeyword(String keyword);
 
-    int countMotoriInLavorazione();
+    int countWorkInProgressEngines();
 
     int countMotoriInOfficina();
 

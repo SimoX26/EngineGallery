@@ -197,7 +197,29 @@ public class DatabaseEngineDAO implements EngineDAO {
     }
 
     @Override
-    public int countMotoriInLavorazione(){
+    public int countWorkInProgressEngines(){
+
+        String sql = """
+                SELECT COUNT(*)\s
+                FROM engines\s
+                WHERE status = ?
+           \s""";
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "IN_PROGRESS");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel conteggio dei motori in lavorazione", e);
+        }
+
         return 0;
     }
 
