@@ -32,35 +32,56 @@
     <!-- KPI -->
     <div class="row g-4 mb-5">
 
+        <!-- Clienti con motori in officina -->
         <div class="col-md-3">
             <div class="kpi-card">
-                <div class="kpi-title">Clienti</div>
-                <div class="kpi-value">${totClienti}</div>
+                <div class="kpi-title">
+                    Clienti con motori in officina
+                </div>
+                <div class="kpi-value">
+                    ${clientiConMotoriAttivi}
+                </div>
             </div>
         </div>
 
+        <!-- Motori totali in officina -->
         <div class="col-md-3">
             <div class="kpi-card">
-                <div class="kpi-title">Motori Totali</div>
-                <div class="kpi-value">${totMotori}</div>
+                <div class="kpi-title">
+                    Motori totali in officina
+                </div>
+                <div class="kpi-value">
+                    ${motoriInOfficina}
+                </div>
             </div>
         </div>
 
+        <!-- Motori in lavorazione -->
         <div class="col-md-3">
             <div class="kpi-card">
-                <div class="kpi-title">In lavorazione</div>
-                <div class="kpi-value">${motoriInLavorazione}</div>
+                <div class="kpi-title">
+                    Motori in lavorazione
+                </div>
+                <div class="kpi-value">
+                    ${motoriInLavorazione}
+                </div>
             </div>
         </div>
 
+        <!-- Motori consegnati ultima settimana -->
         <div class="col-md-3">
             <div class="kpi-card">
-                <div class="kpi-title">Consegnati</div>
-                <div class="kpi-value">${motoriConsegnati}</div>
+                <div class="kpi-title">
+                    Consegnati (ultimi 7 giorni)
+                </div>
+                <div class="kpi-value">
+                    ${motoriConsegnatiUltimaSettimana}
+                </div>
             </div>
         </div>
 
     </div>
+
 
     <!-- ULTIMI MOTORI -->
     <div class="table-container">
