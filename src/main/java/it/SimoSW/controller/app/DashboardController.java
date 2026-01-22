@@ -13,7 +13,7 @@ public class DashboardController {
         this.customerDAO = customerDAO;
     }
 
-    public int getClientiConMotoriAttivi() {
+    public int getClientiConMotoriInOfficina() {
         return customerDAO.countClientiConMotoriInOfficina();
     }
 

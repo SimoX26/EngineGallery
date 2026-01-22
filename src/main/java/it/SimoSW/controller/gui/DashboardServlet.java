@@ -38,11 +38,15 @@ public class DashboardServlet extends HttpServlet {
 
         // Recupero dati AGGREGATI
         request.setAttribute("user", user);
+
+        request.setAttribute("clientiConMotoriAttivi", dashboardController.getClientiConMotoriInOfficina());
+
+        request.setAttribute("motoriInOfficina", dashboardController.getMotoriInOfficina());
+
         request.setAttribute("motoriInLavorazione", dashboardController.getMotoriInLavorazione());
 
-        request.setAttribute("motoriConsegnatiUltimoMese", dashboardController.getMotoriConsegnatiUltimoMese());
+        request.setAttribute("motoriConsegnatiUltimaSettimana", dashboardController.getMotoriConsegnatiUltimaSettimana());
 
-        request.setAttribute("clientiConMotoriAttivi", dashboardController.getClientiConMotoriAttivi());
 
         // Forward alla view
         request.getRequestDispatcher("/WEB-INF/views/dashboard.jsp").forward(request, response);
