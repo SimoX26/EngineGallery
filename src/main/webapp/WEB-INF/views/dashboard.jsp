@@ -63,7 +63,7 @@
                     Motori in lavorazione
                 </div>
                 <div class="kpi-value">
-                    ${motoriInLavorazione}
+                    ${workInProgressEngines}
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@
             <c:forEach var="motore" items="${ultimiMotori}">
                 <tr>
                     <td>
-                        <a href="<%= request.getContextPath() %>/motori/dettaglio?id=${motore.id}">
+                        <a href="<%= request.getContextPath() %>/engine/detail?id=${motore.id}">
                             ${motore.codice}
                         </a>
                     </td>
