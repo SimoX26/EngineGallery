@@ -4,6 +4,13 @@ CREATE DATABASE engine_gallery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE engine_gallery;
 
 
+CREATE USER 'engine_gallery'@'localhost' IDENTIFIED BY 'engine123';
+
+GRANT ALL PRIVILEGES ON engine_gallery.* TO 'engine_gallery'@'localhost';
+
+FLUSH PRIVILEGES;
+
+
 
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
