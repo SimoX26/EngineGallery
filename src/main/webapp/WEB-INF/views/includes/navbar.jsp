@@ -35,7 +35,7 @@
                 <li class="nav-item">
                     <a class="nav-link
                        ${pageContext.request.requestURI.contains("clienti") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/clienti">
+                       href="<%= request.getContextPath() %>/customer">
                         Clienti
                     </a>
                 </li>
@@ -43,7 +43,7 @@
                 <li class="nav-item">
                     <a class="nav-link
                        ${pageContext.request.requestURI.contains("motori") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/motori">
+                       href="<%= request.getContextPath() %>/engine">
                         Motori
                     </a>
                 </li>

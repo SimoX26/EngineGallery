@@ -21,6 +21,7 @@ public class AuthenticationServlet extends HttpServlet {
         this.authenticationController = initializer.getAuthenticationController();
     }
 
+
     /* =========================
        GET: login / logout
        ========================= */
@@ -43,6 +44,7 @@ public class AuthenticationServlet extends HttpServlet {
         // Mostra pagina di login
         request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
     }
+
 
     /* =========================
        POST: login
