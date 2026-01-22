@@ -19,96 +19,79 @@ CREATE TABLE users (
     role ENUM('INSPECTOR', 'OPERATOR') NOT NULL
 );
 
+CREATE TABLE customers (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    surname VARCHAR(100),
+    company_name VARCHAR(150),
+    phone VARCHAR(30),
+    email VARCHAR(100),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 CREATE TABLE folders (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     parent_id BIGINT,
-    FOREIGN KEY (parent_id) REFERENCES folders(id)
+
+    CONSTRAINT fk_folder_parent
+        FOREIGN KEY (parent_id)
+        REFERENCES folders(id)
         ON DELETE CASCADE
 );
 
 
+CREATE TABLE engines (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    engine_code VARCHAR(50) UNIQUE NOT NULL,
+    customer_id BIGINT NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    intake_date DATE NOT NULL,
+    notes TEXT,
 
-CREATE TABLE engine (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    engine_code VARCHAR(50) NOT NULL UNIQUE,
-    status ENUM('INTAKE', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED') NOT NULL
+    CONSTRAINT fk_engine_customer
+        FOREIGN KEY (customer_id)
+        REFERENCES customers(id)
+        ON DELETE RESTRICT
 );
 
 
 
-CREATE TABLE image (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE images (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    filename VARCHAR(255) NOT NULL,
     engine_id BIGINT NOT NULL,
-    file_path VARCHAR(255) NOT NULL,
+    folder_id BIGINT,
+    uploaded_by BIGINT,
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    description TEXT,
-    keywords VARCHAR(255),
+    CONSTRAINT fk_image_engine
+        FOREIGN KEY (engine_id)
+        REFERENCES engines(id)
+        ON DELETE CASCADE,
 
-    FOREIGN KEY (engine_id) REFERENCES engine(id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_image_folder
+        FOREIGN KEY (folder_id)
+        REFERENCES folders(id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT fk_image_user
+        FOREIGN KEY (uploaded_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
 );
 
 
 
--- Ricerca rapida per codice motore
-CREATE INDEX idx_engine_code
-ON engine (engine_code);
-
--- Ricerca per stato motore
-CREATE INDEX idx_engine_status
-ON engine (status);
-
--- Ricerca keyword sulle immagini
-CREATE INDEX idx_image_keywords
-ON image (keywords);
-
-CREATE FULLTEXT INDEX idx_image_description
-ON image (description);
 
 
+INSERT INTO users (username, password_hash, role) VALUES ('mario', SHA2('1234', 256),'INSPECTOR');
+INSERT INTO users (username, password_hash, role) VALUES ('giordano', SHA2('1234', 256), 'INSPECTOR');
+INSERT INTO users (username, password_hash, role) VALUES ('maurizio', SHA2('1234', 256), 'OPERATOR');
+INSERT INTO users (username, password_hash, role) VALUES ('luigi', SHA2('1234', 256),'OPERATOR');
+INSERT INTO users (username, password_hash, role) VALUES ('manuel', SHA2('1234', 256),'OPERATOR');
+INSERT INTO users (username, password_hash, role)VALUES ('giggianuel', SHA2('1234', 256), 'INSPECTOR');
 
 
-INSERT INTO users (username, password_hash, role)
-VALUES (
-    'mario',
-    SHA2('1234', 256),
-    'INSPECTOR'
-);
-
-INSERT INTO users (username, password_hash, role)
-VALUES (
-    'giordano',
-    SHA2('1234', 256),
-    'INSPECTOR'
-);
-
-INSERT INTO users (username, password_hash, role)
-VALUES (
-    'maurizio',
-    SHA2('1234', 256),
-    'OPERATOR'
-);
-
-INSERT INTO users (username, password_hash, role)
-VALUES (
-    'luigi',
-    SHA2('1234', 256),
-    'OPERATOR'
-);
-
-INSERT INTO users (username, password_hash, role)
-VALUES (
-    'manuel',
-    SHA2('1234', 256),
-    'OPERATOR'
-);
-
-INSERT INTO users (username, password_hash, role)
-VALUES (
-    'giggianuel',
-    SHA2('1234', 256),
-    'INSPECTOR'
-);
