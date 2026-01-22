@@ -1,9 +1,6 @@
 package it.SimoSW.util.bootstrap;
 
-import it.SimoSW.controller.app.AuthenticationController;
-import it.SimoSW.controller.app.FolderController;
-import it.SimoSW.controller.app.GalleryController;
-import it.SimoSW.controller.app.ImageController;
+import it.SimoSW.controller.app.*;
 import it.SimoSW.model.dao.*;
 import it.SimoSW.model.dao.database.*;
 
@@ -18,6 +15,7 @@ public class ApplicationInitializer {
     private final GalleryDAO galleryDAO;
     private final UserDAO userDAO;
     private final EngineDAO engineDAO;
+    private final CustomerDAO customerDAO;
 
 
     /* =========================
@@ -28,6 +26,8 @@ public class ApplicationInitializer {
     private final ImageController imageController;
     private final FolderController folderController;
     private final AuthenticationController authenticationController;
+    private final DashboardController dashboardController;
+
 
     public ApplicationInitializer() {
 
@@ -37,6 +37,7 @@ public class ApplicationInitializer {
         this.galleryDAO = new DatabaseGalleryDAO();
         this.userDAO = new DatabaseUserDAO();
         this.engineDAO = new DatabaseEngineDAO();
+        this.customerDAO = new DatabaseCustomerDAO();
 
         /* ===== Controller ===== */
         this.galleryController = new GalleryController(engineDAO, imageDAO);
@@ -46,6 +47,9 @@ public class ApplicationInitializer {
         this.folderController = new FolderController(galleryDAO);
 
         this.authenticationController = new AuthenticationController(userDAO);
+
+        this.dashboardController = new DashboardController(engineDAO, customerDAO);
+
     }
 
     /* =========================
@@ -66,5 +70,9 @@ public class ApplicationInitializer {
 
     public AuthenticationController getAuthenticationController() {
         return authenticationController;
+    }
+
+    public DashboardController getDashboardController() {
+        return dashboardController;
     }
 }
