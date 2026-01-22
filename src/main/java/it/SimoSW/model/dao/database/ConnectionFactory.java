@@ -9,7 +9,7 @@ public class ConnectionFactory {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/engine_gallery?useSSL=false&serverTimezone=UTC";
 
     private static final String DB_USER = "engine_gallery";
-    private static final String DB_PASSWORD = "password";
+    private static final String DB_PASSWORD = "engine123";
 
     private static ConnectionFactory instance;
 
