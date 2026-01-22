@@ -2,6 +2,7 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.AuthenticationController;
 import it.SimoSW.model.User;
+import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,7 +17,9 @@ public class AuthenticationServlet extends HttpServlet {
 
     @Override
     public void init() {
-        this.authenticationController = (AuthenticationController) getServletContext().getAttribute("authenticationController");
+        ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
+
+        this.authenticationController = initializer.getAuthenticationController();
     }
 
     /* =========================
@@ -39,7 +42,7 @@ public class AuthenticationServlet extends HttpServlet {
         }
 
         // Mostra pagina di login
-        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
     }
 
     /* =========================
