@@ -17,7 +17,7 @@
 <body class="dashboard-page">
 
 <!-- NAVBAR -->
-<jsp:include page="/WEB-INF/jsp/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
 <div class="container">
 
