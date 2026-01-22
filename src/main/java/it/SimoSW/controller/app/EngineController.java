@@ -5,16 +5,17 @@ import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.Image;
 import it.SimoSW.model.dao.EngineDAO;
 import it.SimoSW.model.dao.ImageDAO;
+import it.SimoSW.util.bean.EngineDetailBean;
 
 import java.util.List;
 import java.util.Optional;
 
-public class GalleryController {
+public class EngineController {
 
     private final EngineDAO engineDAO;
     private final ImageDAO imageDAO;
 
-    public GalleryController(EngineDAO engineDAO, ImageDAO imageDAO) {
+    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO) {
         this.engineDAO = engineDAO;
         this.imageDAO = imageDAO;
     }
@@ -45,5 +46,9 @@ public class GalleryController {
 
     public List<Image> getImagesForEngine(long engineId) {
         return imageDAO.findByEngineId(engineId);
+    }
+
+    public EngineDetailBean getEngineDetail(long engineId) {
+        return null;
     }
 }

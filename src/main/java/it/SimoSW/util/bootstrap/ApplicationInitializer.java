@@ -11,7 +11,6 @@ public class ApplicationInitializer {
        ========================= */
 
     private final ImageDAO imageDAO;
-    private final FolderDAO folderDAO;
     private final GalleryDAO galleryDAO;
     private final UserDAO userDAO;
     private final EngineDAO engineDAO;
@@ -22,9 +21,8 @@ public class ApplicationInitializer {
        Controller applicativi
        ========================= */
 
-    private final GalleryController galleryController;
+    private final EngineController galleryController;
     private final ImageController imageController;
-    private final FolderController folderController;
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
 
@@ -33,18 +31,15 @@ public class ApplicationInitializer {
 
         /* ===== DAO concreti ===== */
         this.imageDAO = new DatabaseImageDAO();
-        this.folderDAO = new DatabaseFolderDAO();
         this.galleryDAO = new DatabaseGalleryDAO();
         this.userDAO = new DatabaseUserDAO();
         this.engineDAO = new DatabaseEngineDAO();
         this.customerDAO = new DatabaseCustomerDAO();
 
         /* ===== Controller ===== */
-        this.galleryController = new GalleryController(engineDAO, imageDAO);
+        this.galleryController = new EngineController(engineDAO, imageDAO);
 
         this.imageController = new ImageController(imageDAO);
-
-        this.folderController = new FolderController(galleryDAO);
 
         this.authenticationController = new AuthenticationController(userDAO);
 
@@ -56,16 +51,12 @@ public class ApplicationInitializer {
        Getter pubblici
        ========================= */
 
-    public GalleryController getGalleryController() {
+    public EngineController getGalleryController() {
         return galleryController;
     }
 
     public ImageController getImageController() {
         return imageController;
-    }
-
-    public FolderController getFolderController() {
-        return folderController;
     }
 
     public AuthenticationController getAuthenticationController() {

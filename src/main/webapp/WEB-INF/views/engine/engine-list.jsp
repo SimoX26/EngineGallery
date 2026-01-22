@@ -66,10 +66,11 @@
                             </span>
 
                             <!-- DETAIL -->
-                            <a class="btn btn-sm btn-outline-primary"
-                               href="<%= request.getContextPath() %>/motori/dettaglio?id=${motore.id}">
-                                Dettaglio
-                            </a>
+                            <c:url var="engineDetailUrl" value="/engine/dettaglio">
+                                <c:param name="id" value="${motore.id}" />
+                            </c:url>
+
+                            <a class="btn btn-sm btn-outline-primary" href="${engineDetailUrl}">Dettaglio</a>
 
                         </div>
                     </div>
