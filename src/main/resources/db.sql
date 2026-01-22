@@ -33,17 +33,6 @@ CREATE TABLE customers (
 );
 
 
-CREATE TABLE folders (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    parent_id BIGINT,
-
-    CONSTRAINT fk_folder_parent
-        FOREIGN KEY (parent_id)
-        REFERENCES folders(id)
-        ON DELETE CASCADE
-);
-
 
 CREATE TABLE engines (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -65,7 +54,6 @@ CREATE TABLE images (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     filename VARCHAR(255) NOT NULL,
     engine_id BIGINT NOT NULL,
-    folder_id BIGINT,
     uploaded_by BIGINT,
     upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -73,11 +61,6 @@ CREATE TABLE images (
         FOREIGN KEY (engine_id)
         REFERENCES engines(id)
         ON DELETE CASCADE,
-
-    CONSTRAINT fk_image_folder
-        FOREIGN KEY (folder_id)
-        REFERENCES folders(id)
-        ON DELETE SET NULL,
 
     CONSTRAINT fk_image_user
         FOREIGN KEY (uploaded_by)
@@ -89,11 +72,28 @@ CREATE TABLE images (
 
 
 
-INSERT INTO users (username, password_hash, role) VALUES ('mario', SHA2('1234', 256),'INSPECTOR');
-INSERT INTO users (username, password_hash, role) VALUES ('giordano', SHA2('1234', 256), 'INSPECTOR');
-INSERT INTO users (username, password_hash, role) VALUES ('maurizio', SHA2('1234', 256), 'OPERATOR');
-INSERT INTO users (username, password_hash, role) VALUES ('luigi', SHA2('1234', 256),'OPERATOR');
-INSERT INTO users (username, password_hash, role) VALUES ('manuel', SHA2('1234', 256),'OPERATOR');
-INSERT INTO users (username, password_hash, role)VALUES ('giggianuel', SHA2('1234', 256), 'INSPECTOR');
+
+INSERT INTO users (username, password_hash, role) VALUES
+('mario',     SHA2('1234', 256), 'INSPECTOR'),
+('giordano',  SHA2('1234', 256), 'INSPECTOR'),
+('maurizio',  SHA2('1234', 256), 'OPERATOR'),
+('luigi',     SHA2('1234', 256), 'OPERATOR'),
+('manuel',    SHA2('1234', 256), 'OPERATOR'),
+('giggianuel',SHA2('1234', 256), 'INSPECTOR');
 
 
+
+
+INSERT INTO customers (name, surname, company_name, phone, email, notes) VALUES
+('Mario', 'Rossi', NULL, '3331112222', 'm.rossi@email.it', 'Cliente storico'),
+('Luigi', 'Bianchi', NULL, '3334445555', 'l.bianchi@email.it', NULL),
+(' ', ' ', 'Officina Auto Sprint SRL', '0811234567', 'info@autosprint.it', 'Cliente aziendale'),
+('Carlo', 'Verdi', NULL, '3478889999', NULL, 'Motore arrivato molto sporco');
+
+
+
+INSERT INTO engines (engine_code, customer_id, status, intake_date, notes) VALUES
+('V8-034', 1, 'INCOMING',      '2026-01-05', 'Motore completo'),
+('V8-035', 3, 'DISASSEMBLED',  '2026-01-06', 'Smontaggio in corso'),
+('V6-112', 2, 'IN_PROGRESS',   '2026-01-08', NULL),
+('D-998',  4, 'COMPLETED',     '2026-01-02', 'Pronto per riconsegna');
