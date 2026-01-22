@@ -60,7 +60,7 @@ public class AuthenticationServlet extends HttpServlet {
 
         if (user.isPresent()) {
             HttpSession session = request.getSession(true);
-            session.setAttribute("user", user.get());
+            session.setAttribute("loggedUser", user.get());
 
             // Redirect alla galleria dopo login
             response.sendRedirect(request.getContextPath() + "/dashboard");
