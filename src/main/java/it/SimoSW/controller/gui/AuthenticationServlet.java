@@ -18,7 +18,6 @@ public class AuthenticationServlet extends HttpServlet {
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
-
         this.authenticationController = initializer.getAuthenticationController();
     }
 
@@ -62,7 +61,7 @@ public class AuthenticationServlet extends HttpServlet {
             session.setAttribute("user", user.get());
 
             // Redirect alla galleria dopo login
-            response.sendRedirect(request.getContextPath() + "/gallery");
+            response.sendRedirect(request.getContextPath() + "/dashboard");
         } else {
             // Credenziali errate
             request.setAttribute("error", "Credenziali non valide");
