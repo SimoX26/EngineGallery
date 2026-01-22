@@ -66,14 +66,42 @@ ON image (description);
 
 INSERT INTO users (username, password_hash, role)
 VALUES (
-    'inspector',
+    'mario',
     SHA2('1234', 256),
     'INSPECTOR'
 );
 
 INSERT INTO users (username, password_hash, role)
 VALUES (
-    'operator',
+    'giordano',
+    SHA2('1234', 256),
+    'INSPECTOR'
+);
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'maurizio',
     SHA2('1234', 256),
     'OPERATOR'
+);
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'luigi',
+    SHA2('1234', 256),
+    'OPERATOR'
+);
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'manuel',
+    SHA2('1234', 256),
+    'OPERATOR'
+);
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'giggianuel',
+    SHA2('1234', 256),
+    'INSPECTOR'
 );
