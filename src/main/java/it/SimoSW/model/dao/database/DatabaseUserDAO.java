@@ -8,8 +8,7 @@ import java.sql.*;
 
 public class DatabaseUserDAO implements UserDAO {
 
-    private final ConnectionFactory connectionFactory =
-            ConnectionFactory.getInstance();
+    private final ConnectionFactory connectionFactory = ConnectionFactory.getInstance();
 
     @Override
     public User findByUsername(String username) {
@@ -67,12 +66,12 @@ public class DatabaseUserDAO implements UserDAO {
 
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User user = new User();
+
         user.setId(rs.getLong("id"));
         user.setUsername(rs.getString("username"));
         user.setPasswordHash(rs.getString("password_hash"));
-        user.setRole(
-                UserRole.valueOf(rs.getString("role"))
-        );
+        user.setRole(UserRole.valueOf(rs.getString("role").toUpperCase()));
+
         return user;
     }
 }

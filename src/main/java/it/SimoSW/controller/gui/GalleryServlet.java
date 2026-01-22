@@ -34,7 +34,7 @@ public class GalleryServlet extends HttpServlet {
 
         // Caso 1: nessun motore selezionato → pagina ricerca
         if (engineIdParam == null) {
-            request.getRequestDispatcher("/WEB-INF/views/gallery/search.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/gallery/engine-gallery.jsp").forward(request, response);
             return;
         }
 
@@ -45,7 +45,7 @@ public class GalleryServlet extends HttpServlet {
         request.setAttribute("images", images);
         request.setAttribute("engineId", engineId);
 
-        request.getRequestDispatcher("/WEB-INF/views/gallery/engineDetail.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/gallery/engine-detail.jsp").forward(request, response);
     }
 
     /* =========================
