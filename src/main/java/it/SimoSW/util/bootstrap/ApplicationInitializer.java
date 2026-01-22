@@ -7,17 +7,6 @@ import it.SimoSW.model.dao.database.*;
 public class ApplicationInitializer {
 
     /* =========================
-       DAO
-       ========================= */
-
-    private final ImageDAO imageDAO;
-    private final GalleryDAO galleryDAO;
-    private final UserDAO userDAO;
-    private final EngineDAO engineDAO;
-    private final CustomerDAO customerDAO;
-
-
-    /* =========================
        Controller applicativi
        ========================= */
 
@@ -30,11 +19,12 @@ public class ApplicationInitializer {
     public ApplicationInitializer() {
 
         /* ===== DAO concreti ===== */
-        this.imageDAO = new DatabaseImageDAO();
-        this.galleryDAO = new DatabaseGalleryDAO();
-        this.userDAO = new DatabaseUserDAO();
-        this.engineDAO = new DatabaseEngineDAO();
-        this.customerDAO = new DatabaseCustomerDAO();
+        ImageDAO imageDAO = new DatabaseImageDAO();
+        GalleryDAO galleryDAO = new DatabaseGalleryDAO();
+        UserDAO userDAO = new DatabaseUserDAO();
+        EngineDAO engineDAO = new DatabaseEngineDAO();
+        CustomerDAO customerDAO = new DatabaseCustomerDAO();
+
 
         /* ===== Controller ===== */
         this.galleryController = new EngineController(engineDAO, imageDAO);
