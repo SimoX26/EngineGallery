@@ -23,13 +23,18 @@ public class DashboardController {
     }
 
 
-    public int getMotoriInLavorazione() {
-        return engineDAO.countMotoriInLavorazione();
+    public int getWorkInProgressEngines() {
+        return engineDAO.countWorkInProgressEngines();
     }
 
 
     public int getMotoriConsegnatiUltimaSettimana() {
         return engineDAO.countMotoriConsegnatiUltimi7Giorni();
+    }
+
+
+    public int listaUtlimiMotori(){
+        return 0;
     }
 
 }
