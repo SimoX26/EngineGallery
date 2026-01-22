@@ -96,4 +96,8 @@ INSERT INTO engines (engine_code, customer_id, status, intake_date, notes) VALUE
 ('V8-034', 1, 'INCOMING',      '2026-01-05', 'Motore completo'),
 ('V8-035', 3, 'DISASSEMBLED',  '2026-01-06', 'Smontaggio in corso'),
 ('V6-112', 2, 'IN_PROGRESS',   '2026-01-08', NULL),
+('k9k', 3, 'IN_PROGRESS',   '2026-01-08', NULL),
+('N47D20C', 2, 'IN_PROGRESS',   '2026-01-08', NULL),
+('1.3 MJTD', 1, 'IN_PROGRESS',   '2026-01-08', NULL),
+('M9R', 1, 'IN_PROGRESS',   '2026-01-08', NULL),
 ('D-998',  4, 'COMPLETED',     '2026-01-02', 'Pronto per riconsegna');
