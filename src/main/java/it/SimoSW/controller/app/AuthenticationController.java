@@ -3,6 +3,8 @@ package it.SimoSW.controller.app;
 import it.SimoSW.model.User;
 import it.SimoSW.model.dao.UserDAO;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 public class AuthenticationController {
@@ -13,13 +15,7 @@ public class AuthenticationController {
         this.userDAO = userDAO;
     }
 
-    /**
-     * Autentica un utente dato username e password.
-     *
-     * @param username username dell'utente
-     * @param password password in chiaro
-     * @return utente autenticato, se le credenziali sono valide
-     */
+
     public Optional<User> login(String username, String password) {
 
         User user = userDAO.findByUsername(username);
@@ -28,11 +24,31 @@ public class AuthenticationController {
             return Optional.empty();
         }
 
-        // Controllo password (versione base, da migliorare se usi hash)
-        if (user.getPasswordHash().equals(password)) {
+        String hashedInput = hashPassword(password);
+
+        if (hashedInput.equals(user.getPasswordHash())) {
             return Optional.of(user);
         }
 
         return Optional.empty();
     }
+
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes());
+
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hash) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Hash algorithm not available", e);
+        }
+    }
+
+
 }
