@@ -196,6 +196,24 @@ public class DatabaseEngineDAO implements EngineDAO {
         return engines;
     }
 
+    @Override
+    public int countMotoriInLavorazione(){
+        return 0;
+    }
+
+
+    @Override
+    public int countMotoriInOfficina(){
+        return 0;
+    }
+
+
+    @Override
+    public int countMotoriConsegnatiUltimi7Giorni(){
+        return 0;
+    }
+
+
     /* =====================
        Mapping
        ===================== */

@@ -21,4 +21,10 @@ public interface EngineDAO {
     List<Engine> findByStatus(EngineStatus status);
 
     List<Engine> findByKeyword(String keyword);
+
+    int countMotoriInLavorazione();
+
+    int countMotoriInOfficina();
+
+    int countMotoriConsegnatiUltimi7Giorni();
 }
