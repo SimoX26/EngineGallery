@@ -3,6 +3,7 @@ package it.SimoSW.util.bootstrap;
 import it.SimoSW.controller.app.*;
 import it.SimoSW.model.dao.*;
 import it.SimoSW.model.dao.database.*;
+import it.SimoSW.model.dao.mock.MockEngineDAO;
 
 public class ApplicationInitializer {
 
@@ -22,7 +23,7 @@ public class ApplicationInitializer {
         ImageDAO imageDAO = new DatabaseImageDAO();
         GalleryDAO galleryDAO = new DatabaseGalleryDAO();
         UserDAO userDAO = new DatabaseUserDAO();
-        EngineDAO engineDAO = new DatabaseEngineDAO();
+        EngineDAO engineDAO = new MockEngineDAO();
         CustomerDAO customerDAO = new DatabaseCustomerDAO();
 
 
