@@ -34,40 +34,40 @@
     <!-- GALLERY -->
     <div class="row g-4">
 
-        <c:forEach var="motore" items="${motori}">
+        <c:forEach var="motore" items="${engines}">
             <div class="col-xl-3 col-lg-4 col-md-6">
 
                 <div class="engine-gallery-card">
 
                     <!-- IMAGE -->
                     <div class="engine-image"
-                         style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-placeholder.jpg');">
+                         style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-hero.jpg');">
                     </div>
 
                     <!-- BODY -->
                     <div class="engine-body">
 
                         <div class="engine-code">
-                            ${motore.codice}
+                            ${engineCode}
                         </div>
 
                         <div class="engine-client">
-                            Cliente: ${motore.clienteNome}
+                            Cliente: ${customerName}
                         </div>
 
                         <div class="engine-footer">
 
                             <!-- STATUS -->
                             <span class="badge-status
-                                ${motore.stato == 'STOCCATO' ? 'status-stoccato' : ''}
-                                ${motore.stato == 'IN_LAVORAZIONE' ? 'status-lavorazione' : ''}
-                                ${motore.stato == 'CONSEGNATO' ? 'status-consegnato' : ''}">
-                                ${motore.statoLabel}
+                                ${status == 'STOCCATO' ? 'status-stoccato' : ''}
+                                ${status == 'IN_LAVORAZIONE' ? 'status-lavorazione' : ''}
+                                ${status == 'CONSEGNATO' ? 'status-consegnato' : ''}">
+                                ${statusLabel}
                             </span>
 
                             <!-- DETAIL -->
                             <c:url var="engineDetailUrl" value="/engine/dettaglio">
-                                <c:param name="id" value="${motore.id}" />
+                                <c:param name="id" value="${engineId}" />
                             </c:url>
 
                             <a class="btn btn-sm btn-outline-primary" href="${engineDetailUrl}">Dettaglio</a>
