@@ -3,7 +3,6 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.Engine;
 import it.SimoSW.model.EngineStatus;
-import it.SimoSW.model.Image;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -21,8 +20,10 @@ public class EngineListServlet extends HttpServlet {
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
-        this.engineController = initializer.getGalleryController();
+        this.engineController = initializer.getEngineController();
     }
+
+
 
     /* =========================
        GET: visualizzazione
@@ -31,23 +32,13 @@ public class EngineListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String engineIdParam = request.getParameter("engineId");
+        List<Engine> engines = engineController.getAllEngines();
+        request.setAttribute("engines", engines);
 
-        // Caso 1: nessun motore selezionato → pagina ricerca
-        if (engineIdParam == null) {
-            request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
-            return;
-        }
-
-        // Caso 2: motore selezionato → mostra immagini
-        long engineId = Long.parseLong(engineIdParam);
-        List<Image> images = engineController.getImagesForEngine(engineId);
-
-        request.setAttribute("images", images);
-        request.setAttribute("engineId", engineId);
-
-        request.getRequestDispatcher("/WEB-INF/views/engine/engine-detail.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
     }
+
+
 
     /* =========================
        POST: ricerca motori
