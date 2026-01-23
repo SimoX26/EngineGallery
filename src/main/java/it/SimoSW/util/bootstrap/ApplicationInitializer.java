@@ -10,7 +10,7 @@ public class ApplicationInitializer {
        Controller applicativi
        ========================= */
 
-    private final EngineController galleryController;
+    private final EngineController engineController;
     private final ImageController imageController;
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
@@ -27,7 +27,7 @@ public class ApplicationInitializer {
 
 
         /* ===== Controller ===== */
-        this.galleryController = new EngineController(engineDAO, imageDAO);
+        this.engineController = new EngineController(engineDAO, imageDAO);
 
         this.imageController = new ImageController(imageDAO);
 
@@ -41,8 +41,8 @@ public class ApplicationInitializer {
        Getter pubblici
        ========================= */
 
-    public EngineController getGalleryController() {
-        return galleryController;
+    public EngineController getEngineController() {
+        return engineController;
     }
 
     public ImageController getImageController() {
