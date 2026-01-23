@@ -6,7 +6,7 @@ Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessi
 
 ---
 
-### ✨ Funzionalità principali
+#### ✨ Funzionalità principali
 
 * Visualizzazione di una **galleria di motori**
 * Organizzazione delle immagini in **cartelle e sottocartelle**
@@ -17,7 +17,7 @@ Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessi
 
 ---
 
-### 🧱 Architettura e tecnologie
+#### 🧱 Architettura e tecnologie
 
 * **Java + Maven**
 * **Servlet & JSP**
