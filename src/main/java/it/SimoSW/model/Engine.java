@@ -3,7 +3,7 @@ package it.SimoSW.model;
 public class Engine {
 
     private long id;
-    private String engineCode;
+    private final String engineCode;
     private EngineStatus status;
 
     public Engine(long id, String engineCode, EngineStatus status) {
