@@ -34,7 +34,7 @@
     <!-- GALLERY -->
     <div class="row g-4">
 
-        <c:forEach var="motore" items="${engines}">
+        <c:forEach var="engine" items="${engines}">
             <div class="col-xl-3 col-lg-4 col-md-6">
 
                 <div class="engine-gallery-card">
@@ -48,7 +48,7 @@
                     <div class="engine-body">
 
                         <div class="engine-code">
-                            ${engineCode}
+                            ${engine.engineCode}
                         </div>
 
                         <div class="engine-client">
