@@ -20,7 +20,7 @@ public class EngineDetailServlet extends HttpServlet {
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
-        this.engineController = initializer.getGalleryController();
+        this.engineController = initializer.getEngineController();
     }
 
 
