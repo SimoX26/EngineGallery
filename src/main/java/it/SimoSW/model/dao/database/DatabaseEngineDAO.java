@@ -16,19 +16,19 @@ public class DatabaseEngineDAO implements EngineDAO {
        ===================== */
 
     private static final String INSERT_SQL =
-            "INSERT INTO engine (engine_code, status) VALUES (?, ?)";
+            "INSERT INTO engines (engine_code, status) VALUES (?, ?)";
 
     private static final String UPDATE_SQL =
-            "UPDATE engine SET engine_code = ?, status = ? WHERE id = ?";
+            "UPDATE engines SET engine_code = ?, status = ? WHERE id = ?";
 
     private static final String FIND_BY_ID_SQL =
-            "SELECT * FROM engine WHERE id = ?";
+            "SELECT * FROM engines WHERE id = ?";
 
     private static final String FIND_BY_CODE_SQL =
-            "SELECT * FROM engine WHERE engine_code = ?";
+            "SELECT * FROM engines WHERE engine_code = ?";
 
     private static final String FIND_ALL_SQL =
-            "SELECT * FROM engine";
+            "SELECT * FROM engines";
 
     private static final String FIND_BY_STATUS_SQL =
             "SELECT * FROM engine WHERE status = ?";
@@ -40,6 +40,12 @@ public class DatabaseEngineDAO implements EngineDAO {
             JOIN image i ON e.id = i.engine_id
             WHERE i.keywords LIKE ?
             """;
+
+    private static final String COUNT_WORK_IN_PROGRESS_SQL = """
+                SELECT COUNT(*)\s
+                FROM engines\s
+                WHERE status = ?
+           \s""";
 
     /* =====================
        CRUD
@@ -199,14 +205,8 @@ public class DatabaseEngineDAO implements EngineDAO {
     @Override
     public int countWorkInProgressEngines(){
 
-        String sql = """
-                SELECT COUNT(*)\s
-                FROM engines\s
-                WHERE status = ?
-           \s""";
-
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(COUNT_WORK_IN_PROGRESS_SQL)) {
 
             ps.setString(1, "IN_PROGRESS");
 
