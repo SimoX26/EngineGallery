@@ -4,7 +4,6 @@
 
 Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessibile via web**, pensata per officine o archivi industriali, mantenendo una forte separazione tra **logica applicativa, persistenza e presentazione**.
 
----
 
 #### ✨ Funzionalità principali
 
@@ -15,7 +14,6 @@ Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessi
 * Ricerca e filtraggio dei contenuti
 * Interfaccia responsive accessibile da desktop e mobile
 
----
 
 #### 🧱 Architettura e tecnologie
 
