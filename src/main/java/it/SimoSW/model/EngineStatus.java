@@ -1,8 +1,9 @@
 package it.SimoSW.model;
 
 public enum EngineStatus {
-    INCOMING,
-    IN_PROGRESS,
+    WAITING,
+    WORK_IN_PROGRESS,
     DISASSEMBLED,
-    COMPLETED
+    READY,
+    DELIVERED
 }
