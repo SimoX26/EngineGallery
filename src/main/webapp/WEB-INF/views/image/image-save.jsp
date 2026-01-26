@@ -17,7 +17,7 @@
 <body>
 
 <!-- Navbar -->
-<jsp:include page="/WEB-INF/views/partials/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
 <div class="container my-5">
 

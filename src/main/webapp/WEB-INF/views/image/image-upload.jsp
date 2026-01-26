@@ -12,12 +12,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stile globale Engine Gallery -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 <body>
 
 <!-- Navbar -->
-<jsp:include page="/WEB-INF/views/partials/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
 <!-- CONTENUTO PRINCIPALE -->
 <div class="container-fluid d-flex align-items-center justify-content-center"

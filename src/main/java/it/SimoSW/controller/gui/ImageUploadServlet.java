@@ -20,6 +20,17 @@ public class ImageUploadServlet extends HttpServlet {
 
     private static final String TEMP_UPLOAD_DIR = "temp_uploads";
 
+
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp")
+                .forward(request, response);
+    }
+
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -28,7 +39,7 @@ public class ImageUploadServlet extends HttpServlet {
 
         if (imagePart == null || imagePart.getSize() == 0) {
             request.setAttribute("error", "Nessun file selezionato");
-            request.getRequestDispatcher("/WEB-INF/views/image-upload.jsp")
+            request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp")
                     .forward(request, response);
             return;
         }
@@ -64,6 +75,6 @@ public class ImageUploadServlet extends HttpServlet {
         request.setAttribute("tempImageName", safeFileName);
         request.setAttribute("originalFileName", originalFileName);
 
-        request.getRequestDispatcher("/WEB-INF/views/image-save.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/image/image-save.jsp").forward(request, response);
     }
 }
