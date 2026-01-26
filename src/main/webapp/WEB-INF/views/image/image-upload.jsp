@@ -39,20 +39,51 @@
         </p>
 
         <!-- Area upload -->
-        <form action="<%= request.getContextPath() %>/image/upload"
+        <form action="<%= request.getContextPath() %>/image-upload"
               method="post"
               enctype="multipart/form-data">
 
-            <input type="file"
-                   name="image"
-                   accept="image/*"
-                   capture="environment"
-                   class="form-control mb-4"
-                   required>
+            <!-- UPLOAD -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Immagini</label>
+                <input type="file"
+                       name="images"
+                       class="form-control"
+                       accept="image/*"
+                       multiple
+                       required>
+            </div>
+
+            <!-- CLIENTE -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nome cliente</label>
+                <input type="text"
+                       name="cliente"
+                       class="form-control"
+                       required>
+            </div>
+
+            <!-- CODICE MOTORE -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Codice motore</label>
+                <input type="text"
+                       name="codiceMotore"
+                       class="form-control"
+                       required>
+            </div>
+
+            <!-- NOTE -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Note</label>
+                <textarea name="note"
+                          class="form-control"
+                          rows="3"></textarea>
+            </div>
 
             <button type="submit" class="btn btn-engine w-100">
-                Continua
+                Carica immagini
             </button>
+
         </form>
 
     </div>
