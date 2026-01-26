@@ -234,3 +234,42 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
+
+
+
+
+/* =====================
+   FLOATING ACTION BUTTON (FAB)
+   ===================== */
+.fab-upload {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+
+    background-color: var(--primary);
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.6rem;
+    text-decoration: none;
+
+    box-shadow: var(--shadow-strong);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+
+    z-index: 1000;
+}
+
+.fab-upload:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-3px);
+    color: #fff;
+}
+
