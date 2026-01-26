@@ -54,8 +54,7 @@ public class DatabaseEngineDAO implements EngineDAO {
     @Override
     public Engine save(Engine engine) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt =
-                     conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, engine.getEngineCode());
             stmt.setString(2, engine.getStatus().name());
