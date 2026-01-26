@@ -14,10 +14,19 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
-<body class="dashboard-page">
+<body>
+
+
+<!-- FAB -->
+<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
+
+
+<div class="dashboard-page">
 
 <!-- NAVBAR -->
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+
+
 
 <div class="container">
 
@@ -128,6 +137,8 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</div>
 
 </body>
 </html>

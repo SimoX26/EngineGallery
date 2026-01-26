@@ -21,6 +21,10 @@
 <!-- NAVBAR -->
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
+<!-- FAB -->
+<jsp:include page="/WEB-INF/views/partials/fab-upload.jsp"/>
+
+
 <div class="container">
 
     <!-- HEADER -->
