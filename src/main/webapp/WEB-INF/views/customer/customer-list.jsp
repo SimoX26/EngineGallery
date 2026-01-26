@@ -19,11 +19,13 @@
 
 <body>
 
+<!-- FAB -->
+<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
+
+
+
 <!-- NAVBAR -->
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-
-<!-- FAB -->
-<jsp:include page="/WEB-INF/views/partials/fab-upload.jsp"/>
 
 
 <div class="contair" style="text-align: center; display: flex; justify-content: center;  align-items: center;  font-family: Arial, Helvetica, sans-serif;   font-size: 1.6rem;">

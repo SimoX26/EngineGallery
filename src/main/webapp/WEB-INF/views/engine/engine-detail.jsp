@@ -16,14 +16,18 @@
           href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
-<body class="engine-detail-page">
+<body>
+
+
+<!-- FAB -->
+<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
+
+
+
+<div class="engine-detail-page">
 
 <!-- NAVBAR -->
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-
-<!-- FAB -->
-<jsp:include page="/WEB-INF/views/partials/fab-upload.jsp"/>
-
 
 <div class="container">
 
@@ -103,5 +107,6 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+</div>
 </body>
 </html>

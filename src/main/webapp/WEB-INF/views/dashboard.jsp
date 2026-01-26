@@ -111,7 +111,7 @@
             <c:forEach var="motore" items="${ultimiMotori}">
                 <tr>
                     <td>
-                        <a href="<%= request.getContextPath() %>/engine/detail?id=${motore.id}">
+                        <a href="<%= request.getContextPath() %>/engine/detail?id=${engine.id}">
                             ${motore.codice}
                         </a>
                     </td>
