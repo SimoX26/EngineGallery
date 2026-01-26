@@ -61,15 +61,19 @@ body {
    BUTTONS
    ===================== */
 .btn-engine {
-    background-color: var(--primary);
+    background-color: var(--brand-dark);
     border: none;
     height: 48px;
     font-weight: 600;
     color: #fff;
 }
 
-.btn-engine:hover {
-    background-color: var(--primary-hover);
+.btn-engine:hover,
+.btn-engine:focus,
+.btn-engine:active {
+    background-color: var(--brand-dark-hover);
+    color: #fff;
+    box-shadow: none;
 }
 
 
