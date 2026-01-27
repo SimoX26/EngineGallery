@@ -93,17 +93,38 @@ INSERT INTO customers (name, surname, company_name, phone, email, notes) VALUES
 
 
 INSERT INTO engines (engine_code, customer_id, status, intake_date, notes) VALUES
-('V8-034', 1, 'INCOMING',      '2026-01-05', 'Motore completo'),
-('V8-035', 3, 'DISASSEMBLED',  '2026-01-06', 'Smontaggio in corso'),
-('V6-112', 2, 'IN_PROGRESS',   '2026-01-08', NULL),
-('k9k', 3, 'IN_PROGRESS',   '2026-01-08', NULL),
-('N47D20C', 2, 'IN_PROGRESS',   '2026-01-08', NULL),
-('1.3 MJTD', 1, 'IN_PROGRESS',   '2026-01-08', NULL),
-('M9R', 1, 'IN_PROGRESS',   '2026-01-08', NULL),
-('D-998',  4, 'COMPLETED',     '2026-01-02', 'Pronto per riconsegna');
+('V8-034',   1, 'INCOMING',     '2026-01-05', 'Motore completo'),
+('V8-035',   3, 'DISASSEMBLED', '2026-01-06', 'Smontaggio in corso'),
+('V6-112',   2, 'IN_PROGRESS',  '2026-01-08', NULL),
+('K9K',      3, 'IN_PROGRESS',  '2026-01-08', 'Motore Renault'),
+('N47D20C',  2, 'IN_PROGRESS',  '2026-01-08', 'Motore BMW'),
+('1.3 MJTD', 1, 'IN_PROGRESS',  '2026-01-08', 'Motore Fiat'),
+('M9R',      1, 'IN_PROGRESS',  '2026-01-08', NULL),
+('D-998',    4, 'COMPLETED',    '2026-01-02', 'Pronto per riconsegna');
 
 
 
 INSERT INTO images (engine_id, filename, uploaded_by) VALUES
-(1, 'test.jpg', NULL);
+-- Motore V8-034
+(1, 'v8_034_front.jpg', 3),
+(1, 'v8_034_side.jpg',  4),
 
+-- Motore V8-035
+(2, 'v8_035_open.jpg',  5),
+(2, 'v8_035_block.jpg', 3),
+
+-- Motore V6-112
+(3, 'v6_112_dirty.jpg', 4),
+
+-- Motore K9K
+(4, 'k9k_before.jpg',   5),
+(4, 'k9k_after.jpg',    5),
+
+-- Motore N47D20C
+(5, 'n47_chain.jpg',    3),
+
+-- Motore D-998 (completato)
+(8, 'd998_final.jpg',   6),
+
+-- Upload anonimo (test uploaded_by NULL)
+(1, 'v8_034_old.jpg',   NULL);
