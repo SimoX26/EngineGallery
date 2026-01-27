@@ -39,9 +39,7 @@
         </p>
 
         <!-- Area upload -->
-        <form action="<%= request.getContextPath() %>/image-upload"
-              method="post"
-              enctype="multipart/form-data">
+        <form action="<%= request.getContextPath() %>/image-upload" method="post" enctype="multipart/form-data">
 
             <!-- UPLOAD -->
             <div class="mb-4">
@@ -58,7 +56,7 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold">Nome cliente</label>
                 <input type="text"
-                       name="cliente"
+                       name="customer"
                        class="form-control"
                        required>
             </div>
@@ -67,7 +65,7 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold">Codice motore</label>
                 <input type="text"
-                       name="codiceMotore"
+                       name="engineCode"
                        class="form-control"
                        required>
             </div>
@@ -80,7 +78,7 @@
                           rows="3"></textarea>
             </div>
 
-            <button type="submit" class="btn btn-engine w-100">
+            <button type="submit" class="btn-engine w-100">
                 Carica immagini
             </button>
 
