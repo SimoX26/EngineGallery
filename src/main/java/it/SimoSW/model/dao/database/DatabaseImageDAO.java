@@ -4,8 +4,8 @@ import it.SimoSW.model.Image;
 import it.SimoSW.model.dao.ImageDAO;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,30 +15,30 @@ import java.util.Optional;
 public class DatabaseImageDAO implements ImageDAO {
 
     private static final String INSERT_SQL =
-            "INSERT INTO image (engine_id, file_path, description, keywords) VALUES (?, ?, ?, ?)";
-
-    private static final String UPDATE_SQL =
-            "UPDATE image SET file_path = ?, description = ?, keywords = ? WHERE id = ?";
+            "INSERT INTO images (engine_id, filename, uploaded_by) VALUES (?, ?, ?)";
 
     private static final String DELETE_SQL =
-            "DELETE FROM image WHERE id = ?";
+            "DELETE FROM images WHERE id = ?";
 
     private static final String FIND_BY_ID_SQL =
-            "SELECT * FROM image WHERE id = ?";
+            "SELECT * FROM images WHERE id = ?";
 
     private static final String FIND_BY_ENGINE_SQL =
-            "SELECT * FROM image WHERE engine_id = ?";
+            "SELECT * FROM images WHERE engine_id = ?";
 
     @Override
     public Image save(Image image) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt =
-                     conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setLong(1, image.getEngineId());
-            stmt.setString(2, image.getFilePath());
-            stmt.setString(3, image.getDescription());
-            stmt.setString(4, String.join(",", image.getKeywords()));
+            stmt.setString(2, image.getFilename());
+
+            if (image.getUploadedBy() != null) {
+                stmt.setLong(3, image.getUploadedBy());
+            } else {
+                stmt.setNull(3, Types.BIGINT);
+            }
 
             stmt.executeUpdate();
 
@@ -47,9 +47,9 @@ public class DatabaseImageDAO implements ImageDAO {
                     return new Image(
                             rs.getLong(1),
                             image.getEngineId(),
-                            image.getFilePath(),
-                            image.getDescription(),
-                            image.getKeywords()
+                            image.getFilename(),
+                            null,
+                            image.getUploadedBy()
                     );
                 }
             }
@@ -59,24 +59,6 @@ public class DatabaseImageDAO implements ImageDAO {
         }
 
         throw new RuntimeException("Errore durante il salvataggio dell'immagine");
-    }
-
-    @Override
-    public Image update(Image image) {
-        try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
-
-            stmt.setString(1, image.getFilePath());
-            stmt.setString(2, image.getDescription());
-            stmt.setString(3, String.join(",", image.getKeywords()));
-            stmt.setLong(4, image.getId());
-
-            stmt.executeUpdate();
-            return image;
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Errore durante l'aggiornamento dell'immagine", e);
-        }
     }
 
     @Override
@@ -113,7 +95,7 @@ public class DatabaseImageDAO implements ImageDAO {
     }
 
     @Override
-    public List<Image> findByEngineId(long engineId) {
+    public List<Image> findAllByEngineId(long engineId) {
         List<Image> images = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
@@ -134,24 +116,19 @@ public class DatabaseImageDAO implements ImageDAO {
         return images;
     }
 
+
+
     /* =========================
        Mapping
        ========================= */
 
     private Image mapRow(ResultSet rs) throws SQLException {
-        List<String> keywords = new ArrayList<>();
-        String rawKeywords = rs.getString("keywords");
-
-        if (rawKeywords != null && !rawKeywords.isEmpty()) {
-            keywords = Arrays.asList(rawKeywords.split(","));
-        }
-
         return new Image(
                 rs.getLong("id"),
                 rs.getLong("engine_id"),
-                rs.getString("file_path"),
-                rs.getString("description"),
-                keywords
+                rs.getString("filename"),
+                rs.getTimestamp("upload_date").toLocalDateTime(),
+                rs.getObject("uploaded_by", Long.class)
         );
     }
 }
