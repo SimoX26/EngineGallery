@@ -28,16 +28,6 @@ public class ImageController {
     }
 
     /**
-     * Aggiorna i dati di un'immagine esistente.
-     *
-     * @param image immagine aggiornata
-     * @return immagine aggiornata
-     */
-    public Image updateImage(Image image) {
-        return imageDAO.update(image);
-    }
-
-    /**
      * Elimina un'immagine dato il suo identificativo.
      *
      * @param imageId id dell'immagine

@@ -45,7 +45,7 @@ public class EngineController {
        ========================= */
 
     public List<Image> getImagesForEngine(long engineId) {
-        return imageDAO.findByEngineId(engineId);
+        return imageDAO.findAllByEngineId(engineId);
     }
 
     public EngineDetailBean getEngineDetail(long engineId) {

@@ -28,35 +28,30 @@ public class ImageServlet extends HttpServlet {
      * Mostra la pagina di caricamento immagini.
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
     }
 
     /**
-     * Gestisce il caricamento di una o più immagini insieme ai metadati.
+     * Gestisce il salvataggio di una o più immagini insieme ai metadati.
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         /* =========================
            1. LETTURA METADATI
            ========================= */
-        String cliente = request.getParameter("cliente");
-        String codiceMotore = request.getParameter("codiceMotore");
+        String cliente = request.getParameter("customer");
+        String codiceMotore = request.getParameter("engineCode");
         String note = request.getParameter("note");
 
         /* =========================
            2. VALIDAZIONE METADATI
            ========================= */
-        if (cliente == null || cliente.isBlank()
-                || codiceMotore == null || codiceMotore.isBlank()) {
-
+        if (cliente == null || cliente.isBlank() || codiceMotore == null || codiceMotore.isBlank()) {
             request.setAttribute("error", "Nome cliente e codice motore sono obbligatori");
-            request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp")
-                    .forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
             return;
         }
 
@@ -120,8 +115,8 @@ public class ImageServlet extends HttpServlet {
         /* =========================
            6. PASSAGGIO DATI ALLA VIEW
            ========================= */
-        request.setAttribute("cliente", cliente);
-        request.setAttribute("codiceMotore", codiceMotore);
+        request.setAttribute("customer", cliente);
+        request.setAttribute("engineCode", codiceMotore);
         request.setAttribute("note", note);
         request.setAttribute("uploadedImages", uploadedFiles);
 
