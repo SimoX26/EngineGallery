@@ -101,3 +101,9 @@ INSERT INTO engines (engine_code, customer_id, status, intake_date, notes) VALUE
 ('1.3 MJTD', 1, 'IN_PROGRESS',   '2026-01-08', NULL),
 ('M9R', 1, 'IN_PROGRESS',   '2026-01-08', NULL),
 ('D-998',  4, 'COMPLETED',     '2026-01-02', 'Pronto per riconsegna');
+
+
+
+INSERT INTO images (engine_id, filename, uploaded_by) VALUES
+(1, 'test.jpg', NULL);
+
