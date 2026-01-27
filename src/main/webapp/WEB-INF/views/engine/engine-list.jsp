@@ -49,7 +49,7 @@
 
                     <!-- IMAGE -->
                     <div class="engine-image"
-                         style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-hero.jpg');">
+                         style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.coverImage}');">
                     </div>
 
                     <!-- BODY -->
