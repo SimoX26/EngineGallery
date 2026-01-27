@@ -1,29 +1,28 @@
 package it.SimoSW.model;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 public class Image {
 
     private long id;
     private long engineId;
-    private String filePath;
+    private String filename;
+    private LocalDateTime uploadDate;
+    private Long uploadedBy;
 
-    private String description;
-    private List<String> keywords;
-
-    public Image(long id, long engineId, String filePath, String description, List<String> keywords) {
+    // Costruttore completo (tipicamente usato dal DAO in lettura)
+    public Image(long id, long engineId, String filename, LocalDateTime uploadDate, Long uploadedBy) {
         this.id = id;
         this.engineId = engineId;
-        this.filePath = filePath;
-        this.description = description;
-        this.keywords = keywords;
+        this.filename = filename;
+        this.uploadDate = uploadDate;
+        this.uploadedBy = uploadedBy;
     }
 
-    public Image(long engineId, String filePath, String description, List<String> keywords) {
+    // Costruttore per creazione nuova immagine (prima della persistenza)
+    public Image(long engineId, String filename) {
         this.engineId = engineId;
-        this.filePath = filePath;
-        this.description = description;
-        this.keywords = keywords;
+        this.filename = filename;
     }
 
     public long getId() {
@@ -34,23 +33,15 @@ public class Image {
         return engineId;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getFilename() {
+        return filename;
     }
 
-    public String getDescription() {
-        return description;
+    public LocalDateTime getUploadDate() {
+        return uploadDate;
     }
 
-    public List<String> getKeywords() {
-        return keywords;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
+    public Long getUploadedBy() {
+        return uploadedBy;
     }
 }
