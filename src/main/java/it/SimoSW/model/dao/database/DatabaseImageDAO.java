@@ -4,7 +4,6 @@ import it.SimoSW.model.Image;
 import it.SimoSW.model.dao.ImageDAO;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +23,11 @@ public class DatabaseImageDAO implements ImageDAO {
             "SELECT * FROM images WHERE id = ?";
 
     private static final String FIND_BY_ENGINE_SQL =
-            "SELECT * FROM images WHERE engine_id = ?";
+            "SELECT * FROM images WHERE engine_id = ? ORDER BY upload_date DESC";
+
+    // "prima immagine" = la più vecchia (ASC). Se vuoi la più recente, metti DESC.
+    private static final String FIND_COVER_BY_ENGINE_SQL =
+            "SELECT * FROM images WHERE engine_id = ? ORDER BY upload_date ASC LIMIT 1";
 
     @Override
     public Image save(Image image) {
@@ -44,12 +47,10 @@ public class DatabaseImageDAO implements ImageDAO {
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return new Image(
-                            rs.getLong(1),
-                            image.getEngineId(),
-                            image.getFilename(),
-                            null,
-                            image.getUploadedBy()
+                    long newId = rs.getLong(1);
+                    // Ricarico il record per avere anche upload_date generato dal DB
+                    return findById(newId).orElseThrow(() ->
+                            new RuntimeException("Impossibile ricaricare l'immagine appena salvata: id=" + newId)
                     );
                 }
             }
@@ -62,12 +63,13 @@ public class DatabaseImageDAO implements ImageDAO {
     }
 
     @Override
-    public void delete(long imageId) {
+    public boolean delete(long imageId) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
 
             stmt.setLong(1, imageId);
-            stmt.executeUpdate();
+            int affected = stmt.executeUpdate();
+            return affected > 0;
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'eliminazione dell'immagine", e);
@@ -116,19 +118,38 @@ public class DatabaseImageDAO implements ImageDAO {
         return images;
     }
 
+    @Override
+    public Optional<Image> findCoverByEngineId(long engineId) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_COVER_BY_ENGINE_SQL)) {
 
+            stmt.setLong(1, engineId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero della cover del motore", e);
+        }
+
+        return Optional.empty();
+    }
 
     /* =========================
        Mapping
        ========================= */
 
     private Image mapRow(ResultSet rs) throws SQLException {
+        Timestamp ts = rs.getTimestamp("upload_date");
         return new Image(
                 rs.getLong("id"),
                 rs.getLong("engine_id"),
                 rs.getString("filename"),
-                rs.getTimestamp("upload_date").toLocalDateTime(),
-                rs.getObject("uploaded_by", Long.class)
+                rs.getObject("uploaded_by", Long.class),
+                ts != null ? ts.toLocalDateTime() : null
         );
     }
 }

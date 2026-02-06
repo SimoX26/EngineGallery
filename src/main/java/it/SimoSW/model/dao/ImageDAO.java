@@ -9,11 +9,11 @@ public interface ImageDAO {
 
     Image save(Image image);
 
-   // Image update(Image image);
-
-    void delete(long imageId);
+    boolean delete(long imageId);
 
     Optional<Image> findById(long imageId);
 
     List<Image> findAllByEngineId(long engineId);
+
+    Optional<Image> findCoverByEngineId(long engineId);
 }
