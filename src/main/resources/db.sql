@@ -41,7 +41,15 @@ CREATE TABLE engines (
     engine_code VARCHAR(50) NOT NULL,
 
     customer_id BIGINT NOT NULL,
-    status VARCHAR(30) NOT NULL,
+
+    status ENUM(
+        'WAITING',
+        'WORK_IN_PROGRESS',
+        'DISASSEMBLED',
+        'READY',
+        'DELIVERED'
+    ) NOT NULL,
+
     intake_date DATE NOT NULL,
     notes TEXT,
 
@@ -50,6 +58,7 @@ CREATE TABLE engines (
         REFERENCES customers(id)
         ON DELETE RESTRICT
 );
+
 
 
 
