@@ -51,6 +51,7 @@ CREATE TABLE engines (
     ) NOT NULL,
 
     intake_date DATE NOT NULL,
+    delivery_date DATE DEFAULT NULL,
     notes TEXT,
 
     CONSTRAINT fk_engine_customer
@@ -58,7 +59,6 @@ CREATE TABLE engines (
         REFERENCES customers(id)
         ON DELETE RESTRICT
 );
-
 
 
 
