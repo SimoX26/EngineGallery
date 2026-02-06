@@ -42,9 +42,7 @@ public class ApplicationInitializer {
        Getter pubblici
        ========================= */
 
-    public EngineController getEngineController() {
-        return engineController;
-    }
+    public EngineController getEngineController() { return engineController; }
 
     public ImageController getImageController() {
         return imageController;
