@@ -21,80 +21,93 @@
 <!-- FAB -->
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
-
 <div class="engine-gallery-page">
 
-<!-- NAVBAR -->
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+    <!-- NAVBAR -->
+    <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
+    <div class="container">
 
+        <!-- HEADER -->
+        <div class="page-header">
+            <h1>Motori</h1>
+            <p>Visualizzazione completa dei motori presenti nel sistema</p>
+        </div>
 
-<div class="container">
+        <!-- (opzionale) errore -->
+        <c:if test="${not empty error}">
+            <div class="alert alert-warning">${error}</div>
+        </c:if>
 
-    <!-- HEADER -->
-    <div class="page-header">
-        <h1>Motori</h1>
-        <p>
-            Visualizzazione completa dei motori presenti nel sistema
-        </p>
-    </div>
+        <!-- GALLERY -->
+        <div class="row g-4">
 
-    <!-- GALLERY -->
-    <div class="row g-4">
+            <c:forEach var="engine" items="${engines}">
+                <div class="col-xl-3 col-lg-4 col-md-6">
 
-        <c:forEach var="engine" items="${engines}">
-            <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="engine-gallery-card">
 
-                <div class="engine-gallery-card">
-
-                    <!-- IMAGE -->
-                    <div class="engine-image"
-                         style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.coverImage}');">
-                    </div>
-
-                    <!-- BODY -->
-                    <div class="engine-body">
-
-                        <div class="engine-code">
-                            ${engine.engineCode}
+                        <!-- IMAGE (placeholder finché non implementi cover image) -->
+                        <div class="engine-image"
+                             style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-placeholder.jpg');">
                         </div>
 
-                        <div class="engine-client">
-                            Cliente: ${customerName}
+                        <!-- BODY -->
+                        <div class="engine-body">
+
+                            <div class="engine-code">
+                                ${engine.engineCode} • ${engine.engineRef}
+                            </div>
+
+                            <div class="engine-client">
+                                Cliente ID: ${engine.customerId}
+                            </div>
+
+                            <div class="engine-footer">
+
+                                <!-- STATUS -->
+                                <c:set var="st" value="${engine.status}" />
+
+                                <span class="badge-status
+                                    ${st == 'WAITING' ? 'status-stoccato' : ''}
+                                    ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                                    ${st == 'DISASSEMBLED' ? 'status-smontato' : ''}
+                                    ${st == 'READY' ? 'status-ready' : ''}
+                                    ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
+
+                                    <c:choose>
+                                        <c:when test="${st == 'WAITING'}">In attesa</c:when>
+                                        <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                                        <c:when test="${st == 'DISASSEMBLED'}">Smontato</c:when>
+                                        <c:when test="${st == 'READY'}">Pronto</c:when>
+                                        <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
+                                        <c:otherwise>${st}</c:otherwise>
+                                    </c:choose>
+                                </span>
+
+                                <!-- DETAIL -->
+                                <c:url var="engineDetailUrl" value="/engine/detail">
+                                    <c:param name="id" value="${engine.id}" />
+                                </c:url>
+
+                                <a class="btn btn-sm btn-outline-primary" href="${engineDetailUrl}">
+                                    Dettaglio
+                                </a>
+
+                            </div>
                         </div>
 
-                        <div class="engine-footer">
-
-                            <!-- STATUS -->
-                            <span class="badge-status
-                                ${status == 'STOCCATO' ? 'status-stoccato' : ''}
-                                ${status == 'IN_LAVORAZIONE' ? 'status-lavorazione' : ''}
-                                ${status == 'CONSEGNATO' ? 'status-consegnato' : ''}">
-                                ${statusLabel}
-                            </span>
-
-                            <!-- DETAIL -->
-                            <c:url var="engineDetailUrl" value="/engine/dettaglio">
-                                <c:param name="id" value="${engineId}" />
-                            </c:url>
-
-                            <a class="btn btn-sm btn-outline-primary" href="${engineDetailUrl}">Dettaglio</a>
-
-                        </div>
                     </div>
 
                 </div>
+            </c:forEach>
 
-            </div>
-        </c:forEach>
+        </div>
 
     </div>
 
-</div>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </div>
 </body>

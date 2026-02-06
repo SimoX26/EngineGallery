@@ -10,7 +10,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @WebServlet("/engine")
 public class EngineListServlet extends HttpServlet {
@@ -22,8 +21,6 @@ public class EngineListServlet extends HttpServlet {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
     }
-
-
 
     /* =========================
        GET: visualizzazione
@@ -37,8 +34,6 @@ public class EngineListServlet extends HttpServlet {
 
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
     }
-
-
 
     /* =========================
        POST: ricerca motori
@@ -55,18 +50,26 @@ public class EngineListServlet extends HttpServlet {
 
         // Priorità: codice → stato → keyword
         if (engineCode != null && !engineCode.isBlank()) {
-            Optional<Engine> engine = engineController.findEngineByCode(engineCode);
 
-            engines = engine.map(List::of).orElse(List.of());
+            engines = engineController.findEnginesByCode(engineCode.trim());
 
         } else if (statusParam != null && !statusParam.isBlank()) {
-            EngineStatus status = EngineStatus.valueOf(statusParam);
-            engines = engineController.findEnginesByStatus(status);
+
+            try {
+                EngineStatus status = EngineStatus.valueOf(statusParam.trim());
+                engines = engineController.findEnginesByStatus(status);
+            } catch (IllegalArgumentException ex) {
+                // valore non valido dal form -> fallback sensato
+                engines = engineController.getAllEngines();
+                request.setAttribute("error", "Stato non valido: " + statusParam);
+            }
 
         } else if (keyword != null && !keyword.isBlank()) {
-            engines = engineController.findEnginesByKeyword(keyword);
+
+            engines = engineController.searchEngines(keyword.trim());
 
         } else {
+
             engines = engineController.getAllEngines();
         }
 
