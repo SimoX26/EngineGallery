@@ -24,16 +24,42 @@ public class EngineController {
        Ricerca motori
        ========================= */
 
-    public Optional<Engine> findEngineByCode(String engineCode) {
-        return engineDAO.findByEngineCode(engineCode);
+    public Optional<Engine> findEngineByRef(String engineRef) {
+        if (engineRef == null || engineRef.isBlank()) {
+            return Optional.empty();
+        }
+        return engineDAO.findByEngineRef(engineRef.trim());
+    }
+
+    public Optional<Engine> findEngineById(long engineId) {
+        return engineDAO.findById(engineId);
+    }
+
+    /**
+     * NOTA: engine_code NON è univoco, quindi il risultato è una LISTA.
+     */
+    public List<Engine> findEnginesByCode(String engineCode) {
+        if (engineCode == null || engineCode.isBlank()) {
+            return List.of();
+        }
+        return engineDAO.findByEngineCode(engineCode.trim());
     }
 
     public List<Engine> findEnginesByStatus(EngineStatus status) {
+        if (status == null) {
+            return List.of();
+        }
         return engineDAO.findByStatus(status);
     }
 
-    public List<Engine> findEnginesByKeyword(String keyword) {
-        return engineDAO.findByKeyword(keyword);
+    /**
+     * Ricerca testuale (engine_ref, engine_code, note, customer...)
+     */
+    public List<Engine> searchEngines(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+        return engineDAO.search(keyword.trim());
     }
 
     public List<Engine> getAllEngines() {
@@ -49,6 +75,15 @@ public class EngineController {
     }
 
     public EngineDetailBean getEngineDetail(long engineId) {
-        return null;
+        Optional<Engine> engineOpt = engineDAO.findById(engineId);
+        if (engineOpt.isEmpty()) {
+            return null; // oppure Optional<EngineDetailBean> se vuoi pulizia
+        }
+
+        Engine engine = engineOpt.get();
+        List<Image> images = imageDAO.findAllByEngineId(engineId);
+
+        // assumo un bean con (Engine, List<Image>) o setter equivalenti
+        return new EngineDetailBean(engine, images);
     }
 }
