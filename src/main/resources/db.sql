@@ -36,7 +36,10 @@ CREATE TABLE customers (
 
 CREATE TABLE engines (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    engine_code VARCHAR(50) UNIQUE NOT NULL,
+
+    engine_ref VARCHAR(30) NOT NULL UNIQUE,
+    engine_code VARCHAR(50) NOT NULL,
+
     customer_id BIGINT NOT NULL,
     status VARCHAR(30) NOT NULL,
     intake_date DATE NOT NULL,
@@ -92,39 +95,44 @@ INSERT INTO customers (name, surname, company_name, phone, email, notes) VALUES
 
 
 
-INSERT INTO engines (engine_code, customer_id, status, intake_date, notes) VALUES
-('V8-034',   1, 'INCOMING',     '2026-01-05', 'Motore completo'),
-('V8-035',   3, 'DISASSEMBLED', '2026-01-06', 'Smontaggio in corso'),
-('V6-112',   2, 'IN_PROGRESS',  '2026-01-08', NULL),
-('K9K',      3, 'IN_PROGRESS',  '2026-01-08', 'Motore Renault'),
-('N47D20C',  2, 'IN_PROGRESS',  '2026-01-08', 'Motore BMW'),
-('1.3 MJTD', 1, 'IN_PROGRESS',  '2026-01-08', 'Motore Fiat'),
-('M9R',      1, 'IN_PROGRESS',  '2026-01-08', NULL),
-('D-998',    4, 'COMPLETED',    '2026-01-02', 'Pronto per riconsegna');
+INSERT INTO engines (engine_ref, engine_code, customer_id, status, intake_date, notes) VALUES
+-- Cliente 1 (Mario Rossi)
+('ENG-2026-00001', 'N47D20A', 1, 'INCOMING',     '2026-01-03', 'Motore BMW appena arrivato'),
+('ENG-2026-00002', 'N47D20A', 1, 'IN_PROGRESS',  '2026-01-04', 'Secondo motore stesso modello'),
+
+-- Cliente 2 (Luigi Bianchi)
+('ENG-2026-00003', 'K9K',     2, 'DISASSEMBLED', '2026-01-05', 'Motore Renault smontato'),
+('ENG-2026-00004', 'K9K',     2, 'IN_PROGRESS',  '2026-01-06', NULL),
+
+-- Cliente 3 (Officina Auto Sprint)
+('ENG-2026-00005', '1.3 MJTD',3, 'IN_PROGRESS',  '2026-01-07', 'Motore Fiat'),
+('ENG-2026-00006', 'M9R',     3, 'COMPLETED',    '2026-01-02', 'Pronto per riconsegna'),
+
+-- Cliente 4 (Carlo Verdi)
+('ENG-2026-00007', 'V8-034',  4, 'IN_PROGRESS',  '2026-01-08', 'Motore ad alte prestazioni'),
+('ENG-2026-00008', 'D-998',   4, 'COMPLETED',    '2026-01-01', 'Motore storico');
+
 
 
 
 INSERT INTO images (engine_id, filename, uploaded_by) VALUES
--- Motore V8-034
-(1, 'v8_034_front.jpg', 3),
-(1, 'v8_034_side.jpg',  4),
+-- ENG-2026-00001
+(1, 'n47_front.jpg',        3),
+(1, 'n47_chain.jpg',        4),
 
--- Motore V8-035
-(2, 'v8_035_open.jpg',  5),
-(2, 'v8_035_block.jpg', 3),
+-- ENG-2026-00002
+(2, 'n47_block.jpg',        3),
 
--- Motore V6-112
-(3, 'v6_112_dirty.jpg', 4),
+-- ENG-2026-00003
+(3, 'k9k_before.jpg',       4),
+(3, 'k9k_open.jpg',         4),
 
--- Motore K9K
-(4, 'k9k_before.jpg',   5),
-(4, 'k9k_after.jpg',    5),
+-- ENG-2026-00004 (upload anonimo)
+(4, 'k9k_dirty.jpg',        NULL),
 
--- Motore N47D20C
-(5, 'n47_chain.jpg',    3),
+-- ENG-2026-00006 (completato)
+(6, 'm9r_final.jpg',        5),
 
--- Motore D-998 (completato)
-(8, 'd998_final.jpg',   6),
-
--- Upload anonimo (test uploaded_by NULL)
-(1, 'v8_034_old.jpg',   NULL);
+-- ENG-2026-00008 (completato)
+(8, 'd998_overview.jpg',    6),
+(8, 'd998_detail.jpg',      6);
