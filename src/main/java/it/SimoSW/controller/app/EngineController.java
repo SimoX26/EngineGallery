@@ -31,10 +31,6 @@ public class EngineController {
         return engineDAO.findByEngineRef(engineRef.trim());
     }
 
-    public Optional<Engine> findEngineById(long engineId) {
-        return engineDAO.findById(engineId);
-    }
-
     /**
      * NOTA: engine_code NON è univoco, quindi il risultato è una LISTA.
      */
@@ -66,24 +62,15 @@ public class EngineController {
         return engineDAO.findAll();
     }
 
-    /* =========================
-       Immagini associate
-       ========================= */
-
-    public List<Image> getImagesForEngine(long engineId) {
-        return imageDAO.findAllByEngineId(engineId);
-    }
-
     public EngineDetailBean getEngineDetail(long engineId) {
         Optional<Engine> engineOpt = engineDAO.findById(engineId);
         if (engineOpt.isEmpty()) {
-            return null; // oppure Optional<EngineDetailBean> se vuoi pulizia
+            return null;
         }
 
         Engine engine = engineOpt.get();
         List<Image> images = imageDAO.findAllByEngineId(engineId);
 
-        // assumo un bean con (Engine, List<Image>) o setter equivalenti
         return new EngineDetailBean(engine, images);
     }
 
