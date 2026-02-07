@@ -49,7 +49,7 @@
 
                         <!-- IMAGE (placeholder finché non implementi cover image) -->
                         <div class="engine-image"
-                             style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-placeholder.jpg');">
+                             style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverImages[engine.id]}');">
                         </div>
 
                         <!-- BODY -->

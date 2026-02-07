@@ -9,7 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/engine")
 public class EngineListServlet extends HttpServlet {
@@ -27,12 +29,25 @@ public class EngineListServlet extends HttpServlet {
        ========================= */
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         List<Engine> engines = engineController.getAllEngines();
         request.setAttribute("engines", engines);
 
-        request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
+        // Mappa engineId -> cover filename
+        Map<Long, String> coverImages = new HashMap<>();
+
+        for (Engine engine : engines) {
+            engineController
+                    .getCoverFilenameForEngine(engine.getId())
+                    .ifPresent(filename -> coverImages.put(engine.getId(), filename));
+        }
+
+        request.setAttribute("coverImages", coverImages);
+
+        request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp")
+                .forward(request, response);
     }
 
     /* =========================
@@ -74,6 +89,16 @@ public class EngineListServlet extends HttpServlet {
         }
 
         request.setAttribute("engines", engines);
+
+        Map<Long, String> coverImages = new HashMap<>();
+
+        for (Engine engine : engines) {
+            engineController
+                    .getCoverFilenameForEngine(engine.getId())
+                    .ifPresent(filename -> coverImages.put(engine.getId(), filename));
+        }
+
+        request.setAttribute("coverImages", coverImages);
 
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
     }

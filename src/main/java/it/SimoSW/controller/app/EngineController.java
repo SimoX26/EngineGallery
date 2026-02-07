@@ -86,4 +86,8 @@ public class EngineController {
         // assumo un bean con (Engine, List<Image>) o setter equivalenti
         return new EngineDetailBean(engine, images);
     }
+
+    public Optional<String> getCoverFilenameForEngine(long engineId) {
+        return imageDAO.findCoverByEngineId(engineId).map(Image::getFilename);
+    }
 }
