@@ -9,7 +9,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/engine/detail")
@@ -23,48 +22,37 @@ public class EngineDetailServlet extends HttpServlet {
         this.engineController = initializer.getEngineController();
     }
 
-
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-
-        // Controllo login
-        if (session == null || session.getAttribute("loggedUser") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        // Lettura parametro
         String idParam = request.getParameter("id");
-        if (idParam == null) {
+
+        // Controllo su parametro mancante
+        if (idParam == null || idParam.isBlank()) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }
 
+        // Controllo su parametro non numerico
         long engineId;
         try {
             engineId = Long.parseLong(idParam);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException ex) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }
 
-        // Recupero dati (bean di view)
-        EngineDetailBean engine = engineController.getEngineDetail(engineId);
+        // Recupero dettaglio completo
+        EngineDetailBean detail = engineController.getEngineDetail(engineId);
 
-        if (engine == null) {
+        if (detail == null) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }
 
-        // 4️⃣ Passaggio dati
-        request.setAttribute("engine", engine);
+        // Passo UN SOLO oggetto alla JSP
+        request.setAttribute("detail", detail);
 
-        // 5️⃣ Forward
-        request.getRequestDispatcher("/WEB-INF/views/engine/engine-detail.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/engine/engine-detail.jsp").forward(request, response);
     }
-
 }

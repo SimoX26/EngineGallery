@@ -24,13 +24,9 @@ public class EngineListServlet extends HttpServlet {
         this.engineController = initializer.getEngineController();
     }
 
-    /* =========================
-       GET: visualizzazione
-       ========================= */
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         List<Engine> engines = engineController.getAllEngines();
         request.setAttribute("engines", engines);
@@ -46,14 +42,11 @@ public class EngineListServlet extends HttpServlet {
 
         request.setAttribute("coverImages", coverImages);
 
-        request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
     }
 
-    /* =========================
-       POST: ricerca motori
-       ========================= */
 
+    // =================== RICERCA ===================
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
