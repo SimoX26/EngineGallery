@@ -8,12 +8,10 @@
     <title>Engine Gallery • Motori</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet"
-          href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
 <body>
@@ -47,7 +45,7 @@
 
                     <div class="engine-gallery-card">
 
-                        <!-- IMAGE (placeholder finché non implementi cover image) -->
+                        <!-- IMAGE -->
                         <div class="engine-image"
                              style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverImages[engine.id]}');">
                         </div>
@@ -90,7 +88,7 @@
                                     <c:param name="id" value="${engine.id}" />
                                 </c:url>
 
-                                <a class="btn btn-sm btn-outline-primary" href="${engineDetailUrl}">
+                                <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/engine/detail?id=${engine.id}">
                                     Dettaglio
                                 </a>
 

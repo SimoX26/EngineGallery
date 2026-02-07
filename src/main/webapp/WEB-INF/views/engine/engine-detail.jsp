@@ -1,112 +1,106 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Engine Gallery • Dettaglio Motore</title>
+    <title>RML • Dettaglio Motore</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet"
-          href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
 <body>
 
-
-<!-- FAB -->
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
-
-
-
-<div class="engine-detail-page">
-
-<!-- NAVBAR -->
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
-<div class="container">
+<div class="container my-4">
 
-    <!-- HEADER -->
-    <div class="engine-detail-header">
-        <div>
-            <div class="engine-detail-code">
-                ${motore.codice}
-            </div>
-            <div class="text-muted">
-                Cliente: ${motore.clienteNome}
+    <div class="row g-4 card-base">
+
+        <!-- SINISTRA: DATI MOTORE -->
+        <div class="col-lg-5">
+            <div class="engine-detail-section">
+                <h5 class="fw-semibold mb-3">Dati tecnici</h5>
+
+                <dl class="engine-detail-list">
+                    <dt>Riferimento:</dt>
+                    <dd>${detail.engine.engineRef}</dd>
+
+                    <dt>Codice motore:</dt>
+                    <dd>${detail.engine.engineCode}</dd>
+
+                    <dt>ID Cliente:</dt>
+                    <dd>${detail.engine.customerId}</dd>
+
+                    <dt>Stato:</dt>
+                    <dd class="badge-status status-${detail.engine.status}">
+                        ${detail.engine.status}
+                    </dd>
+
+                    <dt>Data ingresso:</dt>
+                    <dd>${detail.engine.intakeDate}</dd>
+
+                    <dt>Data consegna:</dt>
+                    <dd>
+                        <c:choose>
+                            <c:when test="${detail.engine.deliveryDate != null}">
+                                ${detail.engine.deliveryDate}
+                            </c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </dd>
+
+                    <dt>Note:</dt>
+                    <dd>${detail.engine.notes}</dd>
+                </dl>
             </div>
         </div>
 
-        <span class="badge-status
-            ${motore.stato == 'STOCCATO' ? 'status-stoccato' : ''}
-            ${motore.stato == 'IN_LAVORAZIONE' ? 'status-lavorazione' : ''}
-            ${motore.stato == 'CONSEGNATO' ? 'status-consegnato' : ''}">
-            ${motore.statoLabel}
-        </span>
-    </div>
+        <!-- DESTRA: IMMAGINI -->
+        <div class="col-lg-7">
+            <div class="engine-detail-section">
+                <h5 class="fw-semibold mb-3">Immagini</h5>
 
-    <!-- IMAGES -->
-    <div class="engine-detail-section">
-        <h5 class="fw-semibold mb-3">Galleria immagini</h5>
+                <div id="engineCarousel" class="carousel slide" data-bs-ride="false">
 
-        <div class="engine-detail-images">
-            <c:forEach var="img" items="${motore.immagini}">
-                <div class="engine-detail-image"
-                     style="background-image: url('<%= request.getContextPath() %>/${img}');">
-                </div>
-            </c:forEach>
-        </div>
-    </div>
+                    <div class="carousel-inner">
 
-    <!-- TECHNICAL DATA -->
-    <div class="engine-detail-section card-base">
-        <h5 class="fw-semibold mb-3">Dati tecnici</h5>
+                        <c:forEach var="image" items="${detail.images}" varStatus="status">
+                            <div class="carousel-item ${status.first ? 'active' : ''}">
+                                <div class="engine-image-lg"
+                                     style=" height: 420px; background-image: url('<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}');">
+                                </div>
+                            </div>
+                        </c:forEach>
 
-        <dl class="engine-detail-list">
-            <dt>Codice motore</dt>
-            <dd>${motore.codice}</dd>
+                    </div>
 
-            <dt>Cliente</dt>
-            <dd>${motore.clienteNome}</dd>
+                    <!-- PULSANTE PRECEDENTE -->
+                    <button class="carousel-control-prev" type="button"
+                            data-bs-target="#engineCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
 
-            <dt>Stato</dt>
-            <dd>${motore.statoLabel}</dd>
+                    <!-- PULSANTE SUCCESSIVO -->
+                    <button class="carousel-control-next" type="button"
+                            data-bs-target="#engineCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
 
-            <dt>Data inserimento</dt>
-            <dd>${motore.dataInserimento}</dd>
-
-            <dt>Ultima modifica</dt>
-            <dd>${motore.ultimaModifica}</dd>
-
-            <dt>Note tecniche</dt>
-            <dd>${motore.note}</dd>
-        </dl>
-    </div>
-
-    <!-- HISTORY -->
-    <div class="engine-detail-section card-base">
-        <h5 class="fw-semibold mb-3">Storico operazioni</h5>
-
-        <c:forEach var="evento" items="${motore.storico}">
-            <div class="engine-history-item">
-                <div class="fw-semibold">${evento.titolo}</div>
-                <div class="text-muted">
-                    ${evento.data} – ${evento.descrizione}
                 </div>
             </div>
-        </c:forEach>
-    </div>
+        </div>
 
+    </div>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-</div>
 </body>
 </html>
