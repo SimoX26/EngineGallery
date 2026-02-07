@@ -20,9 +20,9 @@ import java.util.*;
         maxFileSize = 5 * 1024 * 1024,      // 5 MB per file
         maxRequestSize = 20 * 1024 * 1024   // 20 MB totali
 )
-public class ImageServlet extends HttpServlet {
+public class UploadImageServlet extends HttpServlet {
 
-    private static final String TEMP_UPLOAD_DIR = "temp_uploads";
+    private static final String TEMP_UPLOAD_DIR = "uploads";
 
     /**
      * Mostra la pagina di caricamento immagini.
