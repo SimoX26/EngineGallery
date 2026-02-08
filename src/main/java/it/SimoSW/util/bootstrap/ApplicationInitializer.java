@@ -23,7 +23,7 @@ public class ApplicationInitializer {
         ImageDAO imageDAO = new DatabaseImageDAO();
         GalleryDAO galleryDAO = new DatabaseGalleryDAO();
         UserDAO userDAO = new DatabaseUserDAO();
-        EngineDAO engineDAO = new MockEngineDAO();
+        EngineDAO engineDAO = new DatabaseEngineDAO();
         CustomerDAO customerDAO = new DatabaseCustomerDAO();
 
 
