@@ -75,7 +75,7 @@
                         <c:forEach var="image" items="${detail.images}" varStatus="status">
                             <div class="carousel-item ${status.first ? 'active' : ''}">
                                 <div class="engine-image-lg"
-                                     style=" height: 420px; background-image: url('<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}');">
+                                     style="height: 420px; width: 100%; background-image: url('<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}');  background-repeat: no-repeat;  background-position: center;   background-size: contain;      background-color: #1f2933;">
                                 </div>
                             </div>
                         </c:forEach>
