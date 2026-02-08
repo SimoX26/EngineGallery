@@ -13,7 +13,7 @@ public class Engine {
     /* =========================
        Identità di dominio
        ========================= */
-    private final String engineRef;   // es. ENG-2026-00001
+    private String engineRef;   // es. ENG-2026-00001
     private final String engineCode;  // es. N47D20A
 
     /* =========================
@@ -152,5 +152,12 @@ public class Engine {
                 || status == EngineStatus.DISASSEMBLED
                 || status == EngineStatus.WORK_IN_PROGRESS
                 || status == EngineStatus.READY;
+    }
+
+    public void assignEngineRef(String engineRef) {
+        if (this.engineRef != null) {
+            throw new IllegalStateException("engineRef già assegnato");
+        }
+        this.engineRef = Objects.requireNonNull(engineRef);
     }
 }

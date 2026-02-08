@@ -7,6 +7,7 @@ import it.SimoSW.model.dao.EngineDAO;
 import it.SimoSW.model.dao.ImageDAO;
 import it.SimoSW.util.bean.EngineDetailBean;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,5 +77,47 @@ public class EngineController {
 
     public Optional<String> getCoverFilenameForEngine(long engineId) {
         return imageDAO.findCoverByEngineId(engineId).map(Image::getFilename);
+    }
+
+    public Engine getOrCreateEngine(String customer, String engineCode) {
+
+        Optional<Engine> existing = engineDAO.findByCustomerAndEngineCode(customer, engineCode);
+
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+
+        /*
+        long customerId = customerDAO
+                .findByName(customer)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Cliente non trovato: " + customer)
+                )
+                .getId();
+        */
+
+        long customerId = 0;
+
+        Engine engine = new Engine(
+                0L,                     // id temporaneo (non ancora persistito)
+                null,                   // engineRef non ancora assegnato
+                engineCode,
+                customerId,
+                LocalDate.now(),         // intakeDate
+                EngineStatus.WAITING,    // stato iniziale
+                null,                   // deliveryDate
+                null                    // note
+        );
+
+        // persist → ottieni ID
+        engine = engineDAO.save(engine);
+
+        // ORA puoi assegnare engineRef (una sola volta)
+        engine.assignEngineRef("MOTORE-" + engine.getId());
+
+        engineDAO.update(engine);
+
+        return engine;
     }
 }
