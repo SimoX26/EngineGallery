@@ -159,4 +159,21 @@ public class MockEngineDAO implements EngineDAO {
                 .filter(d -> !d.isBefore(from) && !d.isAfter(to))
                 .count();
     }
+
+    @Override
+    public Optional<Engine> findByCustomerAndEngineCode(String customer, String engineCode) {
+
+        long customerId;
+
+        try {
+            customerId = Long.parseLong(customer);
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+
+        return engines.stream()
+                .filter(e -> e.getCustomerId() == customerId)
+                .filter(e -> e.getEngineCode().equalsIgnoreCase(engineCode))
+                .findFirst();
+    }
 }

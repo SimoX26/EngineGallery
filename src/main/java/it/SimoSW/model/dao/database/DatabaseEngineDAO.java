@@ -68,6 +68,14 @@ public class DatabaseEngineDAO implements EngineDAO {
           AND delivery_date BETWEEN ? AND ?
     """;
 
+    private static final String FIND_BY_CUSTOMER_AND_ENGINE_CODE_SQL = """
+        SELECT e.*
+        FROM engines e
+        JOIN customers c ON e.customer_id = c.id
+        WHERE c.name = ?
+          AND e.engine_code = ?
+    """;
+
     /* =====================
        CRUD
        ===================== */
@@ -282,5 +290,16 @@ public class DatabaseEngineDAO implements EngineDAO {
     @FunctionalInterface
     private interface SQLConsumer<T> {
         void accept(T t) throws SQLException;
+    }
+
+    @Override
+    public Optional<Engine> findByCustomerAndEngineCode(String customer, String engineCode) {
+        return findSingle(
+                FIND_BY_CUSTOMER_AND_ENGINE_CODE_SQL,
+                ps -> {
+                    ps.setString(1, customer);
+                    ps.setString(2, engineCode);
+                }
+        );
     }
 }
