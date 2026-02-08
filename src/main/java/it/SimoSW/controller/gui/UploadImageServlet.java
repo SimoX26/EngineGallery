@@ -22,7 +22,7 @@ import java.util.*;
 )
 public class UploadImageServlet extends HttpServlet {
 
-    private static final String TEMP_UPLOAD_DIR = "uploads";
+    private static final String UPLOAD_DIR = "uploads";
 
     /**
      * Mostra la pagina di caricamento immagini.
@@ -58,7 +58,7 @@ public class UploadImageServlet extends HttpServlet {
         /* =========================
            3. PREPARAZIONE DIRECTORY
            ========================= */
-        String uploadPath = getServletContext().getRealPath("") + File.separator + TEMP_UPLOAD_DIR;
+        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
 
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) {
