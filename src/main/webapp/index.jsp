@@ -162,10 +162,10 @@
 
             <div class="col-md-4">
                 <div class="feature-card">
-                    <h5>Codice motore univoco</h5>
+                    <h5>Codice motore</h5>
                     <p>
                         Identificazione precisa di ogni unità
-                        tramite codice motore dedicato.
+                        tramite codice motore.
                     </p>
                 </div>
             </div>
