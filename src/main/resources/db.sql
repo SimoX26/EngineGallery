@@ -21,10 +21,10 @@ CREATE TABLE users (
     role ENUM('INSPECTOR', 'OPERATOR') NOT NULL
 );
 
+
 CREATE TABLE customers (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
-    surname VARCHAR(100),
     company_name VARCHAR(150),
     phone VARCHAR(30),
     email VARCHAR(100),
@@ -95,13 +95,24 @@ INSERT INTO users (username, password_hash, role) VALUES
 
 
 
+INSERT INTO customers
+(id, name, company_name, phone, email, notes)
+VALUES
+-- Cliente 1
+(1, 'Mario Rossi', NULL, '3331234567', 'mario.rossi@email.it',
+ 'Cliente privato, BMW Serie 1'),
 
-INSERT INTO customers (name, surname, company_name, phone, email, notes) VALUES
-('Mario', 'Rossi', NULL, '3331112222', 'm.rossi@email.it', 'Cliente storico'),
-('Luigi', 'Bianchi', NULL, '3334445555', 'l.bianchi@email.it', NULL),
-(' ', ' ', 'Officina Auto Sprint SRL', '0811234567', 'info@autosprint.it', 'Cliente aziendale'),
-('Carlo', 'Verdi', NULL, '3478889999', NULL, 'Motore arrivato molto sporco');
+-- Cliente 2
+(2, 'Luigi Bianchi', NULL, '3339876543', 'luigi.bianchi@email.it',
+ 'Cliente privato, Renault'),
 
+-- Cliente 3 (azienda)
+(3, 'Auto Sprint', 'Auto Sprint SRL', '0245678901', 'info@autosprint.it',
+ 'Officina partner'),
+
+-- Cliente 4
+(4, 'Carlo Verdi', NULL, '3391122334', 'carlo.verdi@email.it',
+ 'Cliente appassionato di motori ad alte prestazioni');
 
 
 
