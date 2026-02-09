@@ -12,7 +12,7 @@ public interface EngineDAO {
     /* =========================
        Persistenza
        ========================= */
-    Engine save(Engine engine);
+    long save(Engine engine);
 
     Engine update(Engine engine);
 

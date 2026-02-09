@@ -97,7 +97,16 @@ public class EngineController {
         return detailBean;
     }
 
-    public String createEngineWithImages(EngineDetailBean detailBean) {
+    public String setEngineDetail(EngineDetailBean detailBean) {
+
+        // 0. validazione dell'input
+        if (detailBean == null || detailBean.getEngine() == null) {
+            throw new IllegalArgumentException("EngineDetailBean non valido");
+        }
+
+        if (detailBean.getImages() == null || detailBean.getImages().isEmpty()) {
+            throw new IllegalArgumentException("Deve esserci almeno un'immagine");
+        }
 
         // 1. genera engineRef
         String engineRef = engineRefGenerator.generate();
@@ -106,7 +115,7 @@ public class EngineController {
         detailBean.getEngine().setEngineRef(engineRef);
 
         // 3. salva motore
-        long engineId = engineDAO.save(mapToEntity(detailBean.getEngine()));
+        long engineId = engineDAO.save(mapBeanToEngine(detailBean.getEngine()));
 
         // 4. salva immagini
         for (ImageBean img : detailBean.getImages()) {
@@ -115,6 +124,8 @@ public class EngineController {
 
         return engineRef;
     }
+
+
 
     public Optional<String> getCoverFilenameForEngine(long engineId) {
         return imageDAO.findCoverByEngineId(engineId).map(Image::getFilename);
@@ -144,6 +155,43 @@ public class EngineController {
         bean.setNotes(engine.getNotes());
 
         return bean;
+    }
+    private Engine mapBeanToEngine(EngineBean bean) {
+
+        if (bean == null) {
+            throw new IllegalArgumentException("EngineBean nullo");
+        }
+
+        if (bean.getEngineRef() == null || bean.getEngineRef().isBlank()) {
+            throw new IllegalArgumentException("engineRef mancante");
+        }
+
+        if (bean.getEngineCode() == null || bean.getEngineCode().isBlank()) {
+            throw new IllegalArgumentException("engineCode mancante");
+        }
+
+        if (bean.getCustomerId() <= 0) {
+            throw new IllegalArgumentException("customerId non valido");
+        }
+
+        // Conversioni
+        EngineStatus status = bean.getStatus() != null
+                ? EngineStatus.valueOf(bean.getStatus())
+                : EngineStatus.WAITING;
+
+        LocalDate intakeDate = bean.getIntakeDate() != null
+                ? LocalDate.parse(bean.getIntakeDate())
+                : LocalDate.now();
+
+        // Costruzione dell'Entity (NUOVO Engine)
+        return new Engine(
+                bean.getEngineRef(),     // business key
+                bean.getEngineCode(),    // codice motore
+                bean.getCustomerId(),    // cliente
+                intakeDate,              // data ingresso
+                status,                  // stato iniziale
+                bean.getNotes()          // note (può essere null)
+        );
     }
 
     private ImageBean mapImageToBean(Image image) {
