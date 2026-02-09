@@ -85,10 +85,10 @@
 
                                 <!-- DETAIL -->
                                 <c:url var="engineDetailUrl" value="/engine/detail">
-                                    <c:param name="id" value="${engine.id}" />
+                                    <c:param name="ref" value="${engine.engineRef}" />
                                 </c:url>
 
-                                <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/engine/detail?id=${engine.id}">
+                                <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                                     Dettaglio
                                 </a>
 

@@ -6,9 +6,7 @@ import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/engine/detail")
@@ -25,34 +23,46 @@ public class EngineDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String idParam = request.getParameter("id");
+        String engineRef = request.getParameter("ref");
 
-        // Controllo su parametro mancante
-        if (idParam == null || idParam.isBlank()) {
+        /* =========================
+           Validazione parametro
+           ========================= */
+
+        // 1. Parametro mancante o vuoto
+        if (engineRef == null || engineRef.isBlank()) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }
 
-        // Controllo su parametro non numerico
-        long engineId;
-        try {
-            engineId = Long.parseLong(idParam);
-        } catch (NumberFormatException ex) {
+        // 2. Lunghezza sospetta (difesa base)
+        if (engineRef.length() > 50) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }
 
-        // Recupero dettaglio completo
-        EngineDetailBean detail = engineController.getEngineDetail(engineId);
+        // 3. (OPZIONALE ma consigliato) Controllo formato
+        if (!engineRef.matches("^ENG-[0-9]{4}-[0-9]{5}$")) {
+            response.sendRedirect(request.getContextPath() + "/engine");
+            return;
+        }
+
+        /* =========================
+           Recupero dati
+           ========================= */
+
+        EngineDetailBean detail = engineController.getEngineDetail(engineRef);
 
         if (detail == null) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }
 
-        // Passo UN SOLO oggetto alla JSP
-        request.setAttribute("detail", detail);
+        /* =========================
+           Forward alla JSP
+           ========================= */
 
+        request.setAttribute("detail", detail);
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-detail.jsp").forward(request, response);
     }
 }
