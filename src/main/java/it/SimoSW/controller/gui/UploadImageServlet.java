@@ -1,5 +1,12 @@
 package it.SimoSW.controller.gui;
 
+import it.SimoSW.controller.app.EngineController;
+import it.SimoSW.model.EngineStatus;
+import it.SimoSW.util.bean.EngineBean;
+import it.SimoSW.util.bean.EngineDetailBean;
+import it.SimoSW.util.bean.ImageBean;
+import it.SimoSW.util.bootstrap.ApplicationInitializer;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -8,6 +15,7 @@ import javax.servlet.http.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -21,8 +29,15 @@ import java.util.*;
         maxRequestSize = 20 * 1024 * 1024   // 20 MB totali
 )
 public class UploadImageServlet extends HttpServlet {
+    private EngineController engineController;
 
     private static final String UPLOAD_DIR = "uploads";
+
+    @Override
+    public void init() {
+        ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
+        this.engineController = initializer.getEngineController();
+    }
 
     /**
      * Mostra la pagina di caricamento immagini.
@@ -112,21 +127,37 @@ public class UploadImageServlet extends HttpServlet {
             return;
         }
 
+
+
         /* =========================
-           6. PASSAGGIO DATI ALLA VIEW
+           6. COSTRUZIONE BEAN
            ========================= */
-        request.setAttribute("customer", cliente);
-        request.setAttribute("engineCode", codiceMotore);
-        request.setAttribute("note", note);
-        request.setAttribute("uploadedImages", uploadedFiles);
+        EngineBean engineBean = new EngineBean();
+        engineBean.setEngineCode(codiceMotore);
+        engineBean.setCustomerId(Long.parseLong(cliente));
+        engineBean.setNotes(note);
+        engineBean.setStatus(EngineStatus.WAITING.name());
+        engineBean.setIntakeDate(LocalDate.now().toString());
 
-        String referer = request.getHeader("Referer");
-
-        if (referer != null && !referer.isBlank()) {
-            response.sendRedirect(referer);
-        } else {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+        List<ImageBean> imageBeans = new ArrayList<>();
+        for (String filename : uploadedFiles) {
+            ImageBean ib = new ImageBean();
+            ib.setFilename(filename);
+            imageBeans.add(ib);
         }
 
+        EngineDetailBean detailBean = new EngineDetailBean();
+        detailBean.setEngine(engineBean);
+        detailBean.setImages(imageBeans);
+
+        /* =========================
+           7. APPLICATION LAYER
+           ========================= */
+        engineController.setEngineDetail(detailBean);
+
+        /* =========================
+           8. REDIRECT
+           ========================= */
+        response.sendRedirect(request.getContextPath() + "/dashboard");
     }
 }

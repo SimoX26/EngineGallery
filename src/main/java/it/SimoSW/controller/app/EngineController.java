@@ -117,9 +117,16 @@ public class EngineController {
         // 3. salva motore
         long engineId = engineDAO.save(mapBeanToEngine(detailBean.getEngine()));
 
-        // 4. salva immagini
-        for (ImageBean img : detailBean.getImages()) {
-            imageDAO.save(img.getFilename(), engineId);
+        // 4. salva le immagini
+        for (ImageBean imgBean : detailBean.getImages()) {
+
+            Image image = new Image(
+                    engineId,                 // ID tecnico
+                    imgBean.getFilename(),
+                    null                      // uploadedBy (se non lo gestisci ancora)
+            );
+
+            imageDAO.save(image);
         }
 
         return engineRef;
