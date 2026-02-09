@@ -14,8 +14,7 @@
           rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet"
-          href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
 
 <body class="login-page">

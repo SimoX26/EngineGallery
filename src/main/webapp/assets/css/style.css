@@ -258,21 +258,3 @@ body {
 .btn-engine:active {
     transform: scale(0.98);
 }
-
-
-
-.engine-image-lg {
-    width: 100%;
-
-    /* 🔑 CHIAVE ASSOLUTA */
-    background-size: contain;      /* ingrandisce le piccole, rimpicciolisce le grandi */
-    background-position: center;   /* sempre centrata */
-    background-repeat: no-repeat;  /* NIENTE mosaico */
-
-    background-color: #f0f0f0;     /* sfondo neutro */
-}
-
-
-body {
-    background-color: red !important;
-}
