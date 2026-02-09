@@ -12,7 +12,6 @@ public class ApplicationInitializer {
        ========================= */
 
     private final EngineController engineController;
-    private final ImageController imageController;
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
 
@@ -21,7 +20,6 @@ public class ApplicationInitializer {
 
         /* ===== DAO concreti ===== */
         ImageDAO imageDAO = new DatabaseImageDAO();
-        GalleryDAO galleryDAO = new DatabaseGalleryDAO();
         UserDAO userDAO = new DatabaseUserDAO();
         EngineDAO engineDAO = new DatabaseEngineDAO();
         CustomerDAO customerDAO = new DatabaseCustomerDAO();
@@ -29,8 +27,6 @@ public class ApplicationInitializer {
 
         /* ===== Controller ===== */
         this.engineController = new EngineController(engineDAO, imageDAO);
-
-        this.imageController = new ImageController(imageDAO);
 
         this.authenticationController = new AuthenticationController(userDAO);
 
@@ -43,10 +39,6 @@ public class ApplicationInitializer {
        ========================= */
 
     public EngineController getEngineController() { return engineController; }
-
-    public ImageController getImageController() {
-        return imageController;
-    }
 
     public AuthenticationController getAuthenticationController() {
         return authenticationController;

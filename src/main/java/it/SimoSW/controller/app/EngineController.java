@@ -9,7 +9,6 @@ import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
 import it.SimoSW.util.bean.ImageBean;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
