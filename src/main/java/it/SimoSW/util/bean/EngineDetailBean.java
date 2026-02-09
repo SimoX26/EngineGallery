@@ -7,19 +7,25 @@ import java.util.List;
 
 public class EngineDetailBean {
 
-    private final Engine engine;
-    private final List<Image> images;
 
-    public EngineDetailBean(Engine engine, List<Image> images) {
-        this.engine = engine;
-        this.images = images;
-    }
+    private EngineBean engine;
+    private List<ImageBean> images;
 
-    public Engine getEngine() {
+    public EngineDetailBean() {}
+
+    public EngineBean getEngine() {
         return engine;
     }
 
-    public List<Image> getImages() {
+    public void setEngine(EngineBean engine) {
+        this.engine = engine;
+    }
+
+    public List<ImageBean> getImages() {
         return images;
+    }
+
+    public void setImages(List<ImageBean> images) {
+        this.images = images;
     }
 }

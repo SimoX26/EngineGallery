@@ -5,7 +5,9 @@ import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.Image;
 import it.SimoSW.model.dao.EngineDAO;
 import it.SimoSW.model.dao.ImageDAO;
+import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
+import it.SimoSW.util.bean.ImageBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -64,6 +66,7 @@ public class EngineController {
     }
 
     public EngineDetailBean getEngineDetail(long engineId) {
+
         Optional<Engine> engineOpt = engineDAO.findById(engineId);
         if (engineOpt.isEmpty()) {
             return null;
@@ -72,52 +75,59 @@ public class EngineController {
         Engine engine = engineOpt.get();
         List<Image> images = imageDAO.findAllByEngineId(engineId);
 
-        return new EngineDetailBean(engine, images);
+        EngineBean engineBean = mapEngineToBean(engine);
+        List<ImageBean> imageBeans = images.stream()
+                .map(this::mapImageToBean)
+                .toList();
+
+        EngineDetailBean detailBean = new EngineDetailBean();
+        detailBean.setEngine(engineBean);
+        detailBean.setImages(imageBeans);
+
+        return detailBean;
+    }
+
+    Engine setEngineDetail(EngineDetailBean bean){
+        return null;
     }
 
     public Optional<String> getCoverFilenameForEngine(long engineId) {
         return imageDAO.findCoverByEngineId(engineId).map(Image::getFilename);
     }
 
-    public Engine getOrCreateEngine(String customer, String engineCode) {
-
-        Optional<Engine> existing = engineDAO.findByCustomerAndEngineCode(customer, engineCode);
-
-        if (existing.isPresent()) {
-            return existing.get();
-        }
 
 
-        /*
-        long customerId = customerDAO
-                .findByName(customer)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Cliente non trovato: " + customer)
-                )
-                .getId();
-        */
 
-        long customerId = 0;
 
-        Engine engine = new Engine(
-                0L,                     // id temporaneo (non ancora persistito)
-                null,                   // engineRef non ancora assegnato
-                engineCode,
-                customerId,
-                LocalDate.now(),         // intakeDate
-                EngineStatus.WAITING,    // stato iniziale
-                null,                   // deliveryDate
-                null                    // note
+    private EngineBean mapEngineToBean(Engine engine) {
+
+        EngineBean bean = new EngineBean();
+
+        bean.setEngineRef(engine.getEngineRef());
+        bean.setEngineCode(engine.getEngineCode());
+        bean.setCustomerId(engine.getCustomerId());
+
+        bean.setStatus(engine.getStatus().name());
+        bean.setIntakeDate(engine.getIntakeDate().toString());
+
+        bean.setDeliveryDate(
+                engine.getDeliveryDate() != null
+                        ? engine.getDeliveryDate().toString()
+                        : null
         );
 
-        // persist → ottieni ID
-        engine = engineDAO.save(engine);
+        bean.setNotes(engine.getNotes());
 
-        // ORA puoi assegnare engineRef (una sola volta)
-        engine.assignEngineRef("MOTORE-" + engine.getId());
+        return bean;
+    }
 
-        engineDAO.update(engine);
+    private ImageBean mapImageToBean(Image image) {
 
-        return engine;
+        ImageBean bean = new ImageBean();
+
+        bean.setFilename(image.getFilename());
+        bean.setUploadDate(image.getUploadDate().toString());
+
+        return bean;
     }
 }
