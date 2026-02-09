@@ -15,7 +15,6 @@ public class ApplicationInitializer {
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
 
-
     public ApplicationInitializer() {
 
         /* ===== DAO concreti ===== */
