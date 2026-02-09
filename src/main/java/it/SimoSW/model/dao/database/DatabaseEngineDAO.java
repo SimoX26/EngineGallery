@@ -76,6 +76,18 @@ public class DatabaseEngineDAO implements EngineDAO {
           AND e.engine_code = ?
     """;
 
+
+    private static final String GET_NEXT_SEQUENCE_FOR_YEAR = """
+        SELECT COALESCE(
+            MAX(CAST(SUBSTRING(engine_ref, 10, 5) AS UNSIGNED)),
+            0
+        ) AS last_seq
+        FROM engines
+        WHERE engine_ref LIKE CONCAT('ENG-', ?, '-%')
+        """;
+
+
+
     /* =====================
        CRUD
        ===================== */
@@ -301,5 +313,31 @@ public class DatabaseEngineDAO implements EngineDAO {
                     ps.setString(2, engineCode);
                 }
         );
+    }
+
+
+
+    @Override
+    public int getNextSequenceForYear(int year) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(GET_NEXT_SEQUENCE_FOR_YEAR)) {
+
+            ps.setInt(1, year);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // +1 qui = ritorno il prossimo valore
+                    return rs.getInt("last_seq") + 1;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Errore nel recupero del progressivo engine_ref per l'anno " + year, e
+            );
+        }
+
+        // fallback teorico
+        return 1;
     }
 }

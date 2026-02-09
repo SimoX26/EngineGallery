@@ -8,19 +8,22 @@ import it.SimoSW.model.dao.ImageDAO;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
 import it.SimoSW.util.bean.ImageBean;
+import it.SimoSW.util.generator.EngineRefGenerator;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public class EngineController {
+    private final EngineRefGenerator engineRefGenerator;
 
     private final EngineDAO engineDAO;
     private final ImageDAO imageDAO;
 
-    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO) {
+    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, EngineRefGenerator engineRefGenerator) {
         this.engineDAO = engineDAO;
         this.imageDAO = imageDAO;
+        this.engineRefGenerator = engineRefGenerator;
     }
 
     /* =========================
@@ -94,48 +97,23 @@ public class EngineController {
         return detailBean;
     }
 
-    public Engine setEngineDetail(EngineDetailBean detailBean) {
+    public String createEngineWithImages(EngineDetailBean detailBean) {
 
-        if (detailBean == null || detailBean.getEngine() == null) {
-            throw new IllegalArgumentException("EngineDetailBean non valido");
+        // 1. genera engineRef
+        String engineRef = engineRefGenerator.generate();
+
+        // 2. assegna al bean
+        detailBean.getEngine().setEngineRef(engineRef);
+
+        // 3. salva motore
+        long engineId = engineDAO.save(mapToEntity(detailBean.getEngine()));
+
+        // 4. salva immagini
+        for (ImageBean img : detailBean.getImages()) {
+            imageDAO.save(img.getFilename(), engineId);
         }
 
-        EngineBean eb = detailBean.getEngine();
-
-    /* =========================
-       1. Creazione Engine (NUOVO)
-       ========================= */
-        Engine engine = new Engine(
-                eb.getEngineRef(),
-                eb.getEngineCode(),
-                eb.getCustomerId(),
-                LocalDate.parse(eb.getIntakeDate()),
-                EngineStatus.valueOf(eb.getStatus()),
-                eb.getNotes()
-        );
-
-    /* =========================
-       2. Persistenza Engine
-       ========================= */
-        Engine savedEngine = engineDAO.save(engine);
-
-    /* =========================
-       3. Persistenza Images
-       ========================= */
-        if (detailBean.getImages() != null) {
-            for (ImageBean ib : detailBean.getImages()) {
-
-                Image image = new Image(
-                        savedEngine.getId(),
-                        ib.getFilename(),
-                        null
-                );
-
-                imageDAO.save(image);
-            }
-        }
-
-        return savedEngine;
+        return engineRef;
     }
 
     public Optional<String> getCoverFilenameForEngine(long engineId) {

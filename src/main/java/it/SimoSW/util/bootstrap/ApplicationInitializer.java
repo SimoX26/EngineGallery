@@ -3,7 +3,7 @@ package it.SimoSW.util.bootstrap;
 import it.SimoSW.controller.app.*;
 import it.SimoSW.model.dao.*;
 import it.SimoSW.model.dao.database.*;
-import it.SimoSW.model.dao.mock.MockEngineDAO;
+import it.SimoSW.util.generator.EngineRefGenerator;
 
 public class ApplicationInitializer {
 
@@ -15,6 +15,8 @@ public class ApplicationInitializer {
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
 
+    private final EngineRefGenerator engineRefGenerator;
+
     public ApplicationInitializer() {
 
         /* ===== DAO concreti ===== */
@@ -23,9 +25,11 @@ public class ApplicationInitializer {
         EngineDAO engineDAO = new DatabaseEngineDAO();
         CustomerDAO customerDAO = new DatabaseCustomerDAO();
 
+        engineRefGenerator = new EngineRefGenerator(engineDAO);
+
 
         /* ===== Controller ===== */
-        this.engineController = new EngineController(engineDAO, imageDAO);
+        this.engineController = new EngineController(engineDAO, imageDAO, engineRefGenerator);
 
         this.authenticationController = new AuthenticationController(userDAO);
 

@@ -43,4 +43,8 @@ public interface EngineDAO {
 
 
     Optional<Engine> findByCustomerAndEngineCode(String customer, String engineCode);
+
+
+
+    int getNextSequenceForYear(int year);
 }
