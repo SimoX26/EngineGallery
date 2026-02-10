@@ -97,41 +97,6 @@ public class EngineController {
         return detailBean;
     }
 
-    public String setEngineDetail(EngineDetailBean detailBean) {
-
-        // 0. validazione dell'input
-        if (detailBean == null || detailBean.getEngine() == null) {
-            throw new IllegalArgumentException("EngineDetailBean non valido");
-        }
-
-        if (detailBean.getImages() == null || detailBean.getImages().isEmpty()) {
-            throw new IllegalArgumentException("Deve esserci almeno un'immagine");
-        }
-
-        // 1. genera engineRef
-        String engineRef = engineRefGenerator.generate();
-
-        // 2. assegna al bean
-        detailBean.getEngine().setEngineRef(engineRef);
-
-        // 3. salva motore
-        long engineId = engineDAO.save(mapBeanToEngine(detailBean.getEngine()));
-
-        // 4. salva le immagini
-        for (ImageBean imgBean : detailBean.getImages()) {
-
-            Image image = new Image(
-                    engineId,                 // ID tecnico
-                    imgBean.getFilename(),
-                    null                      // uploadedBy (se non lo gestisci ancora)
-            );
-
-            imageDAO.save(image);
-        }
-
-        return engineRef;
-    }
-
 
     public String generateEngineRef() {
         EngineRefGenerator generator = new EngineRefGenerator(engineDAO);
@@ -145,6 +110,91 @@ public class EngineController {
     }
 
 
+    public Engine createEngine(EngineBean bean) {
+
+        // =========================
+        // 1. VALIDAZIONE BEAN
+        // =========================
+        if (bean == null) {
+            throw new IllegalArgumentException("EngineBean nullo");
+        }
+
+        if (bean.getEngineRef() == null || bean.getEngineRef().isBlank()) {
+            throw new IllegalArgumentException("engineRef obbligatorio");
+        }
+
+        if (bean.getEngineCode() == null || bean.getEngineCode().isBlank()) {
+            throw new IllegalArgumentException("engineCode obbligatorio");
+        }
+
+        // =========================
+        // 2. MOTORE GIÀ ESISTENTE?
+        // =========================
+        Optional<Engine> existing =
+                engineDAO.findByEngineRef(bean.getEngineRef());
+
+        if (existing.isPresent()) {
+            throw new IllegalStateException(
+                    "Motore con ref " + bean.getEngineRef() + " già esistente"
+            );
+        }
+
+        // =========================
+        // 3. COSTRUZIONE MODEL
+        // =========================
+        Engine engine = new Engine(
+                    bean.getEngineRef(),
+                    bean.getEngineCode(),
+                    bean.getCustomerId(),
+                    LocalDate.parse(bean.getIntakeDate()),
+                    EngineStatus.valueOf(bean.getStatus()),
+                    bean.getNotes()
+                );
+
+        // =========================
+        // 4. PERSISTENZA
+        // =========================
+        return engineDAO.save(engine);
+    }
+
+
+    public Image addImage(String engineRef, String filename) {
+
+        // =========================
+        // 1. VALIDAZIONE
+        // =========================
+        if (engineRef == null || engineRef.isBlank()) {
+            throw new IllegalArgumentException("engineRef obbligatorio");
+        }
+
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalArgumentException("filename obbligatorio");
+        }
+
+        // =========================
+        // 2. RECUPERO MOTORE
+        // =========================
+        Engine engine = engineDAO.findByEngineRef(engineRef)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Motore con ref " + engineRef + " non esistente"
+                        )
+                );
+
+        // =========================
+        // 3. COSTRUZIONE MODEL IMAGE
+        // =========================
+        Image image = new Image(
+                engine.getId(),   // relazione DB
+                filename,
+                null              // uploadedBy (gestibile dopo)
+        );
+
+        // =========================
+        // 4. PERSISTENZA
+        // =========================
+        return imageDAO.save(image);
+    }
 
 
 
