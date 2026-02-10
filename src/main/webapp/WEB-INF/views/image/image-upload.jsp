@@ -50,12 +50,12 @@
                         onchange="handleEngineMode(this)"
                         required>
 
-                    <option value="new" selected>
-                        ➕ Nuovo motore (riferimento: ${engineRef})
+                    <option value="new" ${engineMode == 'new' ? 'selected' : ''}>
+                        ➕ Nuovo (riferimento: ${newEngineRef})
                     </option>
 
-                    <option value="existing">
-                        📂 Motore già esistente
+                    <option value="existing" ${engineMode == 'existing' ? 'selected' : ''}>
+                        📂 Esistente (riferimento: ${existingEngineRef})
                     </option>
                 </select>
             </div>

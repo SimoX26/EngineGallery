@@ -45,8 +45,18 @@ public class UploadServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String engineRef = engineController.generateEngineRef();
-        request.setAttribute("engineRef", engineRef);
+        // 1) sempre: riferimento per NUOVO motore
+        String newEngineRef = engineController.generateEngineRef();
+        request.setAttribute("newEngineRef", newEngineRef);
+
+        // 2) riferimento per motore ESISTENTE: "?" finché non selezionato
+        String selectedRef = request.getParameter("ref");
+        String existingEngineRef = (selectedRef != null && !selectedRef.isBlank()) ? selectedRef : "?";
+        request.setAttribute("existingEngineRef", existingEngineRef);
+
+        // 3) modalità selezionata (se arrivo con ref => existing, altrimenti new)
+        String engineMode = (selectedRef != null && !selectedRef.isBlank()) ? "existing" : "new";
+        request.setAttribute("engineMode", engineMode);
 
         request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
     }
