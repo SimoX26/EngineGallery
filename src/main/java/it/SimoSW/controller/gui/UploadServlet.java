@@ -14,6 +14,8 @@ import javax.servlet.http.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
@@ -58,119 +60,128 @@ public class UploadServlet extends HttpServlet {
         String engineMode = (selectedRef != null && !selectedRef.isBlank()) ? "existing" : "new";
         request.setAttribute("engineMode", engineMode);
 
-        request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
     }
 
     /**
      * Gestisce il salvataggio di una o più immagini insieme ai metadati.
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+            throws ServletException, IOException {
 
-        /* =========================
-           1. LETTURA METADATI
-           ========================= */
-        String cliente = request.getParameter("customer");
-        String codiceMotore = request.getParameter("engineCode");
-        String note = request.getParameter("note");
+    /* =========================
+       1. LETTURA PARAMETRI BASE
+       ========================= */
+        String engineMode = request.getParameter("engineMode");
+        String engineRef  = request.getParameter("engineRef");
 
-        /* =========================
-           2. VALIDAZIONE METADATI
-           ========================= */
-        if (cliente == null || cliente.isBlank() || codiceMotore == null || codiceMotore.isBlank()) {
-            request.setAttribute("error", "Nome cliente e codice motore sono obbligatori");
-            request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
-            return;
+        if (engineRef == null || engineRef.isBlank() || "?".equals(engineRef)) {
+            throw new ServletException("Riferimento motore non valido");
         }
 
-        /* =========================
-           3. PREPARAZIONE DIRECTORY
-           ========================= */
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+    /* =========================
+       2. VALIDAZIONE METADATI
+       (solo se nuovo motore)
+       ========================= */
+        String cliente = null;
+        String codiceMotore = null;
+        String note = null;
 
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
+        if ("new".equals(engineMode)) {
+
+            cliente = request.getParameter("customer");
+            codiceMotore = request.getParameter("engineCode");
+            note = request.getParameter("note");
+
+            if (cliente == null || cliente.isBlank()
+                    || codiceMotore == null || codiceMotore.isBlank()) {
+
+                request.setAttribute("error",
+                        "Nome cliente e codice motore sono obbligatori");
+
+                request.getRequestDispatcher(
+                        "/WEB-INF/views/image/upload.jsp"
+                ).forward(request, response);
+                return;
+            }
         }
 
-        /* =========================
-           4. GESTIONE MULTI-UPLOAD
-           ========================= */
+    /* =========================
+       3. PREPARAZIONE DIRECTORY
+       ========================= */
+        String uploadRoot =
+                getServletContext().getRealPath("/uploads/engines");
+
+        Path engineDir = Paths.get(uploadRoot, engineRef);
+        Files.createDirectories(engineDir);
+
+    /* =========================
+       4. UPLOAD IMMAGINI
+       ========================= */
         List<String> uploadedFiles = new ArrayList<>();
 
-        Collection<Part> parts = request.getParts();
+        for (Part part : request.getParts()) {
 
-        for (Part part : parts) {
-
-            // Considera solo il campo file "images"
-            if (!"images".equals(part.getName())) {
+            if (!"images".equals(part.getName()) || part.getSize() == 0) {
                 continue;
             }
 
-            // File vuoto
-            if (part.getSize() == 0) {
-                continue;
-            }
-
-            // Validazione MIME
             String contentType = part.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 continue;
             }
 
-            // Nome file originale
-            String originalFileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+            String originalName = Paths.get(part.getSubmittedFileName())
+                    .getFileName()
+                    .toString();
 
-            // Nome sicuro
-            String safeFileName = UUID.randomUUID() + "_" + originalFileName;
+            String safeFileName =
+                    UUID.randomUUID() + "_" + originalName;
 
-            // Salvataggio file
-            File savedFile = new File(uploadDir, safeFileName);
-            part.write(savedFile.getAbsolutePath());
+            Path destination = engineDir.resolve(safeFileName);
+            part.write(destination.toString());
 
             uploadedFiles.add(safeFileName);
         }
 
-        /* =========================
-           5. VERIFICA RISULTATO
-           ========================= */
         if (uploadedFiles.isEmpty()) {
-            request.setAttribute("error", "Devi caricare almeno un'immagine valida");
-            request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
+            request.setAttribute("error",
+                    "Devi caricare almeno un'immagine valida");
+
+            request.getRequestDispatcher(
+                    "/WEB-INF/views/image/upload.jsp"
+            ).forward(request, response);
             return;
         }
 
+    /* =========================
+       5. APPLICATION LAYER
+       ========================= */
 
+        // 5a. Se nuovo motore → creazione
+        if ("new".equals(engineMode)) {
 
-        /* =========================
-           6. COSTRUZIONE BEAN
-           ========================= */
-        EngineBean engineBean = new EngineBean();
-        engineBean.setEngineCode(codiceMotore);
-        engineBean.setCustomerId(Long.parseLong(cliente));
-        engineBean.setNotes(note);
-        engineBean.setStatus(EngineStatus.WAITING.name());
-        engineBean.setIntakeDate(LocalDate.now().toString());
+            EngineBean engineBean = new EngineBean();
+            engineBean.setEngineRef(engineRef);
+            engineBean.setEngineCode(codiceMotore);
+            engineBean.setCustomerId(Long.parseLong(cliente));
+            engineBean.setNotes(note);
+            engineBean.setStatus(EngineStatus.WAITING.name());
+            engineBean.setIntakeDate(LocalDate.now().toString());
 
-        List<ImageBean> imageBeans = new ArrayList<>();
-        for (String filename : uploadedFiles) {
-            ImageBean ib = new ImageBean();
-            ib.setFilename(filename);
-            imageBeans.add(ib);
+            engineController.createEngine(engineBean);
         }
 
-        EngineDetailBean detailBean = new EngineDetailBean();
-        detailBean.setEngine(engineBean);
-        detailBean.setImages(imageBeans);
+        // 5b. Immagini (sempre)
+        for (String filename : uploadedFiles) {
+            engineController.addImage(engineRef, filename);
+        }
 
-        /* =========================
-           7. APPLICATION LAYER
-           ========================= */
-        engineController.setEngineDetail(detailBean);
-
-        /* =========================
-           8. REDIRECT
-           ========================= */
-        response.sendRedirect(request.getContextPath() + "/dashboard");
+    /* =========================
+       6. REDIRECT
+       ========================= */
+        response.sendRedirect( request.getContextPath()  + "/engine/detail?ref=" + engineRef);
     }
 }

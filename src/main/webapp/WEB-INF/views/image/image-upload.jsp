@@ -39,7 +39,7 @@
         </p>
 
         <!-- Area upload -->
-        <form action="<%= request.getContextPath() %>/image-upload" method="post" enctype="multipart/form-data">
+        <form action="<%= request.getContextPath() %>/upload" method="post" enctype="multipart/form-data">
 
 
             <div class="mb-4">
