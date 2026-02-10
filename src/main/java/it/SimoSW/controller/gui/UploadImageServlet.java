@@ -45,6 +45,9 @@ public class UploadImageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        String engineRef = engineController.generateEngineRef();
+        request.setAttribute("engineRef", engineRef);
+
         request.getRequestDispatcher("/WEB-INF/views/image/image-upload.jsp").forward(request, response);
     }
 

@@ -133,6 +133,12 @@ public class EngineController {
     }
 
 
+    public String generateEngineRef() {
+        EngineRefGenerator generator = new EngineRefGenerator(engineDAO);
+        return generator.generate();
+    }
+
+
 
     public Optional<String> getCoverFilenameForEngine(long engineId) {
         return imageDAO.findCoverByEngineId(engineId).map(Image::getFilename);

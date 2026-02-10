@@ -41,6 +41,28 @@
         <!-- Area upload -->
         <form action="<%= request.getContextPath() %>/image-upload" method="post" enctype="multipart/form-data">
 
+
+            <div class="mb-4">
+                <!-- <label class="form-label fw-semibold">Motore</label> -->
+
+                <select class="form-select"
+                        name="engineMode"
+                        onchange="handleEngineMode(this)"
+                        required>
+
+                    <option value="new" selected>
+                        ➕ Nuovo motore (riferimento: ${engineRef})
+                    </option>
+
+                    <option value="existing">
+                        📂 Motore già esistente
+                    </option>
+                </select>
+            </div>
+
+            <!-- ENGINE REF nascosto (serve solo se nuovo motore) -->
+            <input type="hidden" name="engineRef" value="${engineRef}">
+
             <!-- UPLOAD -->
             <div class="mb-4">
                 <label class="form-label fw-semibold">Immagini</label>
@@ -88,4 +110,13 @@
 </div>
 
 </body>
+
+
+<script>
+    function handleEngineMode(select) {
+        if (select.value === 'existing') {
+            window.location.href = '<%= request.getContextPath() %>/engine/select';
+        }
+    }
+</script>
 </html>
