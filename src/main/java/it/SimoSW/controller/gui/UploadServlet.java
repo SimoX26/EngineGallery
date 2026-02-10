@@ -67,9 +67,7 @@ public class UploadServlet extends HttpServlet {
      * Gestisce il salvataggio di una o più immagini insieme ai metadati.
      */
     @Override
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     /* =========================
        1. LETTURA PARAMETRI BASE
@@ -95,15 +93,11 @@ public class UploadServlet extends HttpServlet {
             codiceMotore = request.getParameter("engineCode");
             note = request.getParameter("note");
 
-            if (cliente == null || cliente.isBlank()
-                    || codiceMotore == null || codiceMotore.isBlank()) {
+            if (cliente == null || cliente.isBlank() || codiceMotore == null || codiceMotore.isBlank()) {
 
-                request.setAttribute("error",
-                        "Nome cliente e codice motore sono obbligatori");
+                request.setAttribute("error", "Nome cliente e codice motore sono obbligatori");
 
-                request.getRequestDispatcher(
-                        "/WEB-INF/views/image/upload.jsp"
-                ).forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
             }
         }
@@ -111,8 +105,7 @@ public class UploadServlet extends HttpServlet {
     /* =========================
        3. PREPARAZIONE DIRECTORY
        ========================= */
-        String uploadRoot =
-                getServletContext().getRealPath("/uploads/engines");
+        String uploadRoot = getServletContext().getRealPath("/uploads/engines");
 
         Path engineDir = Paths.get(uploadRoot, engineRef);
         Files.createDirectories(engineDir);
@@ -133,12 +126,9 @@ public class UploadServlet extends HttpServlet {
                 continue;
             }
 
-            String originalName = Paths.get(part.getSubmittedFileName())
-                    .getFileName()
-                    .toString();
+            String originalName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
 
-            String safeFileName =
-                    UUID.randomUUID() + "_" + originalName;
+            String safeFileName = UUID.randomUUID() + "_" + originalName;
 
             Path destination = engineDir.resolve(safeFileName);
             part.write(destination.toString());
@@ -147,12 +137,9 @@ public class UploadServlet extends HttpServlet {
         }
 
         if (uploadedFiles.isEmpty()) {
-            request.setAttribute("error",
-                    "Devi caricare almeno un'immagine valida");
+            request.setAttribute("error", "Devi caricare almeno un'immagine valida");
 
-            request.getRequestDispatcher(
-                    "/WEB-INF/views/image/upload.jsp"
-            ).forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
             return;
         }
 
@@ -182,6 +169,6 @@ public class UploadServlet extends HttpServlet {
     /* =========================
        6. REDIRECT
        ========================= */
-        response.sendRedirect( request.getContextPath()  + "/engine/detail?ref=" + engineRef);
+        response.sendRedirect( request.getContextPath()  + "/dashboard");
     }
 }
