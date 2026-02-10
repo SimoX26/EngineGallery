@@ -92,7 +92,7 @@ public class DatabaseEngineDAO implements EngineDAO {
        CRUD
        ===================== */
     @Override
-    public long save(Engine engine) {
+    public Engine save(Engine engine) {
 
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(
@@ -116,9 +116,16 @@ public class DatabaseEngineDAO implements EngineDAO {
 
             stmt.executeUpdate();
 
+            // =========================
+            // ID generato
+            // =========================
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getLong(1); // ID tecnico
+                    long generatedId = rs.getLong(1);
+
+                    engine.setId(generatedId);
+
+                    return engine;
                 }
             }
 
@@ -126,8 +133,12 @@ public class DatabaseEngineDAO implements EngineDAO {
             throw new RuntimeException("Errore durante il salvataggio del motore", e);
         }
 
-        throw new RuntimeException("ID generato non disponibile dopo il salvataggio");
+        throw new RuntimeException(
+                "ID generato non disponibile dopo il salvataggio"
+        );
     }
+
+
     @Override
     public Engine update(Engine engine) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();

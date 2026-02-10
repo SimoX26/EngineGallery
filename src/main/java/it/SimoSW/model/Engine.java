@@ -160,4 +160,10 @@ public class Engine {
         }
         this.engineRef = Objects.requireNonNull(engineRef);
     }
+
+
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }
