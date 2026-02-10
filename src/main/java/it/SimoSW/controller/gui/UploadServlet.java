@@ -22,13 +22,13 @@ import java.util.*;
  * Servlet responsabile del caricamento delle immagini del motore
  * insieme ai metadati associati (cliente, codice motore, note).
  */
-@WebServlet("/image-upload")
+@WebServlet("/upload")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024,   // 1 MB
         maxFileSize = 5 * 1024 * 1024,      // 5 MB per file
         maxRequestSize = 20 * 1024 * 1024   // 20 MB totali
 )
-public class UploadImageServlet extends HttpServlet {
+public class UploadServlet extends HttpServlet {
     private EngineController engineController;
 
     private static final String UPLOAD_DIR = "uploads";

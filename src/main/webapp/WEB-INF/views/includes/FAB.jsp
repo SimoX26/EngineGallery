@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
-<a href="<%= request.getContextPath() %>/image-upload"
+<a href="<%= request.getContextPath() %>/upload"
    title="Carica immagine"
    style="
      position: fixed !important;
