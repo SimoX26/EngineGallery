@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet("/engine")
+@WebServlet("/engine/list")
 public class EngineListServlet extends HttpServlet {
 
     private EngineController engineController;
