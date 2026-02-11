@@ -51,14 +51,25 @@ public class UploadServlet extends HttpServlet {
         String newEngineRef = engineController.generateEngineRef();
         request.setAttribute("newEngineRef", newEngineRef);
 
-        // 2) riferimento per motore ESISTENTE: "?" finché non selezionato
+        // 2) riferimento per motore ESISTENTE
         String selectedRef = request.getParameter("ref");
         String existingEngineRef = (selectedRef != null && !selectedRef.isBlank()) ? selectedRef : "?";
         request.setAttribute("existingEngineRef", existingEngineRef);
 
-        // 3) modalità selezionata (se arrivo con ref => existing, altrimenti new)
+        // 3) modalità selezionata
         String engineMode = (selectedRef != null && !selectedRef.isBlank()) ? "existing" : "new";
         request.setAttribute("engineMode", engineMode);
+
+        // 4) QUI LA PARTE CHE TI MANCA
+        String engineRef;
+
+        if ("existing".equals(engineMode)) {
+            engineRef = existingEngineRef;
+        } else {
+            engineRef = newEngineRef;
+        }
+
+        request.setAttribute("engineRef", engineRef);
 
         request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
     }
