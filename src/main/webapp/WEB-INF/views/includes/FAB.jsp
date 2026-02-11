@@ -1,6 +1,18 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
+<style>
+@media (max-width: 768px) {
+  .fab-mobile-center {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    bottom: 20px !important;
+  }
+}
+</style>
+
 <a href="<%= request.getContextPath() %>/upload"
+   class="fab-mobile-center"
    title="Carica immagine"
    style="
      position: fixed !important;
@@ -22,15 +34,3 @@
    ">
     +
 </a>
-
-<script>
-  // Hardening: se qualche wrapper crea un contesto “strano”, assicuriamo che stia come ultimo nodo del body.
-  (function () {
-    const el = document.currentScript.previousElementSibling;
-    if (el && el.parentNode !== document.body) {
-      document.body.appendChild(el);
-    } else if (el) {
-      document.body.appendChild(el); // lo mette comunque in fondo (sopra tutto)
-    }
-  })();
-</script>

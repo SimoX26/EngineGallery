@@ -7,7 +7,7 @@
         <!-- BRAND -->
         <a class="navbar-brand fw-bold"
            href="<%= request.getContextPath() %>/dashboard">
-            Engine Gallery
+            RML • Engine Gallery
         </a>
 
         <!-- TOGGLER (mobile) -->
