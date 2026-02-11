@@ -112,7 +112,7 @@ body {
 }
 
 .kpi-value {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 700;
     margin-top: 10px;
 }
@@ -193,9 +193,9 @@ body {
 }
 
 .engine-image {
-    height: 180px;
-    background-color: #e5e7eb;
+    aspect-ratio: 16 / 9;
     background-size: cover;
+    background-color: #e5e7eb;
     background-position: center;
 }
 
@@ -257,4 +257,42 @@ body {
 
 .btn-engine:active {
     transform: scale(0.98);
+}
+
+
+
+
+
+
+
+
+/* =====================
+   RESPONSIVE SYSTEM
+   ===================== */
+@media (max-width: 992px) {
+    .page-header {
+        margin: 30px 0 20px 0;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 0.95rem;
+    }
+
+    .engine-code {
+        font-size: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-base,
+    .kpi-card,
+    .table-container {
+        border-radius: 10px;
+    }
 }
