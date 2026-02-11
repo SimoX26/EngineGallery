@@ -29,7 +29,7 @@ public class ApplicationInitializer {
 
 
         /* ===== Controller ===== */
-        this.engineController = new EngineController(engineDAO, imageDAO, engineRefGenerator);
+        this.engineController = new EngineController(engineDAO, imageDAO, customerDAO, engineRefGenerator);
 
         this.authenticationController = new AuthenticationController(userDAO);
 

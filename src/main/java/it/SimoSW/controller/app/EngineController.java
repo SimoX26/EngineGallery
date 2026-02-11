@@ -3,6 +3,7 @@ package it.SimoSW.controller.app;
 import it.SimoSW.model.Engine;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.Image;
+import it.SimoSW.model.dao.CustomerDAO;
 import it.SimoSW.model.dao.EngineDAO;
 import it.SimoSW.model.dao.ImageDAO;
 import it.SimoSW.util.bean.EngineBean;
@@ -15,14 +16,16 @@ import java.util.List;
 import java.util.Optional;
 
 public class EngineController {
-    private final EngineRefGenerator engineRefGenerator;
-
     private final EngineDAO engineDAO;
     private final ImageDAO imageDAO;
+    private final CustomerDAO customerDAO;
 
-    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, EngineRefGenerator engineRefGenerator) {
+    private final EngineRefGenerator engineRefGenerator;
+
+    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, CustomerDAO customerDAO, EngineRefGenerator engineRefGenerator) {
         this.engineDAO = engineDAO;
         this.imageDAO = imageDAO;
+        this.customerDAO = customerDAO;
         this.engineRefGenerator = engineRefGenerator;
     }
 
@@ -197,6 +200,12 @@ public class EngineController {
     }
 
 
+    public Long findCustomerIdByName(String name) {
+        return customerDAO.findIdByName(name);
+    }
+
+
+
 
     private EngineBean mapEngineToBean(Engine engine) {
 
@@ -219,44 +228,6 @@ public class EngineController {
 
         return bean;
     }
-    private Engine mapBeanToEngine(EngineBean bean) {
-
-        if (bean == null) {
-            throw new IllegalArgumentException("EngineBean nullo");
-        }
-
-        if (bean.getEngineRef() == null || bean.getEngineRef().isBlank()) {
-            throw new IllegalArgumentException("engineRef mancante");
-        }
-
-        if (bean.getEngineCode() == null || bean.getEngineCode().isBlank()) {
-            throw new IllegalArgumentException("engineCode mancante");
-        }
-
-        if (bean.getCustomerId() <= 0) {
-            throw new IllegalArgumentException("customerId non valido");
-        }
-
-        // Conversioni
-        EngineStatus status = bean.getStatus() != null
-                ? EngineStatus.valueOf(bean.getStatus())
-                : EngineStatus.WAITING;
-
-        LocalDate intakeDate = bean.getIntakeDate() != null
-                ? LocalDate.parse(bean.getIntakeDate())
-                : LocalDate.now();
-
-        // Costruzione dell'Entity (NUOVO Engine)
-        return new Engine(
-                bean.getEngineRef(),     // business key
-                bean.getEngineCode(),    // codice motore
-                bean.getCustomerId(),    // cliente
-                intakeDate,              // data ingresso
-                status,                  // stato iniziale
-                bean.getNotes()          // note (può essere null)
-        );
-    }
-
     private ImageBean mapImageToBean(Image image) {
 
         ImageBean bean = new ImageBean();
