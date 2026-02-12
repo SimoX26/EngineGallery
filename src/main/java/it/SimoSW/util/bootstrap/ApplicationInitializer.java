@@ -12,6 +12,7 @@ public class ApplicationInitializer {
        ========================= */
 
     private final EngineController engineController;
+    private final CustomerController customerController;
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
 
@@ -29,7 +30,9 @@ public class ApplicationInitializer {
 
 
         /* ===== Controller ===== */
-        this.engineController = new EngineController(engineDAO, imageDAO, customerDAO, engineRefGenerator);
+        this.engineController = new EngineController(engineDAO, imageDAO, engineRefGenerator);
+
+        this.customerController = new CustomerController(customerDAO);
 
         this.authenticationController = new AuthenticationController(userDAO);
 
@@ -42,6 +45,8 @@ public class ApplicationInitializer {
        ========================= */
 
     public EngineController getEngineController() { return engineController; }
+
+    public CustomerController getCustomerController() { return customerController; }
 
     public AuthenticationController getAuthenticationController() {
         return authenticationController;

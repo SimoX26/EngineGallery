@@ -18,14 +18,12 @@ import java.util.Optional;
 public class EngineController {
     private final EngineDAO engineDAO;
     private final ImageDAO imageDAO;
-    private final CustomerDAO customerDAO;
 
     private final EngineRefGenerator engineRefGenerator;
 
-    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, CustomerDAO customerDAO, EngineRefGenerator engineRefGenerator) {
+    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, EngineRefGenerator engineRefGenerator) {
         this.engineDAO = engineDAO;
         this.imageDAO = imageDAO;
-        this.customerDAO = customerDAO;
         this.engineRefGenerator = engineRefGenerator;
     }
 
@@ -198,13 +196,6 @@ public class EngineController {
         // =========================
         return imageDAO.save(image);
     }
-
-
-    public Long findCustomerIdByName(String name) {
-        return customerDAO.findIdByName(name);
-    }
-
-
 
 
     private EngineBean mapEngineToBean(Engine engine) {
