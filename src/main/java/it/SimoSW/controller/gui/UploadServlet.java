@@ -1,5 +1,6 @@
 package it.SimoSW.controller.gui;
 
+import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
@@ -32,6 +33,7 @@ import java.util.*;
 )
 public class UploadServlet extends HttpServlet {
     private EngineController engineController;
+    private CustomerController customerController;
 
     private static final String UPLOAD_DIR = "uploads";
 
@@ -39,6 +41,7 @@ public class UploadServlet extends HttpServlet {
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
+        this.customerController = initializer.getCustomerController();
     }
 
     /**
@@ -164,7 +167,7 @@ public class UploadServlet extends HttpServlet {
             EngineBean engineBean = new EngineBean();
             engineBean.setEngineRef(engineRef);
             engineBean.setEngineCode(codiceMotore);
-            Long customerId = engineController.findCustomerIdByName(cliente);
+            Long customerId = customerController.findCustomerIdByName(cliente);
             engineBean.setCustomerId(customerId);
             engineBean.setNotes(note);
             engineBean.setStatus(EngineStatus.WAITING.name());
