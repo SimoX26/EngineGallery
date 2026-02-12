@@ -1,5 +1,6 @@
 package it.SimoSW.controller.app;
 
+import it.SimoSW.model.Customer;
 import it.SimoSW.model.Engine;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.Image;
@@ -18,12 +19,14 @@ import java.util.Optional;
 public class EngineController {
     private final EngineDAO engineDAO;
     private final ImageDAO imageDAO;
+    private final CustomerDAO customerDAO;
 
     private final EngineRefGenerator engineRefGenerator;
 
-    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, EngineRefGenerator engineRefGenerator) {
+    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, CustomerDAO customerDAO, EngineRefGenerator engineRefGenerator) {
         this.engineDAO = engineDAO;
         this.imageDAO = imageDAO;
+        this.customerDAO = customerDAO;
         this.engineRefGenerator = engineRefGenerator;
     }
 
@@ -131,13 +134,10 @@ public class EngineController {
         // =========================
         // 2. MOTORE GIÀ ESISTENTE?
         // =========================
-        Optional<Engine> existing =
-                engineDAO.findByEngineRef(bean.getEngineRef());
+        Optional<Engine> existing = engineDAO.findByEngineRef(bean.getEngineRef());
 
         if (existing.isPresent()) {
-            throw new IllegalStateException(
-                    "Motore con ref " + bean.getEngineRef() + " già esistente"
-            );
+            throw new IllegalStateException("Motore con ref " + bean.getEngineRef() + " già esistente");
         }
 
         // =========================
@@ -205,6 +205,12 @@ public class EngineController {
         bean.setEngineRef(engine.getEngineRef());
         bean.setEngineCode(engine.getEngineCode());
         bean.setCustomerId(engine.getCustomerId());
+
+        String customerName = customerDAO.findById(engine.getCustomerId())
+                .map(Customer::getName)
+                .orElse("—");
+
+        bean.setCustomerName(customerName);
 
         bean.setStatus(engine.getStatus().name());
         bean.setIntakeDate(engine.getIntakeDate().toString());
