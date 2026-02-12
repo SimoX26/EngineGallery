@@ -99,6 +99,30 @@
             </div>
         </div>
 
+
+        <!-- AZIONI -->
+        <div class="row mt-4">
+            <div class="col-12 d-flex justify-content-end gap-3">
+
+                <!-- MODIFICA -->
+                <a href=""
+                   class="btn btn-primary px-4">
+                    Modifica
+                </a>
+
+                <!-- ELIMINA -->
+                <form action=""
+                      method="post"
+                      onsubmit="return confirm('Sei sicuro di voler eliminare questo motore?');">
+
+                    <button type="submit" class="btn btn-danger px-4">
+                        Elimina
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
     </div>
 </div>
 

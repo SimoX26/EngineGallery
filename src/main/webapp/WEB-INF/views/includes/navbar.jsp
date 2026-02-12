@@ -32,6 +32,14 @@
                     </a>
                 </li>
 
+                   <li class="nav-item">
+                        <a class="nav-link
+                           ${pageContext.request.requestURI.contains("engine") ? "active" : ""}"
+                           href="<%= request.getContextPath() %>/engine/list">
+                            Motori
+                        </a>
+                    </li>
+
                 <li class="nav-item">
                     <a class="nav-link
                        ${pageContext.request.requestURI.contains("customer") ? "active" : ""}"
@@ -40,13 +48,7 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link
-                       ${pageContext.request.requestURI.contains("engine") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/engine/list">
-                        Motori
-                    </a>
-                </li>
+
             </ul>
 
             <!-- LOGOUT -->
