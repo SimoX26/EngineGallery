@@ -35,7 +35,7 @@
                 <li class="nav-item">
                     <a class="nav-link
                        ${pageContext.request.requestURI.contains("clienti") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/customer">
+                       href="<%= request.getContextPath() %>/customer/list">
                         Clienti
                     </a>
                 </li>
