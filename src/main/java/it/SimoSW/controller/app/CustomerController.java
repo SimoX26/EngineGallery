@@ -22,4 +22,22 @@ public class CustomerController {
     public List<Customer> getAllCustomers() {
         return customerDAO.findAll();
     }
+
+    public Long findOrCreateCustomerId(String name) {
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome cliente non valido");
+        }
+
+        String normalized = name.trim();
+
+        Long existingId = customerDAO.findIdByName(normalized);
+
+        if (existingId != null) {
+            return existingId;
+        }
+
+        Customer newCustomer = new Customer(normalized);
+        return customerDAO.save(newCustomer);
+    }
 }

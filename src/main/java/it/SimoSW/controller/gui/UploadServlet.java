@@ -167,7 +167,7 @@ public class UploadServlet extends HttpServlet {
             EngineBean engineBean = new EngineBean();
             engineBean.setEngineRef(engineRef);
             engineBean.setEngineCode(codiceMotore);
-            Long customerId = customerController.findCustomerIdByName(cliente);
+            Long customerId = customerController.findOrCreateCustomerId(cliente);
             engineBean.setCustomerId(customerId);
             engineBean.setNotes(note);
             engineBean.setStatus(EngineStatus.WAITING.name());

@@ -57,6 +57,15 @@ public class Customer {
         this.createdAt = createdAt;
     }
 
+    public Customer(String name) {
+        this.name = Objects.requireNonNull(name, "Il nome è obbligatorio");
+        this.companyName = null;
+        this.phone = null;
+        this.email = null;
+        this.notes = null;
+        this.createdAt = LocalDateTime.now();
+    }
+
     /* =========================
        Getter
        ========================= */

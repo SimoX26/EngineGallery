@@ -233,11 +233,14 @@ public class DatabaseCustomerDAO implements CustomerDAO {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Errore durante la ricerca del cliente per nome: " + name, e);
+            throw new RuntimeException(
+                    "Errore durante la ricerca del cliente per nome: " + name,
+                    e
+            );
         }
 
-        // Se non trovato
-        throw new RuntimeException("Cliente non trovato: " + name);
+        // Se non trovato → NON è un errore
+        return null;
     }
 
     @Override
