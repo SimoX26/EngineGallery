@@ -81,7 +81,8 @@
                 <input type="text"
                        name="customer"
                        class="form-control"
-                       required>
+                       value="${customer}"
+                       ${engineMode == 'new' ? 'required' : ''}>
             </div>
 
             <!-- CODICE MOTORE -->
@@ -90,7 +91,8 @@
                 <input type="text"
                        name="engineCode"
                        class="form-control"
-                       required>
+                       value="${engineCode}"
+                       ${engineMode == 'new' ? 'required' : ''}>
             </div>
 
             <!-- NOTE -->
@@ -98,7 +100,7 @@
                 <label class="form-label fw-semibold">Note</label>
                 <textarea name="note"
                           class="form-control"
-                          rows="3"></textarea>
+                          rows="3">${note}</textarea>
             </div>
 
             <button type="submit" class="btn-engine w-100">

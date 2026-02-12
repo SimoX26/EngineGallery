@@ -2,9 +2,6 @@ package it.SimoSW.controller.app;
 
 import it.SimoSW.model.Customer;
 import it.SimoSW.model.dao.CustomerDAO;
-import it.SimoSW.model.dao.EngineDAO;
-import it.SimoSW.model.dao.ImageDAO;
-import it.SimoSW.util.generator.EngineRefGenerator;
 
 import java.util.List;
 
@@ -39,5 +36,14 @@ public class CustomerController {
 
         Customer newCustomer = new Customer(normalized);
         return customerDAO.save(newCustomer);
+    }
+
+    public String findNameById(Long id) {
+
+        if (id == null) {
+            return null;
+        }
+
+        return customerDAO.findById(id).map(Customer::getName).orElse(null);
     }
 }
