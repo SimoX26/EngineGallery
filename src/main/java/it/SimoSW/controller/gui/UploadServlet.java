@@ -5,7 +5,6 @@ import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
-import it.SimoSW.util.bean.ImageBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -13,7 +12,6 @@ import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,9 +46,10 @@ public class UploadServlet extends HttpServlet {
      * Mostra la pagina di caricamento immagini.
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-        // 1) sempre: riferimento per NUOVO motore
+        // 1) riferimento per NUOVO motore
         String newEngineRef = engineController.generateEngineRef();
         request.setAttribute("newEngineRef", newEngineRef);
 
@@ -63,11 +62,26 @@ public class UploadServlet extends HttpServlet {
         String engineMode = (selectedRef != null && !selectedRef.isBlank()) ? "existing" : "new";
         request.setAttribute("engineMode", engineMode);
 
-        // 4) QUI LA PARTE CHE TI MANCA
+        // 4) engineRef effettivo
         String engineRef;
 
         if ("existing".equals(engineMode)) {
             engineRef = existingEngineRef;
+
+            // QUI RECUPERI I DATI DAL DB
+            EngineDetailBean detail = engineController.getEngineDetail(engineRef);
+
+            if (detail != null) {
+                request.setAttribute("customer",
+                        customerController.findNameById(detail.getEngine().getCustomerId()));
+
+                request.setAttribute("engineCode",
+                        detail.getEngine().getEngineCode());
+
+                request.setAttribute("note",
+                        detail.getEngine().getNotes());
+            }
+
         } else {
             engineRef = newEngineRef;
         }

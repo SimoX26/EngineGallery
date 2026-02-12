@@ -37,8 +37,8 @@
                     <dt>Codice motore:</dt>
                     <dd>${detail.engine.engineCode}</dd>
 
-                    <dt>ID Cliente:</dt>
-                    <dd>${detail.engine.customerId}</dd>
+                    <dt>Cliente:</dt>
+                    <dd>${detail.engine.customerName}</dd>
 
                     <dt>Stato:</dt>
                     <dd class="badge-status status-${detail.engine.status}">

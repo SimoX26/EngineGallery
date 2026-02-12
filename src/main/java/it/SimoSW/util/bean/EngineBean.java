@@ -6,6 +6,7 @@ public class EngineBean {
     private String engineRef;
     private String engineCode;
     private long customerId;
+    private String customerName;
     private String status;
     private String intakeDate;
     private String deliveryDate;
@@ -27,6 +28,10 @@ public class EngineBean {
 
     public long getCustomerId() {
         return customerId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
     }
 
     public String getStatus() {
@@ -59,6 +64,10 @@ public class EngineBean {
 
     public void setCustomerId(long customerId) {
         this.customerId = customerId;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     public void setStatus(String status) {
