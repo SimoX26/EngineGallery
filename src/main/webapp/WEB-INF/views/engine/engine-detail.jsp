@@ -160,7 +160,22 @@
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content bg-dark border-0 position-relative">
 
-            <!-- X dentro la modal -->
+            <!-- CONDIVIDI -->
+            <button type="button"
+                    id="shareBtn"
+                    class="modal-action-btn"
+                    aria-label="Condividi"
+                    title="Condividi immagine">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+            </button>
+
+            <!-- CHIUDI (X) -->
             <button type="button"
                     class="modal-close-btn"
                     data-bs-dismiss="modal"
@@ -223,6 +238,7 @@
     const modalCarousel = new bootstrap.Carousel(modalCarouselElement);
 
     const navbar = document.querySelector('.navbar');
+    const shareBtn = document.getElementById('shareBtn');
 
     modal.addEventListener('show.bs.modal', function (event) {
         const clickedImage = event.relatedTarget;
@@ -236,6 +252,100 @@
     modal.addEventListener('hidden.bs.modal', function () {
         // Mostra navbar
         navbar.style.display = '';
+    });
+
+    /* =========================
+       Logica Condividi
+       ========================= */
+    shareBtn.addEventListener('click', async function () {
+        try {
+            // Recupera l'elemento del carousel attivo
+            const activeItem = modalCarouselElement.querySelector('.carousel-item.active');
+            if (!activeItem) {
+                alert('Nessuna immagine selezionata');
+                return;
+            }
+
+            // Calcola l'indice dell'immagine attualmente visualizzata
+            const allItems = Array.from(modalCarouselElement.querySelectorAll('.carousel-item'));
+            const imageIndex = allItems.indexOf(activeItem);
+
+            if (imageIndex === -1) {
+                alert('Errore nel recupero dell\'indice dell\'immagine');
+                return;
+            }
+
+            // Costanti
+            const contextPath = '<%= request.getContextPath() %>';
+            const engineRef = '${detail.engine.engineRef}';
+            const shareUrl = `${contextPath}/image/share?engineRef=${engineRef}&imageIndex=${imageIndex}`;
+
+            console.log('shareUrl:', shareUrl);
+            console.log('imageIndex:', imageIndex);
+
+            // Scarica l'immagine dal server
+            const response = await fetch(shareUrl);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Errore server:', errorText);
+                throw new Error('Errore nel download dell\'immagine: ' + response.status + ' - ' + errorText);
+            }
+
+            // Converti la risposta in blob
+            const blob = await response.blob();
+            console.log('Blob size:', blob.size);
+            console.log('Blob type:', blob.type);
+
+            // Estrai il filename dall'header Content-Disposition
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'immagine.jpg';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=(?:UTF-8'')?([^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = decodeURIComponent(filenameMatch[1]);
+                }
+            }
+
+            console.log('Filename:', filename);
+
+            // Crea un File object dal blob
+            const file = new File([blob], filename, { type: blob.type });
+
+            // Dati da condividere
+            const shareData = {
+                title: 'RML • Engine Gallery',
+                text: `Guarda questa immagine del motore: ${engineRef}`,
+                files: [file]
+            };
+
+            console.log('ShareData:', shareData);
+
+            // Condivisione
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                console.log('Usando navigator.share con file');
+                // Se il browser supporta Web Share API con file
+                await navigator.share(shareData);
+            } else if (navigator.share) {
+                console.log('Usando navigator.share senza file');
+                // Fallback: condividi senza file
+                await navigator.share({
+                    title: 'RML • Engine Gallery',
+                    text: `Guarda questa immagine del motore: ${engineRef}`,
+                    url: window.location.href
+                });
+            } else {
+                alert('La condivisione non è supportata da questo browser');
+            }
+
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Errore nella condivisione:', error);
+                alert('Errore durante la condivisione: ' + error.message);
+            }
+        }
     });
 </script>
 

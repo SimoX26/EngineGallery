@@ -113,6 +113,45 @@ public class EngineController {
         return imageDAO.findCoverByEngineId(engineId).map(Image::getFilename);
     }
 
+    /**
+     * Ottiene il filename dell'immagine per un motore specifico usando engineRef e indice
+     */
+    public Optional<String> getImageFilenameByEngineRefAndIndex(String engineRef, int imageIndex) {
+        // =========================
+        // 1. VALIDAZIONE
+        // =========================
+        if (engineRef == null || engineRef.isBlank()) {
+            return Optional.empty();
+        }
+
+        // =========================
+        // 2. RECUPERO MOTORE
+        // =========================
+        Optional<Engine> engineOpt = engineDAO.findByEngineRef(engineRef.trim());
+        if (engineOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Engine engine = engineOpt.get();
+
+        // =========================
+        // 3. RECUPERO IMMAGINI
+        // =========================
+        List<Image> images = imageDAO.findAllByEngineId(engine.getId());
+
+        // =========================
+        // 4. VALIDAZIONE INDICE
+        // =========================
+        if (imageIndex < 0 || imageIndex >= images.size()) {
+            return Optional.empty();
+        }
+
+        // =========================
+        // 5. RITORNA FILENAME
+        // =========================
+        return Optional.of(images.get(imageIndex).getFilename());
+    }
+
 
     public Engine createEngine(EngineBean bean) {
 
