@@ -16,6 +16,8 @@ public interface EngineDAO {
 
     Engine update(Engine engine);
 
+    boolean delete(String engineRef);
+
     /* =========================
        Recupero per identità
        ========================= */

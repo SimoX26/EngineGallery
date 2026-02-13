@@ -13,7 +13,7 @@ public class Engine {
     /* =========================
        Identità di dominio
        ========================= */
-    private String engineRef;   // es. ENG-2026-00001
+    private String engineRef;   // es. RML-2026-00001
     private final String engineCode;  // es. N47D20A
 
     /* =========================

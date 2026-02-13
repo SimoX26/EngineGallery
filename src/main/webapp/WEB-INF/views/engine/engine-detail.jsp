@@ -137,9 +137,10 @@
                     Modifica
                 </a>
 
-                <form action=""
+                <form action="<%= request.getContextPath() %>/engine/delete"
                       method="post"
                       onsubmit="return confirm('Sei sicuro di voler eliminare questo motore?');">
+                    <input type="hidden" name="engineRef" value="${detail.engine.engineRef}">
                     <button type="submit" class="btn btn-danger px-4">
                         Elimina
                     </button>

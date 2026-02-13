@@ -42,7 +42,7 @@ public class EngineDetailServlet extends HttpServlet {
         }
 
         // 3. (OPZIONALE ma consigliato) Controllo formato
-        if (!engineRef.matches("^ENG-[0-9]{4}-[0-9]{5}$")) {
+        if (!engineRef.matches("^RML-[0-9]{4}-[0-9]{5}$")) {
             response.sendRedirect(request.getContextPath() + "/engine");
             return;
         }

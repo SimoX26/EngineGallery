@@ -16,6 +16,6 @@ public class EngineRefGenerator {
     public String generate() {
         int year = LocalDate.now().getYear();
         int nextSeq = engineDAO.getNextSequenceForYear(year);
-        return String.format("ENG-%d-%05d", year, nextSeq);
+        return String.format("RML-%d-%05d", year, nextSeq);
     }
 }
