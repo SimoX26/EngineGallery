@@ -83,7 +83,7 @@ public class DatabaseEngineDAO implements EngineDAO {
             0
         ) AS last_seq
         FROM engines
-        WHERE engine_ref LIKE CONCAT('ENG-', ?, '-%')
+        WHERE engine_ref LIKE CONCAT('RML-', ?, '-%')
         """;
 
 
@@ -164,6 +164,21 @@ public class DatabaseEngineDAO implements EngineDAO {
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'aggiornamento del motore", e);
+        }
+    }
+
+    @Override
+    public boolean delete(String engineRef) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM engines WHERE engine_ref = ?")) {
+
+            stmt.setString(1, engineRef);
+            int rowsDeleted = stmt.executeUpdate();
+
+            return rowsDeleted > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante l'eliminazione del motore", e);
         }
     }
 

@@ -197,6 +197,39 @@ public class EngineController {
         return imageDAO.save(image);
     }
 
+    public boolean deleteEngine(String engineRef) {
+
+        // =========================
+        // 1. VALIDAZIONE
+        // =========================
+        if (engineRef == null || engineRef.isBlank()) {
+            throw new IllegalArgumentException("engineRef obbligatorio");
+        }
+
+        // =========================
+        // 2. RECUPERO MOTORE
+        // =========================
+        Engine engine = engineDAO.findByEngineRef(engineRef)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Motore con ref " + engineRef + " non esistente"
+                        )
+                );
+
+        // =========================
+        // 3. ELIMINA IMMAGINI ASSOCIATE
+        // =========================
+        List<Image> images = imageDAO.findAllByEngineId(engine.getId());
+        for (Image image : images) {
+            imageDAO.delete(image.getId());
+        }
+
+        // =========================
+        // 4. ELIMINA MOTORE
+        // =========================
+        return engineDAO.delete(engineRef);
+    }
+
 
     private EngineBean mapEngineToBean(Engine engine) {
 
