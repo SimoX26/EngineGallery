@@ -92,6 +92,8 @@
                             <div class="carousel-item ${status.first ? 'active' : ''}">
                                 <div class="engine-image-lg clickable-image"
                                      data-index="${status.index}"
+                                     data-image-url="<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}"
+                                     data-filename="${image.filename}"
                                      data-bs-toggle="modal"
                                      data-bs-target="#imageModal"
                                      style="height: 420px;
@@ -196,7 +198,9 @@
 
                         <c:forEach var="image" items="${detail.images}" varStatus="status">
                             <div class="carousel-item ${status.first ? 'active' : ''}">
-                                <div style="height: 90vh;
+                                <div data-image-url="<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}"
+                                     data-filename="${image.filename}"
+                                     style="height: 90vh;
                                             background-image: url('<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}');
                                             background-repeat: no-repeat;
                                             background-position: center;
@@ -266,78 +270,27 @@
                 return;
             }
 
-            // Calcola l'indice dell'immagine attualmente visualizzata
-            const allItems = Array.from(modalCarouselElement.querySelectorAll('.carousel-item'));
-            const imageIndex = allItems.indexOf(activeItem);
-
-            if (imageIndex === -1) {
-                alert('Errore nel recupero dell\'indice dell\'immagine');
+            const activeImage = activeItem.querySelector('[data-image-url]');
+            if (!activeImage) {
+                alert('Immagine non disponibile');
                 return;
             }
 
-            // Costanti
-            const contextPath = '<%= request.getContextPath() %>';
+            const imageUrl = activeImage.getAttribute('data-image-url');
+            const resolvedImageUrl = new URL(imageUrl, window.location.origin).href;
             const engineRef = '${detail.engine.engineRef}';
-            const shareUrl = `${contextPath}/image/share?engineRef=${engineRef}&imageIndex=${imageIndex}`;
 
-            console.log('shareUrl:', shareUrl);
-            console.log('imageIndex:', imageIndex);
-
-            // Scarica l'immagine dal server
-            const response = await fetch(shareUrl);
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Errore server:', errorText);
-                throw new Error('Errore nel download dell\'immagine: ' + response.status + ' - ' + errorText);
-            }
-
-            // Converti la risposta in blob
-            const blob = await response.blob();
-            console.log('Blob size:', blob.size);
-            console.log('Blob type:', blob.type);
-
-            // Estrai il filename dall'header Content-Disposition
-            const contentDisposition = response.headers.get('content-disposition');
-            let filename = 'immagine.jpg';
-            if (contentDisposition) {
-                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=(?:UTF-8'')?([^;\n]*)/);
-                if (filenameMatch && filenameMatch[1]) {
-                    filename = decodeURIComponent(filenameMatch[1]);
-                }
-            }
-
-            console.log('Filename:', filename);
-
-            // Crea un File object dal blob
-            const file = new File([blob], filename, { type: blob.type });
-
-            // Dati da condividere
+            // Dati base da condividere
             const shareData = {
                 title: 'RML • Engine Gallery',
                 text: `Guarda questa immagine del motore: ${engineRef}`,
-                files: [file]
+                url: resolvedImageUrl
             };
 
-            console.log('ShareData:', shareData);
-
-            // Condivisione
-            if (navigator.canShare && navigator.canShare(shareData)) {
-                console.log('Usando navigator.share con file');
-                // Se il browser supporta Web Share API con file
+            if (navigator.share) {
                 await navigator.share(shareData);
-            } else if (navigator.share) {
-                console.log('Usando navigator.share senza file');
-                // Fallback: condividi senza file
-                await navigator.share({
-                    title: 'RML • Engine Gallery',
-                    text: `Guarda questa immagine del motore: ${engineRef}`,
-                    url: window.location.href
-                });
             } else {
-                alert('La condivisione non è supportata da questo browser');
+                alert('Condivisione non supportata su questo dispositivo o contesto.');
             }
 
         } catch (error) {
