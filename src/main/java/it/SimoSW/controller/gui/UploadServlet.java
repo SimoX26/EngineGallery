@@ -80,10 +80,14 @@ public class UploadServlet extends HttpServlet {
 
                 request.setAttribute("note",
                         detail.getEngine().getNotes());
+
+                request.setAttribute("status",
+                        detail.getEngine().getStatus());
             }
 
         } else {
             engineRef = newEngineRef;
+            request.setAttribute("status", EngineStatus.WAITING.name());
         }
 
         request.setAttribute("engineRef", engineRef);
@@ -114,16 +118,38 @@ public class UploadServlet extends HttpServlet {
         String cliente = null;
         String codiceMotore = null;
         String note = null;
+        String statusParam = null;
+        EngineStatus status = null;
 
         if ("new".equals(engineMode)) {
 
             cliente = request.getParameter("customer");
             codiceMotore = request.getParameter("engineCode");
             note = request.getParameter("note");
+            statusParam = request.getParameter("status");
 
             if (cliente == null || cliente.isBlank() || codiceMotore == null || codiceMotore.isBlank()) {
 
                 request.setAttribute("error", "Nome cliente e codice motore sono obbligatori");
+                request.setAttribute("status", statusParam);
+
+                request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
+                return;
+            }
+
+            if (statusParam == null || statusParam.isBlank()) {
+                request.setAttribute("error", "Seleziona uno stato di lavorazione");
+                request.setAttribute("status", statusParam);
+
+                request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
+                return;
+            }
+
+            try {
+                status = EngineStatus.valueOf(statusParam.trim());
+            } catch (IllegalArgumentException ex) {
+                request.setAttribute("error", "Stato non valido: " + statusParam);
+                request.setAttribute("status", statusParam);
 
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
@@ -184,7 +210,7 @@ public class UploadServlet extends HttpServlet {
             Long customerId = customerController.findOrCreateCustomerId(cliente);
             engineBean.setCustomerId(customerId);
             engineBean.setNotes(note);
-            engineBean.setStatus(EngineStatus.WAITING.name());
+            engineBean.setStatus(status.name());
             engineBean.setIntakeDate(LocalDate.now().toString());
 
             engineController.createEngine(engineBean);
