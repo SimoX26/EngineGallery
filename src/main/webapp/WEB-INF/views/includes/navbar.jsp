@@ -1,4 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
+<c:set var="servletPath" value="${pageContext.request.servletPath}" />
 
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top"
      style="background-color: #1f2933;">
@@ -26,23 +30,32 @@
 
                 <li class="nav-item">
                     <a class="nav-link
-                       ${pageContext.request.requestURI.contains("dashboard") ? "active" : ""}"
+                       ${fn:startsWith(servletPath, "/dashboard") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/dashboard">
                         Dashboard
                     </a>
                 </li>
 
-                   <li class="nav-item">
-                        <a class="nav-link
-                           ${pageContext.request.requestURI.contains("engine") ? "active" : ""}"
-                           href="<%= request.getContextPath() %>/engine/list">
-                            Motori
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/engine")
+                        && !fn:startsWith(servletPath, "/engine/ready") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/engine/list">
+                        Motori
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     <a class="nav-link
-                       ${pageContext.request.requestURI.contains("customer") ? "active" : ""}"
+                       ${fn:startsWith(servletPath, "/engine/ready") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/engine/ready">
+                        Pronta consegna
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/customer") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/customer/list">
                         Clienti
                     </a>

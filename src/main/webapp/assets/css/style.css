@@ -170,7 +170,10 @@ body {
     margin-right: 12px;
 }
 
-.navbar .nav-link.active {
+.navbar .nav-link.active,
+.navbar.navbar-dark .navbar-nav .nav-link.active,
+.navbar .nav-link.active:hover,
+.navbar .nav-link.active:focus {
     color: var(--primary) !important;
     font-weight: 600;
 }
