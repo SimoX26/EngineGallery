@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -38,8 +39,7 @@
         <form action="<%= request.getContextPath() %>/upload" method="post" enctype="multipart/form-data">
 
 
-            <div class="mb-4">
-                <!-- <label class="form-label fw-semibold">Motore</label> -->
+            <div class="mb-4 text-start">
 
                 <select class="form-select"
                         name="engineMode"
@@ -47,13 +47,30 @@
                         required>
 
                     <option value="new" ${engineMode == 'new' ? 'selected' : ''}>
-                        ➕ Nuovo (riferimento: ${newEngineRef})
+                        Nuovo motore
                     </option>
 
                     <option value="existing" ${engineMode == 'existing' ? 'selected' : ''}>
-                        📂 Esistente (riferimento: ${existingEngineRef})
+                        Motore esistente
                     </option>
                 </select>
+
+                <div class="small text-muted mt-2">
+                    <c:choose>
+                        <c:when test="${engineMode == 'existing'}">
+                            Riferimento selezionato
+                            <span class="d-block d-sm-inline">:
+                                <span class="badge bg-light text-dark border">${existingEngineRef}</span>
+                            </span>
+                        </c:when>
+                        <c:otherwise>
+                            Riferimento proposto dal sistema
+                            <span class="d-block d-sm-inline">:
+                                <span class="badge bg-light text-dark border">${newEngineRef}</span>
+                            </span>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
 
             <!-- ENGINE REF nascosto (serve solo se nuovo motore) -->
@@ -128,6 +145,10 @@
     function handleEngineMode(select) {
         if (select.value === 'existing') {
             window.location.href = '<%= request.getContextPath() %>/engine/select';
+            return;
+        }
+        if (select.value === 'new') {
+            window.location.href = '<%= request.getContextPath() %>/upload';
         }
     }
 </script>
