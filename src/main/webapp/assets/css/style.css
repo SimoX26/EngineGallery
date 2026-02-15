@@ -147,18 +147,28 @@ body {
 }
 
 .status-stoccato {
-    background-color: #e5e7eb;
-    color: #374151;
+    background-color: #e2e8f0;
+    color: #334155;
 }
 
 .status-lavorazione {
-    background-color: #fde68a;
-    color: #92400e;
+    background-color: #fed7aa;
+    color: #9a3412;
+}
+
+.status-smontato {
+    background-color: #c7d2fe;
+    color: #3730a3;
+}
+
+.status-ready {
+    background-color: #34d399;
+    color: #064e3b;
 }
 
 .status-consegnato {
-    background-color: #bbf7d0;
-    color: #065f46;
+    background-color: #bae6fd;
+    color: #0c4a6e;
 }
 
 

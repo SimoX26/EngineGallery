@@ -53,8 +53,21 @@
                     <dd>${detail.engine.customerName}</dd>
 
                     <dt>Stato:</dt>
-                    <dd class="badge-status status-${detail.engine.status}">
-                        ${detail.engine.status}
+                    <c:set var="st" value="${detail.engine.status}" />
+                    <dd class="badge-status
+                        ${st == 'WAITING' ? 'status-stoccato' : ''}
+                        ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                        ${st == 'DISASSEMBLED' ? 'status-smontato' : ''}
+                        ${st == 'READY' ? 'status-ready' : ''}
+                        ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
+                        <c:choose>
+                            <c:when test="${st == 'WAITING'}">In attesa</c:when>
+                            <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                            <c:when test="${st == 'DISASSEMBLED'}">Smontato</c:when>
+                            <c:when test="${st == 'READY'}">Pronto</c:when>
+                            <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
+                            <c:otherwise>${st}</c:otherwise>
+                        </c:choose>
                     </dd>
 
                     <dt>Data ingresso:</dt>

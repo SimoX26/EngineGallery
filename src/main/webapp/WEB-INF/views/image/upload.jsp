@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Carica immagine</title>
+    <title>Aggiunta motore</title>
 
     <!-- Bootstrap (se già usato nel progetto) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,17 +26,12 @@
 
     <div class="card-base text-center" style="max-width: 520px; width: 100%;">
 
-        <!-- Icona -->
-        <div class="mb-4">
-            <span style="font-size: 3rem;">📷</span>
-        </div>
-
         <!-- Titolo -->
-        <h2 class="mb-3">Carica immagine o scatta foto</h2>
+        <h2 class="mb-3">Aggiunta motore</h2>
 
         <!-- Sottotesto -->
         <p class="text-muted mb-4">
-            Seleziona un’immagine dal tuo dispositivo oppure utilizza la fotocamera
+            Carica le immagini e completa i dati tecnici del motore
         </p>
 
         <!-- Area upload -->
