@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="<%= request.getContextPath() %>/assets/ico/ICONA.png">
     <title>Aggiunta motore</title>
 
     <!-- Bootstrap (se già usato nel progetto) -->
@@ -130,7 +131,7 @@
             </div>
 
             <button type="submit" class="btn-engine w-100">
-                Carica immagini
+                Salva
             </button>
 
         </form>
