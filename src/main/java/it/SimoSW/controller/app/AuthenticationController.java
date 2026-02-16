@@ -33,6 +33,11 @@ public class AuthenticationController {
         return Optional.empty();
     }
 
+    public Optional<User> findById(long userId) {
+        User user = userDAO.findById(userId);
+        return Optional.ofNullable(user);
+    }
+
 
     private String hashPassword(String password) {
         try {

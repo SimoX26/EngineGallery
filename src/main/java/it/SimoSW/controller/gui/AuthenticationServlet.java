@@ -8,12 +8,17 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @WebServlet("/auth")
 public class AuthenticationServlet extends HttpServlet {
 
     private AuthenticationController authenticationController;
+    private static final String COOKIE_REMEMBER = "remember_user_id";
+    private static final String COOKIE_LAST_PATH = "last_path";
+    private static final int COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
     @Override
     public void init() {
@@ -37,6 +42,8 @@ public class AuthenticationServlet extends HttpServlet {
             if (session != null) {
                 session.invalidate();
             }
+            clearCookie(response, request, COOKIE_REMEMBER);
+            clearCookie(response, request, COOKIE_LAST_PATH);
             response.sendRedirect(request.getContextPath() + "/auth");
             return;
         }
@@ -62,12 +69,62 @@ public class AuthenticationServlet extends HttpServlet {
             HttpSession session = request.getSession(true);
             session.setAttribute("loggedUser", user.get());
 
-            // Redirect alla galleria dopo login
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            setCookie(response, request, COOKIE_REMEMBER, Long.toString(user.get().getId()));
+
+            String lastPath = readCookie(request, COOKIE_LAST_PATH);
+            if (isSafeRedirectPath(lastPath)) {
+                response.sendRedirect(request.getContextPath() + lastPath);
+            } else {
+                // Redirect alla galleria dopo login
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+            }
         } else {
             // Credenziali errate
             request.setAttribute("error", "Credenziali non valide");
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
         }
+    }
+
+    private String readCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                String value = cookie.getValue();
+                if (value == null || value.isBlank()) {
+                    return null;
+                }
+                return URLDecoder.decode(value, StandardCharsets.UTF_8);
+            }
+        }
+        return null;
+    }
+
+    private boolean isSafeRedirectPath(String path) {
+        return path != null && path.startsWith("/") && !path.contains("://");
+    }
+
+    private void setCookie(HttpServletResponse response, HttpServletRequest request,
+                           String name, String value) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(request.isSecure());
+        cookie.setMaxAge(COOKIE_MAX_AGE);
+        cookie.setPath(cookiePath(request));
+        response.addCookie(cookie);
+    }
+
+    private void clearCookie(HttpServletResponse response, HttpServletRequest request, String name) {
+        Cookie cookie = new Cookie(name, "");
+        cookie.setMaxAge(0);
+        cookie.setPath(cookiePath(request));
+        response.addCookie(cookie);
+    }
+
+    private String cookiePath(HttpServletRequest request) {
+        String contextPath = request.getContextPath();
+        return contextPath == null || contextPath.isEmpty() ? "/" : contextPath;
     }
 }

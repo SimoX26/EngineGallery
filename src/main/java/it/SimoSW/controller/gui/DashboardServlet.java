@@ -32,7 +32,7 @@ public class DashboardServlet extends HttpServlet {
 
         // Controllo login
         if (session == null || session.getAttribute("loggedUser") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+            response.sendRedirect(request.getContextPath() + "/auth");
             return;
         }
 
