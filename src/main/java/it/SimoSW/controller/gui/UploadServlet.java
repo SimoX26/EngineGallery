@@ -6,6 +6,7 @@ import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.UploadPathResolver;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -32,8 +33,6 @@ import java.util.*;
 public class UploadServlet extends HttpServlet {
     private EngineController engineController;
     private CustomerController customerController;
-
-    private static final String UPLOAD_DIR = "uploads";
 
     @Override
     public void init() {
@@ -159,9 +158,8 @@ public class UploadServlet extends HttpServlet {
     /* =========================
        3. PREPARAZIONE DIRECTORY
        ========================= */
-        String uploadRoot = getServletContext().getRealPath("/uploads/engines");
-
-        Path engineDir = Paths.get(uploadRoot, engineRef);
+        Path uploadRoot = UploadPathResolver.resolveUploadBase(getServletContext());
+        Path engineDir = uploadRoot.resolve(engineRef);
         Files.createDirectories(engineDir);
 
     /* =========================

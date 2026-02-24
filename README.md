@@ -26,3 +26,16 @@ Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessi
 * Frontend con **HTML, CSS**
 
 L’applicazione è progettata per essere **scalabile, estendibile e manutenibile**, con particolare attenzione alle buone pratiche di ingegneria del software.
+
+#### 📁 Percorso di salvataggio immagini
+
+Per default le immagini vengono salvate in una cartella "umana" dentro la home utente:
+
+```
+~/EngineGallery/uploads/engines
+```
+
+Puoi personalizzare il percorso con:
+
+- variabile ambiente `ENGINE_GALLERY_UPLOAD_DIR`
+- system property `enginegallery.upload.dir`

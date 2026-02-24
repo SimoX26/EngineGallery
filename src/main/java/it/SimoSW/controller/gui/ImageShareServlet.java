@@ -1,6 +1,7 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.EngineController;
+import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -12,7 +13,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @WebServlet("/image/share")
 public class ImageShareServlet extends HttpServlet {
@@ -87,16 +87,12 @@ public class ImageShareServlet extends HttpServlet {
         }
 
         try {
-            String realPath = getServletContext().getRealPath("/");
-            System.out.println("[ImageShareServlet] RealPath: " + realPath);
-
-            if (realPath == null) {
-                System.err.println("[ImageShareServlet] getRealPath() ritorna null - provo getResourceAsStream");
-                serveFileViaResourceStream(response, engineRef, filename);
+            Path uploadBase = UploadPathResolver.resolveUploadBase(getServletContext());
+            Path imagePath = uploadBase.resolve(engineRef).resolve(filename).normalize();
+            if (!imagePath.startsWith(uploadBase)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Percorso file non valido");
                 return;
             }
-
-            Path imagePath = Paths.get(realPath, UPLOAD_DIR, engineRef, filename);
             File imageFile = imagePath.toFile();
 
             System.out.println("[ImageShareServlet] Path assoluto: " + imagePath);
@@ -104,7 +100,7 @@ public class ImageShareServlet extends HttpServlet {
 
             if (!imageFile.exists() || !imageFile.isFile()) {
                 System.err.println("[ImageShareServlet] File non trovato: " + imagePath);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "File non trovato");
+                serveFileViaResourceStream(response, engineRef, filename);
                 return;
             }
 
@@ -171,4 +167,3 @@ public class ImageShareServlet extends HttpServlet {
         }
     }
 }
-
