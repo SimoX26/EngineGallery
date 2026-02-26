@@ -58,7 +58,7 @@ public class DatabaseEngineDAO implements EngineDAO {
             "SELECT COUNT(*) FROM engines WHERE status = ?";
 
     private static final String COUNT_IN_WORKSHOP_SQL =
-            "SELECT COUNT(*) FROM engines WHERE status IN ('WAITING', 'DISASSEMBLED', 'WORK_IN_PROGRESS', 'READY')";
+            "SELECT COUNT(*) FROM engines WHERE status IN ('WAITING', 'WORK_IN_PROGRESS', 'READY')";
 
     private static final String COUNT_DELIVERED_BETWEEN_SQL = """
         SELECT COUNT(*)

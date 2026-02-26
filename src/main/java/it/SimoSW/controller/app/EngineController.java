@@ -197,6 +197,62 @@ public class EngineController {
         return engineDAO.save(engine);
     }
 
+    public Engine updateEngine(EngineBean bean) {
+
+        if (bean == null) {
+            throw new IllegalArgumentException("EngineBean nullo");
+        }
+
+        if (bean.getEngineRef() == null || bean.getEngineRef().isBlank()) {
+            throw new IllegalArgumentException("engineRef obbligatorio");
+        }
+
+        if (bean.getEngineCode() == null || bean.getEngineCode().isBlank()) {
+            throw new IllegalArgumentException("engineCode obbligatorio");
+        }
+
+        if (bean.getCustomerId() <= 0) {
+            throw new IllegalArgumentException("customerId non valido");
+        }
+
+        if (bean.getStatus() == null || bean.getStatus().isBlank()) {
+            throw new IllegalArgumentException("status obbligatorio");
+        }
+
+        if (bean.getIntakeDate() == null || bean.getIntakeDate().isBlank()) {
+            throw new IllegalArgumentException("intakeDate obbligatoria");
+        }
+
+        Engine existing = engineDAO.findByEngineRef(bean.getEngineRef())
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Motore con ref " + bean.getEngineRef() + " non esistente"
+                        )
+                );
+
+        EngineStatus status = EngineStatus.valueOf(bean.getStatus());
+        LocalDate intakeDate = LocalDate.parse(bean.getIntakeDate());
+
+        Engine engine = new Engine(
+                bean.getEngineRef(),
+                bean.getEngineCode(),
+                bean.getCustomerId(),
+                intakeDate,
+                status,
+                bean.getNotes()
+        );
+
+        if (status == EngineStatus.DELIVERED) {
+            LocalDate deliveryDate = (bean.getDeliveryDate() != null && !bean.getDeliveryDate().isBlank())
+                    ? LocalDate.parse(bean.getDeliveryDate())
+                    : LocalDate.now();
+            engine.deliver(deliveryDate);
+        }
+
+        engine.setId(existing.getId());
+        return engineDAO.update(engine);
+    }
+
 
     public Image addImage(String engineRef, String filename) {
 

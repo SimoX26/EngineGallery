@@ -116,7 +116,6 @@
                         ${engineMode == 'new' ? 'required' : 'disabled'}>
                     <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
                     <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                    <option value="DISASSEMBLED" ${status == 'DISASSEMBLED' ? 'selected' : ''}>Smontato</option>
                     <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
                     <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
                 </select>

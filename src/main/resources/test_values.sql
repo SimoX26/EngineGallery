@@ -30,8 +30,7 @@ VALUES
 ('ENG-2026-00001', 'N47D20A', 1, 'WAITING', '2026-01-03', NULL, 'Motore BMW appena arrivato'),
 ('ENG-2026-00002', 'N47D20A', 1, 'WORK_IN_PROGRESS', '2026-01-04', NULL, 'Catena in lavorazione'),
 
--- Cliente 2: Luigi Bianchi
-('ENG-2026-00003', 'K9K', 2, 'DISASSEMBLED', '2026-01-05', NULL, 'Motore Renault smontato'),
+('ENG-2026-00003', 'K9K', 2, 'WORK_IN_PROGRESS', '2026-01-05', NULL, 'Motore Renault in lavorazione'),
 ('ENG-2026-00004', 'K9K', 2, 'READY', '2026-01-06', NULL, 'Pronto per riconsegna'),
 
 -- Cliente 3: Officina Auto Sprint SRL

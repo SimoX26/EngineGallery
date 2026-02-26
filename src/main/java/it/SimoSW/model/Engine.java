@@ -149,7 +149,6 @@ public class Engine {
 
     public boolean isInWorkshop() {
         return status == EngineStatus.WAITING
-                || status == EngineStatus.DISASSEMBLED
                 || status == EngineStatus.WORK_IN_PROGRESS
                 || status == EngineStatus.READY;
     }

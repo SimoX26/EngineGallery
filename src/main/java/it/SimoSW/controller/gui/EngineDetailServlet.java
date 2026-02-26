@@ -63,6 +63,7 @@ public class EngineDetailServlet extends HttpServlet {
            ========================= */
 
         request.setAttribute("detail", detail);
+        request.setAttribute("updated", "1".equals(request.getParameter("updated")));
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-detail.jsp").forward(request, response);
     }
 }

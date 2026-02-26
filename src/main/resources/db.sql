@@ -45,7 +45,6 @@ CREATE TABLE engines (
     status ENUM(
         'WAITING',
         'WORK_IN_PROGRESS',
-        'DISASSEMBLED',
         'READY',
         'DELIVERED'
     ) NOT NULL,
