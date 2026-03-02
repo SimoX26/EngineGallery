@@ -40,6 +40,13 @@ public class DatabaseEngineDAO implements EngineDAO {
     private static final String FIND_ALL_SQL =
             "SELECT * FROM engines";
 
+    private static final String FIND_LATEST_SQL = """
+        SELECT *
+        FROM engines
+        ORDER BY intake_date DESC, id DESC
+        LIMIT ?
+    """;
+
     private static final String FIND_BY_STATUS_SQL =
             "SELECT * FROM engines WHERE status = ?";
 
@@ -209,6 +216,12 @@ public class DatabaseEngineDAO implements EngineDAO {
     @Override
     public List<Engine> findAll() {
         return findList(FIND_ALL_SQL, null);
+    }
+
+    @Override
+    public List<Engine> findLatest(int limit) {
+        int safeLimit = Math.max(1, limit);
+        return findList(FIND_LATEST_SQL, ps -> ps.setInt(1, safeLimit));
     }
 
     @Override

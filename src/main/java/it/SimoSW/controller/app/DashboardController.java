@@ -3,8 +3,10 @@ package it.SimoSW.controller.app;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.dao.CustomerDAO;
 import it.SimoSW.model.dao.EngineDAO;
+import it.SimoSW.model.Engine;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class DashboardController {
 
@@ -46,9 +48,7 @@ public class DashboardController {
     /* =========================
        Lista ultimi motori (TODO)
        ========================= */
-    public int listaUltimiMotori() {
-        // qui non hai ancora un metodo DAO adatto.
-        // Quando lo aggiungi (es. findLatest(int limit)) potrai implementarlo.
-        return 0;
+    public List<Engine> listaUltimiMotori(int limit) {
+        return engineDAO.findLatest(limit);
     }
 }

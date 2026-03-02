@@ -1,8 +1,10 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.DashboardController;
+import it.SimoSW.controller.app.CustomerController;
+import it.SimoSW.controller.app.EngineController;
+import it.SimoSW.model.Engine;
 import it.SimoSW.model.User;
-import it.SimoSW.util.bean.UserSessionBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.RequestDispatcher;
@@ -13,16 +15,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @WebServlet("/dashboard")
 public class DashboardServlet extends HttpServlet {
 
     private DashboardController dashboardController;
+    private EngineController engineController;
+    private CustomerController customerController;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.dashboardController = initializer.getDashboardController();
+        this.engineController = initializer.getEngineController();
+        this.customerController = initializer.getCustomerController();
     }
 
     @Override
@@ -49,8 +58,25 @@ public class DashboardServlet extends HttpServlet {
 
         request.setAttribute("motoriConsegnatiUltimaSettimana", dashboardController.getMotoriConsegnatiUltimaSettimana());
 
+        List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(8);
+        request.setAttribute("ultimiMotori", ultimiMotori);
 
-       // request.setAttribute("ultimiMotori", dashboardController.listaUtlimiMotori());
+        Map<Long, String> coverImages = new HashMap<>();
+        for (Engine engine : ultimiMotori) {
+            engineController
+                    .getCoverFilenameForEngine(engine.getId())
+                    .ifPresent(filename -> coverImages.put(engine.getId(), filename));
+        }
+        request.setAttribute("coverImages", coverImages);
+
+        Map<Long, String> customerNames = new HashMap<>();
+        for (Engine engine : ultimiMotori) {
+            long customerId = engine.getCustomerId();
+            if (!customerNames.containsKey(customerId)) {
+                customerNames.put(customerId, customerController.findNameById(customerId));
+            }
+        }
+        request.setAttribute("customerNames", customerNames);
 
 
         // Forward alla view

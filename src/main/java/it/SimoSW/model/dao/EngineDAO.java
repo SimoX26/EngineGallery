@@ -30,6 +30,7 @@ public interface EngineDAO {
     List<Engine> findByEngineCode(String engineCode);   // NON più Optional
     List<Engine> findByStatus(EngineStatus status);
     List<Engine> findAll();
+    List<Engine> findLatest(int limit);
 
     /* =========================
        Ricerca testuale

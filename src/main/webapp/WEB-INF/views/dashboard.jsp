@@ -97,42 +97,59 @@
     <!-- ULTIMI MOTORI -->
     <div class="table-container">
 
-        <h5 class="mb-4 fw-semibold">Ultimi motori inseriti</h5>
+        <h5 class="mb-4 fw-semibold">Motori recenti</h5>
 
-        <table class="table align-middle">
-            <thead>
-            <tr>
-                <th>Codice Motore</th>
-                <th>Cliente</th>
-                <th>Stato</th>
-                <th>Ultima modifica</th>
-            </tr>
-            </thead>
-            <tbody>
-
-            <c:forEach var="motore" items="${ultimiMotori}">
-                <tr>
-                    <td>
-                        <a href="<%= request.getContextPath() %>/engine/detail?id=${engine.id}">
-                            ${motore.codice}
+        <c:choose>
+            <c:when test="${not empty ultimiMotori}">
+                <div class="list-group">
+                    <c:forEach var="motore" items="${ultimiMotori}">
+                        <c:set var="st" value="${motore.status}" />
+                        <c:set var="coverFilename" value="${coverImages[motore.id]}" />
+                        <c:choose>
+                            <c:when test="${not empty coverFilename}">
+                                <c:set var="coverUrl" value="${pageContext.request.contextPath}/uploads/engines/${motore.engineRef}/${coverFilename}" />
+                            </c:when>
+                            <c:otherwise>
+                                <c:set var="coverUrl" value="${pageContext.request.contextPath}/assets/img/engine-hero.jpg" />
+                            </c:otherwise>
+                        </c:choose>
+                        <a href="<%= request.getContextPath() %>/engine/detail?ref=${motore.engineRef}"
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 84px; height: 64px; border-radius: 10px; background-color: #1f2933; background-position: center; background-repeat: no-repeat; background-size: cover; background-image: url('${coverUrl}');"></div>
+                                    <div>
+                                        <div class="fw-semibold">${motore.engineCode}</div>
+                                        <small class="text-muted">
+                                            <c:out value="${customerNames[motore.customerId]}" default="—" /> • ${motore.engineRef}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">${motore.intakeDate}</small>
+                                    <span class="badge-status
+                                        ${st == 'WAITING' ? 'status-stoccato' : ''}
+                                        ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                                        ${st == 'READY' ? 'status-ready' : ''}
+                                        ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
+                                        <c:choose>
+                                            <c:when test="${st == 'WAITING'}">In attesa</c:when>
+                                            <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                                            <c:when test="${st == 'READY'}">Pronto</c:when>
+                                            <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
+                                            <c:otherwise>${st}</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </div>
+                            </div>
                         </a>
-                    </td>
-                    <td>${motore.clienteNome}</td>
-                    <td>
-                        <span class="badge-status
-                            ${motore.stato == 'STOCCATO' ? 'status-stoccato' : ''}
-                            ${motore.stato == 'IN_LAVORAZIONE' ? 'status-lavorazione' : ''}
-                            ${motore.stato == 'CONSEGNATO' ? 'status-consegnato' : ''}">
-                            ${motore.stato}
-                        </span>
-                    </td>
-                    <td>${motore.ultimaModifica}</td>
-                </tr>
-            </c:forEach>
-
-            </tbody>
-        </table>
-
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <p class="text-muted mb-0">Nessun motore recente disponibile.</p>
+            </c:otherwise>
+        </c:choose>
     </div>
 
 </div>
