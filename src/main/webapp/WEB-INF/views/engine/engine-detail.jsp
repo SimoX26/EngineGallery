@@ -25,6 +25,37 @@
             transform: scale(1.02);
             opacity: 0.9;
         }
+
+        .modal-zoom-image {
+            transform-origin: center center;
+            transform: scale(1);
+            transition: transform 0.15s ease-out;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            width: 100%;
+            height: 90vh;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+            background-color: #1f2933;
+        }
+
+        .zoom-debug-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1200;
+            background: rgba(0, 0, 0, 0.72);
+            color: #fff;
+            font-size: 12px;
+            line-height: 1.35;
+            padding: 10px 12px;
+            border-radius: 8px;
+            white-space: pre-line;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -201,24 +232,25 @@
                 </svg>
             </button>
 
+            <div id="zoomDebugPanel" class="zoom-debug-panel">debug init</div>
+
             <div class="modal-body d-flex align-items-center p-0">
 
                 <div id="modalCarousel"
                      class="carousel slide w-100"
-                     data-bs-ride="false">
+                     data-bs-ride="false"
+                     data-bs-touch="false">
 
                     <div class="carousel-inner">
 
                         <c:forEach var="image" items="${detail.images}" varStatus="status">
                             <div class="carousel-item ${status.first ? 'active' : ''}">
-                                <div data-image-url="<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}"
+                                <img data-image-url="<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}"
                                      data-filename="${image.filename}"
-                                     style="height: 90vh;
-                                            background-image: url('<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-size: contain;">
-                                </div>
+                                     class="modal-zoom-image"
+                                     src="<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}"
+                                     alt="Immagine motore ${status.index + 1}"
+                                     draggable="false">
                             </div>
                         </c:forEach>
 
@@ -252,15 +284,90 @@
 <script>
     const modal = document.getElementById('imageModal');
     const modalCarouselElement = document.getElementById('modalCarousel');
-    const modalCarousel = new bootstrap.Carousel(modalCarouselElement);
+    const modalCarousel = new bootstrap.Carousel(modalCarouselElement, {
+        interval: false,
+        touch: false,
+        keyboard: false
+    });
 
     const navbar = document.querySelector('.navbar');
     const shareBtn = document.getElementById('shareBtn');
+    const zoomDebugPanel = document.getElementById('zoomDebugPanel');
+    const doubleTapDelayMs = 550;
+    const doubleTapMaxDistancePx = 48;
+    const doubleTapZoomScale = 1.5;
+
+    let currentScale = 1;
+    let lastTapTimestamp = 0;
+    let lastTapSlideIndex = -1;
+    let lastTapX = 0;
+    let lastTapY = 0;
+    let debugTapCount = 0;
+
+    function getActiveZoomImage() {
+        const activeItem = modalCarouselElement.querySelector('.carousel-item.active');
+        return activeItem ? activeItem.querySelector('.modal-zoom-image') : null;
+    }
+
+    function applyScale(imageElement, scale) {
+        const clampedScale = Math.min(Math.max(scale, 1), 4);
+        imageElement.style.transform = `scale(${clampedScale})`;
+        currentScale = clampedScale;
+        updateDebugPanel('applyScale -> ' + clampedScale.toFixed(2));
+    }
+
+    function resetZoomOnAllImages() {
+        modalCarouselElement.querySelectorAll('.modal-zoom-image').forEach((imageElement) => {
+            imageElement.style.transform = 'scale(1)';
+        });
+        currentScale = 1;
+    }
+
+    function isOnActiveImage(target) {
+        const activeImage = getActiveZoomImage();
+        return !!activeImage && activeImage.contains(target);
+    }
+
+    function isOnBlockedControl(target) {
+        return !!target.closest('.modal-close-btn, .modal-action-btn, .carousel-control-prev, .carousel-control-next');
+    }
+
+    function getActiveSlide() {
+        return modalCarouselElement.querySelector('.carousel-item.active');
+    }
+
+    function getActiveSlideIndex() {
+        const slides = modalCarouselElement.querySelectorAll('.carousel-item');
+        const active = getActiveSlide();
+        return active ? Array.from(slides).indexOf(active) : -1;
+    }
+
+    function updateDebugPanel(message) {
+        if (!zoomDebugPanel) {
+            return;
+        }
+        zoomDebugPanel.textContent =
+                'event: ' + message + '\n' +
+                'scale: ' + currentScale.toFixed(2) + '\n' +
+                'slide: ' + getActiveSlideIndex() + '\n' +
+                'tapCount: ' + debugTapCount;
+    }
+
+    function toggleDoubleTapZoom() {
+        const activeImage = getActiveZoomImage();
+        if (!activeImage) {
+            return;
+        }
+        const nextScale = currentScale > 1.01 ? 1 : doubleTapZoomScale;
+        applyScale(activeImage, nextScale);
+    }
 
     modal.addEventListener('show.bs.modal', function (event) {
         const clickedImage = event.relatedTarget;
-        const index = clickedImage.getAttribute('data-index');
+        const index = clickedImage ? clickedImage.getAttribute('data-index') : 0;
         modalCarousel.to(index);
+        debugTapCount = 0;
+        updateDebugPanel('modal show index=' + index);
 
         // Nascondi navbar
         navbar.style.display = 'none';
@@ -269,7 +376,107 @@
     modal.addEventListener('hidden.bs.modal', function () {
         // Mostra navbar
         navbar.style.display = '';
+        resetZoomOnAllImages();
+        updateDebugPanel('modal hidden');
     });
+
+    modalCarouselElement.addEventListener('touchmove', function (event) {
+        if (isOnActiveImage(event.target)) {
+            event.preventDefault();
+            updateDebugPanel('touchmove blocked');
+        }
+    }, { passive: false });
+
+    modalCarouselElement.addEventListener('wheel', function (event) {
+        if (isOnActiveImage(event.target)) {
+            event.preventDefault();
+            updateDebugPanel('wheel blocked');
+        }
+    }, { passive: false });
+
+    modalCarouselElement.addEventListener('slid.bs.carousel', function () {
+        resetZoomOnAllImages();
+        lastTapTimestamp = 0;
+        lastTapSlideIndex = -1;
+        debugTapCount = 0;
+        updateDebugPanel('slide changed');
+    });
+
+    function handleTapCandidate(clientX, clientY, target, preventDefaultFn) {
+        debugTapCount += 1;
+        if (!target || isOnBlockedControl(target)) {
+            updateDebugPanel('tap blocked by control');
+            return;
+        }
+
+        const activeSlideIndex = getActiveSlideIndex();
+        if (activeSlideIndex < 0) {
+            return;
+        }
+
+        const now = Date.now();
+        const dt = now - lastTapTimestamp;
+        const dx = clientX - lastTapX;
+        const dy = clientY - lastTapY;
+        const distance = Math.hypot(dx, dy);
+        const isDoubleTap = dt <= doubleTapDelayMs
+                && distance <= doubleTapMaxDistancePx
+                && lastTapSlideIndex === activeSlideIndex;
+        updateDebugPanel('tap dt=' + dt + 'ms dist=' + distance.toFixed(1) + ' double=' + isDoubleTap);
+
+        if (isDoubleTap) {
+            if (preventDefaultFn) {
+                preventDefaultFn();
+            }
+            toggleDoubleTapZoom();
+            lastTapTimestamp = 0;
+            lastTapSlideIndex = -1;
+            return;
+        }
+
+        lastTapTimestamp = now;
+        lastTapSlideIndex = activeSlideIndex;
+        lastTapX = clientX;
+        lastTapY = clientY;
+    }
+
+    function handleMouseLikeTap(event) {
+        handleTapCandidate(
+                event.clientX,
+                event.clientY,
+                event.target,
+                () => event.preventDefault()
+        );
+    }
+
+    if (window.PointerEvent) {
+        modalCarouselElement.addEventListener('pointerup', function (event) {
+            if (event.pointerType === 'mouse' && event.button !== 0) {
+                return;
+            }
+            handleMouseLikeTap(event);
+        }, { capture: true });
+    } else {
+        modalCarouselElement.addEventListener('touchend', function (event) {
+            if (!event.changedTouches || event.changedTouches.length === 0) {
+                return;
+            }
+            const touch = event.changedTouches[0];
+            handleTapCandidate(
+                    touch.clientX,
+                    touch.clientY,
+                    event.target,
+                    () => event.preventDefault()
+            );
+        }, { capture: true, passive: false });
+    }
+
+    // Fallback robusto per browser/webview che non gestiscono bene pointer/touch.
+    modalCarouselElement.addEventListener('click', function (event) {
+        handleMouseLikeTap(event);
+    }, { capture: true });
+
+    updateDebugPanel('script loaded');
 
     /* =========================
        Logica Condividi
@@ -296,7 +503,7 @@
             // Dati base da condividere
             const shareData = {
                 title: 'RML • Engine Gallery',
-                text: `Guarda questa immagine del motore: ${engineRef}`,
+                text: 'Guarda questa immagine del motore: ' + engineRef,
                 url: resolvedImageUrl
             };
 
