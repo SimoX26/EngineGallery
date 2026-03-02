@@ -39,11 +39,26 @@
             <div class="alert alert-warning">${error}</div>
         </c:if>
 
+        <div class="card-base mb-4">
+            <label for="engineKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
+            <input type="search"
+                   id="engineKeywordSearch"
+                   class="form-control"
+                   placeholder="Cerca per codice, riferimento, cliente o stato...">
+            <div id="engineKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
+                Nessun motore corrisponde alla ricerca.
+            </div>
+        </div>
+
         <!-- GALLERY -->
-        <div class="row g-4">
+        <div class="row g-4" id="engineGalleryGrid">
 
             <c:forEach var="engine" items="${engines}">
-                <div class="col-xl-3 col-lg-4 col-md-6">
+                <c:set var="st" value="${engine.status}" />
+                <c:set var="statusSearchLabel"
+                       value="${st == 'WAITING' ? 'in attesa' : st == 'WORK_IN_PROGRESS' ? 'in lavorazione' : st == 'READY' ? 'pronto' : st == 'DELIVERED' ? 'consegnato' : st}" />
+                <div class="col-xl-3 col-lg-4 col-md-6 engine-card-col"
+                     data-search="${engine.engineCode} ${engine.engineRef} ${customerNames[engine.customerId]} ${st} ${statusSearchLabel}">
 
                     <div class="engine-gallery-card">
 
@@ -66,8 +81,6 @@
                             <div class="engine-footer">
 
                                 <!-- STATUS -->
-                                <c:set var="st" value="${engine.status}" />
-
                                 <span class="badge-status
                                     ${st == 'WAITING' ? 'status-stoccato' : ''}
                                     ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
@@ -102,6 +115,36 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const searchInput = document.getElementById('engineKeywordSearch');
+        const engineCards = document.querySelectorAll('.engine-card-col');
+        const emptyState = document.getElementById('engineKeywordEmptyState');
+
+        const normalizeText = (value) => (value || '')
+            .toString()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+
+        const applyEngineFilter = () => {
+            const keyword = normalizeText(searchInput.value);
+            let visibleCount = 0;
+
+            engineCards.forEach((card) => {
+                const haystack = normalizeText(card.dataset.search);
+                const isVisible = keyword.length === 0 || haystack.includes(keyword);
+                card.classList.toggle('d-none', !isVisible);
+                if (isVisible) {
+                    visibleCount += 1;
+                }
+            });
+
+            emptyState.classList.toggle('d-none', visibleCount > 0);
+        };
+
+        searchInput.addEventListener('input', applyEngineFilter);
+    </script>
 
 </div>
 </body>

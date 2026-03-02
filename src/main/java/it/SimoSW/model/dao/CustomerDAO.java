@@ -23,6 +23,8 @@ public interface CustomerDAO {
 
     void delete(Long id);
 
+    int countEnginesByCustomerId(Long customerId);
+
     int countClientiConMotoriInOfficina();
 
 }

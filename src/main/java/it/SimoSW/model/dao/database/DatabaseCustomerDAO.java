@@ -49,6 +49,9 @@ public class DatabaseCustomerDAO implements CustomerDAO {
     private static final String DELETE_SQL =
             "DELETE FROM customers WHERE id = ?";
 
+    private static final String COUNT_ENGINES_BY_CUSTOMER_SQL =
+            "SELECT COUNT(*) FROM engines WHERE customer_id = ?";
+
 
     @Override
     public List<Customer> findAll() {
@@ -202,6 +205,27 @@ public class DatabaseCustomerDAO implements CustomerDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'eliminazione cliente ID: " + id, e);
         }
+    }
+
+    @Override
+    public int countEnginesByCustomerId(Long customerId) {
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(COUNT_ENGINES_BY_CUSTOMER_SQL)) {
+
+            stmt.setLong(1, customerId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel conteggio motori per cliente ID: " + customerId, e);
+        }
+
+        return 0;
     }
 
 
