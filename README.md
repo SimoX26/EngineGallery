@@ -39,3 +39,22 @@ Puoi personalizzare il percorso con:
 
 - variabile ambiente `ENGINE_GALLERY_UPLOAD_DIR`
 - system property `enginegallery.upload.dir`
+
+## 📱 App Android con grafica identica
+
+Per avere la stessa identica UI del progetto web, è stato aggiunto un contenitore Android in `android-app/` che usa `WebView` e carica direttamente l'app Engine Gallery.
+
+### Come usare
+
+1. Apri `android-app/` in Android Studio.
+2. Imposta l'URL backend in `android-app/gradle.properties`:
+   - Emulatore Android + Tomcat locale: `http://10.0.2.2:8080/EngineGallery/`
+   - Dispositivo reale sulla stessa rete: `http://IP_DEL_PC:8080/EngineGallery/`
+   - Server pubblico HTTPS: `https://tuo-dominio/EngineGallery/`
+3. Builda ed esegui l'app Android.
+
+### Note
+
+- Upload file da WebView supportato (chooser Android).
+- Navigazione indietro gestita con il tasto Back.
+- `usesCleartextTraffic=true` è attivo per facilitare test in HTTP locale.
