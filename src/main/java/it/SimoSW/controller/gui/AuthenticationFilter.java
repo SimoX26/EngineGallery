@@ -8,16 +8,12 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
 
     private static final String COOKIE_REMEMBER = "remember_user_id";
-    private static final String COOKIE_LAST_PATH = "last_path";
     private static final int COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
     private AuthenticationController authenticationController;
@@ -47,11 +43,6 @@ public class AuthenticationFilter implements Filter {
             if (isHomePath(path) || "/auth".equals(path)) {
                 ensureAutoLogin(req, res, contextPath);
                 if (isLoggedIn(req)) {
-                    String lastPath = readCookie(req, COOKIE_LAST_PATH);
-                    if (isSafeRedirectPath(lastPath)) {
-                        res.sendRedirect(contextPath + lastPath);
-                        return;
-                    }
                     res.sendRedirect(contextPath + "/dashboard");
                     return;
                 }
@@ -69,7 +60,6 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
-        updateLastPathCookie(req, res, contextPath, path);
         chain.doFilter(request, response);
     }
 
@@ -103,18 +93,6 @@ public class AuthenticationFilter implements Filter {
         setCookie(res, COOKIE_REMEMBER, Long.toString(userId), contextPath, COOKIE_MAX_AGE, req.isSecure());
     }
 
-    private void updateLastPathCookie(HttpServletRequest req, HttpServletResponse res,
-                                      String contextPath, String path) {
-        if ("/logout".equals(path)) {
-            return;
-        }
-
-        String query = req.getQueryString();
-        String fullPath = query == null ? path : path + "?" + query;
-        String encoded = URLEncoder.encode(fullPath, StandardCharsets.UTF_8);
-        setCookie(res, COOKIE_LAST_PATH, encoded, contextPath, COOKIE_MAX_AGE, req.isSecure());
-    }
-
     private boolean isPublicPath(String path) {
         return path.equals("/")
                 || path.equals("/home")
@@ -127,18 +105,6 @@ public class AuthenticationFilter implements Filter {
 
     private boolean isHomePath(String path) {
         return path.equals("/") || path.equals("/home") || path.equals("/index.jsp");
-    }
-
-    private boolean isSafeRedirectPath(String path) {
-        return path != null && path.startsWith("/") && !path.contains("://");
-    }
-
-    private String readCookie(HttpServletRequest req, String name) {
-        Cookie cookie = findCookie(req, name);
-        if (cookie == null || cookie.getValue() == null || cookie.getValue().isBlank()) {
-            return null;
-        }
-        return URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
     }
 
     private Cookie findCookie(HttpServletRequest req, String name) {
