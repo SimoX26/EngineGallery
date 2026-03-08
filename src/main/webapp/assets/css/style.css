@@ -333,12 +333,27 @@ body {
     width: 56px !important;
     height: 56px !important;
     margin-top: 20px !important;
+    padding: 0 !important;
     border-radius: 50% !important;
     background: rgba(31, 41, 51, 0.85) !important;
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
     color: #fff !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.pswp__button--close {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.pswp__button--close .pswp__icn {
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
 }
 
 .pswp__button--custom-share:hover,
@@ -358,6 +373,7 @@ body {
 }
 
 .pswp__button--custom-share svg {
+    display: block;
     width: 24px;
     height: 24px;
     fill: none;
@@ -375,27 +391,37 @@ body {
     width: 56px !important;
     height: 56px !important;
     margin: 0 !important;
-    border-radius: 50% !important;
-    background: rgba(31, 41, 51, 0.85) !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
     color: #fff !important;
     top: 50% !important;
     transform: translateY(-50%);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: none !important;
     opacity: 1 !important;
 }
 
 .pswp__button--arrow:hover {
-    background: rgba(31, 41, 51, 0.95) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
+    background: transparent !important;
+    border: none !important;
 }
 
 .pswp__button--arrow--prev {
-    left: 20px !important;
+    left: 8px !important;
 }
 
 .pswp__button--arrow--next {
-    right: 20px !important;
+    right: 8px !important;
+}
+
+@media (max-width: 768px) {
+    .pswp__button--arrow--prev {
+        left: 2px !important;
+    }
+
+    .pswp__button--arrow--next {
+        right: 2px !important;
+    }
 }
 
 body.modal-open {
@@ -404,6 +430,10 @@ body.modal-open {
 
 .navbar-hidden {
     visibility: hidden;
+}
+
+.fab-hidden {
+    display: none !important;
 }
 
 
