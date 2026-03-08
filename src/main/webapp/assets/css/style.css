@@ -328,84 +328,74 @@ body {
     transform: scale(0.98);
 }
 
-.modal-close-btn {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-
-    font-size: 28px;
-    color: white;
-    font-weight: 300;
-    line-height: 1;
-
-    background: rgba(31, 41, 51, 0.85);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-
-    backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    cursor: pointer;
-    z-index: 1050;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+.pswp__button--custom-share,
+.pswp__button--close {
+    width: 56px !important;
+    height: 56px !important;
+    margin-top: 20px !important;
+    border-radius: 50% !important;
+    background: rgba(31, 41, 51, 0.85) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-.modal-close-btn:hover {
-    background: rgba(31, 41, 51, 0.95);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.1) rotate(90deg);
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+.pswp__button--custom-share:hover,
+.pswp__button--close:hover {
+    background: rgba(31, 41, 51, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: scale(1.08);
 }
 
-.modal-close-btn:active {
-    transform: scale(0.95) rotate(90deg);
-}
-
-.modal-action-btn {
-    position: absolute;
-    top: 25px;
-    right: 95px;
-
-    font-size: 28px;
-    color: white;
-    font-weight: 300;
-    line-height: 1;
-
-    background: rgba(31, 41, 51, 0.85);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-
-    backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    cursor: pointer;
-    z-index: 1050;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.modal-action-btn:hover {
-    background: rgba(31, 41, 51, 0.95);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.1);
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
-}
-
-.modal-action-btn:active {
+.pswp__button--custom-share:active,
+.pswp__button--close:active {
     transform: scale(0.95);
+}
+
+.pswp__button--close:hover {
+    transform: scale(1.08) rotate(90deg);
+}
+
+.pswp__button--custom-share svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pswp__button--zoom {
+    display: none !important;
+}
+
+.pswp__button--arrow {
+    width: 56px !important;
+    height: 56px !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(31, 41, 51, 0.85) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    opacity: 1 !important;
+}
+
+.pswp__button--arrow:hover {
+    background: rgba(31, 41, 51, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.pswp__button--arrow--prev {
+    left: 20px !important;
+}
+
+.pswp__button--arrow--next {
+    right: 20px !important;
 }
 
 body.modal-open {
