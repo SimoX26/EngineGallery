@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class EngineListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         List<Engine> engines = engineController.getAllEngines();
+        sortByMostRecentIntake(engines);
         request.setAttribute("engines", engines);
 
         // Mappa engineId -> cover filename
@@ -93,6 +95,7 @@ public class EngineListServlet extends HttpServlet {
             engines = engineController.getAllEngines();
         }
 
+        sortByMostRecentIntake(engines);
         request.setAttribute("engines", engines);
 
         Map<Long, String> coverImages = new HashMap<>();
@@ -115,5 +118,12 @@ public class EngineListServlet extends HttpServlet {
         request.setAttribute("customerNames", customerNames);
 
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
+    }
+
+    private void sortByMostRecentIntake(List<Engine> engines) {
+        engines.sort(
+                Comparator.comparing(Engine::getIntakeDate).reversed()
+                        .thenComparing(Engine::getId, Comparator.reverseOrder())
+        );
     }
 }
