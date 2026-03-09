@@ -18,9 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Servlet responsabile del caricamento delle immagini del motore
@@ -28,11 +26,12 @@ import java.util.UUID;
  */
 @WebServlet("/upload")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024,   // 1 MB
-        maxFileSize = 5 * 1024 * 1024,      // 5 MB per file
-        maxRequestSize = 20 * 1024 * 1024   // 20 MB totali
+        fileSizeThreshold = 2 * 1024 * 1024,     // 2 MB
+        maxFileSize = 100 * 1024 * 1024,         // 100 MB per file
+        maxRequestSize = 800 * 1024 * 1024       // 800 MB totali
 )
 public class UploadServlet extends HttpServlet {
+    private static final String SESSION_PENDING_NEW_ENGINE_REF = "pendingNewEngineRef";
     private EngineController engineController;
     private CustomerController customerController;
 
@@ -50,20 +49,23 @@ public class UploadServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1) riferimento per motore ESISTENTE
+        HttpSession session = request.getSession();
+
+        // 2) riferimento per motore ESISTENTE
         String selectedRef = request.getParameter("ref");
         String existingEngineRef = (selectedRef != null && !selectedRef.isBlank()) ? selectedRef : "?";
         request.setAttribute("existingEngineRef", existingEngineRef);
 
-        // 2) modalità selezionata
+        // 3) modalità selezionata
         String engineMode = (selectedRef != null && !selectedRef.isBlank()) ? "existing" : "new";
         request.setAttribute("engineMode", engineMode);
 
-        // 3) engineRef effettivo
+        // 4) engineRef effettivo
         String engineRef;
 
         if ("existing".equals(engineMode)) {
             engineRef = existingEngineRef;
+            request.setAttribute("newEngineRef", "");
 
             // QUI RECUPERI I DATI DAL DB
             EngineDetailBean detail = engineController.getEngineDetail(engineRef);
@@ -83,7 +85,13 @@ public class UploadServlet extends HttpServlet {
             }
 
         } else {
-            engineRef = "";
+            String pendingRef = (String) session.getAttribute(SESSION_PENDING_NEW_ENGINE_REF);
+            if (pendingRef == null || pendingRef.isBlank()) {
+                pendingRef = engineController.generateEngineRef();
+                session.setAttribute(SESSION_PENDING_NEW_ENGINE_REF, pendingRef);
+            }
+            request.setAttribute("newEngineRef", pendingRef);
+            engineRef = pendingRef;
             request.setAttribute("status", EngineStatus.WAITING.name());
         }
 
@@ -97,24 +105,62 @@ public class UploadServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            doPostSafe(request, response);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            request.setAttribute("error", "Errore durante il salvataggio. Riprova.");
+            request.setAttribute("engineMode", Optional.ofNullable(request.getParameter("engineMode")).orElse("new"));
+            request.setAttribute("engineRef", Optional.ofNullable(request.getParameter("engineRef")).orElse(""));
+            request.setAttribute("newEngineRef", Optional.ofNullable(request.getParameter("engineRef")).orElse(""));
+            request.setAttribute("existingEngineRef", Optional.ofNullable(request.getParameter("engineRef")).orElse("?"));
+            request.setAttribute("customer", request.getParameter("customer"));
+            request.setAttribute("engineCode", request.getParameter("engineCode"));
+            request.setAttribute("note", request.getParameter("note"));
+            request.setAttribute("status", request.getParameter("status"));
+            request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
+        }
+    }
 
-        /* =========================
-           1. LETTURA PARAMETRI BASE
-           ========================= */
+    private void doPostSafe(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+
+    /* =========================
+       1. LETTURA PARAMETRI BASE
+       ========================= */
         String engineMode = request.getParameter("engineMode");
         if (engineMode == null || engineMode.isBlank()) {
             engineMode = "new";
         }
+        String engineRef  = request.getParameter("engineRef");
 
-        String engineRef = request.getParameter("engineRef");
-        if ("existing".equals(engineMode) && (engineRef == null || engineRef.isBlank() || "?".equals(engineRef))) {
-            throw new ServletException("Riferimento motore non valido");
+        if ("new".equals(engineMode) && (engineRef == null || engineRef.isBlank())) {
+            engineRef = (String) session.getAttribute(SESSION_PENDING_NEW_ENGINE_REF);
         }
 
-        /* =========================
-           2. VALIDAZIONE METADATI
-           (solo se nuovo motore)
-           ========================= */
+        if ("new".equals(engineMode) && (engineRef == null || engineRef.isBlank())) {
+            engineRef = engineController.generateEngineRef();
+            session.setAttribute(SESSION_PENDING_NEW_ENGINE_REF, engineRef);
+        }
+
+        if (engineRef == null || engineRef.isBlank() || "?".equals(engineRef)) {
+            request.setAttribute("error", "Riferimento motore non valido");
+            request.setAttribute("engineMode", engineMode);
+            request.setAttribute("engineRef", "");
+            request.setAttribute("newEngineRef", "");
+            request.setAttribute("existingEngineRef", "?");
+            request.setAttribute("customer", request.getParameter("customer"));
+            request.setAttribute("engineCode", request.getParameter("engineCode"));
+            request.setAttribute("note", request.getParameter("note"));
+            request.setAttribute("status", request.getParameter("status"));
+            request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
+            return;
+        }
+
+    /* =========================
+       2. VALIDAZIONE METADATI
+       (solo se nuovo motore)
+       ========================= */
         String cliente = null;
         String codiceMotore = null;
         String note = null;
@@ -129,15 +175,24 @@ public class UploadServlet extends HttpServlet {
             statusParam = request.getParameter("status");
 
             if (cliente == null || cliente.isBlank() || codiceMotore == null || codiceMotore.isBlank()) {
-                bindFormData(request, engineMode, "", cliente, codiceMotore, note, statusParam);
+
                 request.setAttribute("error", "Nome cliente e codice motore sono obbligatori");
+                request.setAttribute("status", statusParam);
+                request.setAttribute("engineRef", engineRef);
+                request.setAttribute("newEngineRef", engineRef);
+                request.setAttribute("engineMode", "new");
+
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
             }
 
             if (statusParam == null || statusParam.isBlank()) {
-                bindFormData(request, engineMode, "", cliente, codiceMotore, note, statusParam);
                 request.setAttribute("error", "Seleziona uno stato di lavorazione");
+                request.setAttribute("status", statusParam);
+                request.setAttribute("engineRef", engineRef);
+                request.setAttribute("newEngineRef", engineRef);
+                request.setAttribute("engineMode", "new");
+
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
             }
@@ -145,19 +200,24 @@ public class UploadServlet extends HttpServlet {
             try {
                 status = EngineStatus.valueOf(statusParam.trim());
             } catch (IllegalArgumentException ex) {
-                bindFormData(request, engineMode, "", cliente, codiceMotore, note, statusParam);
                 request.setAttribute("error", "Stato non valido: " + statusParam);
+                request.setAttribute("status", statusParam);
+                request.setAttribute("engineRef", engineRef);
+                request.setAttribute("newEngineRef", engineRef);
+                request.setAttribute("engineMode", "new");
+
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
             }
         }
 
-        /* =========================
-           3. VALIDAZIONE IMMAGINI
-           ========================= */
+    /* =========================
+       4. UPLOAD IMMAGINI
+       ========================= */
         List<PendingImage> pendingImages = new ArrayList<>();
 
         for (Part part : request.getParts()) {
+
             if (!"images".equals(part.getName()) || part.getSize() == 0) {
                 continue;
             }
@@ -167,30 +227,32 @@ public class UploadServlet extends HttpServlet {
                 continue;
             }
 
-            String originalName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+            String submittedName = part.getSubmittedFileName();
+            if (submittedName == null || submittedName.isBlank()) {
+                continue;
+            }
+
+            String originalName = Paths.get(submittedName).getFileName().toString();
+
             String safeFileName = UUID.randomUUID() + "_" + originalName;
             pendingImages.add(new PendingImage(part, safeFileName));
         }
 
         if (pendingImages.isEmpty()) {
-            bindFormData(request, engineMode, "existing".equals(engineMode) ? engineRef : "", cliente, codiceMotore, note, statusParam);
             request.setAttribute("error", "Devi caricare almeno un'immagine valida");
+            request.setAttribute("engineRef", engineRef);
+            request.setAttribute("newEngineRef", engineRef);
+            request.setAttribute("engineMode", engineMode);
+
             request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
             return;
         }
 
-        /* =========================
-           4. GENERAZIONE REF (cuscinetto)
-           ========================= */
-        if ("new".equals(engineMode)) {
-            engineRef = engineController.generateEngineRef();
-        }
+    /* =========================
+       5. APPLICATION LAYER
+       ========================= */
 
-        /* =========================
-           5. APPLICATION LAYER
-           ========================= */
-
-        // 5a. Se nuovo motore → creazione (solo dopo click su Salva)
+        // 5a. Se nuovo motore → creazione
         if ("new".equals(engineMode)) {
 
             EngineBean engineBean = new EngineBean();
@@ -202,7 +264,17 @@ public class UploadServlet extends HttpServlet {
             engineBean.setStatus(status.name());
             engineBean.setIntakeDate(LocalDate.now().toString());
 
-            engineController.createEngine(engineBean);
+            try {
+                engineController.createEngine(engineBean);
+            } catch (IllegalStateException ex) {
+                // Collisione rara: il riferimento mostrato era solo "provvisorio".
+                // Rigenero e ritento una volta.
+                String retryRef = engineController.generateEngineRef();
+                engineBean.setEngineRef(retryRef);
+                engineController.createEngine(engineBean);
+                engineRef = retryRef;
+            }
+            session.removeAttribute(SESSION_PENDING_NEW_ENGINE_REF);
         }
 
         // 5b. Immagini (sempre)
@@ -216,26 +288,10 @@ public class UploadServlet extends HttpServlet {
             engineController.addImage(engineRef, pendingImage.filename);
         }
 
-        /* =========================
-           6. REDIRECT
-           ========================= */
-        response.sendRedirect(request.getContextPath() + "/dashboard");
-    }
-
-    private void bindFormData(HttpServletRequest request,
-                              String engineMode,
-                              String engineRef,
-                              String customer,
-                              String engineCode,
-                              String note,
-                              String status) {
-        request.setAttribute("engineMode", engineMode);
-        request.setAttribute("engineRef", engineRef);
-        request.setAttribute("existingEngineRef", "existing".equals(engineMode) ? engineRef : "?");
-        request.setAttribute("customer", customer);
-        request.setAttribute("engineCode", engineCode);
-        request.setAttribute("note", note);
-        request.setAttribute("status", status);
+    /* =========================
+       6. REDIRECT
+       ========================= */
+        response.sendRedirect( request.getContextPath()  + "/dashboard");
     }
 
     private static final class PendingImage {

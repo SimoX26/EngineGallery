@@ -37,7 +37,7 @@
         </p>
 
         <!-- Area upload -->
-        <form action="<%= request.getContextPath() %>/upload" method="post" enctype="multipart/form-data">
+        <form id="uploadForm" action="<%= request.getContextPath() %>/upload" method="post" enctype="multipart/form-data">
 
 
             <div class="mb-4 text-start">
@@ -65,9 +65,9 @@
                             </span>
                         </c:when>
                         <c:otherwise>
-                            Riferimento
+                            Riferimento proposto dal sistema
                             <span class="d-block d-sm-inline">:
-                                <span class="badge bg-light text-dark border">Assegnato al salvataggio</span>
+                                <span class="badge bg-light text-dark border">${newEngineRef}</span>
                             </span>
                         </c:otherwise>
                     </c:choose>
@@ -81,11 +81,15 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Immagini</label>
                 <input type="file"
+                       id="imagesInput"
                        name="images"
                        class="form-control"
                        accept="image/*"
                        multiple
                        required>
+                <div class="small text-muted mt-2">
+                    Max 100MB per file, 800MB totali
+                </div>
             </div>
 
             <!-- CLIENTE -->
@@ -142,6 +146,9 @@
 
 
 <script>
+    const MAX_FILE_SIZE = 100 * 1024 * 1024;     // 100 MB
+    const MAX_TOTAL_SIZE = 800 * 1024 * 1024;    // 800 MB
+
     function handleEngineMode(select) {
         if (select.value === 'existing') {
             window.location.href = '<%= request.getContextPath() %>/engine/select';
@@ -151,5 +158,27 @@
             window.location.href = '<%= request.getContextPath() %>/upload';
         }
     }
+
+    document.getElementById('uploadForm').addEventListener('submit', function (event) {
+        const input = document.getElementById('imagesInput');
+        if (!input || !input.files) {
+            return;
+        }
+
+        let total = 0;
+        for (const file of input.files) {
+            if (file.size > MAX_FILE_SIZE) {
+                event.preventDefault();
+                alert('Il file "' + file.name + '" supera 100MB.');
+                return;
+            }
+            total += file.size;
+        }
+
+        if (total > MAX_TOTAL_SIZE) {
+            event.preventDefault();
+            alert('La dimensione totale delle immagini supera 800MB.');
+        }
+    });
 </script>
 </html>
