@@ -65,9 +65,9 @@
                             </span>
                         </c:when>
                         <c:otherwise>
-                            Riferimento proposto dal sistema
+                            Riferimento
                             <span class="d-block d-sm-inline">:
-                                <span class="badge bg-light text-dark border">${newEngineRef}</span>
+                                <span class="badge bg-light text-dark border">Assegnato al salvataggio</span>
                             </span>
                         </c:otherwise>
                     </c:choose>
