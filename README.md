@@ -29,7 +29,7 @@ L’applicazione è progettata per essere **scalabile, estendibile e manutenibil
 
 #### 📁 Percorso di salvataggio immagini
 
-Per default le immagini vengono salvate in una cartella "umana" dentro la home utente:
+Per default le immagini vengono salvate nella cartella:
 
 ```
 ~/EngineGallery/uploads/engines
