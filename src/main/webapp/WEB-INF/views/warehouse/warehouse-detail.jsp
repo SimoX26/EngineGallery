@@ -14,7 +14,6 @@
 </head>
 <body>
 
-<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
 <div class="container my-4">
@@ -47,7 +46,7 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-12 d-flex justify-content-end gap-3">
+            <div class="col-12 detail-actions d-flex flex-wrap justify-content-center gap-2 gap-md-3">
                 <a href="<%= request.getContextPath() %>/warehouse/list" class="btn btn-outline-secondary px-4">
                     Indietro
                 </a>

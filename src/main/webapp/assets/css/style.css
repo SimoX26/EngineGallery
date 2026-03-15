@@ -441,6 +441,22 @@ body {
     cursor: not-allowed;
 }
 
+.detail-actions .btn {
+    min-width: 140px;
+}
+
+@media (max-width: 576px) {
+    .detail-actions {
+        gap: 0.6rem !important;
+    }
+
+    .detail-actions .btn {
+        flex: 1 1 calc(50% - 0.6rem);
+        min-width: 130px;
+        text-align: center;
+    }
+}
+
 .pswp__button--custom-share,
 .pswp__button--close {
     width: 56px !important;
