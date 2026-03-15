@@ -15,9 +15,7 @@
         </a>
 
         <!-- TOGGLER (mobile) -->
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#engineNavbar"
+        <button id="engineNavbarToggler" class="navbar-toggler" type="button"
                 aria-controls="engineNavbar"
                 aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -86,10 +84,44 @@
 </nav>
 
 <script>
-    if (!window.bootstrap) {
-        const bootstrapScript = document.createElement('script');
-        bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
-        bootstrapScript.defer = true;
-        document.head.appendChild(bootstrapScript);
-    }
+    (function () {
+        function initNavbarToggle() {
+            const toggler = document.getElementById('engineNavbarToggler');
+            const menu = document.getElementById('engineNavbar');
+            if (!toggler || !menu || !window.bootstrap || !window.bootstrap.Collapse) {
+                return;
+            }
+
+            if (toggler.dataset.initialized === 'true') {
+                return;
+            }
+
+            toggler.dataset.initialized = 'true';
+            const collapse = window.bootstrap.Collapse.getOrCreateInstance(menu, {toggle: false});
+
+            toggler.addEventListener('click', function (event) {
+                event.preventDefault();
+                collapse.toggle();
+            });
+
+            menu.addEventListener('shown.bs.collapse', function () {
+                toggler.setAttribute('aria-expanded', 'true');
+            });
+
+            menu.addEventListener('hidden.bs.collapse', function () {
+                toggler.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        if (!window.bootstrap) {
+            const bootstrapScript = document.createElement('script');
+            bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
+            bootstrapScript.defer = true;
+            bootstrapScript.addEventListener('load', initNavbarToggle);
+            document.head.appendChild(bootstrapScript);
+            return;
+        }
+
+        initNavbarToggle();
+    })();
 </script>

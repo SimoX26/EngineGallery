@@ -188,6 +188,41 @@ body {
     z-index: 3000 !important;
 }
 
+@media (max-width: 991.98px) {
+    .navbar .navbar-collapse {
+        text-align: center;
+        margin-top: 0.65rem;
+        padding: 0.65rem 0.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .navbar .navbar-nav {
+        width: 100%;
+        align-items: center;
+    }
+
+    .navbar .navbar-nav .nav-item {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .navbar .nav-link {
+        margin-right: 0;
+        display: inline-flex;
+        justify-content: center;
+    }
+
+    .navbar .navbar-nav.ms-auto {
+        margin-left: 0 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        margin-top: 0.45rem;
+        padding-top: 0.45rem;
+    }
+}
+
 
 /* =====================
    ENGINE GALLERY
