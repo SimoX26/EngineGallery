@@ -247,6 +247,39 @@ body {
     background-position: center;
 }
 
+.engine-image-empty {
+    background-image: none !important;
+    background: repeating-linear-gradient(
+            135deg,
+            #e5e7eb,
+            #e5e7eb 10px,
+            #f1f5f9 10px,
+            #f1f5f9 20px
+    );
+    border: 1px solid #d1d5db;
+}
+
+.engine-image-empty-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    text-align: center;
+    padding: 0 6px;
+}
+
+.dashboard-engine-thumb {
+    width: 84px;
+    height: 64px;
+    border-radius: 10px;
+    background-color: #1f2933;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    flex-shrink: 0;
+}
+
 .engine-body {
     padding: 20px;
 }

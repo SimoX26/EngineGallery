@@ -105,19 +105,20 @@
                     <c:forEach var="motore" items="${ultimiMotori}">
                         <c:set var="st" value="${motore.status}" />
                         <c:set var="coverFilename" value="${coverImages[motore.id]}" />
-                        <c:choose>
-                            <c:when test="${not empty coverFilename}">
-                                <c:set var="coverUrl" value="${pageContext.request.contextPath}/uploads/engines/${motore.engineRef}/${coverFilename}" />
-                            </c:when>
-                            <c:otherwise>
-                                <c:set var="coverUrl" value="${pageContext.request.contextPath}/assets/img/engine-hero.jpg" />
-                            </c:otherwise>
-                        </c:choose>
                         <a href="<%= request.getContextPath() %>/engine/detail?ref=${motore.engineRef}"
                            class="list-group-item list-group-item-action">
                             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div style="width: 84px; height: 64px; border-radius: 10px; background-color: #1f2933; background-position: center; background-repeat: no-repeat; background-size: cover; background-image: url('${coverUrl}');"></div>
+                                    <c:choose>
+                                        <c:when test="${not empty coverFilename}">
+                                            <div class="dashboard-engine-thumb"
+                                                 style="background-image: url('${pageContext.request.contextPath}/uploads/engines/${motore.engineRef}/${coverFilename}');">
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="dashboard-engine-thumb engine-image-empty"></div>
+                                        </c:otherwise>
+                                    </c:choose>
                                     <div>
                                         <div class="fw-semibold">${motore.engineCode}</div>
                                         <small class="text-muted">

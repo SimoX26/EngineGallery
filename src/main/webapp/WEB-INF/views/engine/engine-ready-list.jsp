@@ -51,8 +51,8 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <div class="engine-image"
-                                     style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-hero.jpg');">
+                                <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                                    <span class="engine-image-empty-label">Nessuna immagine</span>
                                 </div>
                             </c:otherwise>
                         </c:choose>
