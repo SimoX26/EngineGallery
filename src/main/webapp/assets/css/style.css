@@ -400,6 +400,47 @@ body {
     transform: scale(0.98);
 }
 
+.btn-detail-edit,
+.btn-detail-delete {
+    min-width: 120px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-detail-edit {
+    color: #fff;
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-detail-edit:hover,
+.btn-detail-edit:focus {
+    color: #fff;
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-detail-delete {
+    color: #b91c1c;
+    background-color: #fff;
+    border: 1px solid #ef4444;
+}
+
+.btn-detail-delete:hover,
+.btn-detail-delete:focus {
+    color: #991b1b;
+    background-color: #fee2e2;
+    border-color: #dc2626;
+}
+
+.btn-detail-delete:disabled {
+    color: #9ca3af;
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+    cursor: not-allowed;
+}
+
 .pswp__button--custom-share,
 .pswp__button--close {
     width: 56px !important;

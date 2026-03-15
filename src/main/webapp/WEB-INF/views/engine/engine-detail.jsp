@@ -33,7 +33,7 @@
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
-<div class="container my-4" id="engineDetailGallery" data-engine-ref="${detail.engine.engineRef}">
+<div class="container mt-5 mb-4" id="engineDetailGallery" data-engine-ref="${detail.engine.engineRef}">
     <c:if test="${updated}">
         <div class="alert alert-success" role="alert">
             Modifiche salvate correttamente.
@@ -129,11 +129,15 @@
 
         <div class="row mt-4">
             <div class="col-12 d-flex justify-content-end gap-3">
-                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}" class="btn btn-primary px-4">
+                <a href="<%= request.getContextPath() %>/engine/list" class="btn btn-outline-secondary px-4">
+                    Indietro
+                </a>
+
+                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}" class="btn btn-detail-edit px-4">
                     Modifica
                 </a>
 
-                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}" class="btn btn-danger px-4">
+                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}" class="btn btn-detail-delete px-4">
                     Elimina
                 </a>
             </div>

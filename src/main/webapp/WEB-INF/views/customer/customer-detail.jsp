@@ -74,18 +74,22 @@
 
         <div class="row mt-4">
             <div class="col-12 d-flex justify-content-end gap-3">
-                <a href="<%= request.getContextPath() %>/customer/edit?id=${customer.id}" class="btn btn-primary px-4">
+                <a href="<%= request.getContextPath() %>/customer/list" class="btn btn-outline-secondary px-4">
+                    Indietro
+                </a>
+
+                <a href="<%= request.getContextPath() %>/customer/edit?id=${customer.id}" class="btn btn-detail-edit px-4">
                     Modifica
                 </a>
 
                 <c:choose>
                     <c:when test="${canDelete}">
-                        <a href="<%= request.getContextPath() %>/customer/delete?id=${customer.id}" class="btn btn-danger px-4">
+                        <a href="<%= request.getContextPath() %>/customer/delete?id=${customer.id}" class="btn btn-detail-delete px-4">
                             Elimina
                         </a>
                     </c:when>
                     <c:otherwise>
-                        <button class="btn btn-danger px-4" disabled
+                        <button class="btn btn-detail-delete px-4" disabled
                                 title="Cliente associato a motori esistenti">
                             Elimina
                         </button>

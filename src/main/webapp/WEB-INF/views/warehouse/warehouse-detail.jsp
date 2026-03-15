@@ -51,10 +51,10 @@
                 <a href="<%= request.getContextPath() %>/warehouse/list" class="btn btn-outline-secondary px-4">
                     Indietro
                 </a>
-                <a href="<%= request.getContextPath() %>/warehouse/edit?id=${item.id}" class="btn btn-primary px-4">
+                <a href="<%= request.getContextPath() %>/warehouse/edit?id=${item.id}" class="btn btn-detail-edit px-4">
                     Modifica
                 </a>
-                <a href="<%= request.getContextPath() %>/warehouse/delete?id=${item.id}" class="btn btn-danger px-4">
+                <a href="<%= request.getContextPath() %>/warehouse/delete?id=${item.id}" class="btn btn-detail-delete px-4">
                     Elimina
                 </a>
             </div>
