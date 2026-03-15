@@ -74,6 +74,11 @@
                             <div><c:out value="${customer.phone}" default="—" /></div>
                         </div>
 
+                        <div class="customer-field">
+                            <div class="customer-meta">Email</div>
+                            <div><c:out value="${customer.email}" default="—" /></div>
+                        </div>
+
                     </div>
                 </div>
             </a>
