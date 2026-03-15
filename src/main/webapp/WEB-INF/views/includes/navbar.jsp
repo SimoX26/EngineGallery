@@ -53,6 +53,14 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/warehouse") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/warehouse/list">
+                        Magazzino
+                    </a>
+                </li>
+
                  <li class="nav-item">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/engine/ready") ? "active" : ""}"

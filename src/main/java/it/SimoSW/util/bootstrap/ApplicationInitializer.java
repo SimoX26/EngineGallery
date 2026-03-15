@@ -15,6 +15,7 @@ public class ApplicationInitializer {
     private final CustomerController customerController;
     private final AuthenticationController authenticationController;
     private final DashboardController dashboardController;
+    private final WarehouseController warehouseController;
 
     private final EngineRefGenerator engineRefGenerator;
 
@@ -25,6 +26,7 @@ public class ApplicationInitializer {
         UserDAO userDAO = new DatabaseUserDAO();
         EngineDAO engineDAO = new DatabaseEngineDAO();
         CustomerDAO customerDAO = new DatabaseCustomerDAO();
+        WarehouseItemDAO warehouseItemDAO = new DatabaseWarehouseItemDAO();
 
         engineRefGenerator = new EngineRefGenerator(engineDAO);
 
@@ -37,6 +39,8 @@ public class ApplicationInitializer {
         this.authenticationController = new AuthenticationController(userDAO);
 
         this.dashboardController = new DashboardController(engineDAO, customerDAO);
+
+        this.warehouseController = new WarehouseController(warehouseItemDAO);
 
     }
 
@@ -54,5 +58,9 @@ public class ApplicationInitializer {
 
     public DashboardController getDashboardController() {
         return dashboardController;
+    }
+
+    public WarehouseController getWarehouseController() {
+        return warehouseController;
     }
 }
