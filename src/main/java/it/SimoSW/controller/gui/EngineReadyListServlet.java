@@ -1,5 +1,6 @@
 package it.SimoSW.controller.gui;
 
+import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.Engine;
 import it.SimoSW.model.EngineStatus;
@@ -19,11 +20,13 @@ import java.util.Map;
 public class EngineReadyListServlet extends HttpServlet {
 
     private EngineController engineController;
+    private CustomerController customerController;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
+        this.customerController = initializer.getCustomerController();
     }
 
     @Override
@@ -41,6 +44,15 @@ public class EngineReadyListServlet extends HttpServlet {
         }
 
         request.setAttribute("coverImages", coverImages);
+
+        Map<Long, String> customerNames = new HashMap<>();
+        for (Engine engine : engines) {
+            long customerId = engine.getCustomerId();
+            if (!customerNames.containsKey(customerId)) {
+                customerNames.put(customerId, customerController.findNameById(customerId));
+            }
+        }
+        request.setAttribute("customerNames", customerNames);
 
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-ready-list.jsp").forward(request, response);
     }

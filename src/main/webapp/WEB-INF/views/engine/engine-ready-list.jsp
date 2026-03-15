@@ -55,7 +55,7 @@
                             </div>
 
                             <div class="engine-client">
-                                Cliente ID: ${engine.customerId}
+                                Cliente: <c:out value="${customerNames[engine.customerId]}" default="—" />
                             </div>
 
                             <div class="engine-footer">

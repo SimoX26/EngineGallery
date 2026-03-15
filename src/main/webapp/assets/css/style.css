@@ -284,8 +284,8 @@ body {
 }
 
 .customer-card {
-    padding: 30px 40px;
-    margin-bottom: 28px; /* distanza tra le card */
+    padding: 22px 24px;
+    margin-bottom: 16px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -297,17 +297,21 @@ body {
 
 .customer-card-link:hover .customer-card,
 .customer-card-link:focus .customer-card {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
 }
 
 .customer-row {
     display: flex;
-    justify-content: center;  /* centra i dati */
-    align-items: center;
-    gap: 60px;                /* spazio tra i blocchi */
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 28px;
     flex-wrap: wrap;
-    text-align: center;
+    text-align: left;
+}
+
+.customer-field {
+    min-width: 140px;
 }
 
 .customer-main {

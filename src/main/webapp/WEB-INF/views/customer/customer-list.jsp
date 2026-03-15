@@ -53,44 +53,14 @@
                             <div class="customer-main">
                                 ${customer.name}
                             </div>
-                            <div class="customer-meta">
-                                ID ${customer.id}
-                            </div>
                         </div>
 
-                        <c:if test="${not empty customer.companyName}">
-                            <div class="customer-field">
-                                <div class="customer-meta">Azienda</div>
-                                <div>${customer.companyName}</div>
-                            </div>
-                        </c:if>
-
-                        <c:if test="${not empty customer.phone}">
-                            <div class="customer-field">
-                                <div class="customer-meta">Telefono</div>
-                                <div>${customer.phone}</div>
-                            </div>
-                        </c:if>
-
-                        <c:if test="${not empty customer.email}">
-                            <div class="customer-field">
-                                <div class="customer-meta">Email</div>
-                                <div>${customer.email}</div>
-                            </div>
-                        </c:if>
-
                         <div class="customer-field">
-                            <div class="customer-meta">Creato</div>
-                            <div>${customer.createdAt}</div>
+                            <div class="customer-meta">Telefono</div>
+                            <div><c:out value="${customer.phone}" default="—" /></div>
                         </div>
 
                     </div>
-
-                    <c:if test="${not empty customer.notes}">
-                        <div class="customer-notes">
-                                ${customer.notes}
-                        </div>
-                    </c:if>
                 </div>
             </a>
 
