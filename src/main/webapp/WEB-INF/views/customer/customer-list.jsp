@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -40,11 +41,24 @@
         </div>
     </c:if>
 
+    <div class="card-base mb-4">
+        <label for="customerKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
+        <input type="search"
+               id="customerKeywordSearch"
+               class="form-control"
+               placeholder="Cerca per nome, telefono, azienda, email o note...">
+        <div id="customerKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
+            Nessun cliente corrisponde alla ricerca.
+        </div>
+    </div>
+
     <!-- LISTA CLIENTI -->
-    <div class="customer-list">
+    <div class="customer-list" id="customerListGrid">
 
         <c:forEach var="customer" items="${customers}">
-            <a href="<%= request.getContextPath() %>/customer/detail?id=${customer.id}" class="customer-card-link">
+            <a href="<%= request.getContextPath() %>/customer/detail?id=${customer.id}"
+               class="customer-card-link customer-card-item"
+               data-search="${fn:escapeXml(customer.name)} ${fn:escapeXml(customer.phone)} ${fn:escapeXml(customer.companyName)} ${fn:escapeXml(customer.email)} ${fn:escapeXml(customer.notes)}">
                 <div class="card-base customer-card">
 
                     <div class="customer-row">
@@ -72,6 +86,36 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const searchInput = document.getElementById('customerKeywordSearch');
+    const customerCards = document.querySelectorAll('.customer-card-item');
+    const emptyState = document.getElementById('customerKeywordEmptyState');
+
+    const normalizeText = (value) => (value || '')
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    const applyCustomerFilter = () => {
+        const keyword = normalizeText(searchInput.value);
+        let visibleCount = 0;
+
+        customerCards.forEach((card) => {
+            const haystack = normalizeText(card.dataset.search);
+            const isVisible = keyword.length === 0 || haystack.includes(keyword);
+            card.classList.toggle('d-none', !isVisible);
+            if (isVisible) {
+                visibleCount += 1;
+            }
+        });
+
+        emptyState.classList.toggle('d-none', visibleCount > 0);
+    };
+
+    searchInput.addEventListener('input', applyCustomerFilter);
+</script>
 
 </body>
 </html>
