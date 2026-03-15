@@ -238,7 +238,7 @@ public class UploadServlet extends HttpServlet {
             pendingImages.add(new PendingImage(part, safeFileName));
         }
 
-        if (pendingImages.isEmpty()) {
+        if (pendingImages.isEmpty() && "existing".equals(engineMode)) {
             request.setAttribute("error", "Devi caricare almeno un'immagine valida");
             request.setAttribute("engineRef", engineRef);
             request.setAttribute("newEngineRef", engineRef);
@@ -277,15 +277,17 @@ public class UploadServlet extends HttpServlet {
             session.removeAttribute(SESSION_PENDING_NEW_ENGINE_REF);
         }
 
-        // 5b. Immagini (sempre)
-        Path uploadRoot = UploadPathResolver.resolveUploadBase(getServletContext());
-        Path engineDir = uploadRoot.resolve(engineRef);
-        Files.createDirectories(engineDir);
+        // 5b. Immagini (opzionali per nuovo motore)
+        if (!pendingImages.isEmpty()) {
+            Path uploadRoot = UploadPathResolver.resolveUploadBase(getServletContext());
+            Path engineDir = uploadRoot.resolve(engineRef);
+            Files.createDirectories(engineDir);
 
-        for (PendingImage pendingImage : pendingImages) {
-            Path destination = engineDir.resolve(pendingImage.filename);
-            pendingImage.part.write(destination.toString());
-            engineController.addImage(engineRef, pendingImage.filename);
+            for (PendingImage pendingImage : pendingImages) {
+                Path destination = engineDir.resolve(pendingImage.filename);
+                pendingImage.part.write(destination.toString());
+                engineController.addImage(engineRef, pendingImage.filename);
+            }
         }
 
     /* =========================

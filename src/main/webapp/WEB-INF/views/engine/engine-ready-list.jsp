@@ -43,9 +43,19 @@
                     <div class="engine-gallery-card">
 
                         <!-- IMAGE -->
-                        <div class="engine-image"
-                             style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverImages[engine.id]}');">
-                        </div>
+                        <c:set var="coverFilename" value="${coverImages[engine.id]}" />
+                        <c:choose>
+                            <c:when test="${not empty coverFilename}">
+                                <div class="engine-image"
+                                     style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="engine-image"
+                                     style="background-image: url('<%= request.getContextPath() %>/assets/img/engine-hero.jpg');">
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
 
                         <!-- BODY -->
                         <div class="engine-body">

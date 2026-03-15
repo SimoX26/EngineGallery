@@ -33,7 +33,7 @@
 
         <!-- Sottotesto -->
         <p class="text-muted mb-4">
-            Carica le immagini e completa i dati tecnici del motore
+            Completa i dati tecnici del motore e, se vuoi, aggiungi immagini
         </p>
 
         <!-- Area upload -->
@@ -85,10 +85,9 @@
                        name="images"
                        class="form-control"
                        accept="image/*"
-                       multiple
-                       required>
+                       multiple>
                 <div class="small text-muted mt-2">
-                    Max 100MB per file, 800MB totali
+                    Facoltative. Max 100MB per file, 800MB totali
                 </div>
             </div>
 
