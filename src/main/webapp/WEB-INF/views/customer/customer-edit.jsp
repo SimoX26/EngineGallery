@@ -35,11 +35,6 @@
         <form action="<%= request.getContextPath() %>/customer/edit?id=${customerId}" method="post">
 
             <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">ID cliente</label>
-                <input type="text" class="form-control" value="${customerId}" readonly>
-            </div>
-
-            <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Nome</label>
                 <input type="text"
                        name="name"

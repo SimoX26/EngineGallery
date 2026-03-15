@@ -24,7 +24,7 @@
                 <div class="card-body p-4 p-md-5">
                     <h1 class="h4 text-danger mb-3">Conferma eliminazione</h1>
                     <p class="mb-1">Sei veramente sicuro di voler eliminare questo cliente?</p>
-                    <p class="mb-4 fw-semibold">${customer.name} - ID ${customer.id}</p>
+                    <p class="mb-4 fw-semibold">${customer.name}</p>
                     <p class="text-muted small mb-4">Questa azione non puo essere annullata.</p>
 
                     <c:if test="${not canDelete}">

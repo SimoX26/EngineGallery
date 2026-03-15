@@ -1,6 +1,5 @@
 package it.SimoSW.model;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Customer {
@@ -20,11 +19,6 @@ public class Customer {
     private final String notes;
 
     /* =========================
-       Audit
-       ========================= */
-    private LocalDateTime createdAt;
-
-    /* =========================
        Costruttore per nuovo Customer
        ========================= */
     public Customer(String name,
@@ -38,7 +32,6 @@ public class Customer {
         this.phone = phone;
         this.email = email;
         this.notes = notes;
-        this.createdAt = LocalDateTime.now();
     }
 
     /* =========================
@@ -49,12 +42,10 @@ public class Customer {
                     String companyName,
                     String phone,
                     String email,
-                    String notes,
-                    LocalDateTime createdAt) {
+                    String notes) {
 
         this(name, companyName, phone, email, notes);
         this.id = id;
-        this.createdAt = createdAt;
     }
 
     public Customer(String name) {
@@ -63,7 +54,6 @@ public class Customer {
         this.phone = null;
         this.email = null;
         this.notes = null;
-        this.createdAt = LocalDateTime.now();
     }
 
     /* =========================
@@ -92,10 +82,6 @@ public class Customer {
 
     public String getNotes() {
         return notes;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     /* =========================

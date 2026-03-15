@@ -22,19 +22,19 @@ public class DatabaseCustomerDAO implements CustomerDAO {
                     "WHERE status <> ?";
 
     private static final String FIND_ALL_SQL =
-            "SELECT id, name, company_name, phone, email, notes, created_at " +
+            "SELECT id, name, company_name, phone, email, notes " +
                     "FROM customers ORDER BY name";
 
     private static final String FIND_BY_ID_SQL =
-            "SELECT id, name, company_name, phone, email, notes, created_at " +
+            "SELECT id, name, company_name, phone, email, notes " +
                     "FROM customers WHERE id = ?";
 
     private static final String FIND_BY_EMAIL_SQL =
-            "SELECT id, name, company_name, phone, email, notes, created_at " +
+            "SELECT id, name, company_name, phone, email, notes " +
                     "FROM customers WHERE email = ?";
 
     private static final String SEARCH_BY_NAME_SQL =
-            "SELECT id, name, company_name, phone, email, notes, created_at " +
+            "SELECT id, name, company_name, phone, email, notes " +
                     "FROM customers WHERE name LIKE ? ORDER BY name";
 
     private static final String INSERT_SQL =
@@ -237,8 +237,7 @@ public class DatabaseCustomerDAO implements CustomerDAO {
                 rs.getString("company_name"),
                 rs.getString("phone"),
                 rs.getString("email"),
-                rs.getString("notes"),
-                rs.getTimestamp("created_at").toLocalDateTime()
+                rs.getString("notes")
         );
     }
 

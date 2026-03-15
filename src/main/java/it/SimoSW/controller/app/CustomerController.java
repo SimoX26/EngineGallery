@@ -76,8 +76,7 @@ public class CustomerController {
                 normalizeOptional(companyName),
                 normalizeOptional(phone),
                 normalizeOptional(email),
-                normalizeOptional(notes),
-                existing.getCreatedAt()
+                normalizeOptional(notes)
         );
 
         customerDAO.update(updated);

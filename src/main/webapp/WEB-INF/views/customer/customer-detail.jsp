@@ -35,9 +35,6 @@
             <h5 class="fw-semibold mb-3">Dettaglio cliente</h5>
 
             <dl class="engine-detail-list">
-                <dt>ID:</dt>
-                <dd>${customer.id}</dd>
-
                 <dt>Nome:</dt>
                 <dd>${customer.name}</dd>
 
@@ -64,9 +61,6 @@
                         <c:otherwise>—</c:otherwise>
                     </c:choose>
                 </dd>
-
-                <dt>Creato il:</dt>
-                <dd>${customer.createdAt}</dd>
 
                 <dt>Note:</dt>
                 <dd>
