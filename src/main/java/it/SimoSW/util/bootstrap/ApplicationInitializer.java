@@ -38,7 +38,7 @@ public class ApplicationInitializer {
 
         this.authenticationController = new AuthenticationController(userDAO);
 
-        this.dashboardController = new DashboardController(engineDAO, customerDAO);
+        this.dashboardController = new DashboardController(engineDAO, customerDAO, warehouseItemDAO);
 
         this.warehouseController = new WarehouseController(warehouseItemDAO);
 

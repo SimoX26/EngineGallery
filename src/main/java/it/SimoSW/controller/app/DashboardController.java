@@ -1,9 +1,11 @@
 package it.SimoSW.controller.app;
 
 import it.SimoSW.model.EngineStatus;
+import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.model.dao.CustomerDAO;
 import it.SimoSW.model.dao.EngineDAO;
 import it.SimoSW.model.Engine;
+import it.SimoSW.model.dao.WarehouseItemDAO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,10 +14,12 @@ public class DashboardController {
 
     private final EngineDAO engineDAO;
     private final CustomerDAO customerDAO;
+    private final WarehouseItemDAO warehouseItemDAO;
 
-    public DashboardController(EngineDAO engineDAO, CustomerDAO customerDAO) {
+    public DashboardController(EngineDAO engineDAO, CustomerDAO customerDAO, WarehouseItemDAO warehouseItemDAO) {
         this.engineDAO = engineDAO;
         this.customerDAO = customerDAO;
+        this.warehouseItemDAO = warehouseItemDAO;
     }
 
     /* =========================
@@ -50,5 +54,25 @@ public class DashboardController {
        ========================= */
     public List<Engine> listaUltimiMotori(int limit) {
         return engineDAO.findLatest(limit);
+    }
+
+    /* =========================
+       KPI Magazzino
+       ========================= */
+
+    public int getWarehouseItemCount() {
+        return warehouseItemDAO.countAll();
+    }
+
+    public int getWarehouseTotalQuantity() {
+        return warehouseItemDAO.sumTotalQuantity();
+    }
+
+    public int getWarehouseOutOfStockCount() {
+        return warehouseItemDAO.countOutOfStock();
+    }
+
+    public List<WarehouseItem> listaUltimiArticoliMagazzino(int limit) {
+        return warehouseItemDAO.findLatest(limit);
     }
 }

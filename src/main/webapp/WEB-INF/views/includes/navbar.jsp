@@ -30,7 +30,7 @@
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/dashboard") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/dashboard">
-                        Dashboard
+                        Home
                     </a>
                 </li>
 

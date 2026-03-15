@@ -16,6 +16,9 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
     private static final String FIND_ALL_SQL =
             "SELECT id, name, sku, quantity, location, notes FROM warehouse_items ORDER BY name";
 
+    private static final String FIND_LATEST_SQL =
+            "SELECT id, name, sku, quantity, location, notes FROM warehouse_items ORDER BY id DESC LIMIT ?";
+
     private static final String FIND_BY_ID_SQL =
             "SELECT id, name, sku, quantity, location, notes FROM warehouse_items WHERE id = ?";
 
@@ -27,6 +30,15 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
 
     private static final String DELETE_SQL =
             "DELETE FROM warehouse_items WHERE id = ?";
+
+    private static final String COUNT_ALL_SQL =
+            "SELECT COUNT(*) FROM warehouse_items";
+
+    private static final String SUM_TOTAL_QUANTITY_SQL =
+            "SELECT COALESCE(SUM(quantity), 0) FROM warehouse_items";
+
+    private static final String COUNT_OUT_OF_STOCK_SQL =
+            "SELECT COUNT(*) FROM warehouse_items WHERE quantity <= 0";
 
     @Override
     public List<WarehouseItem> findAll() {
@@ -67,6 +79,30 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public List<WarehouseItem> findLatest(int limit) {
+
+        int normalizedLimit = Math.max(1, limit);
+        List<WarehouseItem> items = new ArrayList<>();
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_LATEST_SQL)) {
+
+            stmt.setInt(1, normalizedLimit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel recupero ultimi articoli magazzino", e);
+        }
+
+        return items;
     }
 
     @Override
@@ -128,6 +164,57 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'eliminazione articolo magazzino ID: " + id, e);
         }
+    }
+
+    @Override
+    public int countAll() {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(COUNT_ALL_SQL);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel conteggio articoli magazzino", e);
+        }
+
+        return 0;
+    }
+
+    @Override
+    public int sumTotalQuantity() {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SUM_TOTAL_QUANTITY_SQL);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel calcolo quantita totale magazzino", e);
+        }
+
+        return 0;
+    }
+
+    @Override
+    public int countOutOfStock() {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(COUNT_OUT_OF_STOCK_SQL);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel conteggio articoli esauriti", e);
+        }
+
+        return 0;
     }
 
     private WarehouseItem mapRow(ResultSet rs) throws SQLException {

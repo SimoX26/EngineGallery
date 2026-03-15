@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="<%= request.getContextPath() %>/assets/ico/ICONA.png">
-    <title>Engine Gallery • Dashboard</title>
+    <title>Engine Gallery • Home</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -34,7 +34,7 @@
 
     <!-- HEADER -->
     <div class="page-header">
-        <h1>Dashboard</h1>
+        <h1>Home</h1>
         <p>
             Panoramica generale
         </p>
@@ -87,6 +87,30 @@
                 </div>
                 <div class="kpi-value">
                     ${motoriConsegnatiUltimaSettimana}
+                </div>
+            </div>
+        </div>
+
+        <!-- Articoli magazzino -->
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-title">
+                    Articoli in magazzino
+                </div>
+                <div class="kpi-value">
+                    ${warehouseItemCount}
+                </div>
+            </div>
+        </div>
+
+        <!-- Articoli esauriti -->
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-title">
+                    Articoli esauriti
+                </div>
+                <div class="kpi-value">
+                    ${warehouseOutOfStockCount}
                 </div>
             </div>
         </div>
@@ -149,6 +173,42 @@
             </c:when>
             <c:otherwise>
                 <p class="text-muted mb-0">Nessun motore recente disponibile.</p>
+            </c:otherwise>
+        </c:choose>
+    </div>
+
+    <!-- ULTIMI ARTICOLI MAGAZZINO -->
+    <div class="table-container mt-4">
+
+        <h5 class="mb-4 fw-semibold">Articoli magazzino recenti</h5>
+
+        <c:choose>
+            <c:when test="${not empty ultimiArticoliMagazzino}">
+                <div class="list-group">
+                    <c:forEach var="item" items="${ultimiArticoliMagazzino}">
+                        <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                                <div>
+                                    <div class="fw-semibold">${item.name}</div>
+                                    <small class="text-muted">
+                                        Codice: <c:out value="${item.sku}" default="—" /> •
+                                        Ubicazione: <c:out value="${item.location}" default="—" />
+                                    </small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">Disponibilita</small>
+                                    <span class="badge-status ${item.quantity <= 0 ? 'status-stoccato' : 'status-ready'}">
+                                        ${item.quantity}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <p class="text-muted mb-0">Nessun articolo di magazzino disponibile.</p>
             </c:otherwise>
         </c:choose>
     </div>

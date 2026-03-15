@@ -4,6 +4,7 @@ import it.SimoSW.controller.app.DashboardController;
 import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.Engine;
+import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.model.User;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
@@ -60,6 +61,12 @@ public class DashboardServlet extends HttpServlet {
 
         List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(8);
         request.setAttribute("ultimiMotori", ultimiMotori);
+
+        request.setAttribute("warehouseItemCount", dashboardController.getWarehouseItemCount());
+        request.setAttribute("warehouseOutOfStockCount", dashboardController.getWarehouseOutOfStockCount());
+
+        List<WarehouseItem> ultimiArticoliMagazzino = dashboardController.listaUltimiArticoliMagazzino(6);
+        request.setAttribute("ultimiArticoliMagazzino", ultimiArticoliMagazzino);
 
         Map<Long, String> coverImages = new HashMap<>();
         for (Engine engine : ultimiMotori) {
