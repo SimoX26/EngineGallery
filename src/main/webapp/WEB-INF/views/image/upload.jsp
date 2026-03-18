@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -35,6 +36,12 @@
         <p class="text-muted mb-4">
             Completa i dati tecnici del motore e, se vuoi, aggiungi immagini
         </p>
+
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger text-start" role="alert">
+                    ${error}
+            </div>
+        </c:if>
 
         <!-- Area upload -->
         <form id="uploadForm" action="<%= request.getContextPath() %>/upload" method="post" enctype="multipart/form-data">
@@ -87,18 +94,33 @@
                        accept="image/*"
                        multiple>
                 <div class="small text-muted mt-2">
-                    Facoltative. Max 100MB per file, 800MB totali
+                    Max 100MB per file, 800MB totali
                 </div>
             </div>
 
             <!-- CLIENTE -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Nome cliente</label>
+                <div class="position-relative">
                 <input type="text"
+                       id="customerInput"
                        name="customer"
                        class="form-control"
+                       autocomplete="off"
+                       list="customerOptions"
+                       placeholder="Seleziona cliente esistente o inseriscine uno nuovo"
                        value="${customer}"
+                       ${engineMode == 'existing' ? 'readonly' : ''}
                        ${engineMode == 'new' ? 'required' : ''}>
+                    <div id="customerSuggestions"
+                         class="list-group position-absolute w-100 shadow-sm d-none"
+                         style="z-index: 1050; max-height: 220px; overflow-y: auto;"></div>
+                </div>
+                <datalist id="customerOptions">
+                    <c:forEach var="customerItem" items="${customers}">
+                        <option value="${fn:escapeXml(customerItem.name)}"></option>
+                    </c:forEach>
+                </datalist>
             </div>
 
             <!-- CODICE MOTORE -->
@@ -147,6 +169,65 @@
 <script>
     const MAX_FILE_SIZE = 100 * 1024 * 1024;     // 100 MB
     const MAX_TOTAL_SIZE = 800 * 1024 * 1024;    // 800 MB
+    const customerInput = document.getElementById('customerInput');
+    const customerSuggestions = document.getElementById('customerSuggestions');
+    const customerNames = Array.from(document.querySelectorAll('#customerOptions option'))
+        .map((option) => option.value)
+        .filter((name) => name && name.trim().length > 0);
+    const normalizeText = (value) => (value || '')
+        .toString()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    function hideCustomerSuggestions() {
+        if (customerSuggestions) {
+            customerSuggestions.classList.add('d-none');
+            customerSuggestions.innerHTML = '';
+        }
+    }
+
+    function renderCustomerSuggestions(query) {
+        if (!customerInput || customerInput.readOnly || !customerSuggestions) {
+            return;
+        }
+
+        const normalized = normalizeText(query);
+        if (normalized.length === 0) {
+            hideCustomerSuggestions();
+            return;
+        }
+
+        const matches = customerNames
+            .filter((name) => normalizeText(name).includes(normalized))
+            .slice(0, 8);
+
+        if (matches.length === 0) {
+            customerSuggestions.innerHTML = '';
+            const empty = document.createElement('div');
+            empty.className = 'list-group-item text-muted';
+            empty.textContent = 'Nessun cliente corrisponde alla ricerca.';
+            customerSuggestions.appendChild(empty);
+            customerSuggestions.classList.remove('d-none');
+            return;
+        }
+
+        customerSuggestions.innerHTML = '';
+        matches.forEach((name) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'list-group-item list-group-item-action';
+            button.textContent = name;
+            button.addEventListener('click', () => {
+                customerInput.value = name;
+                hideCustomerSuggestions();
+            });
+            customerSuggestions.appendChild(button);
+        });
+
+        customerSuggestions.classList.remove('d-none');
+    }
 
     function handleEngineMode(select) {
         if (select.value === 'existing') {
@@ -179,5 +260,12 @@
             alert('La dimensione totale delle immagini supera 800MB.');
         }
     });
+
+    if (customerInput && !customerInput.readOnly) {
+        customerInput.addEventListener('input', () => renderCustomerSuggestions(customerInput.value));
+        customerInput.addEventListener('blur', () => {
+            setTimeout(hideCustomerSuggestions, 120);
+        });
+    }
 </script>
 </html>

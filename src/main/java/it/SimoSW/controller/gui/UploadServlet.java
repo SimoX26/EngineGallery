@@ -50,6 +50,7 @@ public class UploadServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+        populateCustomerOptions(request);
 
         // 2) riferimento per motore ESISTENTE
         String selectedRef = request.getParameter("ref");
@@ -118,6 +119,7 @@ public class UploadServlet extends HttpServlet {
             request.setAttribute("engineCode", request.getParameter("engineCode"));
             request.setAttribute("note", request.getParameter("note"));
             request.setAttribute("status", request.getParameter("status"));
+            populateCustomerOptions(request);
             request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
         }
     }
@@ -153,6 +155,7 @@ public class UploadServlet extends HttpServlet {
             request.setAttribute("engineCode", request.getParameter("engineCode"));
             request.setAttribute("note", request.getParameter("note"));
             request.setAttribute("status", request.getParameter("status"));
+            populateCustomerOptions(request);
             request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
             return;
         }
@@ -181,6 +184,10 @@ public class UploadServlet extends HttpServlet {
                 request.setAttribute("engineRef", engineRef);
                 request.setAttribute("newEngineRef", engineRef);
                 request.setAttribute("engineMode", "new");
+                request.setAttribute("customer", request.getParameter("customer"));
+                request.setAttribute("engineCode", codiceMotore);
+                request.setAttribute("note", note);
+                populateCustomerOptions(request);
 
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
@@ -192,6 +199,10 @@ public class UploadServlet extends HttpServlet {
                 request.setAttribute("engineRef", engineRef);
                 request.setAttribute("newEngineRef", engineRef);
                 request.setAttribute("engineMode", "new");
+                request.setAttribute("customer", request.getParameter("customer"));
+                request.setAttribute("engineCode", codiceMotore);
+                request.setAttribute("note", note);
+                populateCustomerOptions(request);
 
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
@@ -205,6 +216,10 @@ public class UploadServlet extends HttpServlet {
                 request.setAttribute("engineRef", engineRef);
                 request.setAttribute("newEngineRef", engineRef);
                 request.setAttribute("engineMode", "new");
+                request.setAttribute("customer", request.getParameter("customer"));
+                request.setAttribute("engineCode", codiceMotore);
+                request.setAttribute("note", note);
+                populateCustomerOptions(request);
 
                 request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
                 return;
@@ -243,6 +258,11 @@ public class UploadServlet extends HttpServlet {
             request.setAttribute("engineRef", engineRef);
             request.setAttribute("newEngineRef", engineRef);
             request.setAttribute("engineMode", engineMode);
+            request.setAttribute("customer", request.getParameter("customer"));
+            request.setAttribute("engineCode", request.getParameter("engineCode"));
+            request.setAttribute("note", request.getParameter("note"));
+            request.setAttribute("status", request.getParameter("status"));
+            populateCustomerOptions(request);
 
             request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
             return;
@@ -294,6 +314,10 @@ public class UploadServlet extends HttpServlet {
        6. REDIRECT
        ========================= */
         response.sendRedirect( request.getContextPath()  + "/dashboard");
+    }
+
+    private void populateCustomerOptions(HttpServletRequest request) {
+        request.setAttribute("customers", customerController.getAllCustomers());
     }
 
     private static final class PendingImage {
