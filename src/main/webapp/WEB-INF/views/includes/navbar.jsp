@@ -75,15 +75,10 @@
             <!-- LOGOUT -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <form action="<%= request.getContextPath() %>/logout"
-                          method="post"
-                          class="d-inline">
-
-                        <button type="submit"
-                                class="nav-link btn btn-link text-danger fw-semibold p-0">
-                            Logout
-                        </button>
-                    </form>
+                    <a href="<%= request.getContextPath() %>/logout"
+                       class="nav-link text-danger fw-semibold">
+                        Logout
+                    </a>
                 </li>
             </ul>
         </div>

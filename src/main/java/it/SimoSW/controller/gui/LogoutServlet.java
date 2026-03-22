@@ -14,10 +14,38 @@ public class LogoutServlet extends HttpServlet {
 
     private static final String COOKIE_REMEMBER = "remember_user_id";
     private static final String COOKIE_LAST_PATH = "last_path";
+    private static final String ACTION_CONTINUE = "continue";
+    private static final String ACTION_CONFIRM = "confirm";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
 
+        if (ACTION_CONFIRM.equals(action)) {
+            performLogout(request, response);
+            return;
+        }
+
+        if (ACTION_CONTINUE.equals(action)) {
+            showConfirmPage(request, response, 2);
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath() + "/dashboard");
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        showConfirmPage(request, response, 1);
+    }
+
+    private void showConfirmPage(HttpServletRequest request, HttpServletResponse response, int step)
+            throws ServletException, IOException {
+        request.setAttribute("logoutStep", step);
+        request.getRequestDispatcher("/WEB-INF/views/auth/logout-confirm.jsp").forward(request, response);
+    }
+
+    private void performLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Recupera la sessione se esiste (senza crearne una nuova)
         HttpSession session = request.getSession(false);
 
@@ -30,15 +58,6 @@ public class LogoutServlet extends HttpServlet {
 
         // Redirect alla landing page
         response.sendRedirect(request.getContextPath() + "/home");
-    }
-
-    /**
-     * Opzionale: se qualcuno prova ad accedere via GET,
-     * lo trattiamo come un POST per sicurezza.
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doPost(request, response);
     }
 
     private void clearCookie(HttpServletResponse response, HttpServletRequest request, String name) {
