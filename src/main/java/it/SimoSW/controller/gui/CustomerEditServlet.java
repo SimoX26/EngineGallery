@@ -65,7 +65,7 @@ public class CustomerEditServlet extends HttpServlet {
 
         try {
             customerController.updateCustomer(customerId, name, companyName, phone, email, notes);
-            response.sendRedirect(request.getContextPath() + "/customer/detail?id=" + customerId + "&updated=1");
+            response.sendRedirect(request.getContextPath() + "/customer/detail?id=" + customerId + "&updated=1&navHome=1");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/customer/customer-edit.jsp").forward(request, response);

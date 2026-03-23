@@ -60,12 +60,30 @@
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Stato</label>
+                <c:set var="currentStatus" value="${empty status ? 'WAITING' : status}" />
                 <select class="form-select" name="status" required>
                     <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
                     <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
                     <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
                     <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
                 </select>
+                <div class="status-select-preview mt-2">
+                    <span class="small text-muted">Colore stato:</span>
+                    <span id="statusPreviewBadge"
+                          class="badge-status ms-2
+                          ${currentStatus == 'WAITING' ? 'status-stoccato' : ''}
+                          ${currentStatus == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                          ${currentStatus == 'READY' ? 'status-ready' : ''}
+                          ${currentStatus == 'DELIVERED' ? 'status-consegnato' : ''}">
+                        <c:choose>
+                            <c:when test="${currentStatus == 'WAITING'}">In attesa</c:when>
+                            <c:when test="${currentStatus == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                            <c:when test="${currentStatus == 'READY'}">Pronto</c:when>
+                            <c:when test="${currentStatus == 'DELIVERED'}">Consegnato</c:when>
+                            <c:otherwise>${currentStatus}</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
             </div>
 
             <div class="mb-3 text-start">
@@ -108,6 +126,42 @@
 
     </div>
 </div>
+
+<script>
+    (() => {
+        const select = document.querySelector('select[name="status"]');
+        const badge = document.getElementById('statusPreviewBadge');
+        if (!select || !badge) {
+            return;
+        }
+
+        const styleByStatus = {
+            WAITING: 'status-stoccato',
+            WORK_IN_PROGRESS: 'status-lavorazione',
+            READY: 'status-ready',
+            DELIVERED: 'status-consegnato'
+        };
+
+        const labelByStatus = {
+            WAITING: 'In attesa',
+            WORK_IN_PROGRESS: 'In lavorazione',
+            READY: 'Pronto',
+            DELIVERED: 'Consegnato'
+        };
+
+        const updateBadge = () => {
+            badge.classList.remove('status-stoccato', 'status-lavorazione', 'status-ready', 'status-consegnato');
+            const value = select.value;
+            if (styleByStatus[value]) {
+                badge.classList.add(styleByStatus[value]);
+            }
+            badge.textContent = labelByStatus[value] || value || '—';
+        };
+
+        select.addEventListener('change', updateBadge);
+        updateBadge();
+    })();
+</script>
 
 </body>
 </html>

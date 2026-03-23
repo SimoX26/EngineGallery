@@ -40,7 +40,7 @@ public class WarehouseCreateServlet extends HttpServlet {
         try {
             Integer quantity = parseQuantity(quantityParam);
             Long id = warehouseController.createItem(name, sku, quantity, location, notes);
-            response.sendRedirect(request.getContextPath() + "/warehouse/detail?id=" + id);
+            response.sendRedirect(request.getContextPath() + "/warehouse/detail?id=" + id + "&navHome=1");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-new.jsp").forward(request, response);

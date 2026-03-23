@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=3">
 </head>
 
 <body>
@@ -31,10 +31,9 @@
         <!-- HEADER -->
         <div class="page-header">
             <h1>Pronta consegna</h1>
-            <p>Motori pronti alla consegna</p>
         </div>
 
-        <div class="card-base mb-4">
+        <div class="card-base mb-4 search-panel-compact">
             <label for="engineKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
             <input type="search"
                    id="engineKeywordSearch"
@@ -55,6 +54,7 @@
                 <div class="col-xl-3 col-lg-4 col-md-6 engine-card-col"
                      data-search="${engine.engineCode} ${engine.engineRef} ${customerNames[engine.customerId]} ${st} ${statusSearchLabel}">
 
+                    <a class="engine-card-link" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                     <div class="engine-gallery-card">
 
                         <!-- IMAGE -->
@@ -76,11 +76,11 @@
                         <div class="engine-body">
 
                             <div class="engine-code">
-                                ${engine.engineCode} • ${engine.engineRef}
+                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
                             </div>
 
                             <div class="engine-client">
-                                Cliente: <c:out value="${customerNames[engine.customerId]}" default="—" />
+                                ${engine.engineRef}
                             </div>
 
                             <div class="engine-footer">
@@ -101,15 +101,11 @@
                                     </c:choose>
                                 </span>
 
-                                <!-- DETAIL -->
-                                <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
-                                    Dettaglio
-                                </a>
-
                             </div>
                         </div>
 
                     </div>
+                    </a>
 
                 </div>
             </c:forEach>

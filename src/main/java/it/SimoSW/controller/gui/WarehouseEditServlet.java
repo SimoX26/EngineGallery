@@ -65,7 +65,7 @@ public class WarehouseEditServlet extends HttpServlet {
         try {
             Integer quantity = parseQuantity(quantityParam);
             warehouseController.updateItem(itemId, name, sku, quantity, location, notes);
-            response.sendRedirect(request.getContextPath() + "/warehouse/detail?id=" + itemId + "&updated=1");
+            response.sendRedirect(request.getContextPath() + "/warehouse/detail?id=" + itemId + "&updated=1&navHome=1");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-edit.jsp").forward(request, response);

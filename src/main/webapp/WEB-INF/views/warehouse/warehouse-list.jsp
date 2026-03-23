@@ -25,7 +25,6 @@
     <div class="page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div>
             <h1>Magazzino</h1>
-            <p>Gestione articoli e disponibilita</p>
         </div>
         <a href="<%= request.getContextPath() %>/warehouse/new" class="btn-engine">
             Nuovo articolo
@@ -36,7 +35,7 @@
         <div class="alert alert-danger">${error}</div>
     </c:if>
 
-    <div class="card-base mb-4">
+    <div class="card-base mb-4 search-panel-compact">
         <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
         <input type="search"
                id="warehouseKeywordSearch"

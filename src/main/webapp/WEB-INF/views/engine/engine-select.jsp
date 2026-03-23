@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=3">
 </head>
 
 <body>
@@ -31,7 +31,6 @@
         <!-- HEADER -->
         <div class="page-header">
             <h1>Seleziona motore esistente</h1>
-            <p>Visualizzazione completa dei motori presenti nel sistema</p>
         </div>
 
         <!-- (opzionale) errore -->
@@ -39,7 +38,7 @@
             <div class="alert alert-warning">${error}</div>
         </c:if>
 
-        <div class="card-base mb-4">
+        <div class="card-base mb-4 search-panel-compact">
             <label for="engineKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
             <input type="search"
                    id="engineKeywordSearch"

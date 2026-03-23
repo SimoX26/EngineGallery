@@ -13,7 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=4">
 </head>
 
 <body>
@@ -45,26 +45,30 @@
 
         <!-- Clienti serviti mese corrente -->
         <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="kpi-title">
-                    Clienti serviti (mese di ${meseCorrenteLabel})
+            <a href="<%= request.getContextPath() %>/customer/list" class="kpi-card-link">
+                <div class="kpi-card">
+                    <div class="kpi-title">
+                        Clienti serviti (mese di ${meseCorrenteLabel})
+                    </div>
+                    <div class="kpi-value">
+                        ${clientiServitiMese}
+                    </div>
                 </div>
-                <div class="kpi-value">
-                    ${clientiServitiMese}
-                </div>
-            </div>
+            </a>
         </div>
 
         <!-- Motori in lavorazione -->
         <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="kpi-title">
-                    Motori in lavorazione
+            <a href="<%= request.getContextPath() %>/engine/list" class="kpi-card-link">
+                <div class="kpi-card">
+                    <div class="kpi-title">
+                        Motori in lavorazione
+                    </div>
+                    <div class="kpi-value">
+                        ${workInProgressEngines}
+                    </div>
                 </div>
-                <div class="kpi-value">
-                    ${workInProgressEngines}
-                </div>
-            </div>
+            </a>
         </div>
 
         <!-- Motori consegnati mese corrente -->

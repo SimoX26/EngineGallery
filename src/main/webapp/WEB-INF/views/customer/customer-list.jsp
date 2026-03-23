@@ -31,7 +31,6 @@
     <!-- HEADER -->
     <div class="page-header">
         <h1>Rubrica Clienti</h1>
-        <p>Elenco completo dei clienti</p>
     </div>
 
     <!-- ERROR -->
@@ -41,7 +40,7 @@
         </div>
     </c:if>
 
-    <div class="card-base mb-4">
+    <div class="card-base mb-4 search-panel-compact">
         <label for="customerKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
         <input type="search"
                id="customerKeywordSearch"

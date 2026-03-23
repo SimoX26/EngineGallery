@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stile globale Engine Gallery -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=5">
 </head>
 <body>
 
@@ -32,56 +32,35 @@
         <!-- Titolo -->
         <h2 class="mb-3">Aggiunta motore</h2>
 
-        <!-- Sottotesto -->
-        <p class="text-muted mb-4">
-            Completa i dati tecnici del motore e, se vuoi, aggiungi immagini
-        </p>
-
         <c:if test="${not empty error}">
             <div class="alert alert-danger text-start" role="alert">
                     ${error}
             </div>
         </c:if>
 
+        <div class="alert alert-light border text-start py-2 px-3 mb-4 clickable-fields-hint" role="note">
+            Compila i campi evidenziati e poi premi <strong>Salva</strong>.
+        </div>
+
         <!-- Area upload -->
-        <form id="uploadForm" action="<%= request.getContextPath() %>/upload" method="post" enctype="multipart/form-data">
+        <form id="uploadForm"
+              class="form-click-guides"
+              action="<%= request.getContextPath() %>/upload"
+              method="post"
+              enctype="multipart/form-data">
 
 
             <div class="mb-4 text-start">
-
-                <select class="form-select"
-                        name="engineMode"
-                        onchange="handleEngineMode(this)"
-                        required>
-
-                    <option value="new" ${engineMode == 'new' ? 'selected' : ''}>
-                        Nuovo motore
-                    </option>
-
-                    <option value="existing" ${engineMode == 'existing' ? 'selected' : ''}>
-                        Motore esistente
-                    </option>
-                </select>
-
                 <div class="small text-muted mt-2">
-                    <c:choose>
-                        <c:when test="${engineMode == 'existing'}">
-                            Riferimento selezionato
-                            <span class="d-block d-sm-inline">:
-                                <span class="badge bg-light text-dark border">${existingEngineRef}</span>
-                            </span>
-                        </c:when>
-                        <c:otherwise>
-                            Riferimento proposto dal sistema
-                            <span class="d-block d-sm-inline">:
-                                <span class="badge bg-light text-dark border">${newEngineRef}</span>
-                            </span>
-                        </c:otherwise>
-                    </c:choose>
+                    Nuovo riferimento proposto
+                    <span class="d-block d-sm-inline">:
+                        <span class="badge bg-light text-dark border">${newEngineRef}</span>
+                    </span>
                 </div>
             </div>
 
             <!-- ENGINE REF nascosto (serve solo se nuovo motore) -->
+            <input type="hidden" name="engineMode" value="new">
             <input type="hidden" name="engineRef" value="${engineRef}">
 
             <!-- UPLOAD -->
@@ -110,8 +89,7 @@
                        list="customerOptions"
                        placeholder="Seleziona cliente esistente o inseriscine uno nuovo"
                        value="${customer}"
-                       ${engineMode == 'existing' ? 'readonly' : ''}
-                       ${engineMode == 'new' ? 'required' : ''}>
+                       required>
                     <div id="customerSuggestions"
                          class="list-group position-absolute w-100 shadow-sm d-none"
                          style="z-index: 1050; max-height: 220px; overflow-y: auto;"></div>
@@ -130,20 +108,38 @@
                        name="engineCode"
                        class="form-control"
                        value="${engineCode}"
-                       ${engineMode == 'new' ? 'required' : ''}>
+                       required>
             </div>
 
             <!-- STATO -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Stato</label>
+                <c:set var="currentStatus" value="${empty status ? 'WAITING' : status}" />
                 <select class="form-select"
                         name="status"
-                        ${engineMode == 'new' ? 'required' : 'disabled'}>
+                        required>
                     <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
                     <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
                     <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
                     <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
                 </select>
+                <div class="status-select-preview mt-2 text-start">
+                    <span class="small text-muted">Colore stato:</span>
+                    <span id="statusPreviewBadge"
+                          class="badge-status ms-2
+                          ${currentStatus == 'WAITING' ? 'status-stoccato' : ''}
+                          ${currentStatus == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                          ${currentStatus == 'READY' ? 'status-ready' : ''}
+                          ${currentStatus == 'DELIVERED' ? 'status-consegnato' : ''}">
+                        <c:choose>
+                            <c:when test="${currentStatus == 'WAITING'}">In attesa</c:when>
+                            <c:when test="${currentStatus == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                            <c:when test="${currentStatus == 'READY'}">Pronto</c:when>
+                            <c:when test="${currentStatus == 'DELIVERED'}">Consegnato</c:when>
+                            <c:otherwise>${currentStatus}</c:otherwise>
+                        </c:choose>
+                    </span>
+                </div>
             </div>
 
             <!-- NOTE -->
@@ -229,16 +225,6 @@
         customerSuggestions.classList.remove('d-none');
     }
 
-    function handleEngineMode(select) {
-        if (select.value === 'existing') {
-            window.location.href = '<%= request.getContextPath() %>/engine/select';
-            return;
-        }
-        if (select.value === 'new') {
-            window.location.href = '<%= request.getContextPath() %>/upload';
-        }
-    }
-
     document.getElementById('uploadForm').addEventListener('submit', function (event) {
         const input = document.getElementById('imagesInput');
         if (!input || !input.files) {
@@ -267,5 +253,39 @@
             setTimeout(hideCustomerSuggestions, 120);
         });
     }
+
+    (() => {
+        const select = document.querySelector('select[name="status"]');
+        const badge = document.getElementById('statusPreviewBadge');
+        if (!select || !badge) {
+            return;
+        }
+
+        const styleByStatus = {
+            WAITING: 'status-stoccato',
+            WORK_IN_PROGRESS: 'status-lavorazione',
+            READY: 'status-ready',
+            DELIVERED: 'status-consegnato'
+        };
+
+        const labelByStatus = {
+            WAITING: 'In attesa',
+            WORK_IN_PROGRESS: 'In lavorazione',
+            READY: 'Pronto',
+            DELIVERED: 'Consegnato'
+        };
+
+        const updateBadge = () => {
+            badge.classList.remove('status-stoccato', 'status-lavorazione', 'status-ready', 'status-consegnato');
+            const value = select.value;
+            if (styleByStatus[value]) {
+                badge.classList.add(styleByStatus[value]);
+            }
+            badge.textContent = labelByStatus[value] || value || '—';
+        };
+
+        select.addEventListener('change', updateBadge);
+        updateBadge();
+    })();
 </script>
 </html>

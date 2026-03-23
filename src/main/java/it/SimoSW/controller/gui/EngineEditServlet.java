@@ -138,7 +138,7 @@ public class EngineEditServlet extends HttpServlet {
 
             engineController.updateEngine(bean);
 
-            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef + "&updated=1");
+            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef + "&updated=1&navHome=1");
         } catch (IllegalArgumentException | IllegalStateException e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/engine/engine-edit.jsp").forward(request, response);

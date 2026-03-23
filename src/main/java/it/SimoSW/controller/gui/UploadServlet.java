@@ -4,7 +4,6 @@ import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
-import it.SimoSW.util.bean.EngineDetailBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.UploadPathResolver;
 
@@ -51,52 +50,17 @@ public class UploadServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         populateCustomerOptions(request);
+        request.setAttribute("engineMode", "new");
 
-        // 2) riferimento per motore ESISTENTE
-        String selectedRef = request.getParameter("ref");
-        String existingEngineRef = (selectedRef != null && !selectedRef.isBlank()) ? selectedRef : "?";
-        request.setAttribute("existingEngineRef", existingEngineRef);
-
-        // 3) modalità selezionata
-        String engineMode = (selectedRef != null && !selectedRef.isBlank()) ? "existing" : "new";
-        request.setAttribute("engineMode", engineMode);
-
-        // 4) engineRef effettivo
-        String engineRef;
-
-        if ("existing".equals(engineMode)) {
-            engineRef = existingEngineRef;
-            request.setAttribute("newEngineRef", "");
-
-            // QUI RECUPERI I DATI DAL DB
-            EngineDetailBean detail = engineController.getEngineDetail(engineRef);
-
-            if (detail != null) {
-                request.setAttribute("customer",
-                        customerController.findNameById(detail.getEngine().getCustomerId()));
-
-                request.setAttribute("engineCode",
-                        detail.getEngine().getEngineCode());
-
-                request.setAttribute("note",
-                        detail.getEngine().getNotes());
-
-                request.setAttribute("status",
-                        detail.getEngine().getStatus());
-            }
-
-        } else {
-            String pendingRef = (String) session.getAttribute(SESSION_PENDING_NEW_ENGINE_REF);
-            if (pendingRef == null || pendingRef.isBlank()) {
-                pendingRef = engineController.generateEngineRef();
-                session.setAttribute(SESSION_PENDING_NEW_ENGINE_REF, pendingRef);
-            }
-            request.setAttribute("newEngineRef", pendingRef);
-            engineRef = pendingRef;
-            request.setAttribute("status", EngineStatus.WAITING.name());
+        String pendingRef = (String) session.getAttribute(SESSION_PENDING_NEW_ENGINE_REF);
+        if (pendingRef == null || pendingRef.isBlank()) {
+            pendingRef = engineController.generateEngineRef();
+            session.setAttribute(SESSION_PENDING_NEW_ENGINE_REF, pendingRef);
         }
 
-        request.setAttribute("engineRef", engineRef);
+        request.setAttribute("newEngineRef", pendingRef);
+        request.setAttribute("engineRef", pendingRef);
+        request.setAttribute("status", EngineStatus.WAITING.name());
 
         request.getRequestDispatcher("/WEB-INF/views/image/upload.jsp").forward(request, response);
     }
@@ -313,7 +277,7 @@ public class UploadServlet extends HttpServlet {
     /* =========================
        6. REDIRECT
        ========================= */
-        response.sendRedirect( request.getContextPath()  + "/dashboard");
+        response.sendRedirect(request.getContextPath() + "/dashboard?navHome=1");
     }
 
     private void populateCustomerOptions(HttpServletRequest request) {
