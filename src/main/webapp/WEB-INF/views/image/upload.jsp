@@ -39,7 +39,7 @@
         </c:if>
 
         <div class="alert alert-light border text-start py-2 px-3 mb-4 clickable-fields-hint" role="note">
-            Compila i campi evidenziati e poi premi <strong>Salva</strong>.
+            Compila i campi e premi <strong>Salva</strong>.
         </div>
 
         <!-- Area upload -->
@@ -52,8 +52,8 @@
 
             <div class="mb-4 text-start">
                 <div class="small text-muted mt-2">
-                    Nuovo riferimento proposto
-                    <span class="d-block d-sm-inline">:
+                    <span class="text-nowrap">
+                        Nuovo riferimento:
                         <span class="badge bg-light text-dark border">${newEngineRef}</span>
                     </span>
                 </div>
