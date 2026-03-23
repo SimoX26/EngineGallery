@@ -75,6 +75,22 @@ public class DatabaseEngineDAO implements EngineDAO {
           AND delivery_date BETWEEN ? AND ?
     """;
 
+    private static final String COUNT_DISTINCT_CUSTOMERS_DELIVERED_BETWEEN_SQL = """
+        SELECT COUNT(DISTINCT customer_id)
+        FROM engines
+        WHERE status = 'DELIVERED'
+          AND delivery_date IS NOT NULL
+          AND delivery_date BETWEEN ? AND ?
+    """;
+
+    private static final String AVG_PROCESSING_DAYS_DELIVERED_BETWEEN_SQL = """
+        SELECT COALESCE(AVG(DATEDIFF(delivery_date, intake_date)), 0)
+        FROM engines
+        WHERE status = 'DELIVERED'
+          AND delivery_date IS NOT NULL
+          AND delivery_date BETWEEN ? AND ?
+    """;
+
     private static final String FIND_BY_CUSTOMER_AND_ENGINE_CODE_SQL = """
         SELECT e.*
         FROM engines e
@@ -257,6 +273,38 @@ public class DatabaseEngineDAO implements EngineDAO {
             ps.setDate(1, Date.valueOf(from));
             ps.setDate(2, Date.valueOf(to));
         });
+    }
+
+    @Override
+    public int countDistinctCustomersDeliveredBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+        return count(COUNT_DISTINCT_CUSTOMERS_DELIVERED_BETWEEN_SQL, ps -> {
+            ps.setDate(1, Date.valueOf(from));
+            ps.setDate(2, Date.valueOf(to));
+        });
+    }
+
+    @Override
+    public double averageProcessingDaysForDeliveredBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(AVG_PROCESSING_DAYS_DELIVERED_BETWEEN_SQL)) {
+
+            stmt.setDate(1, Date.valueOf(from));
+            stmt.setDate(2, Date.valueOf(to));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getDouble(1) : 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel calcolo del tempo medio di lavorazione", e);
+        }
     }
 
     /* =====================

@@ -16,8 +16,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @WebServlet("/dashboard")
@@ -51,19 +55,26 @@ public class DashboardServlet extends HttpServlet {
         // Recupero dati AGGREGATI
         request.setAttribute("loggedUser", user);
 
-        request.setAttribute("clientiConMotoriAttivi", dashboardController.getClientiConMotoriInOfficina());
-
-        request.setAttribute("motoriInOfficina", dashboardController.getMotoriInOfficina());
-
         request.setAttribute("workInProgressEngines", dashboardController.getWorkInProgressEngines());
 
-        request.setAttribute("motoriConsegnatiUltimaSettimana", dashboardController.getMotoriConsegnatiUltimaSettimana());
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(today);
+        LocalDate monthStart = currentMonth.atDay(1);
+        LocalDate monthEnd = currentMonth.atEndOfMonth();
+
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ITALIAN);
+        String meseCorrenteLabel = monthFormatter.format(today);
+        if (!meseCorrenteLabel.isEmpty()) {
+            meseCorrenteLabel = Character.toUpperCase(meseCorrenteLabel.charAt(0)) + meseCorrenteLabel.substring(1);
+        }
+
+        request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);
+        request.setAttribute("clientiServitiMese", dashboardController.getClientiServitiNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("tempoMedioLavorazioneMese", dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd));
 
         List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(8);
         request.setAttribute("ultimiMotori", ultimiMotori);
-
-        request.setAttribute("warehouseItemCount", dashboardController.getWarehouseItemCount());
-        request.setAttribute("warehouseOutOfStockCount", dashboardController.getWarehouseOutOfStockCount());
 
         List<WarehouseItem> ultimiArticoliMagazzino = dashboardController.listaUltimiArticoliMagazzino(6);
         request.setAttribute("ultimiArticoliMagazzino", ultimiArticoliMagazzino);

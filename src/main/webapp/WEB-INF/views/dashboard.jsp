@@ -43,26 +43,14 @@
     <!-- KPI -->
     <div class="row g-4 mb-5">
 
-        <!-- Clienti con motori in officina -->
+        <!-- Clienti serviti mese corrente -->
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">
-                    Clienti con motori in officina
+                    Clienti serviti (mese di ${meseCorrenteLabel})
                 </div>
                 <div class="kpi-value">
-                    ${clientiConMotoriAttivi}
-                </div>
-            </div>
-        </div>
-
-        <!-- Motori totali in officina -->
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="kpi-title">
-                    Motori totali in officina
-                </div>
-                <div class="kpi-value">
-                    ${motoriInOfficina}
+                    ${clientiServitiMese}
                 </div>
             </div>
         </div>
@@ -79,38 +67,26 @@
             </div>
         </div>
 
-        <!-- Motori consegnati ultima settimana -->
+        <!-- Motori consegnati mese corrente -->
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">
-                    Consegnati (ultimi 7 giorni)
+                    Motori consegnati (mese di ${meseCorrenteLabel})
                 </div>
                 <div class="kpi-value">
-                    ${motoriConsegnatiUltimaSettimana}
+                    ${motoriConsegnatiMese}
                 </div>
             </div>
         </div>
 
-        <!-- Articoli magazzino -->
+        <!-- Tempo medio lavorazione mese corrente -->
         <div class="col-md-3">
             <div class="kpi-card">
                 <div class="kpi-title">
-                    Articoli in magazzino
+                    Tempo medio lavorazione (mese di ${meseCorrenteLabel})
                 </div>
                 <div class="kpi-value">
-                    ${warehouseItemCount}
-                </div>
-            </div>
-        </div>
-
-        <!-- Articoli esauriti -->
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="kpi-title">
-                    Articoli esauriti
-                </div>
-                <div class="kpi-value">
-                    ${warehouseOutOfStockCount}
+                    ${tempoMedioLavorazioneMese} gg
                 </div>
             </div>
         </div>

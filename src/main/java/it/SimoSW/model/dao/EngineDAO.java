@@ -43,6 +43,8 @@ public interface EngineDAO {
     int countByStatus(EngineStatus status);
     int countInWorkshop();
     int countDeliveredBetween(LocalDate from, LocalDate to);
+    int countDistinctCustomersDeliveredBetween(LocalDate from, LocalDate to);
+    double averageProcessingDaysForDeliveredBetween(LocalDate from, LocalDate to);
 
 
     Optional<Engine> findByCustomerAndEngineCode(String customer, String engineCode);

@@ -49,6 +49,18 @@ public class DashboardController {
         return engineDAO.countDeliveredBetween(from, to);
     }
 
+    public int getClientiServitiNelPeriodo(LocalDate from, LocalDate to) {
+        return engineDAO.countDistinctCustomersDeliveredBetween(from, to);
+    }
+
+    public int getMotoriConsegnatiNelPeriodo(LocalDate from, LocalDate to) {
+        return engineDAO.countDeliveredBetween(from, to);
+    }
+
+    public int getTempoMedioLavorazioneNelPeriodo(LocalDate from, LocalDate to) {
+        return (int) Math.round(engineDAO.averageProcessingDaysForDeliveredBetween(from, to));
+    }
+
     /* =========================
        Lista ultimi motori (TODO)
        ========================= */
