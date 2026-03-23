@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stile globale Engine Gallery -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=5">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=6">
 </head>
 <body>
 
@@ -72,22 +72,19 @@
                        class="form-control"
                        accept="image/*"
                        multiple>
-                <div class="small text-muted mt-2">
-                    Max 100MB per file, 800MB totali
-                </div>
             </div>
 
             <!-- CLIENTE -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Nome cliente</label>
-                <div class="position-relative">
+                <div class="position-relative field-icon-wrap">
+                <span class="field-icon" aria-hidden="true">◎</span>
                 <input type="text"
                        id="customerInput"
                        name="customer"
-                       class="form-control"
+                       class="form-control has-field-icon"
                        autocomplete="off"
                        list="customerOptions"
-                       placeholder="Seleziona cliente esistente o inseriscine uno nuovo"
                        value="${customer}"
                        required>
                     <div id="customerSuggestions"
@@ -104,50 +101,51 @@
             <!-- CODICE MOTORE -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Codice motore</label>
-                <input type="text"
-                       name="engineCode"
-                       class="form-control"
-                       value="${engineCode}"
-                       required>
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon" aria-hidden="true">#</span>
+                    <input type="text"
+                           name="engineCode"
+                           class="form-control has-field-icon"
+                           value="${engineCode}"
+                           required>
+                </div>
             </div>
 
             <!-- STATO -->
             <div class="mb-3">
-                <label class="form-label fw-semibold">Stato</label>
                 <c:set var="currentStatus" value="${empty status ? 'WAITING' : status}" />
-                <select class="form-select"
-                        name="status"
-                        required>
-                    <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
-                    <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                    <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
-                    <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
-                </select>
-                <div class="status-select-preview mt-2 text-start">
-                    <span class="small text-muted">Colore stato:</span>
-                    <span id="statusPreviewBadge"
-                          class="badge-status ms-2
-                          ${currentStatus == 'WAITING' ? 'status-stoccato' : ''}
-                          ${currentStatus == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
-                          ${currentStatus == 'READY' ? 'status-ready' : ''}
-                          ${currentStatus == 'DELIVERED' ? 'status-consegnato' : ''}">
-                        <c:choose>
-                            <c:when test="${currentStatus == 'WAITING'}">In attesa</c:when>
-                            <c:when test="${currentStatus == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
-                            <c:when test="${currentStatus == 'READY'}">Pronto</c:when>
-                            <c:when test="${currentStatus == 'DELIVERED'}">Consegnato</c:when>
-                            <c:otherwise>${currentStatus}</c:otherwise>
-                        </c:choose>
-                    </span>
+                <label class="form-label fw-semibold d-inline-flex align-items-center gap-2">
+                    Stato
+                    <span id="statusColorDot"
+                          class="status-color-dot
+                          ${currentStatus == 'WAITING' ? 'status-dot-waiting' : ''}
+                          ${currentStatus == 'WORK_IN_PROGRESS' ? 'status-dot-work' : ''}
+                          ${currentStatus == 'READY' ? 'status-dot-ready' : ''}
+                          ${currentStatus == 'DELIVERED' ? 'status-dot-delivered' : ''}"
+                          aria-hidden="true"></span>
+                </label>
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon" aria-hidden="true">●</span>
+                    <select class="form-select has-field-icon"
+                            name="status"
+                            required>
+                        <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
+                        <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
+                        <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
+                        <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
+                    </select>
                 </div>
             </div>
 
             <!-- NOTE -->
             <div class="mb-4">
                 <label class="form-label fw-semibold">Note</label>
-                <textarea name="note"
-                          class="form-control"
-                          rows="3">${note}</textarea>
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon field-icon-textarea" aria-hidden="true">✎</span>
+                    <textarea name="note"
+                              class="form-control has-field-icon"
+                              rows="3">${note}</textarea>
+                </div>
             </div>
 
             <button type="submit" class="btn-engine w-100">
@@ -256,36 +254,28 @@
 
     (() => {
         const select = document.querySelector('select[name="status"]');
-        const badge = document.getElementById('statusPreviewBadge');
-        if (!select || !badge) {
+        const dot = document.getElementById('statusColorDot');
+        if (!select || !dot) {
             return;
         }
 
         const styleByStatus = {
-            WAITING: 'status-stoccato',
-            WORK_IN_PROGRESS: 'status-lavorazione',
-            READY: 'status-ready',
-            DELIVERED: 'status-consegnato'
+            WAITING: 'status-dot-waiting',
+            WORK_IN_PROGRESS: 'status-dot-work',
+            READY: 'status-dot-ready',
+            DELIVERED: 'status-dot-delivered'
         };
 
-        const labelByStatus = {
-            WAITING: 'In attesa',
-            WORK_IN_PROGRESS: 'In lavorazione',
-            READY: 'Pronto',
-            DELIVERED: 'Consegnato'
-        };
-
-        const updateBadge = () => {
-            badge.classList.remove('status-stoccato', 'status-lavorazione', 'status-ready', 'status-consegnato');
+        const updateDot = () => {
+            dot.classList.remove('status-dot-waiting', 'status-dot-work', 'status-dot-ready', 'status-dot-delivered');
             const value = select.value;
             if (styleByStatus[value]) {
-                badge.classList.add(styleByStatus[value]);
+                dot.classList.add(styleByStatus[value]);
             }
-            badge.textContent = labelByStatus[value] || value || '—';
         };
 
-        select.addEventListener('change', updateBadge);
-        updateBadge();
+        select.addEventListener('change', updateDot);
+        updateDot();
     })();
 </script>
 </html>
