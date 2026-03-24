@@ -122,7 +122,8 @@
                 }
             });
 
-            emptyState.classList.toggle('d-none', visibleCount > 0);
+            const showEmptyState = keyword.length > 0 && visibleCount === 0;
+            emptyState.classList.toggle('d-none', !showEmptyState);
         };
 
         searchInput.addEventListener('input', applyHydraulicFilter);
