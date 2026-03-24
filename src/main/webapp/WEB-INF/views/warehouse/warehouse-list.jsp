@@ -22,29 +22,31 @@
 
 <div class="container">
 
-    <div class="page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-            <h1>Magazzino</h1>
+    <div class="page-header-with-search">
+        <div class="page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h1>Magazzino</h1>
+            </div>
+            <a href="<%= request.getContextPath() %>/warehouse/new" class="btn-engine">
+                Aggiungi articolo
+            </a>
         </div>
-        <a href="<%= request.getContextPath() %>/warehouse/new" class="btn-engine">
-            Nuovo articolo
-        </a>
+
+        <div class="card-base search-panel-compact">
+            <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
+            <input type="search"
+                   id="warehouseKeywordSearch"
+                   class="form-control"
+                   placeholder="Cerca per nome, codice, ubicazione, quantita o note...">
+            <div id="warehouseKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
+                Nessun articolo corrisponde alla ricerca.
+            </div>
+        </div>
     </div>
 
     <c:if test="${not empty error}">
         <div class="alert alert-danger">${error}</div>
     </c:if>
-
-    <div class="card-base mb-4 search-panel-compact">
-        <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
-        <input type="search"
-               id="warehouseKeywordSearch"
-               class="form-control"
-               placeholder="Cerca per nome, codice, ubicazione, quantita o note...">
-        <div id="warehouseKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-            Nessun articolo corrisponde alla ricerca.
-        </div>
-    </div>
 
     <div class="customer-list" id="warehouseListGrid">
         <c:forEach var="item" items="${items}">

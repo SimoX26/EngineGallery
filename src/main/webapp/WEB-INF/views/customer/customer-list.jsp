@@ -28,9 +28,22 @@
 
 <div class="container">
 
-    <!-- HEADER -->
-    <div class="page-header">
-        <h1>Rubrica Clienti</h1>
+    <div class="page-header-with-search">
+        <!-- HEADER -->
+        <div class="page-header">
+            <h1>Rubrica Clienti</h1>
+        </div>
+
+        <div class="card-base search-panel-compact">
+            <label for="customerKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
+            <input type="search"
+                   id="customerKeywordSearch"
+                   class="form-control"
+                   placeholder="Cerca per nome, telefono, azienda, email o note...">
+            <div id="customerKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
+                Nessun cliente corrisponde alla ricerca.
+            </div>
+        </div>
     </div>
 
     <!-- ERROR -->
@@ -39,17 +52,6 @@
             ${error}
         </div>
     </c:if>
-
-    <div class="card-base mb-4 search-panel-compact">
-        <label for="customerKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
-        <input type="search"
-               id="customerKeywordSearch"
-               class="form-control"
-               placeholder="Cerca per nome, telefono, azienda, email o note...">
-        <div id="customerKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-            Nessun cliente corrisponde alla ricerca.
-        </div>
-    </div>
 
     <!-- LISTA CLIENTI -->
     <div class="customer-list" id="customerListGrid">

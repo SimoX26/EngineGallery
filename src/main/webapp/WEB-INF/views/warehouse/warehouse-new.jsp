@@ -18,11 +18,11 @@
 <div class="container-fluid d-flex align-items-center justify-content-center"
      style="min-height: calc(100vh - 70px);">
 
-    <div class="card-base text-center" style="max-width: 560px; width: 100%;">
+    <div class="card-base" style="max-width: 560px; width: 100%;">
 
-        <h2 class="mb-3">Nuovo articolo</h2>
+        <h2 class="mb-3 text-center">Aggiungi articolo</h2>
 
-        <p class="text-muted mb-4">
+        <p class="text-muted mb-4 text-center">
             Inserisci i dati del nuovo articolo di magazzino
         </p>
 
@@ -32,48 +32,69 @@
             </div>
         </c:if>
 
-        <form action="<%= request.getContextPath() %>/warehouse/new" method="post">
+        <div class="alert alert-light border text-start py-2 px-3 mb-4 clickable-fields-hint" role="note">
+            Compila i campi e premi <strong>Salva articolo</strong>.
+        </div>
+
+        <form action="<%= request.getContextPath() %>/warehouse/new"
+              method="post"
+              class="form-click-guides">
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Nome articolo</label>
-                <input type="text"
-                       name="name"
-                       class="form-control"
-                       value="${name}"
-                       required>
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon" aria-hidden="true">✎</span>
+                    <input type="text"
+                           name="name"
+                           class="form-control has-field-icon"
+                           value="${name}"
+                           required>
+                </div>
             </div>
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Codice articolo</label>
-                <input type="text"
-                       name="sku"
-                       class="form-control"
-                       value="${sku}">
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon" aria-hidden="true">#</span>
+                    <input type="text"
+                           name="sku"
+                           class="form-control has-field-icon"
+                           value="${sku}">
+                </div>
             </div>
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Quantita</label>
-                <input type="number"
-                       name="quantity"
-                       min="0"
-                       class="form-control"
-                       value="${quantity}"
-                       required>
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon" aria-hidden="true">#</span>
+                    <input type="number"
+                           name="quantity"
+                           min="0"
+                           class="form-control has-field-icon"
+                           value="${quantity}"
+                           required>
+                </div>
             </div>
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Ubicazione</label>
-                <input type="text"
-                       name="location"
-                       class="form-control"
-                       value="${location}">
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon" aria-hidden="true">⌂</span>
+                    <input type="text"
+                           name="location"
+                           class="form-control has-field-icon"
+                           value="${location}">
+                </div>
             </div>
 
             <div class="mb-4 text-start">
                 <label class="form-label fw-semibold">Note</label>
-                <textarea name="notes"
-                          class="form-control"
-                          rows="3">${notes}</textarea>
+                <div class="position-relative field-icon-wrap">
+                    <span class="field-icon field-icon-textarea" aria-hidden="true">✎</span>
+                    <textarea name="notes"
+                              class="form-control has-field-icon"
+                              rows="3">${notes}</textarea>
+                </div>
             </div>
 
             <div class="d-flex gap-2">

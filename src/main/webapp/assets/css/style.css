@@ -6,8 +6,8 @@
     --bg-dark: #1f2933;
     --bg-card: #ffffff;
 
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary: #1f2933;
+    --primary-hover: #1f2933;
 
     --text-main: #212529;
     --text-muted: #6b7280;
@@ -55,6 +55,43 @@ body {
 
 .page-header p {
     color: var(--text-muted);
+}
+
+.page-header-with-search {
+    margin: 40px 0 30px 0;
+}
+
+.page-header-with-search .page-header {
+    margin: 0;
+}
+
+.page-header-with-search .search-panel-compact {
+    margin: 0;
+}
+
+@media (min-width: 992px) {
+    .page-header-with-search {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .page-header-with-search .page-header {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .page-header-with-search .search-panel-compact {
+        flex: 0 0 min(460px, 42%);
+        width: min(460px, 42%);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .page-header-with-search .search-panel-compact {
+        margin-top: 1rem;
+    }
 }
 
 
@@ -254,7 +291,7 @@ body {
 .form-click-guides .form-control:focus,
 .form-click-guides .form-select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.18);
+    box-shadow: 0 0 0 0.2rem rgba(31, 41, 51, 0.18);
     background-color: #f8fbff;
 }
 
@@ -295,7 +332,7 @@ body {
 
 .file-input-native:focus + .file-input-visual {
     border-color: var(--primary);
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.18);
+    box-shadow: 0 0 0 0.2rem rgba(31, 41, 51, 0.18);
     background-color: #f8fbff;
 }
 
@@ -328,12 +365,12 @@ body {
 }
 
 .form-click-guides .btn-engine {
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 2px rgba(31, 41, 51, 0.2);
 }
 
 .form-click-guides .btn-engine:hover,
 .form-click-guides .btn-engine:focus {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 0 0 3px rgba(31, 41, 51, 0.25);
 }
 
 .status-color-dot {
@@ -373,7 +410,7 @@ body {
 .navbar.navbar-dark .navbar-nav .nav-link.active,
 .navbar .nav-link.active:hover,
 .navbar .nav-link.active:focus {
-    color: var(--primary) !important;
+    color: #ffffff !important;
     font-weight: 600;
 }
 .navbar {
