@@ -5,7 +5,7 @@ set -euo pipefail
 LOCAL_WEBAPPS_DEFAULT="/home/simone/apache-tomcat-9.0.112/webapps"
 REMOTE_USER_DEFAULT="admin"
 REMOTE_HOST_DEFAULT="ec2-13-62-51-239.eu-north-1.compute.amazonaws.com"
-REMOTE_WEBAPPS_DEFAULT="/opt/tomcat/webapps"
+REMOTE_WEBAPPS_DEFAULT="~"
 REMOTE_KEY_DEFAULT="/home/simone/Documenti/Keys.pem"
 
 usage() {
@@ -16,8 +16,9 @@ Uso:
 Esempi:
   ./deploy.sh --locale
   ./deploy.sh --remoto
-  ./deploy.sh --remoto --remote-path /var/lib/tomcat9/webapps
-  ./deploy.sh --target user@192.168.1.50:/opt/tomcat/webapps/
+  ./deploy.sh --remoto --remote-path ~/webapps
+  ./deploy.sh --remoto --remote-sql-path ~/sql
+  ./deploy.sh --target user@192.168.1.50:~/webapps/
 
 Opzioni:
   --locale      Copia il WAR in locale su /home/simone/apache-tomcat-9.0.112/webapps
@@ -27,7 +28,8 @@ Opzioni:
   --identity    Chiave SSH (default remoto: /home/simone/Documenti/Keys.pem)
   --remote-user Utente SSH remoto (default: admin)
   --remote-host Host SSH remoto (default: ec2-13-62-51-239.eu-north-1.compute.amazonaws.com)
-  --remote-path Cartella remota webapps (default: /opt/tomcat/webapps)
+  --remote-path Cartella remota webapps (default: ~/webapps)
+  --remote-sql-path Cartella remota script SQL (default: ~)
   --local-path  Cartella locale webapps (default: /home/simone/apache-tomcat-9.0.112/webapps)
   --skip-build  Salta 'mvn clean package' e usa WAR già presente in target/
   --help        Mostra questo aiuto
@@ -45,6 +47,7 @@ LOCAL_PATH="$LOCAL_WEBAPPS_DEFAULT"
 REMOTE_USER="$REMOTE_USER_DEFAULT"
 REMOTE_HOST="$REMOTE_HOST_DEFAULT"
 REMOTE_PATH="$REMOTE_WEBAPPS_DEFAULT"
+REMOTE_SQL_PATH=""
 SKIP_BUILD="false"
 MODE=""
 
@@ -101,6 +104,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --remote-path)
       REMOTE_PATH="${2:-}"
+      shift 2
+      ;;
+    --remote-sql-path)
+      REMOTE_SQL_PATH="${2:-}"
       shift 2
       ;;
     --local-path)
@@ -186,6 +193,25 @@ SCP_CMD+=("$WAR_FILE" "$TARGET")
 
 echo ">> Upload SCP verso: $TARGET"
 "${SCP_CMD[@]}"
+
+if [[ "$MODE" == "remoto" ]]; then
+  SQL_BASE_PATH="${REMOTE_SQL_PATH:-~}"
+  mapfile -d '' SQL_FILES < <(find src/main/resources -type f -name "*.sql" -print0 | sort -z)
+
+  if [[ "${#SQL_FILES[@]}" -gt 0 ]]; then
+    SCP_SQL_CMD=(scp -P "$PORT")
+    if [[ -n "$IDENTITY" ]]; then
+      SCP_SQL_CMD+=(-i "$IDENTITY")
+    fi
+
+    echo ">> Upload script SQL in: ${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}"
+    for sql_file in "${SQL_FILES[@]}"; do
+      "${SCP_SQL_CMD[@]}" "$sql_file" "${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}/"
+    done
+  else
+    echo ">> Nessuno script SQL trovato in src/main/resources."
+  fi
+fi
 
 echo ">> Deploy completato con successo."
 
