@@ -48,6 +48,26 @@ REMOTE_PATH="$REMOTE_WEBAPPS_DEFAULT"
 SKIP_BUILD="false"
 MODE=""
 
+resolve_ipv4() {
+  local host="$1"
+  local ip=""
+
+  if [[ "$host" == "localhost" || "$host" == "127.0.0.1" ]]; then
+    ip="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
+    if [[ -z "$ip" ]]; then
+      ip="127.0.0.1"
+    fi
+    echo "$ip"
+    return 0
+  fi
+
+  ip="$(getent ahostsv4 "$host" 2>/dev/null | awk '{print $1; exit}' || true)"
+  if [[ -z "$ip" ]]; then
+    ip="$host"
+  fi
+  echo "$ip"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --locale)
@@ -124,6 +144,8 @@ if [[ -z "$WAR_FILE" ]]; then
   echo "Errore: nessun file WAR trovato in target/." >&2
   exit 1
 fi
+WAR_NAME="$(basename "$WAR_FILE")"
+APP_CONTEXT="${WAR_NAME%.war}"
 
 # Correzione automatica typo comune: "7home/..." -> "/home/..."
 if [[ "$IDENTITY" == 7home/* ]]; then
@@ -140,6 +162,14 @@ if [[ "$MODE" == "locale" ]]; then
   echo ">> Deploy locale in: $LOCAL_PATH"
   cp -f "$WAR_FILE" "$LOCAL_PATH/"
   echo ">> Deploy locale completato."
+
+  LOCAL_IP="$(resolve_ipv4 "localhost")"
+  if [[ "$APP_CONTEXT" == "ROOT" ]]; then
+    APP_URL="http://${LOCAL_IP}:8080/"
+  else
+    APP_URL="http://${LOCAL_IP}:8080/${APP_CONTEXT}/"
+  fi
+  echo ">> Avvio applicativo: $APP_URL"
   exit 0
 fi
 
@@ -158,3 +188,24 @@ echo ">> Upload SCP verso: $TARGET"
 "${SCP_CMD[@]}"
 
 echo ">> Deploy completato con successo."
+
+if [[ "$MODE" == "remoto" ]]; then
+  REMOTE_IP="$(resolve_ipv4 "$REMOTE_HOST")"
+  if [[ "$APP_CONTEXT" == "ROOT" ]]; then
+    APP_URL="http://${REMOTE_IP}:8080/"
+  else
+    APP_URL="http://${REMOTE_IP}:8080/${APP_CONTEXT}/"
+  fi
+  echo ">> Avvio applicativo: $APP_URL"
+fi
+
+if [[ "$MODE" == "target" ]]; then
+  TARGET_HOST="$(echo "$TARGET" | sed -E 's|^([^@]+@)?([^:]+):.*$|\2|')"
+  TARGET_IP="$(resolve_ipv4 "$TARGET_HOST")"
+  if [[ "$APP_CONTEXT" == "ROOT" ]]; then
+    APP_URL="http://${TARGET_IP}:8080/"
+  else
+    APP_URL="http://${TARGET_IP}:8080/${APP_CONTEXT}/"
+  fi
+  echo ">> Avvio applicativo (stimato): $APP_URL"
+fi
