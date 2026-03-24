@@ -12,28 +12,43 @@ public final class UploadPathResolver {
     }
 
     public static Path resolveUploadBase(ServletContext context) {
+        return resolveUploadRoot(context).resolve("engines").normalize();
+    }
+
+    public static Path resolveHydraulicUploadBase(ServletContext context) {
+        return resolveUploadRoot(context).resolve("hydraulic").normalize();
+    }
+
+    private static Path resolveUploadRoot(ServletContext context) {
         String configured = System.getProperty(SYS_PROP);
         if (configured == null || configured.isBlank()) {
             configured = System.getenv(ENV_VAR);
         }
         if (configured != null && !configured.isBlank()) {
-            return Paths.get(configured).toAbsolutePath().normalize();
+            Path configuredPath = Paths.get(configured).toAbsolutePath().normalize();
+            String lastSegment = configuredPath.getFileName() != null
+                    ? configuredPath.getFileName().toString()
+                    : "";
+            if ("engines".equalsIgnoreCase(lastSegment) || "hydraulic".equalsIgnoreCase(lastSegment)) {
+                return configuredPath.getParent() != null ? configuredPath.getParent() : configuredPath;
+            }
+            return configuredPath;
         }
 
         String userHome = System.getProperty("user.home");
         if (userHome != null && !userHome.isBlank()) {
-            return Paths.get(userHome, "EngineGallery", "uploads", "engines")
+            return Paths.get(userHome, "EngineGallery", "uploads")
                     .toAbsolutePath()
                     .normalize();
         }
 
         if (context != null) {
-            String realPath = context.getRealPath("/uploads/engines");
+            String realPath = context.getRealPath("/uploads");
             if (realPath != null) {
                 return Paths.get(realPath).toAbsolutePath().normalize();
             }
         }
 
-        return Paths.get("uploads", "engines").toAbsolutePath().normalize();
+        return Paths.get("uploads").toAbsolutePath().normalize();
     }
 }

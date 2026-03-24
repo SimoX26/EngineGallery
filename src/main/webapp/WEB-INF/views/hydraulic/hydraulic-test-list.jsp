@@ -24,8 +24,11 @@
 
     <div class="container">
 
-        <div class="page-header">
-            <h1>Prove idrauliche</h1>
+        <div class="page-header d-flex align-items-center justify-content-between gap-2 flex-wrap">
+            <h1 class="mb-0">Prove idrauliche</h1>
+            <a class="btn-engine" href="<%= request.getContextPath() %>/hydraulic-test/new">
+                Aggiungi prova idraulica
+            </a>
         </div>
 
         <c:if test="${not empty error}">
@@ -48,22 +51,28 @@
             <c:when test="${not empty hydraulicTests}">
                 <div class="row g-4" id="hydraulicGalleryGrid">
                     <c:forEach var="test" items="${hydraulicTests}">
-                        <div class="col-xl-4 col-lg-6 hydraulic-card-col"
+                        <div class="col-xl-3 col-lg-4 col-md-6 hydraulic-card-col"
                              data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${test.testDate}">
+                            <a class="engine-card-link" href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}">
                             <div class="engine-gallery-card h-100">
                                 <div class="hydraulic-video-wrap">
-                                    <video class="hydraulic-video" controls preload="metadata">
-                                        <source src="${fn:escapeXml(test.videoUrl)}" type="video/mp4">
+                                    <video class="hydraulic-video" muted preload="metadata">
+                                        <c:choose>
+                                            <c:when test="${fn:startsWith(test.videoUrl, 'http://') || fn:startsWith(test.videoUrl, 'https://')}">
+                                                <source src="${fn:escapeXml(test.videoUrl)}">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <source src="${pageContext.request.contextPath}/uploads/hydraulic/${fn:escapeXml(test.videoUrl)}">
+                                            </c:otherwise>
+                                        </c:choose>
                                         Il browser non supporta la riproduzione video.
                                     </video>
                                 </div>
 
                                 <div class="engine-body">
                                     <div class="engine-code">
+                                        <c:out value="${test.engineCode}" default="—" /> -
                                         <c:out value="${test.customerName}" default="Cliente non disponibile" />
-                                    </div>
-                                    <div class="engine-client">
-                                        Codice motore: <c:out value="${test.engineCode}" default="—" />
                                     </div>
                                     <div class="engine-client">
                                         Data prova: <c:out value="${test.testDate}" default="—" />
@@ -75,6 +84,7 @@
                                     </c:if>
                                 </div>
                             </div>
+                            </a>
                         </div>
                     </c:forEach>
                 </div>
