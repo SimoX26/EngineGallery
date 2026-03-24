@@ -43,6 +43,14 @@ VALUES
 
 
 
+INSERT INTO hydraulic_tests
+(customer_name, engine_code, video_url, test_date, notes)
+VALUES
+('Mario Rossi', 'N47D20A', 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4', '2026-01-12', 'Prova pressione circuito completata'),
+('Luigi Bianchi', 'K9K', 'https://samplelib.com/lib/preview/mp4/sample-10s.mp4', '2026-01-11', 'Verifica tenuta valvole testata'),
+('Auto Sprint', '1.3 MJTD', 'https://samplelib.com/lib/preview/mp4/sample-15s.mp4', '2026-01-10', 'Esito prova conforme ai parametri');
+
+
 INSERT INTO images (engine_id, filename, uploaded_by) VALUES
 -- ENG-2026-00001
 (1, 'n47_front.jpg', 3),

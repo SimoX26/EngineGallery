@@ -63,6 +63,14 @@
 
                 <li class="nav-item">
                     <a class="nav-link
+                       ${fn:startsWith(servletPath, "/hydraulic-test") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/hydraulic-test/list">
+                        Prove idrauliche
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link
                        ${fn:startsWith(servletPath, "/warehouse") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/warehouse/list">
                         Magazzino

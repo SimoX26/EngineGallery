@@ -555,6 +555,23 @@ body {
     align-items: center;
 }
 
+.hydraulic-video-wrap {
+    aspect-ratio: 16 / 9;
+    background-color: #0f172a;
+}
+
+.hydraulic-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hydraulic-notes {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
 
 
 /* =====================
