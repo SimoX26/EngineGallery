@@ -41,6 +41,7 @@
 
         <!-- Area upload -->
         <form id="uploadForm"
+              class="form-click-guides"
               action="<%= request.getContextPath() %>/upload"
               method="post"
               enctype="multipart/form-data">

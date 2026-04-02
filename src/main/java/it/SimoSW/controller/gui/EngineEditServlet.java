@@ -56,6 +56,9 @@ public class EngineEditServlet extends HttpServlet {
                 detail.getEngine().getIntakeDate(),
                 detail.getEngine().getDeliveryDate(),
                 detail.getEngine().getNotes());
+        request.setAttribute("engineImages", detail.getImages());
+        request.setAttribute("imagesUpdated", "1".equals(request.getParameter("imagesUpdated")));
+        request.setAttribute("imageError", "1".equals(request.getParameter("imageError")));
 
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-edit.jsp").forward(request, response);
     }
@@ -71,6 +74,7 @@ public class EngineEditServlet extends HttpServlet {
         String note = safeTrim(request.getParameter("note"));
 
         bindFormData(request, engineRef, customerName, engineCode, statusParam, intakeDate, deliveryDate, note);
+        bindImagesForEdit(request, engineRef);
 
         if (!isValidEngineRef(engineRef)) {
             request.setAttribute("error", "Riferimento motore non valido");
@@ -181,5 +185,15 @@ public class EngineEditServlet extends HttpServlet {
         request.setAttribute("intakeDate", intakeDate);
         request.setAttribute("deliveryDate", deliveryDate);
         request.setAttribute("note", note);
+    }
+
+    private void bindImagesForEdit(HttpServletRequest request, String engineRef) {
+        if (!isValidEngineRef(engineRef)) {
+            return;
+        }
+        EngineDetailBean detail = engineController.getEngineDetail(engineRef);
+        if (detail != null) {
+            request.setAttribute("engineImages", detail.getImages());
+        }
     }
 }

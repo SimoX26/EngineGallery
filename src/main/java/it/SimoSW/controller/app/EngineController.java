@@ -292,6 +292,33 @@ public class EngineController {
         return imageDAO.save(image);
     }
 
+    public boolean deleteImageByFilename(String engineRef, String filename) {
+
+        if (engineRef == null || engineRef.isBlank()) {
+            throw new IllegalArgumentException("engineRef obbligatorio");
+        }
+
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalArgumentException("filename obbligatorio");
+        }
+
+        Engine engine = engineDAO.findByEngineRef(engineRef)
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Motore con ref " + engineRef + " non esistente"
+                        )
+                );
+
+        List<Image> images = imageDAO.findAllByEngineId(engine.getId());
+        for (Image image : images) {
+            if (filename.equals(image.getFilename())) {
+                return imageDAO.delete(image.getId());
+            }
+        }
+
+        return false;
+    }
+
     public boolean deleteEngine(String engineRef) {
 
         // =========================
