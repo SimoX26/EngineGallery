@@ -45,7 +45,9 @@
             </div>
         </c:if>
 
-        <form action="<%= request.getContextPath() %>/engine/edit?ref=${engineRef}" method="post">
+        <form action="<%= request.getContextPath() %>/engine/edit?ref=${engineRef}"
+              method="post"
+              class="form-click-guides">
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Riferimento</label>
@@ -232,7 +234,10 @@
 <div class="modal fade" id="engineImagesModal" tabindex="-1" aria-labelledby="engineImagesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <form action="<%= request.getContextPath() %>/engine/edit/images" method="post" enctype="multipart/form-data">
+            <form action="<%= request.getContextPath() %>/engine/edit/images"
+                  method="post"
+                  enctype="multipart/form-data"
+                  class="form-click-guides">
                 <div class="modal-header">
                     <h5 class="modal-title" id="engineImagesModalLabel">Modifica immagini</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>

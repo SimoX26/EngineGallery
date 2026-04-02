@@ -49,7 +49,7 @@ public class EngineImageEditServlet extends HttpServlet {
         try {
             applyImageDeletions(request, engineRef);
             applyImageAdditions(request, engineRef);
-            response.sendRedirect(request.getContextPath() + "/engine/edit?ref=" + engineRef + "&imagesUpdated=1");
+            response.sendRedirect(request.getContextPath() + "/engine/edit?ref=" + engineRef + "&imagesUpdated=1&lockBack=1");
         } catch (IllegalArgumentException ex) {
             response.sendRedirect(request.getContextPath() + "/engine/edit?ref=" + engineRef + "&imageError=1");
         } catch (RuntimeException ex) {
