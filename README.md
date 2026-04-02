@@ -27,6 +27,16 @@ Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessi
 
 L’applicazione è progettata per essere **scalabile, estendibile e manutenibile**, con particolare attenzione alle buone pratiche di ingegneria del software.
 
+#### 📱 Versione Android installabile
+
+Nel repository è presente il progetto Android in:
+
+`android-app/`
+
+Guida build/install APK:
+
+`android-app/README.md`
+
 #### 📁 Percorso di salvataggio immagini
 
 Per default le immagini vengono salvate nella cartella:
@@ -39,4 +49,3 @@ Puoi personalizzare il percorso con:
 
 - variabile ambiente `ENGINE_GALLERY_UPLOAD_DIR`
 - system property `enginegallery.upload.dir`
-

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Engine Gallery</string>
+    <string name="file_picker_title">Seleziona file</string>
+    <string name="file_error">Impossibile preparare il file</string>
+</resources>

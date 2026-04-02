@@ -1,0 +1,2 @@
+# Copia in local.properties e modifica in base al tuo ambiente
+sdk.dir=/percorso/android-sdk
