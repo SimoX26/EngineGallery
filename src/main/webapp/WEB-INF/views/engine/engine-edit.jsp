@@ -186,6 +186,7 @@
     })();
 
     (() => {
+        const initImageModalHandlers = () => {
         const modal = document.getElementById('engineImagesModal');
         if (!modal) {
             return;
@@ -228,6 +229,13 @@
                 card.remove();
             }
         });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initImageModalHandlers);
+            return;
+        }
+        initImageModalHandlers();
     })();
 </script>
 
