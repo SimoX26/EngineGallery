@@ -33,21 +33,16 @@
             </div>
         </c:if>
 
-        <div class="alert alert-light border text-start py-2 px-3 mb-4 clickable-fields-hint" role="note">
-            Compila i campi e premi <strong>Salva articolo</strong>.
-        </div>
-
         <form action="<%= request.getContextPath() %>/warehouse/new"
               method="post"
               class="form-click-guides">
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Nome articolo</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon" aria-hidden="true">✎</span>
+                <div class="position-relative">
                     <input type="text"
                            name="name"
-                           class="form-control has-field-icon"
+                           class="form-control"
                            value="${name}"
                            required>
                 </div>
@@ -55,23 +50,21 @@
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Codice articolo</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon" aria-hidden="true">#</span>
+                <div class="position-relative">
                     <input type="text"
                            name="sku"
-                           class="form-control has-field-icon"
+                           class="form-control"
                            value="${sku}">
                 </div>
             </div>
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Quantita</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon" aria-hidden="true">#</span>
+                <div class="position-relative">
                     <input type="number"
                            name="quantity"
                            min="0"
-                           class="form-control has-field-icon"
+                           class="form-control"
                            value="${quantity}"
                            required>
                 </div>
@@ -79,21 +72,19 @@
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Ubicazione</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon" aria-hidden="true">⌂</span>
+                <div class="position-relative">
                     <input type="text"
                            name="location"
-                           class="form-control has-field-icon"
+                           class="form-control"
                            value="${location}">
                 </div>
             </div>
 
             <div class="mb-4 text-start">
                 <label class="form-label fw-semibold">Note</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon field-icon-textarea" aria-hidden="true">✎</span>
+                <div class="position-relative">
                     <textarea name="notes"
-                              class="form-control has-field-icon"
+                              class="form-control"
                               rows="3">${notes}</textarea>
                 </div>
             </div>
