@@ -34,19 +34,10 @@
                 ${error}
             </div>
         </c:if>
-        <c:if test="${imagesUpdated}">
-            <div class="alert alert-success text-start" role="alert">
-                Modifiche immagini salvate correttamente.
-            </div>
-        </c:if>
-        <c:if test="${imageError}">
-            <div class="alert alert-danger text-start" role="alert">
-                Errore durante il salvataggio delle immagini.
-            </div>
-        </c:if>
 
         <form action="<%= request.getContextPath() %>/engine/edit?ref=${engineRef}"
               method="post"
+              enctype="multipart/form-data"
               class="form-click-guides">
 
             <div class="mb-3 text-start">
@@ -127,13 +118,39 @@
                           rows="3">${note}</textarea>
             </div>
 
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold">Immagini motore</label>
+                <div class="engine-images-edit-list mb-3" data-image-list>
+                    <c:choose>
+                        <c:when test="${not empty engineImages}">
+                            <c:forEach var="image" items="${engineImages}">
+                                <div class="engine-image-edit-card" data-image-card>
+                                    <button type="button"
+                                            class="engine-image-delete-btn"
+                                            data-delete-image
+                                            data-filename="${fn:escapeXml(image.filename)}"
+                                            title="Elimina immagine"
+                                            aria-label="Elimina immagine">X</button>
+                                    <img src="<%= request.getContextPath() %>/uploads/engines/${engineRef}/${image.filename}"
+                                         alt="Immagine motore"
+                                         class="engine-image-edit-preview">
+                                    <div class="small text-muted mt-1 text-truncate">
+                                        <c:out value="${image.filename}" />
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="text-muted small">Nessuna immagine presente.</div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <div data-deletions-container></div>
+            </div>
+
             <div class="mb-4 text-start">
-                <button type="button"
-                        class="btn btn-outline-primary w-100"
-                        data-bs-toggle="modal"
-                        data-bs-target="#engineImagesModal">
-                    Modifica immagini
-                </button>
+                <label class="form-label fw-semibold">Aggiungi nuove immagini</label>
+                <input type="file" name="newImages" class="form-control" accept="image/*" multiple>
             </div>
 
             <div class="d-flex gap-2">
@@ -186,14 +203,8 @@
     })();
 
     (() => {
-        const initImageModalHandlers = () => {
-        const modal = document.getElementById('engineImagesModal');
-        if (!modal) {
-            return;
-        }
-
-        const list = modal.querySelector('[data-image-list]');
-        const deletionsContainer = modal.querySelector('[data-deletions-container]');
+        const list = document.querySelector('[data-image-list]');
+        const deletionsContainer = document.querySelector('[data-deletions-container]');
         if (!list || !deletionsContainer) {
             return;
         }
@@ -229,72 +240,8 @@
                 card.remove();
             }
         });
-        };
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initImageModalHandlers);
-            return;
-        }
-        initImageModalHandlers();
     })();
 </script>
-
-<div class="modal fade" id="engineImagesModal" tabindex="-1" aria-labelledby="engineImagesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <form action="<%= request.getContextPath() %>/engine/edit/images"
-                  method="post"
-                  enctype="multipart/form-data"
-                  class="form-click-guides">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="engineImagesModalLabel">Modifica immagini</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-                </div>
-
-                <div class="modal-body">
-                    <input type="hidden" name="engineRef" value="${engineRef}">
-                    <div data-deletions-container></div>
-
-                    <div class="engine-images-edit-list mb-3" data-image-list>
-                        <c:choose>
-                            <c:when test="${not empty engineImages}">
-                                <c:forEach var="image" items="${engineImages}">
-                                    <div class="engine-image-edit-card" data-image-card>
-                                        <button type="button"
-                                                class="engine-image-delete-btn"
-                                                data-delete-image
-                                                data-filename="${fn:escapeXml(image.filename)}"
-                                                title="Elimina immagine"
-                                                aria-label="Elimina immagine">X</button>
-                                        <img src="<%= request.getContextPath() %>/uploads/engines/${engineRef}/${image.filename}"
-                                             alt="Immagine motore"
-                                             class="engine-image-edit-preview">
-                                        <div class="small text-muted mt-1 text-truncate">
-                                            <c:out value="${image.filename}" />
-                                        </div>
-                                    </div>
-                                </c:forEach>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="text-muted small">Nessuna immagine presente.</div>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-
-                    <div>
-                        <label class="form-label fw-semibold">Aggiungi nuove immagini</label>
-                        <input type="file" name="newImages" class="form-control" accept="image/*" multiple>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
-                    <button type="submit" class="btn-engine">Salva modifiche immagini</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 </body>
 </html>
