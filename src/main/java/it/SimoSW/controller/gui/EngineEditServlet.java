@@ -5,6 +5,7 @@ import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
+import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
@@ -19,14 +20,11 @@ import javax.servlet.http.Part;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 @WebServlet("/engine/edit")
 @MultipartConfig(
@@ -279,42 +277,8 @@ public class EngineEditServlet extends HttpServlet {
         Files.createDirectories(engineDir);
 
         for (Part part : validImageParts) {
-            String submittedName = part.getSubmittedFileName();
-            String originalName = submittedName == null ? "image.jpg" : Paths.get(submittedName).getFileName().toString();
-            String sanitized = sanitizeFilename(originalName);
-            String storedFilename = UUID.randomUUID() + "_" + sanitized;
-
-            Path destination = engineDir.resolve(storedFilename).normalize();
-            if (!destination.startsWith(engineDir)) {
-                continue;
-            }
-
-            part.write(destination.toString());
+            String storedFilename = ImageOptimizationUtil.storeOptimizedImage(part, engineDir);
             engineController.addImage(engineRef, storedFilename);
         }
-    }
-
-    private static String sanitizeFilename(String filename) {
-        String value = (filename == null || filename.isBlank()) ? "image.jpg" : filename;
-        String normalized = Paths.get(value).getFileName().toString().replace(' ', '_');
-        StringBuilder builder = new StringBuilder(normalized.length());
-        for (int i = 0; i < normalized.length(); i++) {
-            char ch = normalized.charAt(i);
-            if (Character.isLetterOrDigit(ch) || ch == '.' || ch == '_' || ch == '-') {
-                builder.append(ch);
-            } else {
-                builder.append('_');
-            }
-        }
-        String sanitized = builder.toString();
-        if (sanitized.isBlank()) {
-            return "image.jpg";
-        }
-
-        String lower = sanitized.toLowerCase(Locale.ROOT);
-        if (!lower.contains(".")) {
-            return sanitized + ".jpg";
-        }
-        return sanitized;
     }
 }

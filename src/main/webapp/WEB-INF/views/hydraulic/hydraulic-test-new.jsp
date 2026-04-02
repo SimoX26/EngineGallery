@@ -42,8 +42,21 @@
 
             <div class="mb-3">
                 <label class="form-label fw-semibold">Video prova</label>
-                <input type="file" name="videoFile" class="form-control" accept="video/*" required>
+                <div class="file-input-wrap">
+                    <input type="file"
+                           id="videoFileInput"
+                           name="videoFile"
+                           class="file-input-native"
+                           accept="video/*"
+                           required>
+                    <label for="videoFileInput" class="file-input-visual file-input-visual-label mb-0">
+                        Seleziona video
+                    </label>
+                </div>
                 <div class="small text-muted mt-1">Formati supportati: video/*</div>
+                <div id="videoPreviewWrap" class="selected-video-preview-wrap mt-2 d-none">
+                    <video id="videoPreview" class="selected-video-preview" controls preload="metadata"></video>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -64,6 +77,33 @@
     </div>
 </div>
 
+<script>
+    (() => {
+        const input = document.getElementById('videoFileInput');
+        const wrap = document.getElementById('videoPreviewWrap');
+        const preview = document.getElementById('videoPreview');
+        if (!input || !wrap || !preview) {
+            return;
+        }
+
+        input.addEventListener('change', function () {
+            const file = input.files && input.files.length > 0 ? input.files[0] : null;
+            if (!file || !file.type || !file.type.startsWith('video/')) {
+                preview.removeAttribute('src');
+                preview.load();
+                wrap.classList.add('d-none');
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(file);
+            preview.src = objectUrl;
+            preview.onloadeddata = function () {
+                URL.revokeObjectURL(objectUrl);
+            };
+            wrap.classList.remove('d-none');
+        });
+    })();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

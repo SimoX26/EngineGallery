@@ -63,13 +63,18 @@
             <!-- UPLOAD -->
             <div class="mb-4">
                 <label class="form-label fw-semibold">Immagini</label>
-                <input type="file"
-                       id="imagesInput"
-                       name="images"
-                       class="form-control"
-                       accept="image/*"
-                       multiple>
-                <div id="imagesSelectionInfo" class="small text-muted mt-2">0 file selezionati</div>
+                <div class="file-input-wrap">
+                    <input type="file"
+                           id="imagesInput"
+                           name="images"
+                           class="file-input-native"
+                           accept="image/*"
+                           multiple>
+                    <label for="imagesInput" class="file-input-visual file-input-visual-label mb-0">
+                        Seleziona immagini
+                    </label>
+                </div>
+                <div id="imagesPreviewList" class="engine-images-edit-list mt-2 d-none"></div>
             </div>
 
             <!-- CLIENTE -->
@@ -158,7 +163,7 @@
     const MAX_FILE_SIZE = 100 * 1024 * 1024;     // 100 MB
     const MAX_TOTAL_SIZE = 800 * 1024 * 1024;    // 800 MB
     const imagesInput = document.getElementById('imagesInput');
-    const imagesSelectionInfo = document.getElementById('imagesSelectionInfo');
+    const imagesPreviewList = document.getElementById('imagesPreviewList');
     const customerInput = document.getElementById('customerInput');
     const customerSuggestions = document.getElementById('customerSuggestions');
     const customerNames = Array.from(document.querySelectorAll('#customerOptions option'))
@@ -219,10 +224,64 @@
         customerSuggestions.classList.remove('d-none');
     }
 
-    if (imagesInput && imagesSelectionInfo) {
+    function renderSelectedImagesPreview(input, container) {
+        container.innerHTML = '';
+        const files = input.files ? Array.from(input.files) : [];
+        const hasImages = files.some((file) => file.type && file.type.startsWith('image/'));
+        if (!hasImages) {
+            container.classList.add('d-none');
+            return;
+        }
+
+        files.forEach((file, index) => {
+            if (!file.type || !file.type.startsWith('image/')) {
+                return;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'engine-image-edit-card';
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'engine-image-delete-btn';
+            removeButton.textContent = 'X';
+            removeButton.setAttribute('aria-label', 'Rimuovi immagine selezionata');
+            removeButton.title = 'Rimuovi';
+            removeButton.addEventListener('click', function () {
+                const currentFiles = input.files ? Array.from(input.files) : [];
+                const transfer = new DataTransfer();
+                currentFiles.forEach((currentFile, currentIndex) => {
+                    if (currentIndex !== index) {
+                        transfer.items.add(currentFile);
+                    }
+                });
+                input.files = transfer.files;
+                renderSelectedImagesPreview(input, container);
+            });
+
+            const img = document.createElement('img');
+            img.className = 'engine-image-edit-preview';
+            img.alt = file.name;
+            const objectUrl = URL.createObjectURL(file);
+            img.src = objectUrl;
+            img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+
+            const filename = document.createElement('div');
+            filename.className = 'small text-muted mt-1 text-truncate';
+            filename.textContent = file.name;
+
+            card.appendChild(removeButton);
+            card.appendChild(img);
+            card.appendChild(filename);
+            container.appendChild(card);
+        });
+
+        container.classList.remove('d-none');
+    }
+
+    if (imagesInput && imagesPreviewList) {
         imagesInput.addEventListener('change', function () {
-            const selectedFiles = imagesInput.files ? imagesInput.files.length : 0;
-            imagesSelectionInfo.textContent = selectedFiles + ' file selezionati';
+            renderSelectedImagesPreview(imagesInput, imagesPreviewList);
         });
     }
 

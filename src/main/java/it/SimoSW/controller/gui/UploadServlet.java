@@ -7,6 +7,7 @@ import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 import it.SimoSW.util.UploadPathResolver;
+import it.SimoSW.util.ImageOptimizationUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -16,7 +17,6 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -214,11 +214,7 @@ public class UploadServlet extends HttpServlet {
             if (submittedName == null || submittedName.isBlank()) {
                 continue;
             }
-
-            String originalName = Paths.get(submittedName).getFileName().toString();
-
-            String safeFileName = UUID.randomUUID() + "_" + originalName;
-            pendingImages.add(new PendingImage(part, safeFileName));
+            pendingImages.add(new PendingImage(part));
         }
 
         if (pendingImages.isEmpty() && "existing".equals(engineMode)) {
@@ -272,9 +268,8 @@ public class UploadServlet extends HttpServlet {
             Files.createDirectories(engineDir);
 
             for (PendingImage pendingImage : pendingImages) {
-                Path destination = engineDir.resolve(pendingImage.filename);
-                pendingImage.part.write(destination.toString());
-                engineController.addImage(engineRef, pendingImage.filename);
+                String storedFilename = ImageOptimizationUtil.storeOptimizedImage(pendingImage.part, engineDir);
+                engineController.addImage(engineRef, storedFilename);
             }
         }
 
@@ -295,11 +290,9 @@ public class UploadServlet extends HttpServlet {
 
     private static final class PendingImage {
         private final Part part;
-        private final String filename;
 
-        private PendingImage(Part part, String filename) {
+        private PendingImage(Part part) {
             this.part = part;
-            this.filename = filename;
         }
     }
 }

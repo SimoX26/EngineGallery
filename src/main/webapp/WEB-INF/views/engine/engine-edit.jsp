@@ -41,84 +41,6 @@
               class="form-click-guides">
 
             <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Riferimento</label>
-                <input type="text" class="form-control" value="${engineRef}" readonly>
-            </div>
-
-            <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Nome cliente</label>
-                <input type="text"
-                       name="customer"
-                       class="form-control"
-                       value="${customer}"
-                       required>
-            </div>
-
-            <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Codice motore</label>
-                <input type="text"
-                       name="engineCode"
-                       class="form-control"
-                       value="${engineCode}"
-                       required>
-            </div>
-
-            <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Stato</label>
-                <c:set var="currentStatus" value="${empty status ? 'WAITING' : status}" />
-                <select class="form-select" name="status" required>
-                    <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
-                    <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                    <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
-                    <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
-                </select>
-                <div class="status-select-preview mt-2">
-                    <span class="small text-muted">Colore stato:</span>
-                    <span id="statusPreviewBadge"
-                          class="badge-status ms-2
-                          ${currentStatus == 'WAITING' ? 'status-stoccato' : ''}
-                          ${currentStatus == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
-                          ${currentStatus == 'READY' ? 'status-ready' : ''}
-                          ${currentStatus == 'DELIVERED' ? 'status-consegnato' : ''}">
-                        <c:choose>
-                            <c:when test="${currentStatus == 'WAITING'}">In attesa</c:when>
-                            <c:when test="${currentStatus == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
-                            <c:when test="${currentStatus == 'READY'}">Pronto</c:when>
-                            <c:when test="${currentStatus == 'DELIVERED'}">Consegnato</c:when>
-                            <c:otherwise>${currentStatus}</c:otherwise>
-                        </c:choose>
-                    </span>
-                </div>
-            </div>
-
-            <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Data ingresso</label>
-                <input type="date"
-                       name="intakeDate"
-                       class="form-control"
-                       value="${intakeDate}"
-                       required>
-            </div>
-
-            <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Data consegna</label>
-                <input type="date"
-                       name="deliveryDate"
-                       class="form-control"
-                       value="${deliveryDate}">
-                <div class="small text-muted mt-1">
-                    Usata solo se lo stato è "Consegnato".
-                </div>
-            </div>
-
-            <div class="mb-4 text-start">
-                <label class="form-label fw-semibold">Note</label>
-                <textarea name="note"
-                          class="form-control"
-                          rows="3">${note}</textarea>
-            </div>
-
-            <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Immagini motore</label>
                 <div class="engine-images-edit-list mb-3" data-image-list>
                     <c:choose>
@@ -150,7 +72,88 @@
 
             <div class="mb-4 text-start">
                 <label class="form-label fw-semibold">Aggiungi nuove immagini</label>
-                <input type="file" name="newImages" class="form-control" accept="image/*" multiple>
+                <div class="file-input-wrap">
+                    <input type="file"
+                           id="newImagesInput"
+                           name="newImages"
+                           class="file-input-native"
+                           accept="image/*"
+                           multiple>
+                    <label for="newImagesInput" class="file-input-visual file-input-visual-label mb-0">
+                        Seleziona immagini
+                    </label>
+                </div>
+                <div id="newImagesPreviewList" class="engine-images-edit-list mt-2 d-none"></div>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold">Riferimento</label>
+                <input type="text" class="form-control" value="${engineRef}" readonly>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold">Nome cliente</label>
+                <input type="text"
+                       name="customer"
+                       class="form-control"
+                       value="${customer}"
+                       required>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold">Codice motore</label>
+                <input type="text"
+                       name="engineCode"
+                       class="form-control"
+                       value="${engineCode}"
+                       required>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold d-inline-flex align-items-center gap-2">
+                    Stato
+                    <c:set var="currentStatus" value="${empty status ? 'WAITING' : status}" />
+                    <span id="statusColorDot"
+                          class="status-color-dot
+                          ${currentStatus == 'WAITING' ? 'status-dot-waiting' : ''}
+                          ${currentStatus == 'WORK_IN_PROGRESS' ? 'status-dot-work' : ''}
+                          ${currentStatus == 'READY' ? 'status-dot-ready' : ''}
+                          ${currentStatus == 'DELIVERED' ? 'status-dot-delivered' : ''}"
+                          aria-hidden="true"></span>
+                </label>
+                <select class="form-select" name="status" required>
+                    <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
+                    <option value="WORK_IN_PROGRESS" ${status == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
+                    <option value="READY" ${status == 'READY' ? 'selected' : ''}>Pronto</option>
+                    <option value="DELIVERED" ${status == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
+                </select>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold">Data ingresso</label>
+                <input type="date"
+                       name="intakeDate"
+                       class="form-control"
+                       value="${intakeDate}"
+                       required>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-semibold">Data consegna</label>
+                <input type="date"
+                       name="deliveryDate"
+                       class="form-control"
+                       value="${deliveryDate}">
+                <div class="small text-muted mt-1">
+                    Usata solo se lo stato è "Consegnato".
+                </div>
+            </div>
+
+            <div class="mb-4 text-start">
+                <label class="form-label fw-semibold">Note</label>
+                <textarea name="note"
+                          class="form-control"
+                          rows="3">${note}</textarea>
             </div>
 
             <div class="d-flex gap-2">
@@ -170,36 +173,28 @@
 <script>
     (() => {
         const select = document.querySelector('select[name="status"]');
-        const badge = document.getElementById('statusPreviewBadge');
-        if (!select || !badge) {
+        const dot = document.getElementById('statusColorDot');
+        if (!select || !dot) {
             return;
         }
 
         const styleByStatus = {
-            WAITING: 'status-stoccato',
-            WORK_IN_PROGRESS: 'status-lavorazione',
-            READY: 'status-ready',
-            DELIVERED: 'status-consegnato'
+            WAITING: 'status-dot-waiting',
+            WORK_IN_PROGRESS: 'status-dot-work',
+            READY: 'status-dot-ready',
+            DELIVERED: 'status-dot-delivered'
         };
 
-        const labelByStatus = {
-            WAITING: 'In attesa',
-            WORK_IN_PROGRESS: 'In lavorazione',
-            READY: 'Pronto',
-            DELIVERED: 'Consegnato'
-        };
-
-        const updateBadge = () => {
-            badge.classList.remove('status-stoccato', 'status-lavorazione', 'status-ready', 'status-consegnato');
+        const updateDot = () => {
+            dot.classList.remove('status-dot-waiting', 'status-dot-work', 'status-dot-ready', 'status-dot-delivered');
             const value = select.value;
             if (styleByStatus[value]) {
-                badge.classList.add(styleByStatus[value]);
+                dot.classList.add(styleByStatus[value]);
             }
-            badge.textContent = labelByStatus[value] || value || '—';
         };
 
-        select.addEventListener('change', updateBadge);
-        updateBadge();
+        select.addEventListener('change', updateDot);
+        updateDot();
     })();
 
     (() => {
@@ -239,6 +234,73 @@
             if (card) {
                 card.remove();
             }
+        });
+    })();
+
+    (() => {
+        const input = document.getElementById('newImagesInput');
+        const previewList = document.getElementById('newImagesPreviewList');
+        if (!input || !previewList) {
+            return;
+        }
+
+        const renderPreview = () => {
+            previewList.innerHTML = '';
+            const files = input.files ? Array.from(input.files) : [];
+            const hasImages = files.some((file) => file.type && file.type.startsWith('image/'));
+            if (!hasImages) {
+                previewList.classList.add('d-none');
+                return;
+            }
+
+            files.forEach((file, index) => {
+                if (!file.type || !file.type.startsWith('image/')) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'engine-image-edit-card';
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'engine-image-delete-btn';
+                removeButton.textContent = 'X';
+                removeButton.setAttribute('aria-label', 'Rimuovi immagine selezionata');
+                removeButton.title = 'Rimuovi';
+                removeButton.addEventListener('click', function () {
+                    const currentFiles = input.files ? Array.from(input.files) : [];
+                    const transfer = new DataTransfer();
+                    currentFiles.forEach((currentFile, currentIndex) => {
+                        if (currentIndex !== index) {
+                            transfer.items.add(currentFile);
+                        }
+                    });
+                    input.files = transfer.files;
+                    renderPreview();
+                });
+
+                const img = document.createElement('img');
+                img.className = 'engine-image-edit-preview';
+                img.alt = file.name;
+                const objectUrl = URL.createObjectURL(file);
+                img.src = objectUrl;
+                img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+
+                const filename = document.createElement('div');
+                filename.className = 'small text-muted mt-1 text-truncate';
+                filename.textContent = file.name;
+
+                card.appendChild(removeButton);
+                card.appendChild(img);
+                card.appendChild(filename);
+                previewList.appendChild(card);
+            });
+
+            previewList.classList.remove('d-none');
+        };
+
+        input.addEventListener('change', function () {
+            renderPreview();
         });
     })();
 </script>
