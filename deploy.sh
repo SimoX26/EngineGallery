@@ -11,7 +11,7 @@ REMOTE_KEY_DEFAULT="/home/simone/Documenti/Keys.pem"
 usage() {
   cat <<'HELP'
 Uso:
-  ./deploy.sh (--locale | --remoto | --target <destinazione_scp>) [opzioni]
+  ./deploy.sh (--locale | --remoto | --target <destinazione_scp> | --android) [opzioni]
 
 Esempi:
   ./deploy.sh --locale
@@ -19,11 +19,16 @@ Esempi:
   ./deploy.sh --remoto --remote-path ~/webapps
   ./deploy.sh --remoto --remote-sql-path ~/sql
   ./deploy.sh --target user@192.168.1.50:~/webapps/
+  ./deploy.sh --android
+  ./deploy.sh --android --android-url http://192.168.1.50:8080/EngineGallery
 
 Opzioni:
   --locale      Copia il WAR in locale su /home/simone/apache-tomcat-9.0.112/webapps
   --remoto      Copia il WAR su host remoto preconfigurato via scp
   --target      Destinazione SCP custom nel formato [user@]host:/path/
+  --android     Build APK Android (android-app) e installa via adb se disponibile
+  --android-url URL backend da iniettare nella build Android (ENGINE_GALLERY_BASE_URL)
+  --android-no-install Salta installazione adb automatica (build-only)
   --port        Porta SSH (default: 22)
   --identity    Chiave SSH (default remoto: /home/simone/Documenti/Keys.pem)
   --remote-user Utente SSH remoto (default: admin)
@@ -49,6 +54,8 @@ REMOTE_HOST="$REMOTE_HOST_DEFAULT"
 REMOTE_PATH="$REMOTE_WEBAPPS_DEFAULT"
 REMOTE_SQL_PATH=""
 SKIP_BUILD="false"
+ANDROID_URL=""
+ANDROID_INSTALL="true"
 MODE=""
 
 resolve_ipv4() {
@@ -85,6 +92,18 @@ while [[ $# -gt 0 ]]; do
       TARGET="${2:-}"
       MODE="target"
       shift 2
+      ;;
+    --android)
+      MODE="android"
+      shift
+      ;;
+    --android-url)
+      ANDROID_URL="${2:-}"
+      shift 2
+      ;;
+    --android-no-install)
+      ANDROID_INSTALL="false"
+      shift
       ;;
     --port)
       PORT="${2:-}"
@@ -131,7 +150,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$MODE" ]]; then
-  echo "Errore: devi specificare --locale, --remoto o --target." >&2
+  echo "Errore: devi specificare --locale, --remoto, --target o --android." >&2
   usage
   exit 1
 fi
@@ -139,6 +158,61 @@ fi
 if [[ "$MODE" == "target" ]] && ! [[ "$TARGET" =~ :/ ]]; then
   echo "Errore: --target deve essere nel formato [user@]host:/path/." >&2
   exit 1
+fi
+
+if [[ "$MODE" == "android" ]]; then
+  ANDROID_DIR="android-app"
+  APK_FILE="${ANDROID_DIR}/app/build/outputs/apk/debug/app-debug.apk"
+  PACKAGE_NAME="it.simosw.enginegallery"
+
+  if [[ ! -d "$ANDROID_DIR" ]]; then
+    echo "Errore: cartella Android non trovata: $ANDROID_DIR" >&2
+    exit 1
+  fi
+
+  GRADLE_CMD=("./gradlew" "assembleDebug")
+  if [[ -n "$ANDROID_URL" ]]; then
+    GRADLE_CMD+=("-PENGINE_GALLERY_BASE_URL=${ANDROID_URL}")
+  fi
+
+  echo ">> Build Android in ${ANDROID_DIR}: ${GRADLE_CMD[*]}"
+  (
+    cd "$ANDROID_DIR"
+    "${GRADLE_CMD[@]}"
+  )
+
+  if [[ ! -f "$APK_FILE" ]]; then
+    echo "Errore: APK non trovato dopo la build: $APK_FILE" >&2
+    exit 1
+  fi
+
+  echo ">> APK generato: $APK_FILE"
+
+  if [[ "$ANDROID_INSTALL" == "false" ]]; then
+    echo ">> Installazione adb saltata (--android-no-install)."
+    exit 0
+  fi
+
+  if ! command -v adb >/dev/null 2>&1; then
+    echo ">> adb non trovato: installazione automatica saltata."
+    echo ">> Installa manualmente con:"
+    echo "   adb install -r $APK_FILE"
+    exit 0
+  fi
+
+  ADB_DEVICE_COUNT="$(adb devices | awk 'NR>1 && $2=="device" {count++} END {print count+0}')"
+  if [[ "$ADB_DEVICE_COUNT" -eq 0 ]]; then
+    echo ">> Nessun dispositivo adb collegato: installazione automatica saltata."
+    echo ">> Installa manualmente con:"
+    echo "   adb install -r $APK_FILE"
+    exit 0
+  fi
+
+  echo ">> Installazione APK su dispositivo (adb install -r)"
+  adb install -r "$APK_FILE"
+  echo ">> Deploy Android completato."
+  echo ">> Pacchetto installato: ${PACKAGE_NAME}"
+  exit 0
 fi
 
 if [[ "$SKIP_BUILD" != "true" ]]; then
