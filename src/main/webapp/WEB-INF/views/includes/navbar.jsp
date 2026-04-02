@@ -8,14 +8,6 @@
      style="background-color: #1f2933;">
     <div class="container-fluid">
 
-        <button type="button"
-                class="navbar-toggler navbar-action-btn me-2 navbar-back-btn"
-                id="navbarBackButton"
-                aria-label="Indietro"
-                title="Indietro">
-            <span id="navbarBackIcon" class="navbar-back-icon" aria-hidden="true">&lt;</span>
-        </button>
-
         <!-- BRAND -->
         <a class="navbar-brand fw-bold"
            href="<%= request.getContextPath() %>/dashboard">
@@ -104,31 +96,6 @@
 
 <script>
     (function () {
-        const backButton = document.getElementById('navbarBackButton');
-        const backIcon = document.getElementById('navbarBackIcon');
-        const forceHomeMode = new URLSearchParams(window.location.search).get('navHome') === '1';
-
-        if (forceHomeMode && backIcon) {
-            backIcon.textContent = '⌂';
-            backButton.setAttribute('aria-label', 'Home');
-            backButton.setAttribute('title', 'Home');
-        }
-
-        if (backButton) {
-            backButton.addEventListener('click', function () {
-                if (forceHomeMode) {
-                    window.location.href = '<%= request.getContextPath() %>/dashboard';
-                    return;
-                }
-
-                if (window.history.length > 1) {
-                    window.history.back();
-                    return;
-                }
-                window.location.href = '<%= request.getContextPath() %>/dashboard';
-            });
-        }
-
         function initNavbarToggle() {
             const toggler = document.getElementById('engineNavbarToggler');
             const menu = document.getElementById('engineNavbar');

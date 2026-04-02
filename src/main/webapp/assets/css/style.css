@@ -418,10 +418,6 @@ body {
     z-index: 3000 !important;
 }
 
-.navbar-back-btn {
-    display: block !important;
-}
-
 .navbar-action-btn {
     width: 2.5rem;
     height: 2.25rem;
@@ -429,23 +425,6 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-}
-
-.navbar-back-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.35rem;
-    height: 1.35rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.75);
-    line-height: 1;
-}
-
-.navbar-back-btn:hover .navbar-back-icon,
-.navbar-back-btn:focus .navbar-back-icon {
-    color: #fff;
 }
 
 .navbar-brand {
