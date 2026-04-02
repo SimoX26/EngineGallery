@@ -17,6 +17,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 
@@ -58,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.webView)
         swipeRefresh = findViewById(R.id.swipeRefresh)
 
+        applySystemInsets()
         setupWebView()
         setupNavigation()
 
@@ -75,6 +78,25 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         webView.saveState(outState)
+    }
+
+    private fun applySystemInsets() {
+        val initialLeft = swipeRefresh.paddingLeft
+        val initialTop = swipeRefresh.paddingTop
+        val initialRight = swipeRefresh.paddingRight
+        val initialBottom = swipeRefresh.paddingBottom
+
+        ViewCompat.setOnApplyWindowInsetsListener(swipeRefresh) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                initialLeft + systemBars.left,
+                initialTop + systemBars.top,
+                initialRight + systemBars.right,
+                initialBottom + systemBars.bottom
+            )
+            insets
+        }
+        ViewCompat.requestApplyInsets(swipeRefresh)
     }
 
     private fun setupNavigation() {
