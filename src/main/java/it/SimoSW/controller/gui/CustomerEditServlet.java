@@ -3,6 +3,7 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.model.Customer;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,6 +30,10 @@ public class CustomerEditServlet extends HttpServlet {
         Long customerId = parseCustomerId(request.getParameter("id"));
         if (customerId == null) {
             response.sendRedirect(request.getContextPath() + "/customer/list");
+            return;
+        }
+        String formPath = "/customer/edit?id=" + customerId;
+        if (PostSubmitNavigationGuard.redirectIfBlocked(request, response, formPath)) {
             return;
         }
 
@@ -65,7 +70,10 @@ public class CustomerEditServlet extends HttpServlet {
 
         try {
             customerController.updateCustomer(customerId, name, companyName, phone, email, notes);
-            response.sendRedirect(request.getContextPath() + "/customer/detail?id=" + customerId + "&updated=1&navHome=1");
+            String formPath = "/customer/edit?id=" + customerId;
+            String fallbackPath = "/customer/detail?id=" + customerId + "&updated=1&lockBack=1&navHome=1";
+            PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);
+            response.sendRedirect(request.getContextPath() + fallbackPath);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/customer/customer-edit.jsp").forward(request, response);

@@ -6,6 +6,7 @@ import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -34,6 +35,10 @@ public class EngineEditServlet extends HttpServlet {
 
         if (!isValidEngineRef(engineRef)) {
             response.sendRedirect(request.getContextPath() + "/engine/list");
+            return;
+        }
+        String formPath = "/engine/edit?ref=" + engineRef;
+        if (PostSubmitNavigationGuard.redirectIfBlocked(request, response, formPath)) {
             return;
         }
 
@@ -137,8 +142,10 @@ public class EngineEditServlet extends HttpServlet {
             bean.setNotes(note);
 
             engineController.updateEngine(bean);
-
-            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef + "&updated=1&navHome=1");
+            String formPath = "/engine/edit?ref=" + engineRef;
+            String fallbackPath = "/engine/detail?ref=" + engineRef + "&updated=1&lockBack=1&navHome=1";
+            PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);
+            response.sendRedirect(request.getContextPath() + fallbackPath);
         } catch (IllegalArgumentException | IllegalStateException e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/engine/engine-edit.jsp").forward(request, response);

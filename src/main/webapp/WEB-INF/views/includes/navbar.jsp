@@ -96,6 +96,72 @@
 
 <script>
     (function () {
+        const BACK_LOCK_KEY = 'postSubmitBackLock.currentFallback';
+        const FINAL_HOME_WALL_KEY = 'postSubmitBackLock.finalHomeWall';
+        const HOME_PATH = '<%= request.getContextPath() %>/dashboard';
+
+        function cleanUrlWithoutLockBack() {
+            const params = new URLSearchParams(window.location.search);
+            params.delete('lockBack');
+            const query = params.toString();
+            return window.location.pathname + (query ? ('?' + query) : '');
+        }
+
+        function initPostSubmitBackGuard() {
+            const params = new URLSearchParams(window.location.search);
+            const hasLockBackParam = params.get('lockBack') === '1';
+
+            if (hasLockBackParam) {
+                const cleanUrl = cleanUrlWithoutLockBack();
+                sessionStorage.setItem(BACK_LOCK_KEY, cleanUrl);
+                history.replaceState({postSubmitBackLock: true}, '', cleanUrl + window.location.hash);
+            }
+
+            const lockedFallback = sessionStorage.getItem(BACK_LOCK_KEY);
+            const currentUrl = window.location.pathname + window.location.search;
+            const isLockedFallbackPage = lockedFallback && lockedFallback === currentUrl;
+            if (isLockedFallbackPage) {
+                history.pushState({postSubmitBackLock: true}, '', window.location.href);
+                window.addEventListener('popstate', function () {
+                    sessionStorage.removeItem(BACK_LOCK_KEY);
+                    sessionStorage.setItem(FINAL_HOME_WALL_KEY, '1');
+                    window.location.replace(HOME_PATH);
+                });
+            }
+
+            const isHomePage = window.location.pathname === HOME_PATH;
+            const hasFinalWall = sessionStorage.getItem(FINAL_HOME_WALL_KEY) === '1';
+            if (isHomePage && hasFinalWall) {
+                history.pushState({finalHomeBackWall: true}, '', window.location.href);
+                window.addEventListener('popstate', function () {
+                    history.pushState({finalHomeBackWall: true}, '', window.location.href);
+                });
+            }
+
+            const body = document.body;
+            if (!body || body.dataset.backGuardForm !== '1') {
+                return;
+            }
+
+            const fallback = body.dataset.backGuardFallback;
+            if (!fallback) {
+                return;
+            }
+
+            window.addEventListener('pageshow', function (event) {
+                const navigationEntries = performance.getEntriesByType
+                        ? performance.getEntriesByType('navigation')
+                        : [];
+                const navigationType = navigationEntries.length > 0 ? navigationEntries[0].type : '';
+                const isBackForwardNavigation = event.persisted || navigationType === 'back_forward';
+                const hasSubmitLock = !!sessionStorage.getItem(BACK_LOCK_KEY);
+
+                if (hasSubmitLock && isBackForwardNavigation) {
+                    window.location.replace(fallback);
+                }
+            });
+        }
+
         function initNavbarToggle() {
             const toggler = document.getElementById('engineNavbarToggler');
             const menu = document.getElementById('engineNavbar');
@@ -123,6 +189,8 @@
                 toggler.setAttribute('aria-expanded', 'false');
             });
         }
+
+        initPostSubmitBackGuard();
 
         if (!window.bootstrap) {
             const bootstrapScript = document.createElement('script');

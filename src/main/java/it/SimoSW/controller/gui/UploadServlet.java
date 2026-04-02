@@ -5,6 +5,7 @@ import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 import it.SimoSW.util.UploadPathResolver;
 
 import javax.servlet.ServletException;
@@ -47,6 +48,9 @@ public class UploadServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (PostSubmitNavigationGuard.redirectIfBlocked(request, response, "/upload")) {
+            return;
+        }
 
         HttpSession session = request.getSession();
         populateCustomerOptions(request);
@@ -277,7 +281,12 @@ public class UploadServlet extends HttpServlet {
     /* =========================
        6. REDIRECT
        ========================= */
-        response.sendRedirect(request.getContextPath() + "/dashboard?navHome=1");
+        PostSubmitNavigationGuard.blockFormPageOnce(
+                request,
+                "/upload",
+                "/dashboard?lockBack=1&navHome=1"
+        );
+        response.sendRedirect(request.getContextPath() + "/dashboard?lockBack=1&navHome=1");
     }
 
     private void populateCustomerOptions(HttpServletRequest request) {

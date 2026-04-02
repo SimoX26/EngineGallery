@@ -3,6 +3,7 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.WarehouseController;
 import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,6 +29,10 @@ public class WarehouseEditServlet extends HttpServlet {
         Long itemId = parseId(request.getParameter("id"));
         if (itemId == null) {
             response.sendRedirect(request.getContextPath() + "/warehouse/list");
+            return;
+        }
+        String formPath = "/warehouse/edit?id=" + itemId;
+        if (PostSubmitNavigationGuard.redirectIfBlocked(request, response, formPath)) {
             return;
         }
 
@@ -65,7 +70,10 @@ public class WarehouseEditServlet extends HttpServlet {
         try {
             Integer quantity = parseQuantity(quantityParam);
             warehouseController.updateItem(itemId, name, sku, quantity, location, notes);
-            response.sendRedirect(request.getContextPath() + "/warehouse/detail?id=" + itemId + "&updated=1&navHome=1");
+            String formPath = "/warehouse/edit?id=" + itemId;
+            String fallbackPath = "/warehouse/detail?id=" + itemId + "&updated=1&lockBack=1&navHome=1";
+            PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);
+            response.sendRedirect(request.getContextPath() + fallbackPath);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-edit.jsp").forward(request, response);

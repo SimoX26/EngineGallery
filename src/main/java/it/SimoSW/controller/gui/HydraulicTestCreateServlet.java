@@ -3,6 +3,7 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.HydraulicTestController;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -44,6 +45,9 @@ public class HydraulicTestCreateServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (PostSubmitNavigationGuard.redirectIfBlocked(request, response, "/hydraulic-test/new")) {
+            return;
+        }
         request.setAttribute("testDate", LocalDate.now().toString());
         request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
                 .forward(request, response);
@@ -149,7 +153,12 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     testDate,
                     notes
             );
-            response.sendRedirect(request.getContextPath() + "/hydraulic-test/list");
+            PostSubmitNavigationGuard.blockFormPageOnce(
+                    request,
+                    "/hydraulic-test/new",
+                    "/hydraulic-test/list?lockBack=1"
+            );
+            response.sendRedirect(request.getContextPath() + "/hydraulic-test/list?lockBack=1");
         } catch (RuntimeException ex) {
             Files.deleteIfExists(destination);
             request.setAttribute("error", "Errore durante il salvataggio della prova idraulica.");

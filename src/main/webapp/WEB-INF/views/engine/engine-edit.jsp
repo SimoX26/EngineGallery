@@ -12,7 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
 </head>
-<body>
+<body data-back-guard-form="1"
+      data-back-guard-fallback="<%= request.getContextPath() %>/engine/detail?ref=${engineRef}">
 
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 

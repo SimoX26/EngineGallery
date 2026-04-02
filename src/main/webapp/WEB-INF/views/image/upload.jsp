@@ -18,7 +18,8 @@
     <!-- Stile globale Engine Gallery -->
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=7">
 </head>
-<body>
+<body data-back-guard-form="1"
+      data-back-guard-fallback="<%= request.getContextPath() %>/dashboard?navHome=1">
 
 <!-- Navbar -->
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -38,13 +39,8 @@
             </div>
         </c:if>
 
-        <div class="alert alert-light border text-start py-2 px-3 mb-4 clickable-fields-hint" role="note">
-            Compila i campi e premi <strong>Salva</strong>.
-        </div>
-
         <!-- Area upload -->
         <form id="uploadForm"
-              class="form-click-guides"
               action="<%= request.getContextPath() %>/upload"
               method="post"
               enctype="multipart/form-data">
@@ -66,29 +62,23 @@
             <!-- UPLOAD -->
             <div class="mb-4">
                 <label class="form-label fw-semibold">Immagini</label>
-                <div class="position-relative file-input-wrap">
-                    <input type="file"
-                           id="imagesInput"
-                           name="images"
-                           class="file-input-native"
-                           accept="image/*"
-                           multiple>
-                    <div class="file-input-visual" aria-hidden="true">
-                        <span class="file-input-icon">✎</span>
-                    </div>
-                </div>
+                <input type="file"
+                       id="imagesInput"
+                       name="images"
+                       class="form-control"
+                       accept="image/*"
+                       multiple>
                 <div id="imagesSelectionInfo" class="small text-muted mt-2">0 file selezionati</div>
             </div>
 
             <!-- CLIENTE -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Nome cliente</label>
-                <div class="position-relative field-icon-wrap">
-                <span class="field-icon" aria-hidden="true">✎</span>
+                <div class="position-relative">
                 <input type="text"
                        id="customerInput"
                        name="customer"
-                       class="form-control has-field-icon"
+                       class="form-control"
                        autocomplete="off"
                        list="customerOptions"
                        value="${customer}"
@@ -107,11 +97,10 @@
             <!-- CODICE MOTORE -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Codice motore</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon" aria-hidden="true">✎</span>
+                <div class="position-relative">
                     <input type="text"
                            name="engineCode"
-                           class="form-control has-field-icon"
+                           class="form-control"
                            value="${engineCode}"
                            required>
                 </div>
@@ -130,9 +119,8 @@
                           ${currentStatus == 'DELIVERED' ? 'status-dot-delivered' : ''}"
                           aria-hidden="true"></span>
                 </label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon" aria-hidden="true">●</span>
-                    <select class="form-select has-field-icon"
+                <div class="position-relative">
+                    <select class="form-select"
                             name="status"
                             required>
                         <option value="WAITING" ${status == 'WAITING' ? 'selected' : ''}>In attesa</option>
@@ -146,10 +134,9 @@
             <!-- NOTE -->
             <div class="mb-4">
                 <label class="form-label fw-semibold">Note</label>
-                <div class="position-relative field-icon-wrap">
-                    <span class="field-icon field-icon-textarea" aria-hidden="true">✎</span>
+                <div class="position-relative">
                     <textarea name="note"
-                              class="form-control has-field-icon"
+                              class="form-control"
                               rows="3">${note}</textarea>
                 </div>
             </div>
