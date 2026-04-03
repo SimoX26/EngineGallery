@@ -15,6 +15,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraUri: Uri? = null
+    private val cameraUris = mutableListOf<Uri>()
 
     private val fileChooserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -36,20 +38,38 @@ class MainActivity : AppCompatActivity() {
                 return@registerForActivityResult
             }
 
+            if (result.resultCode != RESULT_OK) {
+                deliverSelectedUris(callback)
+                return@registerForActivityResult
+            }
+
             val uris = mutableListOf<Uri>()
 
-            val data = result.data?.data
-            if (data != null) {
-                uris.add(data)
+            val clipData = result.data?.clipData
+            if (clipData != null) {
+                for (index in 0 until clipData.itemCount) {
+                    clipData.getItemAt(index).uri?.let(uris::add)
+                }
             }
 
-            if (uris.isEmpty() && cameraUri != null && result.resultCode == RESULT_OK) {
-                uris.add(cameraUri!!)
+            val singleData = result.data?.data
+            if (singleData != null) {
+                uris.add(singleData)
             }
 
-            callback.onReceiveValue(if (uris.isEmpty()) null else uris.toTypedArray())
-            filePathCallback = null
-            cameraUri = null
+            if (uris.isNotEmpty()) {
+                callback.onReceiveValue(uris.toTypedArray())
+                resetFileSelectionState()
+                return@registerForActivityResult
+            }
+
+            if (cameraUri != null) {
+                cameraUris.add(cameraUri!!)
+                showContinueCameraDialog(callback)
+                return@registerForActivityResult
+            }
+
+            deliverSelectedUris(callback)
         }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -158,6 +178,7 @@ class MainActivity : AppCompatActivity() {
             ): Boolean {
                 this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePathCallback
+                resetCameraSelection()
 
                 val chooserIntent = buildFileChooserIntent()
                 fileChooserLauncher.launch(chooserIntent)
@@ -171,29 +192,73 @@ class MainActivity : AppCompatActivity() {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*"
             putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         }
 
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val imageFile = createTempImageFile()
-        val cameraAvailable = cameraIntent.resolveActivity(packageManager) != null
-
-        if (cameraAvailable && imageFile != null) {
-            cameraUri = FileProvider.getUriForFile(
-                this,
-                "${BuildConfig.APPLICATION_ID}.fileprovider",
-                imageFile
-            )
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri)
-            cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        }
+        val cameraIntent = buildCameraCaptureIntent()
 
         return Intent(Intent.ACTION_CHOOSER).apply {
             putExtra(Intent.EXTRA_INTENT, contentIntent)
             putExtra(Intent.EXTRA_TITLE, getString(R.string.file_picker_title))
-            if (cameraAvailable && cameraUri != null) {
+            if (cameraIntent != null) {
                 putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
             }
         }
+    }
+
+    private fun buildCameraCaptureIntent(): Intent? {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val imageFile = createTempImageFile()
+        val cameraAvailable = cameraIntent.resolveActivity(packageManager) != null
+        if (!cameraAvailable || imageFile == null) {
+            cameraUri = null
+            return null
+        }
+
+        cameraUri = FileProvider.getUriForFile(
+            this,
+            "${BuildConfig.APPLICATION_ID}.fileprovider",
+            imageFile
+        )
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri)
+        cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        return cameraIntent
+    }
+
+    private fun showContinueCameraDialog(callback: ValueCallback<Array<Uri>>) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.camera_continue_title)
+            .setMessage(R.string.camera_continue_message)
+            .setPositiveButton(R.string.camera_continue_positive) { _, _ ->
+                val nextCameraIntent = buildCameraCaptureIntent()
+                if (nextCameraIntent == null) {
+                    deliverSelectedUris(callback)
+                } else {
+                    fileChooserLauncher.launch(nextCameraIntent)
+                }
+            }
+            .setNegativeButton(R.string.camera_continue_negative) { _, _ ->
+                deliverSelectedUris(callback)
+            }
+            .setOnCancelListener {
+                deliverSelectedUris(callback)
+            }
+            .show()
+    }
+
+    private fun deliverSelectedUris(callback: ValueCallback<Array<Uri>>) {
+        callback.onReceiveValue(if (cameraUris.isEmpty()) null else cameraUris.toTypedArray())
+        resetFileSelectionState()
+    }
+
+    private fun resetCameraSelection() {
+        cameraUri = null
+        cameraUris.clear()
+    }
+
+    private fun resetFileSelectionState() {
+        filePathCallback = null
+        resetCameraSelection()
     }
 
     private fun createTempImageFile(): File? {
