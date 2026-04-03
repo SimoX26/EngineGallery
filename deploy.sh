@@ -11,7 +11,7 @@ REMOTE_KEY_DEFAULT="/home/simone/Documenti/Keys.pem"
 usage() {
   cat <<'HELP'
 Uso:
-  ./deploy.sh (--locale | --remoto | --target <destinazione_scp> | --android) [opzioni]
+  ./deploy.sh (--locale | --remoto | --target <destinazione_scp> | --android | --apk) [opzioni]
 
 Esempi:
   ./deploy.sh --locale
@@ -20,6 +20,7 @@ Esempi:
   ./deploy.sh --remoto --remote-sql-path ~/sql
   ./deploy.sh --target user@192.168.1.50:~/webapps/
   ./deploy.sh --android
+  ./deploy.sh --apk
   ./deploy.sh --android --android-url http://192.168.1.50:8080/EngineGallery
 
 Opzioni:
@@ -27,6 +28,7 @@ Opzioni:
   --remoto      Copia il WAR su host remoto preconfigurato via scp
   --target      Destinazione SCP custom nel formato [user@]host:/path/
   --android     Build APK Android (android-app) e installa via adb se disponibile
+  --apk         Build APK Android (android-app) senza installazione adb
   --android-url URL backend da iniettare nella build Android (ENGINE_GALLERY_BASE_URL)
   --android-no-install Salta installazione adb automatica (build-only)
   --port        Porta SSH (default: 22)
@@ -97,6 +99,11 @@ while [[ $# -gt 0 ]]; do
       MODE="android"
       shift
       ;;
+    --apk)
+      MODE="apk"
+      ANDROID_INSTALL="false"
+      shift
+      ;;
     --android-url)
       ANDROID_URL="${2:-}"
       shift 2
@@ -150,7 +157,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$MODE" ]]; then
-  echo "Errore: devi specificare --locale, --remoto, --target o --android." >&2
+  echo "Errore: devi specificare --locale, --remoto, --target, --android o --apk." >&2
   usage
   exit 1
 fi
@@ -160,9 +167,9 @@ if [[ "$MODE" == "target" ]] && ! [[ "$TARGET" =~ :/ ]]; then
   exit 1
 fi
 
-if [[ "$MODE" == "android" ]]; then
+if [[ "$MODE" == "android" || "$MODE" == "apk" ]]; then
   ANDROID_DIR="android-app"
-  APK_FILE="${ANDROID_DIR}/app/build/outputs/apk/debug/app-debug.apk"
+  APK_DIR="${ANDROID_DIR}/app/build/outputs/apk/debug"
   PACKAGE_NAME="it.simosw.enginegallery"
 
   if [[ ! -d "$ANDROID_DIR" ]]; then
@@ -175,23 +182,49 @@ if [[ "$MODE" == "android" ]]; then
     GRADLE_CMD+=("-PENGINE_GALLERY_BASE_URL=${ANDROID_URL}")
   fi
 
-  echo ">> Build Android in ${ANDROID_DIR}: ${GRADLE_CMD[*]}"
-  (
-    cd "$ANDROID_DIR"
-    "${GRADLE_CMD[@]}"
-  )
+  if [[ "$MODE" == "apk" ]]; then
+    BUILD_LOG="$(mktemp)"
+    if ! (
+      cd "$ANDROID_DIR"
+      "${GRADLE_CMD[@]}" >"$BUILD_LOG" 2>&1
+    ); then
+      cat "$BUILD_LOG" >&2
+      rm -f "$BUILD_LOG"
+      exit 1
+    fi
+    rm -f "$BUILD_LOG"
+  else
+    echo ">> Build Android in ${ANDROID_DIR}: ${GRADLE_CMD[*]}"
+    (
+      cd "$ANDROID_DIR"
+      "${GRADLE_CMD[@]}"
+    )
+  fi
 
-  if [[ ! -f "$APK_FILE" ]]; then
-    echo "Errore: APK non trovato dopo la build: $APK_FILE" >&2
+  APK_FILE="$(ls -t "${APK_DIR}"/*.apk 2>/dev/null | head -n 1 || true)"
+  if [[ -z "$APK_FILE" || ! -f "$APK_FILE" ]]; then
+    echo "Errore: APK non trovato dopo la build in: $APK_DIR" >&2
     exit 1
   fi
 
-  echo ">> APK generato: $APK_FILE"
+  APK_ABS_PATH="$(cd "$(dirname "$APK_FILE")" && pwd)/$(basename "$APK_FILE")"
+  APK_DIR_ABS_PATH="$(cd "$APK_DIR" && pwd)"
 
   if [[ "$ANDROID_INSTALL" == "false" ]]; then
-    echo ">> Installazione adb saltata (--android-no-install)."
+    if [[ "$MODE" == "apk" ]]; then
+      echo "$APK_DIR_ABS_PATH"
+    else
+      echo ">> APK generato: $APK_FILE"
+      echo ">> Percorso filesystem: $APK_ABS_PATH"
+      echo ">> Link file: file://$APK_ABS_PATH"
+      echo ">> Installazione adb saltata (--android-no-install)."
+    fi
     exit 0
   fi
+
+  echo ">> APK generato: $APK_FILE"
+  echo ">> Percorso filesystem: $APK_ABS_PATH"
+  echo ">> Link file: file://$APK_ABS_PATH"
 
   if ! command -v adb >/dev/null 2>&1; then
     echo ">> adb non trovato: installazione automatica saltata."

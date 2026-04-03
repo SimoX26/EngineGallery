@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -45,6 +47,12 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+}
+
+android.applicationVariants.configureEach {
+    outputs.configureEach {
+        (this as ApkVariantOutputImpl).outputFileName = "RML.apk"
     }
 }
 
