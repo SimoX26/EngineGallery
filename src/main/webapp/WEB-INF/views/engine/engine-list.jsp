@@ -171,6 +171,7 @@
                                   data-quick-status-form
                                   action="<%= request.getContextPath() %>/engine/detail"
                                   method="post">
+                                <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
                                 <input type="hidden" name="redirectTo" value="list">
                                 <input type="hidden" name="ref" value="${engine.engineRef}">
                                 <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">

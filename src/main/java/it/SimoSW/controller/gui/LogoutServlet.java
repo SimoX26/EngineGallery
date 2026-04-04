@@ -1,9 +1,10 @@
 package it.SimoSW.controller.gui;
 
+import it.SimoSW.util.security.CookieSecurityUtil;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -61,14 +62,6 @@ public class LogoutServlet extends HttpServlet {
     }
 
     private void clearCookie(HttpServletResponse response, HttpServletRequest request, String name) {
-        Cookie cookie = new Cookie(name, "");
-        cookie.setMaxAge(0);
-        cookie.setPath(cookiePath(request));
-        response.addCookie(cookie);
-    }
-
-    private String cookiePath(HttpServletRequest request) {
-        String contextPath = request.getContextPath();
-        return contextPath == null || contextPath.isEmpty() ? "/" : contextPath;
+        CookieSecurityUtil.clearCookie(response, request, name);
     }
 }

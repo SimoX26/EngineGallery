@@ -34,6 +34,7 @@
         </c:if>
 
         <form action="<%= request.getContextPath() %>/customer/edit?id=${customerId}" method="post">
+            <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Nome</label>

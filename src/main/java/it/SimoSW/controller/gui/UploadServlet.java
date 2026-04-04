@@ -19,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet responsabile del caricamento delle immagini del motore
@@ -31,6 +33,7 @@ import java.util.*;
         maxRequestSize = 800 * 1024 * 1024       // 800 MB totali
 )
 public class UploadServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(UploadServlet.class.getName());
     private static final String SESSION_PENDING_NEW_ENGINE_REF = "pendingNewEngineRef";
     private EngineController engineController;
     private CustomerController customerController;
@@ -77,7 +80,7 @@ public class UploadServlet extends HttpServlet {
         try {
             doPostSafe(request, response);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Errore durante il salvataggio upload motore", ex);
             request.setAttribute("error", "Errore durante il salvataggio. Riprova.");
             request.setAttribute("engineMode", Optional.ofNullable(request.getParameter("engineMode")).orElse("new"));
             request.setAttribute("engineRef", Optional.ofNullable(request.getParameter("engineRef")).orElse(""));

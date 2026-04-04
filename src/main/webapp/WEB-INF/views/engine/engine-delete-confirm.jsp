@@ -34,6 +34,7 @@
                         </a>
 
                         <form action="<%= request.getContextPath() %>/engine/delete" method="post" class="m-0">
+                            <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
                             <input type="hidden" name="engineRef" value="${detail.engine.engineRef}">
                             <input type="hidden" name="confirmDelete" value="true">
                             <button type="submit" class="btn btn-danger px-4">

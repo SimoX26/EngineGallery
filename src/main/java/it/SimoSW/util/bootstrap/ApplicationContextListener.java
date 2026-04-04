@@ -4,9 +4,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebListener
 public class ApplicationContextListener implements ServletContextListener {
+    private static final Logger LOGGER = Logger.getLogger(ApplicationContextListener.class.getName());
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -18,11 +21,10 @@ public class ApplicationContextListener implements ServletContextListener {
 
             context.setAttribute("appInitializer", initializer);
 
-            System.out.println("[EngineGallery] Application initialized successfully");
+            LOGGER.info("[EngineGallery] Application initialized successfully");
 
         } catch (Exception e) {
-            System.err.println("[EngineGallery] FATAL ERROR during startup");
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "[EngineGallery] FATAL ERROR during startup", e);
 
             // blocca l'avvio dell'app se il bootstrap fallisce
             throw new RuntimeException("Application initialization failed", e);
@@ -31,6 +33,6 @@ public class ApplicationContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        System.out.println("[EngineGallery] Application shutdown completed");
+        LOGGER.info("[EngineGallery] Application shutdown completed");
     }
 }

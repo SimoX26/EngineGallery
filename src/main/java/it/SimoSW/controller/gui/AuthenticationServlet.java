@@ -3,6 +3,8 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.AuthenticationController;
 import it.SimoSW.model.User;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.security.CookieSecurityUtil;
+import it.SimoSW.util.security.RememberMeTokenUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -39,7 +41,7 @@ public class AuthenticationServlet extends HttpServlet {
             if (session != null) {
                 session.invalidate();
             }
-            clearCookie(response, request, COOKIE_REMEMBER);
+            CookieSecurityUtil.clearCookie(response, request, COOKIE_REMEMBER);
             response.sendRedirect(request.getContextPath() + "/auth");
             return;
         }
@@ -62,37 +64,27 @@ public class AuthenticationServlet extends HttpServlet {
         Optional<User> user = authenticationController.login(username, password);
 
         if (user.isPresent()) {
+            HttpSession previousSession = request.getSession(false);
+            if (previousSession != null) {
+                previousSession.invalidate();
+            }
             HttpSession session = request.getSession(true);
             session.setAttribute("loggedUser", user.get());
 
-            setCookie(response, request, COOKIE_REMEMBER, Long.toString(user.get().getId()));
+            String rememberToken = RememberMeTokenUtil.createToken(user.get().getId(), COOKIE_MAX_AGE);
+            CookieSecurityUtil.setLaxCookie(
+                    response,
+                    request,
+                    COOKIE_REMEMBER,
+                    rememberToken,
+                    COOKIE_MAX_AGE,
+                    true
+            );
             response.sendRedirect(request.getContextPath() + "/dashboard");
         } else {
             // Credenziali errate
             request.setAttribute("error", "Credenziali non valide");
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
         }
-    }
-
-    private void setCookie(HttpServletResponse response, HttpServletRequest request,
-                           String name, String value) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(request.isSecure());
-        cookie.setMaxAge(COOKIE_MAX_AGE);
-        cookie.setPath(cookiePath(request));
-        response.addCookie(cookie);
-    }
-
-    private void clearCookie(HttpServletResponse response, HttpServletRequest request, String name) {
-        Cookie cookie = new Cookie(name, "");
-        cookie.setMaxAge(0);
-        cookie.setPath(cookiePath(request));
-        response.addCookie(cookie);
-    }
-
-    private String cookiePath(HttpServletRequest request) {
-        String contextPath = request.getContextPath();
-        return contextPath == null || contextPath.isEmpty() ? "/" : contextPath;
     }
 }

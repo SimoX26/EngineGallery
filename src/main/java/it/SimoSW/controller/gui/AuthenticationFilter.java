@@ -3,12 +3,16 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.AuthenticationController;
 import it.SimoSW.model.User;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.util.security.CookieSecurityUtil;
+import it.SimoSW.util.security.CsrfTokenUtil;
+import it.SimoSW.util.security.RememberMeTokenUtil;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
@@ -39,24 +43,35 @@ public class AuthenticationFilter implements Filter {
             path = "/";
         }
 
+        ensureCsrfTokenForPageRequests(req, path);
+
         if (isPublicPath(path)) {
             if (isHomePath(path) || "/auth".equals(path)) {
-                ensureAutoLogin(req, res, contextPath);
+                ensureAutoLogin(req, res);
                 if (isLoggedIn(req)) {
                     res.sendRedirect(contextPath + "/dashboard");
                     return;
                 }
+            }
+            if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
+                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                return;
             }
             chain.doFilter(request, response);
             return;
         }
 
         if (!isLoggedIn(req)) {
-            ensureAutoLogin(req, res, contextPath);
+            ensureAutoLogin(req, res);
         }
 
         if (!isLoggedIn(req)) {
             res.sendRedirect(contextPath + "/auth");
+            return;
+        }
+
+        if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
             return;
         }
 
@@ -68,29 +83,29 @@ public class AuthenticationFilter implements Filter {
         return session != null && session.getAttribute("loggedUser") != null;
     }
 
-    private void ensureAutoLogin(HttpServletRequest req, HttpServletResponse res, String contextPath) {
+    private void ensureAutoLogin(HttpServletRequest req, HttpServletResponse res) {
         Cookie rememberCookie = findCookie(req, COOKIE_REMEMBER);
         if (rememberCookie == null) {
             return;
         }
 
-        long userId;
-        try {
-            userId = Long.parseLong(rememberCookie.getValue());
-        } catch (NumberFormatException ex) {
-            clearCookie(res, COOKIE_REMEMBER, contextPath);
+        OptionalLong userIdOpt = RememberMeTokenUtil.verifyAndExtractUserId(rememberCookie.getValue());
+        if (userIdOpt.isEmpty()) {
+            clearCookie(res, req, COOKIE_REMEMBER);
             return;
         }
+        long userId = userIdOpt.getAsLong();
 
         Optional<User> userOpt = authenticationController.findById(userId);
         if (userOpt.isEmpty()) {
-            clearCookie(res, COOKIE_REMEMBER, contextPath);
+            clearCookie(res, req, COOKIE_REMEMBER);
             return;
         }
 
         HttpSession session = req.getSession(true);
         session.setAttribute("loggedUser", userOpt.get());
-        setCookie(res, COOKIE_REMEMBER, Long.toString(userId), contextPath, COOKIE_MAX_AGE, req.isSecure());
+        String rotatedToken = RememberMeTokenUtil.createToken(userId, COOKIE_MAX_AGE);
+        setCookie(res, req, COOKIE_REMEMBER, rotatedToken, COOKIE_MAX_AGE);
     }
 
     private boolean isPublicPath(String path) {
@@ -120,24 +135,27 @@ public class AuthenticationFilter implements Filter {
         return null;
     }
 
-    private void setCookie(HttpServletResponse res, String name, String value,
-                           String contextPath, int maxAge, boolean secure) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secure);
-        cookie.setMaxAge(maxAge);
-        cookie.setPath(cookiePath(contextPath));
-        res.addCookie(cookie);
+    private void setCookie(HttpServletResponse res, HttpServletRequest req, String name, String value, int maxAge) {
+        CookieSecurityUtil.setLaxCookie(res, req, name, value, maxAge, true);
     }
 
-    private void clearCookie(HttpServletResponse res, String name, String contextPath) {
-        Cookie cookie = new Cookie(name, "");
-        cookie.setMaxAge(0);
-        cookie.setPath(cookiePath(contextPath));
-        res.addCookie(cookie);
+    private void clearCookie(HttpServletResponse res, HttpServletRequest req, String name) {
+        CookieSecurityUtil.clearCookie(res, req, name);
     }
 
-    private String cookiePath(String contextPath) {
-        return contextPath == null || contextPath.isEmpty() ? "/" : contextPath;
+    private void ensureCsrfTokenForPageRequests(HttpServletRequest req, String path) {
+        String method = req.getMethod();
+        if ("GET".equalsIgnoreCase(method)
+                && !path.startsWith("/assets/")
+                && !path.startsWith("/uploads/")) {
+            CsrfTokenUtil.ensureToken(req);
+        }
+    }
+
+    private boolean requiresCsrfValidation(HttpServletRequest req, String path) {
+        if (!"POST".equalsIgnoreCase(req.getMethod())) {
+            return false;
+        }
+        return !path.startsWith("/assets/") && !path.startsWith("/uploads/");
     }
 }

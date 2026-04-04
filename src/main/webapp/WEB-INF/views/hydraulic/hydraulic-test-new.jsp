@@ -30,6 +30,7 @@
               method="post"
               enctype="multipart/form-data"
               class="form-click-guides">
+            <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
             <div class="mb-3">
                 <label class="form-label fw-semibold">Nome cliente</label>
                 <input type="text" name="customerName" class="form-control" value="${customerName}" required>

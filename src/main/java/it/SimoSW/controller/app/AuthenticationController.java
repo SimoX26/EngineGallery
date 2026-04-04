@@ -2,9 +2,7 @@ package it.SimoSW.controller.app;
 
 import it.SimoSW.model.User;
 import it.SimoSW.model.dao.UserDAO;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import it.SimoSW.util.security.PasswordHashUtil;
 import java.util.Optional;
 
 public class AuthenticationController {
@@ -24,9 +22,12 @@ public class AuthenticationController {
             return Optional.empty();
         }
 
-        String hashedInput = hashPassword(password);
-
-        if (hashedInput.equals(user.getPasswordHash())) {
+        if (PasswordHashUtil.verify(password, user.getPasswordHash())) {
+            if (PasswordHashUtil.isLegacyHash(user.getPasswordHash())) {
+                String upgradedHash = PasswordHashUtil.hash(password);
+                userDAO.updatePasswordHash(user.getId(), upgradedHash);
+                user.setPasswordHash(upgradedHash);
+            }
             return Optional.of(user);
         }
 
@@ -37,23 +38,4 @@ public class AuthenticationController {
         User user = userDAO.findById(userId);
         return Optional.ofNullable(user);
     }
-
-
-    private String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-
-            StringBuilder hex = new StringBuilder();
-            for (byte b : hash) {
-                hex.append(String.format("%02x", b));
-            }
-            return hex.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hash algorithm not available", e);
-        }
-    }
-
-
 }

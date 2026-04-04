@@ -45,6 +45,7 @@
               action="<%= request.getContextPath() %>/upload"
               method="post"
               enctype="multipart/form-data">
+            <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
 
             <div class="mb-4 text-start">

@@ -7,4 +7,6 @@ public interface UserDAO {
     User findByUsername(String username);
 
     User findById(long userId);
+
+    void updatePasswordHash(long userId, String passwordHash);
 }

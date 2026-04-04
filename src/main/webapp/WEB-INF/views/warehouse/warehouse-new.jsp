@@ -37,6 +37,7 @@
               method="post"
               enctype="multipart/form-data"
               class="form-click-guides">
+            <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
             <div class="mb-4 text-start">
                 <label class="form-label fw-semibold">Immagini articolo</label>

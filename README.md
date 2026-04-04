@@ -49,3 +49,15 @@ Puoi personalizzare il percorso con:
 
 - variabile ambiente `ENGINE_GALLERY_UPLOAD_DIR`
 - system property `enginegallery.upload.dir`
+
+#### 🔐 Configurazione sicurezza/DB
+
+Per avviare l'applicazione ora sono richieste le configurazioni DB via variabili esterne (niente credenziali hardcoded):
+
+- `ENGINE_GALLERY_DB_URL` (oppure `-Denginegallery.db.url=...`)
+- `ENGINE_GALLERY_DB_USER` (oppure `-Denginegallery.db.user=...`)
+- `ENGINE_GALLERY_DB_PASSWORD` (oppure `-Denginegallery.db.password=...`)
+
+Per firmare in modo sicuro il cookie "remember me" imposta:
+
+- `ENGINE_GALLERY_REMEMBER_SECRET` (oppure `-Denginegallery.remember.secret=...`)

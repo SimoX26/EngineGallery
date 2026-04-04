@@ -60,6 +60,23 @@ public class DatabaseUserDAO implements UserDAO {
         }
     }
 
+    @Override
+    public void updatePasswordHash(long userId, String passwordHash) {
+        String sql = """
+            UPDATE users
+            SET password_hash = ?
+            WHERE id = ?
+        """;
+        try (Connection conn = connectionFactory.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, passwordHash);
+            ps.setLong(2, userId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating password hash", e);
+        }
+    }
+
     // =========================
     // Metodo di supporto
     // =========================

@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
+import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -93,6 +96,9 @@ class MainActivity : AppCompatActivity() {
         swipeRefresh.setOnRefreshListener {
             webView.reload()
         }
+        swipeRefresh.setOnChildScrollUpCallback { _, _ ->
+            webView.canScrollVertically(-1)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -132,14 +138,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupWebView() {
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
+        cookieManager.setAcceptThirdPartyCookies(webView, false)
+
         with(webView.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true
+            databaseEnabled = true
+            cacheMode = WebSettings.LOAD_DEFAULT
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             loadWithOverviewMode = true
             useWideViewPort = true
             mediaPlaybackRequiresUserGesture = false
             allowFileAccess = true
+            setSupportZoom(false)
+            builtInZoomControls = false
+            displayZoomControls = false
+        }
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, true)
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -185,6 +204,19 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
+    }
+
+    override fun onPause() {
+        webView.onPause()
+        webView.pauseTimers()
+        CookieManager.getInstance().flush()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        webView.onResume()
+        webView.resumeTimers()
     }
 
     private fun buildFileChooserIntent(): Intent {

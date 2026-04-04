@@ -42,6 +42,7 @@
                         <c:choose>
                             <c:when test="${canDelete}">
                                 <form action="<%= request.getContextPath() %>/customer/delete" method="post" class="m-0">
+                                    <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
                                     <input type="hidden" name="id" value="${customer.id}">
                                     <input type="hidden" name="confirmDelete" value="true">
                                     <button type="submit" class="btn btn-danger px-4">
