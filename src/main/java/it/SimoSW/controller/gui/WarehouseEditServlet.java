@@ -2,18 +2,33 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WarehouseController;
 import it.SimoSW.model.WarehouseItem;
+import it.SimoSW.util.ImageOptimizationUtil;
+import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @WebServlet("/warehouse/edit")
+@MultipartConfig(
+        fileSizeThreshold = 2 * 1024 * 1024,
+        maxFileSize = 100 * 1024 * 1024,
+        maxRequestSize = 800 * 1024 * 1024
+)
 public class WarehouseEditServlet extends HttpServlet {
 
     private WarehouseController warehouseController;
@@ -43,6 +58,7 @@ public class WarehouseEditServlet extends HttpServlet {
         }
 
         bindFormData(request, itemOpt.get());
+        bindImagesForEdit(request, itemId);
         request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-edit.jsp").forward(request, response);
     }
 
@@ -66,10 +82,13 @@ public class WarehouseEditServlet extends HttpServlet {
         request.setAttribute("quantity", safeTrim(quantityParam));
         request.setAttribute("location", safeTrim(location));
         request.setAttribute("notes", safeTrim(notes));
+        bindImagesForEdit(request, itemId);
 
         try {
             Integer quantity = parseQuantity(quantityParam);
             warehouseController.updateItem(itemId, name, sku, quantity, location, notes);
+            applyImageDeletions(request, itemId);
+            applyImageAdditions(request, itemId);
             String formPath = "/warehouse/edit?id=" + itemId;
             String fallbackPath = "/warehouse/detail?id=" + itemId + "&updated=1&lockBack=1&navHome=1";
             PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);
@@ -116,6 +135,83 @@ public class WarehouseEditServlet extends HttpServlet {
             return parsed > 0 ? parsed : null;
         } catch (NumberFormatException ex) {
             return null;
+        }
+    }
+
+    private void bindImagesForEdit(HttpServletRequest request, Long itemId) {
+        if (itemId == null || itemId <= 0) {
+            return;
+        }
+        request.setAttribute("itemImages", warehouseController.findImagesByItemId(itemId));
+    }
+
+    private void applyImageDeletions(HttpServletRequest request, Long itemId) {
+        String[] requestedDeletions = request.getParameterValues("deleteFilenames");
+        if (requestedDeletions == null || requestedDeletions.length == 0) {
+            return;
+        }
+
+        Set<String> uniqueFilenames = new LinkedHashSet<>();
+        for (String raw : requestedDeletions) {
+            String filename = safeTrim(raw);
+            if (filename == null || filename.isBlank()) {
+                continue;
+            }
+            if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+                continue;
+            }
+            uniqueFilenames.add(filename);
+        }
+
+        if (uniqueFilenames.isEmpty()) {
+            return;
+        }
+
+        Path uploadBase = UploadPathResolver.resolveWarehouseUploadBase(getServletContext());
+        Path itemDir = uploadBase.resolve(String.valueOf(itemId)).normalize();
+
+        for (String filename : uniqueFilenames) {
+            boolean deleted = warehouseController.deleteImageByFilename(itemId, filename);
+            if (!deleted) {
+                continue;
+            }
+            Path imagePath = itemDir.resolve(filename).normalize();
+            if (imagePath.startsWith(uploadBase)) {
+                try {
+                    Files.deleteIfExists(imagePath);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    private void applyImageAdditions(HttpServletRequest request, Long itemId) throws IOException, ServletException {
+        List<Part> validImageParts = new ArrayList<>();
+        for (Part part : request.getParts()) {
+            if (!"newImages".equals(part.getName()) || part.getSize() <= 0) {
+                continue;
+            }
+            String contentType = part.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                continue;
+            }
+            validImageParts.add(part);
+        }
+
+        if (validImageParts.isEmpty()) {
+            return;
+        }
+
+        Path uploadBase = UploadPathResolver.resolveWarehouseUploadBase(getServletContext());
+        Path itemDir = uploadBase.resolve(String.valueOf(itemId)).normalize();
+        if (!itemDir.startsWith(uploadBase)) {
+            throw new IllegalArgumentException("Percorso non valido");
+        }
+        Files.createDirectories(itemDir);
+
+        for (Part part : validImageParts) {
+            String storedFilename = ImageOptimizationUtil.storeOptimizedImage(part, itemDir);
+            warehouseController.addImage(itemId, storedFilename);
         }
     }
 }

@@ -1,7 +1,9 @@
 package it.SimoSW.controller.app;
 
 import it.SimoSW.model.WarehouseItem;
+import it.SimoSW.model.WarehouseImage;
 import it.SimoSW.model.dao.WarehouseItemDAO;
+import it.SimoSW.model.dao.WarehouseImageDAO;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,9 +11,11 @@ import java.util.Optional;
 public class WarehouseController {
 
     private final WarehouseItemDAO warehouseItemDAO;
+    private final WarehouseImageDAO warehouseImageDAO;
 
-    public WarehouseController(WarehouseItemDAO warehouseItemDAO) {
+    public WarehouseController(WarehouseItemDAO warehouseItemDAO, WarehouseImageDAO warehouseImageDAO) {
         this.warehouseItemDAO = warehouseItemDAO;
+        this.warehouseImageDAO = warehouseImageDAO;
     }
 
     public List<WarehouseItem> getAllItems() {
@@ -85,6 +89,40 @@ public class WarehouseController {
         }
 
         warehouseItemDAO.delete(id);
+    }
+
+    public List<WarehouseImage> findImagesByItemId(Long itemId) {
+        if (itemId == null || itemId <= 0) {
+            return List.of();
+        }
+        return warehouseImageDAO.findAllByWarehouseItemId(itemId);
+    }
+
+    public WarehouseImage addImage(Long itemId, String filename) {
+        if (itemId == null || itemId <= 0) {
+            throw new IllegalArgumentException("ID articolo non valido");
+        }
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalArgumentException("Nome file immagine non valido");
+        }
+        if (warehouseItemDAO.findById(itemId).isEmpty()) {
+            throw new IllegalStateException("Articolo non trovato");
+        }
+        WarehouseImage image = new WarehouseImage(itemId, filename.trim(), null);
+        return warehouseImageDAO.save(image);
+    }
+
+    public boolean deleteImageByFilename(Long itemId, String filename) {
+        if (itemId == null || itemId <= 0 || filename == null || filename.isBlank()) {
+            return false;
+        }
+        List<WarehouseImage> images = warehouseImageDAO.findAllByWarehouseItemId(itemId);
+        for (WarehouseImage image : images) {
+            if (image.getFilename().equals(filename.trim())) {
+                return warehouseImageDAO.delete(image.getId());
+            }
+        }
+        return false;
     }
 
     private static int normalizeQuantity(Integer quantity) {

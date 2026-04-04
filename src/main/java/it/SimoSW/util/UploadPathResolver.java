@@ -19,6 +19,10 @@ public final class UploadPathResolver {
         return resolveUploadRoot(context).resolve("hydraulic").normalize();
     }
 
+    public static Path resolveWarehouseUploadBase(ServletContext context) {
+        return resolveUploadRoot(context).resolve("warehouse").normalize();
+    }
+
     private static Path resolveUploadRoot(ServletContext context) {
         String configured = System.getProperty(SYS_PROP);
         if (configured == null || configured.isBlank()) {
@@ -29,7 +33,9 @@ public final class UploadPathResolver {
             String lastSegment = configuredPath.getFileName() != null
                     ? configuredPath.getFileName().toString()
                     : "";
-            if ("engines".equalsIgnoreCase(lastSegment) || "hydraulic".equalsIgnoreCase(lastSegment)) {
+            if ("engines".equalsIgnoreCase(lastSegment)
+                    || "hydraulic".equalsIgnoreCase(lastSegment)
+                    || "warehouse".equalsIgnoreCase(lastSegment)) {
                 return configuredPath.getParent() != null ? configuredPath.getParent() : configuredPath;
             }
             return configuredPath;

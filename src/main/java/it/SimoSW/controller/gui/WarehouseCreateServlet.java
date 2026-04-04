@@ -1,17 +1,30 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WarehouseController;
+import it.SimoSW.util.ImageOptimizationUtil;
+import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @WebServlet("/warehouse/new")
+@MultipartConfig(
+        fileSizeThreshold = 2 * 1024 * 1024,
+        maxFileSize = 100 * 1024 * 1024,
+        maxRequestSize = 800 * 1024 * 1024
+)
 public class WarehouseCreateServlet extends HttpServlet {
 
     private WarehouseController warehouseController;
@@ -44,6 +57,7 @@ public class WarehouseCreateServlet extends HttpServlet {
         try {
             Integer quantity = parseQuantity(quantityParam);
             Long id = warehouseController.createItem(name, sku, quantity, location, notes);
+            applyImageAdditions(request, id);
             PostSubmitNavigationGuard.blockFormPageOnce(
                     request,
                     "/warehouse/new",
@@ -85,5 +99,35 @@ public class WarehouseCreateServlet extends HttpServlet {
 
     private static String safeTrim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private void applyImageAdditions(HttpServletRequest request, Long itemId) throws IOException, ServletException {
+        List<Part> validImageParts = new ArrayList<>();
+        for (Part part : request.getParts()) {
+            if (!"images".equals(part.getName()) || part.getSize() <= 0) {
+                continue;
+            }
+            String contentType = part.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                continue;
+            }
+            validImageParts.add(part);
+        }
+
+        if (validImageParts.isEmpty()) {
+            return;
+        }
+
+        Path uploadBase = UploadPathResolver.resolveWarehouseUploadBase(getServletContext());
+        Path itemDir = uploadBase.resolve(String.valueOf(itemId)).normalize();
+        if (!itemDir.startsWith(uploadBase)) {
+            throw new IllegalArgumentException("Percorso non valido");
+        }
+        Files.createDirectories(itemDir);
+
+        for (Part part : validImageParts) {
+            String storedFilename = ImageOptimizationUtil.storeOptimizedImage(part, itemDir);
+            warehouseController.addImage(itemId, storedFilename);
+        }
     }
 }

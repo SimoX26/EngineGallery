@@ -158,6 +158,11 @@
                                     Apri
                                 </a>
                             </div>
+                            <c:if test="${st == 'DELIVERED' && engine.deliveryDate != null}">
+                                <div class="small text-muted mt-1">
+                                    Consegnato il ${engine.deliveryDate}
+                                </div>
+                            </c:if>
 
                             <form id="quickStatusForm-${engine.id}"
                                   class="quick-status-form d-none mt-2"

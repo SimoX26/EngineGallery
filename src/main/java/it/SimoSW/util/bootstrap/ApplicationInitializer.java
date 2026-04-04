@@ -28,6 +28,7 @@ public class ApplicationInitializer {
         EngineDAO engineDAO = new DatabaseEngineDAO();
         CustomerDAO customerDAO = new DatabaseCustomerDAO();
         WarehouseItemDAO warehouseItemDAO = new DatabaseWarehouseItemDAO();
+        WarehouseImageDAO warehouseImageDAO = new DatabaseWarehouseImageDAO();
         HydraulicTestDAO hydraulicTestDAO = new DatabaseHydraulicTestDAO();
 
         engineRefGenerator = new EngineRefGenerator(engineDAO);
@@ -42,7 +43,7 @@ public class ApplicationInitializer {
 
         this.dashboardController = new DashboardController(engineDAO, customerDAO, warehouseItemDAO);
 
-        this.warehouseController = new WarehouseController(warehouseItemDAO);
+        this.warehouseController = new WarehouseController(warehouseItemDAO, warehouseImageDAO);
         this.hydraulicTestController = new HydraulicTestController(hydraulicTestDAO);
 
     }

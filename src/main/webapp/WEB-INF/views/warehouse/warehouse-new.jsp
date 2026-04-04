@@ -35,7 +35,24 @@
 
         <form action="<%= request.getContextPath() %>/warehouse/new"
               method="post"
+              enctype="multipart/form-data"
               class="form-click-guides">
+
+            <div class="mb-4 text-start">
+                <label class="form-label fw-semibold">Immagini articolo</label>
+                <div class="file-input-wrap">
+                    <input type="file"
+                           id="warehouseImagesInput"
+                           name="images"
+                           class="file-input-native"
+                           accept="image/*"
+                           multiple>
+                    <label for="warehouseImagesInput" class="file-input-visual file-input-visual-label mb-0">
+                        Seleziona immagini
+                    </label>
+                </div>
+                <div id="warehouseImagesPreviewList" class="engine-images-edit-list mt-2 d-none"></div>
+            </div>
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Nome articolo</label>
@@ -102,6 +119,73 @@
 
     </div>
 </div>
+
+<script>
+    (() => {
+        const input = document.getElementById('warehouseImagesInput');
+        const previewList = document.getElementById('warehouseImagesPreviewList');
+        if (!input || !previewList) {
+            return;
+        }
+
+        const renderPreview = () => {
+            previewList.innerHTML = '';
+            const files = input.files ? Array.from(input.files) : [];
+            const hasImages = files.some((file) => file.type && file.type.startsWith('image/'));
+            if (!hasImages) {
+                previewList.classList.add('d-none');
+                return;
+            }
+
+            files.forEach((file, index) => {
+                if (!file.type || !file.type.startsWith('image/')) {
+                    return;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'engine-image-edit-card';
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'engine-image-delete-btn';
+                removeButton.textContent = 'X';
+                removeButton.setAttribute('aria-label', 'Rimuovi immagine selezionata');
+                removeButton.title = 'Rimuovi';
+                removeButton.addEventListener('click', function () {
+                    const currentFiles = input.files ? Array.from(input.files) : [];
+                    const transfer = new DataTransfer();
+                    currentFiles.forEach((currentFile, currentIndex) => {
+                        if (currentIndex !== index) {
+                            transfer.items.add(currentFile);
+                        }
+                    });
+                    input.files = transfer.files;
+                    renderPreview();
+                });
+
+                const img = document.createElement('img');
+                img.className = 'engine-image-edit-preview';
+                img.alt = file.name;
+                const objectUrl = URL.createObjectURL(file);
+                img.src = objectUrl;
+                img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+
+                const filename = document.createElement('div');
+                filename.className = 'small text-muted mt-1 text-truncate';
+                filename.textContent = file.name;
+
+                card.appendChild(removeButton);
+                card.appendChild(img);
+                card.appendChild(filename);
+                previewList.appendChild(card);
+            });
+
+            previewList.classList.remove('d-none');
+        };
+
+        input.addEventListener('change', renderPreview);
+    })();
+</script>
 
 </body>
 </html>
