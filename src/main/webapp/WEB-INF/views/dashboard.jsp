@@ -73,14 +73,16 @@
 
         <!-- Motori consegnati mese corrente -->
         <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="kpi-title">
-                    Motori consegnati (mese di ${meseCorrenteLabel})
+            <a href="<%= request.getContextPath() %>/engine/list?status=DELIVERED" class="kpi-card-link">
+                <div class="kpi-card">
+                    <div class="kpi-title">
+                        Motori consegnati (mese di ${meseCorrenteLabel})
+                    </div>
+                    <div class="kpi-value">
+                        ${motoriConsegnatiMese}
+                    </div>
                 </div>
-                <div class="kpi-value">
-                    ${motoriConsegnatiMese}
-                </div>
-            </div>
+            </a>
         </div>
 
         <!-- Tempo medio lavorazione mese corrente -->

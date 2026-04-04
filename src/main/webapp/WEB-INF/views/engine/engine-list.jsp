@@ -14,6 +14,11 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=3">
+    <style>
+        .engine-card-link-main {
+            height: auto;
+        }
+    </style>
 </head>
 
 <body>
@@ -103,7 +108,7 @@
                      data-customer="<c:out value='${customerNames[engine.customerId]}' default='—'/>">
 
                     <div class="engine-gallery-card">
-                        <a class="engine-card-link" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                        <a class="engine-card-link engine-card-link-main" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                             <!-- IMAGE -->
                             <c:set var="coverFilename" value="${coverImages[engine.id]}" />
                             <c:choose>
@@ -152,11 +157,6 @@
                                         <c:otherwise>${st}</c:otherwise>
                                     </c:choose>
                                 </button>
-
-                                <a href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
-                                   class="btn btn-sm btn-outline-secondary">
-                                    Apri
-                                </a>
                             </div>
                             <c:if test="${st == 'DELIVERED' && engine.deliveryDate != null}">
                                 <div class="small text-muted mt-1">
