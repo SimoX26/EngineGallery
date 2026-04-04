@@ -38,16 +38,6 @@
             Modifiche salvate correttamente.
         </div>
     </c:if>
-    <c:if test="${statusUpdated}">
-        <div class="alert alert-success" role="alert">
-            Stato aggiornato correttamente.
-        </div>
-    </c:if>
-    <c:if test="${not empty statusUpdateError}">
-        <div class="alert alert-danger" role="alert">
-            <c:out value="${statusUpdateError}" />
-        </div>
-    </c:if>
     <div class="row g-4 card-base">
 
         <div class="col-lg-5">
@@ -67,16 +57,11 @@
                     <dt>Stato:</dt>
                     <c:set var="st" value="${detail.engine.status}" />
                     <dd>
-                        <button type="button"
-                                id="quickStatusBadge"
-                                class="badge-status quick-status-trigger
+                        <span class="badge-status
                                 ${st == 'WAITING' ? 'status-stoccato' : ''}
                                 ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
                                 ${st == 'READY' ? 'status-ready' : ''}
-                                ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
-                                aria-expanded="${not empty statusUpdateError ? 'true' : 'false'}"
-                                aria-controls="quickStatusForm"
-                                title="Clicca per modificare rapidamente lo stato">
+                                ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
                             <c:choose>
                                 <c:when test="${st == 'WAITING'}">In attesa</c:when>
                                 <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
@@ -84,25 +69,7 @@
                                 <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
                                 <c:otherwise>${st}</c:otherwise>
                             </c:choose>
-                        </button>
-
-                        <form id="quickStatusForm"
-                              class="quick-status-form ${not empty statusUpdateError ? '' : 'd-none'} mt-2"
-                              action="<%= request.getContextPath() %>/engine/detail"
-                              method="post">
-                            <input type="hidden" name="ref" value="${detail.engine.engineRef}">
-                            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
-                                <select class="form-select form-select-sm" name="status" required>
-                                    <option value="WAITING" ${st == 'WAITING' ? 'selected' : ''}>In attesa</option>
-                                    <option value="WORK_IN_PROGRESS" ${st == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                                    <option value="READY" ${st == 'READY' ? 'selected' : ''}>Pronto</option>
-                                    <option value="DELIVERED" ${st == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-engine quick-status-save">Salva</button>
-                                <button type="button" id="quickStatusCancel" class="btn btn-sm btn-outline-secondary">Annulla</button>
-                            </div>
-                            <div class="small text-muted mt-1">Modifica rapida: solo stato motore.</div>
-                        </form>
+                        </span>
                     </dd>
 
                     <dt>Data ingresso:</dt>
@@ -186,40 +153,6 @@
         engineRef: '${detail.engine.engineRef}',
         contextPath: '<%= request.getContextPath() %>'
     };
-
-    (() => {
-        const trigger = document.getElementById('quickStatusBadge');
-        const form = document.getElementById('quickStatusForm');
-        const cancelButton = document.getElementById('quickStatusCancel');
-
-        if (!trigger || !form || !cancelButton) {
-            return;
-        }
-
-        const openForm = () => {
-            form.classList.remove('d-none');
-            trigger.setAttribute('aria-expanded', 'true');
-            const statusSelect = form.querySelector('select[name="status"]');
-            if (statusSelect) {
-                statusSelect.focus();
-            }
-        };
-
-        const closeForm = () => {
-            form.classList.add('d-none');
-            trigger.setAttribute('aria-expanded', 'false');
-        };
-
-        trigger.addEventListener('click', () => {
-            if (form.classList.contains('d-none')) {
-                openForm();
-                return;
-            }
-            closeForm();
-        });
-
-        cancelButton.addEventListener('click', closeForm);
-    })();
 </script>
 <script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js"></script>
 

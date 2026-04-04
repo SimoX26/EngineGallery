@@ -80,9 +80,14 @@
             </div>
         </div>
 
-        <!-- (opzionale) errore -->
         <c:if test="${not empty error}">
             <div class="alert alert-warning">${error}</div>
+        </c:if>
+        <c:if test="${param.statusUpdated == '1'}">
+            <div class="alert alert-success">Stato aggiornato correttamente.</div>
+        </c:if>
+        <c:if test="${not empty param.statusUpdateError}">
+            <div class="alert alert-danger"><c:out value="${param.statusUpdateError}" /></div>
         </c:if>
 
         <!-- GALLERY -->
@@ -97,43 +102,47 @@
                      data-status="${st}"
                      data-customer="<c:out value='${customerNames[engine.customerId]}' default='—'/>">
 
-                    <a class="engine-card-link" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                     <div class="engine-gallery-card">
+                        <a class="engine-card-link" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                            <!-- IMAGE -->
+                            <c:set var="coverFilename" value="${coverImages[engine.id]}" />
+                            <c:choose>
+                                <c:when test="${not empty coverFilename}">
+                                    <div class="engine-image"
+                                         style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                                        <span class="engine-image-empty-label">Nessuna immagine</span>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
 
-                        <!-- IMAGE -->
-                        <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                        <c:choose>
-                            <c:when test="${not empty coverFilename}">
-                                <div class="engine-image"
-                                     style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
+                            <div class="engine-body pb-2">
+                                <div class="engine-code">
+                                    ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
                                 </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
-                                    <span class="engine-image-empty-label">Nessuna immagine</span>
+
+                                <div class="engine-client">
+                                    ${engine.engineRef}
                                 </div>
-                            </c:otherwise>
-                        </c:choose>
-
-                        <!-- BODY -->
-                        <div class="engine-body">
-
-                            <div class="engine-code">
-                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
                             </div>
+                        </a>
 
-                            <div class="engine-client">
-                                ${engine.engineRef}
-                            </div>
-
+                        <div class="engine-body pt-0">
                             <div class="engine-footer">
-
-                                <!-- STATUS -->
-                                <span class="badge-status
-                                    ${st == 'WAITING' ? 'status-stoccato' : ''}
-                                    ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
-                                    ${st == 'READY' ? 'status-ready' : ''}
-                                    ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
+                                <button type="button"
+                                        class="badge-status quick-status-trigger
+                                        ${st == 'WAITING' ? 'status-stoccato' : ''}
+                                        ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                                        ${st == 'READY' ? 'status-ready' : ''}
+                                        ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
+                                        data-quick-status-trigger
+                                        data-target-form="quickStatusForm-${engine.id}"
+                                        aria-expanded="false"
+                                        aria-controls="quickStatusForm-${engine.id}"
+                                        title="Clicca per modificare rapidamente lo stato">
 
                                     <c:choose>
                                         <c:when test="${st == 'WAITING'}">In attesa</c:when>
@@ -142,13 +151,35 @@
                                         <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
                                         <c:otherwise>${st}</c:otherwise>
                                     </c:choose>
-                                </span>
+                                </button>
 
+                                <a href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    Apri
+                                </a>
                             </div>
-                        </div>
 
+                            <form id="quickStatusForm-${engine.id}"
+                                  class="quick-status-form d-none mt-2"
+                                  data-quick-status-form
+                                  action="<%= request.getContextPath() %>/engine/detail"
+                                  method="post">
+                                <input type="hidden" name="redirectTo" value="list">
+                                <input type="hidden" name="ref" value="${engine.engineRef}">
+                                <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+                                    <select class="form-select form-select-sm" name="status" required>
+                                        <option value="WAITING" ${st == 'WAITING' ? 'selected' : ''}>In attesa</option>
+                                        <option value="WORK_IN_PROGRESS" ${st == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
+                                        <option value="READY" ${st == 'READY' ? 'selected' : ''}>Pronto</option>
+                                        <option value="DELIVERED" ${st == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-engine quick-status-save">Salva</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-quick-status-cancel>Annulla</button>
+                                </div>
+                                <div class="small text-muted mt-1">Modifica rapida: solo stato motore.</div>
+                            </form>
+                        </div>
                     </div>
-                    </a>
 
                 </div>
             </c:forEach>
@@ -168,6 +199,9 @@
         const resetFiltersButton = document.getElementById('engineFiltersReset');
         const engineCards = document.querySelectorAll('.engine-card-col');
         const emptyState = document.getElementById('engineKeywordEmptyState');
+        const quickStatusForms = document.querySelectorAll('[data-quick-status-form]');
+        const quickStatusTriggers = document.querySelectorAll('[data-quick-status-trigger]');
+        const quickStatusCancelButtons = document.querySelectorAll('[data-quick-status-cancel]');
         const filtersCollapse = bootstrap.Collapse.getOrCreateInstance(filtersPanel, { toggle: false });
         const queryParams = new URLSearchParams(window.location.search);
 
@@ -221,6 +255,21 @@
             }
         };
 
+        const closeQuickStatusForm = (form) => {
+            if (!form || form.classList.contains('d-none')) {
+                return;
+            }
+            form.classList.add('d-none');
+            const trigger = document.querySelector(`[data-target-form="${form.id}"]`);
+            if (trigger) {
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        };
+
+        const closeAllQuickStatusForms = () => {
+            quickStatusForms.forEach((form) => closeQuickStatusForm(form));
+        };
+
         const applyEngineFilter = () => {
             const keyword = normalizeText(searchInput.value);
             const selectedStatus = (statusFilter.value || '').trim();
@@ -255,6 +304,7 @@
 
         populateCustomerFilter();
         applyInitialFiltersFromQuery();
+
         searchInput.addEventListener('input', applyEngineFilter);
         statusFilter.addEventListener('change', applyEngineFilter);
         customerFilter.addEventListener('change', applyEngineFilter);
@@ -266,6 +316,46 @@
             customerFilter.value = '';
             applyEngineFilter();
         });
+
+        quickStatusTriggers.forEach((trigger) => {
+            trigger.addEventListener('click', () => {
+                const targetFormId = trigger.dataset.targetForm;
+                const targetForm = document.getElementById(targetFormId);
+                if (!targetForm) {
+                    return;
+                }
+
+                const isHidden = targetForm.classList.contains('d-none');
+                closeAllQuickStatusForms();
+
+                if (isHidden) {
+                    targetForm.classList.remove('d-none');
+                    trigger.setAttribute('aria-expanded', 'true');
+                    const statusSelect = targetForm.querySelector('select[name="status"]');
+                    if (statusSelect) {
+                        statusSelect.focus();
+                    }
+                }
+            });
+        });
+
+        quickStatusCancelButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const form = button.closest('[data-quick-status-form]');
+                closeQuickStatusForm(form);
+            });
+        });
+
+        quickStatusForms.forEach((form) => {
+            form.addEventListener('submit', () => {
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Salvataggio...';
+                }
+            });
+        });
+
         applyEngineFilter();
     </script>
 

@@ -69,8 +69,6 @@ public class EngineDetailServlet extends HttpServlet {
 
         request.setAttribute("detail", detail);
         request.setAttribute("updated", "1".equals(request.getParameter("updated")));
-        request.setAttribute("statusUpdated", "1".equals(request.getParameter("statusUpdated")));
-        request.setAttribute("statusUpdateError", request.getParameter("statusUpdateError"));
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-detail.jsp").forward(request, response);
     }
 
@@ -78,6 +76,7 @@ public class EngineDetailServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String engineRef = safeTrim(request.getParameter("ref"));
         String statusParam = safeTrim(request.getParameter("status"));
+        boolean backToList = "list".equalsIgnoreCase(safeTrim(request.getParameter("redirectTo")));
 
         if (!isValidEngineRef(engineRef)) {
             response.sendRedirect(request.getContextPath() + "/engine/list");
@@ -85,8 +84,13 @@ public class EngineDetailServlet extends HttpServlet {
         }
 
         if (statusParam == null || statusParam.isBlank()) {
-            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef
-                    + "&statusUpdateError=" + encodeParam("Seleziona uno stato valido"));
+            if (backToList) {
+                response.sendRedirect(request.getContextPath() + "/engine/list?statusUpdateError="
+                        + encodeParam("Seleziona uno stato valido"));
+            } else {
+                response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef
+                        + "&statusUpdateError=" + encodeParam("Seleziona uno stato valido"));
+            }
             return;
         }
 
@@ -94,8 +98,13 @@ public class EngineDetailServlet extends HttpServlet {
         try {
             newStatus = EngineStatus.valueOf(statusParam);
         } catch (IllegalArgumentException ex) {
-            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef
-                    + "&statusUpdateError=" + encodeParam("Stato non valido"));
+            if (backToList) {
+                response.sendRedirect(request.getContextPath() + "/engine/list?statusUpdateError="
+                        + encodeParam("Stato non valido"));
+            } else {
+                response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef
+                        + "&statusUpdateError=" + encodeParam("Stato non valido"));
+            }
             return;
         }
 
@@ -128,10 +137,19 @@ public class EngineDetailServlet extends HttpServlet {
 
             engineController.updateEngine(updateBean);
 
-            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef + "&statusUpdated=1");
+            if (backToList) {
+                response.sendRedirect(request.getContextPath() + "/engine/list?statusUpdated=1");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef + "&statusUpdated=1");
+            }
         } catch (RuntimeException ex) {
-            response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef
-                    + "&statusUpdateError=" + encodeParam("Errore durante l'aggiornamento rapido dello stato"));
+            if (backToList) {
+                response.sendRedirect(request.getContextPath() + "/engine/list?statusUpdateError="
+                        + encodeParam("Errore durante l'aggiornamento rapido dello stato"));
+            } else {
+                response.sendRedirect(request.getContextPath() + "/engine/detail?ref=" + engineRef
+                        + "&statusUpdateError=" + encodeParam("Errore durante l'aggiornamento rapido dello stato"));
+            }
         }
     }
 
