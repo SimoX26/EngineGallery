@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -77,7 +78,9 @@
                                         <c:out value="${test.customerName}" default="Cliente non disponibile" />
                                     </div>
                                     <div class="engine-client">
-                                        Data prova: <c:out value="${test.testDate}" default="—" />
+                                        Data prova:
+                                        <fmt:parseDate value="${test.testDate}" pattern="yyyy-MM-dd" var="hydraulicTestDateParsed" />
+                                        <fmt:formatDate value="${hydraulicTestDateParsed}" pattern="dd / MM / yyyy" />
                                     </div>
                                     <c:if test="${not empty test.notes}">
                                         <div class="hydraulic-notes mt-2">

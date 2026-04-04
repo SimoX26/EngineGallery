@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -160,7 +161,8 @@
                             </div>
                             <c:if test="${st == 'DELIVERED' && engine.deliveryDate != null}">
                                 <div class="small text-muted mt-1">
-                                    Consegnato il ${engine.deliveryDate}
+                                    <fmt:parseDate value="${engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineCardDeliveryDateParsed" />
+                                    Consegnato il <fmt:formatDate value="${engineCardDeliveryDateParsed}" pattern="dd / MM / yyyy" />
                                 </div>
                             </c:if>
 

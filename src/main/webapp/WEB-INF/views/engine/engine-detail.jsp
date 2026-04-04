@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -73,13 +74,17 @@
                     </dd>
 
                     <dt>Data ingresso:</dt>
-                    <dd>${detail.engine.intakeDate}</dd>
+                    <dd>
+                        <fmt:parseDate value="${detail.engine.intakeDate}" pattern="yyyy-MM-dd" var="engineIntakeDateParsed" />
+                        <fmt:formatDate value="${engineIntakeDateParsed}" pattern="dd / MM / yyyy" />
+                    </dd>
 
                     <dt>Data consegna:</dt>
                     <dd>
                         <c:choose>
                             <c:when test="${detail.engine.deliveryDate != null}">
-                                ${detail.engine.deliveryDate}
+                                <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateParsed" />
+                                <fmt:formatDate value="${engineDeliveryDateParsed}" pattern="dd / MM / yyyy" />
                             </c:when>
                             <c:otherwise>-</c:otherwise>
                         </c:choose>

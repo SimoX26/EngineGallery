@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -133,7 +134,10 @@
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <small class="text-muted">${motore.intakeDate}</small>
+                                    <small class="text-muted">
+                                        <fmt:parseDate value="${motore.intakeDate}" pattern="yyyy-MM-dd" var="motoreIntakeDateParsed" />
+                                        <fmt:formatDate value="${motoreIntakeDateParsed}" pattern="dd / MM / yyyy" />
+                                    </small>
                                     <span class="badge-status
                                         ${st == 'WAITING' ? 'status-stoccato' : ''}
                                         ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -32,7 +33,10 @@
                 <dd><c:out value="${hydraulicTest.engineCode}" default="—"/></dd>
 
                 <dt>Data prova:</dt>
-                <dd><c:out value="${hydraulicTest.testDate}" default="—"/></dd>
+                <dd>
+                    <fmt:parseDate value="${hydraulicTest.testDate}" pattern="yyyy-MM-dd" var="hydraulicTestDateParsed" />
+                    <fmt:formatDate value="${hydraulicTestDateParsed}" pattern="dd / MM / yyyy" />
+                </dd>
 
                 <dt>Note:</dt>
                 <dd><c:out value="${hydraulicTest.notes}" default="—"/></dd>
