@@ -59,7 +59,7 @@
 
         <!-- Motori in lavorazione -->
         <div class="col-md-3">
-            <a href="<%= request.getContextPath() %>/engine/list" class="kpi-card-link">
+            <a href="<%= request.getContextPath() %>/engine/list?status=WORK_IN_PROGRESS" class="kpi-card-link">
                 <div class="kpi-card">
                     <div class="kpi-title">
                         Motori in lavorazione
