@@ -3,10 +3,11 @@ set -euo pipefail
 
 # Default locali/remoti richiesti
 LOCAL_WEBAPPS_DEFAULT="/home/simone/apache-tomcat-9.0.112/webapps"
-REMOTE_USER_DEFAULT="admin"
-REMOTE_HOST_DEFAULT="ec2-13-62-51-239.eu-north-1.compute.amazonaws.com"
+REMOTE_USER_DEFAULT="root"
+REMOTE_HOST_DEFAULT="82.165.20.124"
 REMOTE_WEBAPPS_DEFAULT="~"
-REMOTE_KEY_DEFAULT="/home/simone/Documenti/Keys.pem"
+REMOTE_PASSWORD_DEFAULT="F1yKNvqwl6qw8ED"
+ANDROID_URL_DEFAULT="http://${REMOTE_HOST_DEFAULT}:8080/EngineGallery"
 
 usage() {
   cat <<'HELP'
@@ -21,7 +22,7 @@ Esempi:
   ./deploy.sh --target user@192.168.1.50:~/webapps/
   ./deploy.sh --android
   ./deploy.sh --apk
-  ./deploy.sh --android --android-url http://192.168.1.50:8080/EngineGallery
+  ./deploy.sh --android --android-url http://82.165.20.124:8080/EngineGallery
 
 Opzioni:
   --locale      Copia il WAR in locale su /home/simone/apache-tomcat-9.0.112/webapps
@@ -32,9 +33,9 @@ Opzioni:
   --android-url URL backend da iniettare nella build Android (ENGINE_GALLERY_BASE_URL)
   --android-no-install Salta installazione adb automatica (build-only)
   --port        Porta SSH (default: 22)
-  --identity    Chiave SSH (default remoto: /home/simone/Documenti/Keys.pem)
-  --remote-user Utente SSH remoto (default: admin)
-  --remote-host Host SSH remoto (default: ec2-13-62-51-239.eu-north-1.compute.amazonaws.com)
+  --password    Password SSH (default remoto preconfigurato)
+  --remote-user Utente SSH remoto (default: root)
+  --remote-host Host SSH remoto (default: 82.165.20.124)
   --remote-path Cartella remota webapps (default: ~/webapps)
   --remote-sql-path Cartella remota script SQL (default: ~)
   --local-path  Cartella locale webapps (default: /home/simone/apache-tomcat-9.0.112/webapps)
@@ -49,14 +50,15 @@ HELP
 
 TARGET=""
 PORT="22"
-IDENTITY="$REMOTE_KEY_DEFAULT"
+PASSWORD="$REMOTE_PASSWORD_DEFAULT"
 LOCAL_PATH="$LOCAL_WEBAPPS_DEFAULT"
 REMOTE_USER="$REMOTE_USER_DEFAULT"
 REMOTE_HOST="$REMOTE_HOST_DEFAULT"
 REMOTE_PATH="$REMOTE_WEBAPPS_DEFAULT"
 REMOTE_SQL_PATH=""
 SKIP_BUILD="false"
-ANDROID_URL=""
+ANDROID_URL="$ANDROID_URL_DEFAULT"
+ANDROID_URL_EXPLICIT="false"
 ANDROID_INSTALL="true"
 MODE=""
 
@@ -106,6 +108,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --android-url)
       ANDROID_URL="${2:-}"
+      ANDROID_URL_EXPLICIT="true"
       shift 2
       ;;
     --android-no-install)
@@ -116,8 +119,8 @@ while [[ $# -gt 0 ]]; do
       PORT="${2:-}"
       shift 2
       ;;
-    --identity)
-      IDENTITY="${2:-}"
+    --password)
+      PASSWORD="${2:-}"
       shift 2
       ;;
     --remote-user)
@@ -162,6 +165,10 @@ if [[ -z "$MODE" ]]; then
   exit 1
 fi
 
+if [[ "$ANDROID_URL_EXPLICIT" != "true" ]]; then
+  ANDROID_URL="http://${REMOTE_HOST}:8080/EngineGallery"
+fi
+
 if [[ "$MODE" == "target" ]] && ! [[ "$TARGET" =~ :/ ]]; then
   echo "Errore: --target deve essere nel formato [user@]host:/path/." >&2
   exit 1
@@ -181,6 +188,7 @@ if [[ "$MODE" == "android" || "$MODE" == "apk" ]]; then
   if [[ -n "$ANDROID_URL" ]]; then
     GRADLE_CMD+=("-PENGINE_GALLERY_BASE_URL=${ANDROID_URL}")
   fi
+  echo ">> Android backend URL: ${ANDROID_URL}"
 
   if [[ "$MODE" == "apk" ]]; then
     BUILD_LOG="$(mktemp)"
@@ -261,11 +269,6 @@ fi
 WAR_NAME="$(basename "$WAR_FILE")"
 APP_CONTEXT="${WAR_NAME%.war}"
 
-# Correzione automatica typo comune: "7home/..." -> "/home/..."
-if [[ "$IDENTITY" == 7home/* ]]; then
-  IDENTITY="/${IDENTITY}"
-fi
-
 echo ">> WAR selezionato: $WAR_FILE"
 
 if [[ "$MODE" == "locale" ]]; then
@@ -291,10 +294,12 @@ if [[ "$MODE" == "remoto" ]]; then
   TARGET="${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH%/}/"
 fi
 
-SCP_CMD=(scp -P "$PORT")
-if [[ -n "$IDENTITY" ]]; then
-  SCP_CMD+=(-i "$IDENTITY")
+if ! command -v sshpass >/dev/null 2>&1; then
+  echo "Errore: 'sshpass' non trovato." >&2
+  echo "Installa sshpass per usare il deploy automatico con password." >&2
+  exit 1
 fi
+SCP_CMD=(sshpass -p "$PASSWORD" scp -P "$PORT")
 
 SCP_CMD+=("$WAR_FILE" "$TARGET")
 
@@ -306,10 +311,7 @@ if [[ "$MODE" == "remoto" ]]; then
   mapfile -d '' SQL_FILES < <(find src/main/resources -type f -name "*.sql" -print0 | sort -z)
 
   if [[ "${#SQL_FILES[@]}" -gt 0 ]]; then
-    SCP_SQL_CMD=(scp -P "$PORT")
-    if [[ -n "$IDENTITY" ]]; then
-      SCP_SQL_CMD+=(-i "$IDENTITY")
-    fi
+    SCP_SQL_CMD=(sshpass -p "$PASSWORD" scp -P "$PORT")
 
     echo ">> Upload script SQL in: ${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}"
     for sql_file in "${SQL_FILES[@]}"; do
