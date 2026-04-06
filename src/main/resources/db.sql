@@ -124,6 +124,7 @@ CREATE TABLE warehouse_images (
 INSERT INTO users (username, password_hash, role) VALUES
 ('mario',     SHA2('Uhz3Mj7SqycaZ6', 256), 'OPERATOR'),
 ('giordano',  SHA2('CFIiby2kuH9NyF', 256), 'OPERATOR'),
+('giuliano',  SHA2('R7mK9pL2xV8nQa', 256), 'OPERATOR'),
 ('maurizio',  SHA2('34q9xn6xuVUAUJ', 256), 'OPERATOR'),
 ('luigi',     SHA2('QZfU52j4WyCKB4', 256), 'OPERATOR'),
 ('giggi',     SHA2('myRBb47yKJyEB8', 256), 'OPERATOR'),
