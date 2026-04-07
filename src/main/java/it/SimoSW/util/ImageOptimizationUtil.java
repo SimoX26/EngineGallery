@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.UUID;
@@ -27,6 +28,7 @@ public final class ImageOptimizationUtil {
     }
 
     public static String storeOptimizedImage(Part part, Path targetDir) throws IOException {
+        Files.createDirectories(targetDir);
         String submittedName = part.getSubmittedFileName();
         String originalName = submittedName == null ? "image.jpg" : Paths.get(submittedName).getFileName().toString();
         String sanitizedOriginal = sanitizeFilename(originalName);
@@ -38,8 +40,10 @@ public final class ImageOptimizationUtil {
 
         if (source == null) {
             String fallbackFilename = UUID.randomUUID() + "_" + sanitizedOriginal;
-            Path fallbackDestination = targetDir.resolve(fallbackFilename).normalize();
-            part.write(fallbackDestination.toString());
+            Path fallbackDestination = safeResolve(targetDir, fallbackFilename);
+            try (InputStream is = part.getInputStream()) {
+                Files.copy(is, fallbackDestination, StandardCopyOption.REPLACE_EXISTING);
+            }
             return fallbackFilename;
         }
 
@@ -47,9 +51,18 @@ public final class ImageOptimizationUtil {
         BufferedImage rgbImage = ensureRgb(resized);
 
         String outputFilename = UUID.randomUUID() + ".jpg";
-        Path outputPath = targetDir.resolve(outputFilename).normalize();
+        Path outputPath = safeResolve(targetDir, outputFilename);
         writeJpeg(rgbImage, outputPath, JPEG_QUALITY);
         return outputFilename;
+    }
+
+    private static Path safeResolve(Path targetDir, String filename) {
+        Path baseDir = targetDir.toAbsolutePath().normalize();
+        Path destination = baseDir.resolve(filename).normalize();
+        if (!destination.startsWith(baseDir)) {
+            throw new IllegalArgumentException("Percorso destinazione non valido");
+        }
+        return destination;
     }
 
     private static BufferedImage resizeIfNeeded(BufferedImage source, int maxWidth, int maxHeight) {
