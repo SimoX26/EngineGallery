@@ -212,6 +212,7 @@
         const quickStatusCancelButtons = document.querySelectorAll('[data-quick-status-cancel]');
         const filtersCollapse = bootstrap.Collapse.getOrCreateInstance(filtersPanel, { toggle: false });
         const queryParams = new URLSearchParams(window.location.search);
+        const quickStatusScrollKey = 'engineList.quickStatus.scrollY';
 
         const normalizeText = (value) => (value || '')
             .toString()
@@ -303,6 +304,25 @@
             filtersToggle.classList.toggle('btn-secondary', activeFilters);
         };
 
+        const restoreScrollAfterQuickStatusSubmit = () => {
+            const hasQuickStatusFeedback = queryParams.get('statusUpdated') === '1'
+                || queryParams.has('statusUpdateError');
+            if (!hasQuickStatusFeedback) {
+                return;
+            }
+
+            const savedScrollY = Number(sessionStorage.getItem(quickStatusScrollKey));
+            if (!Number.isFinite(savedScrollY) || savedScrollY < 0) {
+                sessionStorage.removeItem(quickStatusScrollKey);
+                return;
+            }
+
+            requestAnimationFrame(() => {
+                window.scrollTo(0, savedScrollY);
+                sessionStorage.removeItem(quickStatusScrollKey);
+            });
+        };
+
         filtersPanel.addEventListener('shown.bs.collapse', () => {
             filtersToggle.setAttribute('aria-expanded', 'true');
         });
@@ -356,6 +376,7 @@
 
         quickStatusForms.forEach((form) => {
             form.addEventListener('submit', () => {
+                sessionStorage.setItem(quickStatusScrollKey, String(window.scrollY));
                 const submitButton = form.querySelector('button[type="submit"]');
                 if (submitButton) {
                     submitButton.disabled = true;
@@ -365,6 +386,7 @@
         });
 
         applyEngineFilter();
+        restoreScrollAfterQuickStatusSubmit();
     </script>
 
 </div>
