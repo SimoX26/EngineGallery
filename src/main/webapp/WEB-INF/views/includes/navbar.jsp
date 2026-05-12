@@ -190,7 +190,95 @@
             });
         }
 
+        function initLoadingOverlay() {
+            if (window.__appLoadingOverlayInitialized) {
+                return;
+            }
+            window.__appLoadingOverlayInitialized = true;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'app-loading-overlay';
+            overlay.id = 'appLoadingOverlay';
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.innerHTML = ''
+                + '<div class="app-loading-overlay__panel" role="status" aria-live="polite">'
+                + '  <div class="spinner-border app-loading-overlay__spinner" aria-hidden="true"></div>'
+                + '  <span>Caricamento in corso...</span>'
+                + '</div>';
+            document.body.appendChild(overlay);
+
+            const showOverlay = function () {
+                overlay.classList.add('is-visible');
+                overlay.setAttribute('aria-hidden', 'false');
+            };
+
+            const isSameOrigin = function (url) {
+                return url.origin === window.location.origin;
+            };
+
+            document.addEventListener('submit', function (event) {
+                const form = event.target;
+                if (!(form instanceof HTMLFormElement)) {
+                    return;
+                }
+                if (form.dataset.noLoadingOverlay === 'true') {
+                    return;
+                }
+                const method = (form.method || '').toLowerCase();
+                if (method !== 'get' && method !== 'post') {
+                    return;
+                }
+                showOverlay();
+            }, true);
+
+            document.addEventListener('click', function (event) {
+                if (event.defaultPrevented || event.button !== 0) {
+                    return;
+                }
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+
+                const link = event.target.closest('a[href]');
+                if (!link) {
+                    return;
+                }
+
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+                    return;
+                }
+                if (link.hasAttribute('download') || link.target === '_blank') {
+                    return;
+                }
+
+                let destination;
+                try {
+                    destination = new URL(link.href, window.location.href);
+                } catch (err) {
+                    return;
+                }
+
+                if (!isSameOrigin(destination)) {
+                    return;
+                }
+
+                const current = window.location.pathname + window.location.search + window.location.hash;
+                const next = destination.pathname + destination.search + destination.hash;
+                if (current === next) {
+                    return;
+                }
+
+                showOverlay();
+            }, true);
+
+            window.addEventListener('beforeunload', function () {
+                showOverlay();
+            });
+        }
+
         initPostSubmitBackGuard();
+        initLoadingOverlay();
 
         if (!window.bootstrap) {
             const bootstrapScript = document.createElement('script');

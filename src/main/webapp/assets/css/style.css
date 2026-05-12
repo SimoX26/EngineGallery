@@ -30,6 +30,52 @@ body {
     color: var(--text-main);
 }
 
+/* =====================
+   LOADING OVERLAY
+   ===================== */
+.app-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(15, 23, 42, 0.34);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.app-loading-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+
+.app-loading-overlay__panel {
+    min-width: 210px;
+    max-width: 92vw;
+    border-radius: var(--radius-md);
+    background: rgba(31, 41, 51, 0.95);
+    color: #f8fafc;
+    box-shadow: var(--shadow-strong);
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.app-loading-overlay__spinner {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-width: 0.18em;
+}
+
 
 /* =====================
    CARD
