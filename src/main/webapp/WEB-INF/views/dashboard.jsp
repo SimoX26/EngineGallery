@@ -99,10 +99,10 @@
         </div>
 
     </div>
-
-
-    <!-- ULTIMI MOTORI -->
-    <div class="table-container d-none d-md-block">
+    <!-- ULTIMI MOTORI + ULTIMI ARTICOLI MAGAZZINO -->
+    <div class="row g-4 mt-1">
+        <div class="col-12 col-md-6">
+            <div class="table-container d-none d-md-block">
 
         <h5 class="mb-4 fw-semibold">Motori recenti</h5>
 
@@ -161,10 +161,12 @@
                 <p class="text-muted mb-0">Nessun motore recente disponibile.</p>
             </c:otherwise>
         </c:choose>
-    </div>
+            </div>
+        </div>
 
-    <!-- ULTIMI ARTICOLI MAGAZZINO -->
-    <div class="table-container mt-4">
+        <!-- ULTIMI ARTICOLI MAGAZZINO -->
+        <div class="col-12 col-md-6 d-none d-md-block">
+            <div class="table-container">
 
         <h5 class="mb-4 fw-semibold">Articoli magazzino recenti</h5>
 
@@ -197,6 +199,8 @@
                 <p class="text-muted mb-0">Nessun articolo di magazzino disponibile.</p>
             </c:otherwise>
         </c:choose>
+            </div>
+        </div>
     </div>
 
     <!-- NAVIGAZIONE RAPIDA -->
@@ -207,63 +211,54 @@
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/dashboard">
                     <div class="home-nav-card-title">Home</div>
                     <p class="home-nav-card-desc mb-3">Panoramica generale dell'officina.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/customer/list">
                     <div class="home-nav-card-title">Clienti</div>
                     <p class="home-nav-card-desc mb-3">Gestione rubrica clienti e dettagli.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/list">
                     <div class="home-nav-card-title">Motori</div>
                     <p class="home-nav-card-desc mb-3">Motori clienti in lavorazione.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/archive">
                     <div class="home-nav-card-title">Archivio motori</div>
                     <p class="home-nav-card-desc mb-3">Storico motori consegnati.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/hydraulic-test/list">
                     <div class="home-nav-card-title">Prove idrauliche</div>
                     <p class="home-nav-card-desc mb-3">Video e schede test idraulici.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/warehouse/list">
                     <div class="home-nav-card-title">Magazzino</div>
                     <p class="home-nav-card-desc mb-3">Gestione articoli e disponibilità.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/ready-delivery">
                     <div class="home-nav-card-title">Pronta Consegna</div>
                     <p class="home-nav-card-desc mb-3">Sezione dedicata ai motori di pronta consegna.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/catalog">
                     <div class="home-nav-card-title">Catalogo</div>
                     <p class="home-nav-card-desc mb-3">Catalogo motori vendibili direttamente.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
             <div class="col-lg-4 col-md-6">
                 <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/statistics">
                     <div class="home-nav-card-title">Statistiche</div>
                     <p class="home-nav-card-desc mb-3">Storico KPI e andamento mensile.</p>
-                    <span class="btn btn-sm btn-engine">Apri sezione</span>
                 </a>
             </div>
         </div>
