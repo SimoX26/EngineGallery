@@ -12,10 +12,12 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@WebServlet("/engine/list")
+@WebServlet({"/engine/list", "/engine/archive"})
 public class EngineListServlet extends HttpServlet {
 
     private EngineController engineController;
@@ -31,93 +33,73 @@ public class EngineListServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        boolean archiveMode = "/engine/archive".equals(request.getServletPath());
 
-        List<Engine> engines = engineController.getAllEngines();
-        sortByMostRecentIntake(engines);
-        request.setAttribute("engines", engines);
+        String engineCode = safeTrim(request.getParameter("engineCode"));
+        String statusParam = safeTrim(request.getParameter("status"));
+        String customerIdParam = safeTrim(request.getParameter("customerId"));
+        String keyword = safeTrim(request.getParameter("keyword"));
 
-        // Mappa engineId -> cover filename
+        Long selectedCustomerId = parseLong(customerIdParam);
+        EngineStatus selectedStatus = null;
+
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                selectedStatus = EngineStatus.valueOf(statusParam);
+            } catch (IllegalArgumentException ex) {
+                request.setAttribute("error", "Stato non valido: " + statusParam);
+            }
+        }
+
+        if (archiveMode) {
+            selectedStatus = EngineStatus.DELIVERED;
+            statusParam = EngineStatus.DELIVERED.name();
+        }
+        final EngineStatus effectiveStatus = selectedStatus;
+
+        List<Engine> scopedEngines = engineController.getAllEngines().stream()
+                .filter(engine -> archiveMode
+                        ? engine.getStatus() == EngineStatus.DELIVERED
+                        : engine.getStatus() != EngineStatus.DELIVERED)
+                .collect(Collectors.toList());
+
+        Map<Long, String> customerNames = buildCustomerNames(scopedEngines);
+
+        List<Engine> filteredEngines = scopedEngines.stream()
+                .filter(engine -> effectiveStatus == null || engine.getStatus() == effectiveStatus)
+                .filter(engine -> engineCode == null || engineCode.isBlank() || engineCode.equalsIgnoreCase(engine.getEngineCode()))
+                .filter(engine -> selectedCustomerId == null || engine.getCustomerId() == selectedCustomerId)
+                .filter(engine -> keyword == null || keyword.isBlank() || matchesKeyword(engine, customerNames.get(engine.getCustomerId()), keyword))
+                .collect(Collectors.toList());
+
+        sortByMostRecentIntake(filteredEngines);
+        request.setAttribute("engines", filteredEngines);
+
         Map<Long, String> coverImages = new HashMap<>();
-
-        for (Engine engine : engines) {
+        for (Engine engine : filteredEngines) {
             engineController
                     .getCoverFilenameForEngine(engine.getId())
                     .ifPresent(filename -> coverImages.put(engine.getId(), filename));
         }
 
         request.setAttribute("coverImages", coverImages);
-
-        Map<Long, String> customerNames = new HashMap<>();
-        for (Engine engine : engines) {
-            long customerId = engine.getCustomerId();
-            if (!customerNames.containsKey(customerId)) {
-                customerNames.put(customerId, customerController.findNameById(customerId));
-            }
-        }
         request.setAttribute("customerNames", customerNames);
+
+        request.setAttribute("archiveMode", archiveMode);
+        request.setAttribute("pageTitle", archiveMode ? "Archivio motori" : "Lista motori");
+
+        request.setAttribute("filterEngineCode", engineCode == null ? "" : engineCode);
+        request.setAttribute("filterStatus", statusParam == null ? "" : statusParam);
+        request.setAttribute("filterCustomerId", selectedCustomerId == null ? "" : String.valueOf(selectedCustomerId));
+        request.setAttribute("filterKeyword", keyword == null ? "" : keyword);
 
         request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
     }
 
 
-    // =================== RICERCA ===================
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        String engineCode = request.getParameter("engineCode");
-        String statusParam = request.getParameter("status");
-        String keyword = request.getParameter("keyword");
-
-        List<Engine> engines;
-
-        // Priorità: codice → stato → keyword
-        if (engineCode != null && !engineCode.isBlank()) {
-
-            engines = engineController.findEnginesByCode(engineCode.trim());
-
-        } else if (statusParam != null && !statusParam.isBlank()) {
-
-            try {
-                EngineStatus status = EngineStatus.valueOf(statusParam.trim());
-                engines = engineController.findEnginesByStatus(status);
-            } catch (IllegalArgumentException ex) {
-                // valore non valido dal form -> fallback sensato
-                engines = engineController.getAllEngines();
-                request.setAttribute("error", "Stato non valido: " + statusParam);
-            }
-
-        } else if (keyword != null && !keyword.isBlank()) {
-
-            engines = engineController.searchEngines(keyword.trim());
-
-        } else {
-
-            engines = engineController.getAllEngines();
-        }
-
-        sortByMostRecentIntake(engines);
-        request.setAttribute("engines", engines);
-
-        Map<Long, String> coverImages = new HashMap<>();
-
-        for (Engine engine : engines) {
-            engineController
-                    .getCoverFilenameForEngine(engine.getId())
-                    .ifPresent(filename -> coverImages.put(engine.getId(), filename));
-        }
-
-        request.setAttribute("coverImages", coverImages);
-
-        Map<Long, String> customerNames = new HashMap<>();
-        for (Engine engine : engines) {
-            long customerId = engine.getCustomerId();
-            if (!customerNames.containsKey(customerId)) {
-                customerNames.put(customerId, customerController.findNameById(customerId));
-            }
-        }
-        request.setAttribute("customerNames", customerNames);
-
-        request.getRequestDispatcher("/WEB-INF/views/engine/engine-list.jsp").forward(request, response);
+        doGet(request, response);
     }
 
     private void sortByMostRecentIntake(List<Engine> engines) {
@@ -125,5 +107,70 @@ public class EngineListServlet extends HttpServlet {
                 Comparator.comparing(Engine::getIntakeDate).reversed()
                         .thenComparing(Engine::getId, Comparator.reverseOrder())
         );
+    }
+
+    private Map<Long, String> buildCustomerNames(List<Engine> engines) {
+        Map<Long, String> customerNames = new LinkedHashMap<>();
+        for (Engine engine : engines) {
+            long customerId = engine.getCustomerId();
+            if (!customerNames.containsKey(customerId)) {
+                customerNames.put(customerId, customerController.findNameById(customerId));
+            }
+        }
+        return customerNames;
+    }
+
+    private static String safeTrim(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    private static Long parseLong(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private static boolean matchesKeyword(Engine engine, String customerName, String keyword) {
+        String normalizedKeyword = normalizeText(keyword);
+        if (normalizedKeyword.isBlank()) {
+            return true;
+        }
+
+        String statusLabel = switch (engine.getStatus()) {
+            case WAITING -> "in attesa";
+            case WORK_IN_PROGRESS -> "in lavorazione";
+            case READY -> "pronto";
+            case DELIVERED -> "consegnato";
+        };
+
+        String haystack = String.join(" ",
+                safeValue(engine.getEngineCode()),
+                safeValue(engine.getEngineRef()),
+                safeValue(customerName),
+                safeValue(engine.getStatus().name()),
+                statusLabel,
+                safeValue(engine.getNotes())
+        );
+
+        return normalizeText(haystack).contains(normalizedKeyword);
+    }
+
+    private static String safeValue(String value) {
+        return value == null ? "" : value;
+    }
+
+    private static String normalizeText(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalized = java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}+", "")
+                .toLowerCase()
+                .trim();
     }
 }

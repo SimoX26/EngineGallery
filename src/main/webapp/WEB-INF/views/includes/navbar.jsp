@@ -37,9 +37,18 @@
                 <li class="nav-item">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/engine")
-                        && !fn:startsWith(servletPath, "/engine/ready") ? "active" : ""}"
+                        && !fn:startsWith(servletPath, "/engine/ready")
+                        && !fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/engine/list">
                         Motori
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/engine/archive">
+                        Archivio motori
                     </a>
                 </li>
 
