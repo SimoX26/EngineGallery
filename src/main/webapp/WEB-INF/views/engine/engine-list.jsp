@@ -56,18 +56,9 @@
                            name="keyword"
                            value="<c:out value='${filterKeyword}' />"
                            class="form-control"
-                           placeholder="Cerca per codice, riferimento, cliente o stato...">
+                           placeholder="Inserisci ciò che stai cercando.. ">
                     <div class="collapse mt-3" id="engineFiltersPanel">
                         <div class="row g-2">
-                            <div class="col-md-6">
-                                <label for="engineCodeFilter" class="form-label small mb-1">Codice motore</label>
-                                <input type="text"
-                                       id="engineCodeFilter"
-                                       name="engineCode"
-                                       value="<c:out value='${filterEngineCode}' />"
-                                       class="form-control"
-                                       placeholder="Es. N47D20A">
-                            </div>
                             <div class="col-md-6">
                                 <label for="engineStatusFilter" class="form-label small mb-1">Stato</label>
                                 <select id="engineStatusFilter" name="status" class="form-select" ${archiveMode ? 'disabled' : ''}>
@@ -225,7 +216,7 @@
         const quickStatusScrollKey = 'engineList.quickStatus.scrollY';
 
         const hasActiveFilters = () => {
-            const params = ['keyword', 'engineCode', 'status', 'customerId'];
+            const params = ['keyword', 'status', 'customerId'];
             return params.some((p) => {
                 const v = (queryParams.get(p) || '').trim();
                 return v.length > 0;

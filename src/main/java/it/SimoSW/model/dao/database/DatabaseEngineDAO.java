@@ -88,6 +88,7 @@ public class DatabaseEngineDAO implements EngineDAO {
         FROM engines
         WHERE status = 'DELIVERED'
           AND delivery_date IS NOT NULL
+          AND intake_date <= delivery_date
           AND delivery_date BETWEEN ? AND ?
     """;
 

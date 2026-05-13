@@ -182,14 +182,23 @@ public class EngineController {
         // =========================
         // 3. COSTRUZIONE MODEL
         // =========================
+        EngineStatus status = EngineStatus.valueOf(bean.getStatus());
+
         Engine engine = new Engine(
                     bean.getEngineRef(),
                     bean.getEngineCode(),
                     bean.getCustomerId(),
                     LocalDate.parse(bean.getIntakeDate()),
-                    EngineStatus.valueOf(bean.getStatus()),
+                    status,
                     bean.getNotes()
                 );
+
+        if (status == EngineStatus.DELIVERED) {
+            LocalDate deliveryDate = (bean.getDeliveryDate() != null && !bean.getDeliveryDate().isBlank())
+                    ? LocalDate.parse(bean.getDeliveryDate())
+                    : LocalDate.now();
+            engine.deliver(deliveryDate);
+        }
 
         // =========================
         // 4. PERSISTENZA
