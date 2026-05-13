@@ -84,6 +84,14 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/catalog") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/catalog">
+                        Catalogo
+                    </a>
+                </li>
+
                 <li class="nav-item nav-group-start">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.time.format.DateTimeFormatter;
 
 public class DashboardController {
+    private static final LocalDate STATISTICS_START_DATE = LocalDate.of(2026, 1, 1);
 
     private final EngineDAO engineDAO;
     private final CustomerDAO customerDAO;
@@ -80,26 +81,49 @@ public class DashboardController {
     }
 
     public int getMotoriConsegnatiNelPeriodo(LocalDate from, LocalDate to) {
-        return engineDAO.countDeliveredBetween(from, to);
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+        LocalDate safeFrom = from.isBefore(STATISTICS_START_DATE) ? STATISTICS_START_DATE : from;
+        if (safeFrom.isAfter(to)) {
+            return 0;
+        }
+        return engineDAO.countDeliveredBetween(safeFrom, to);
     }
 
     public int getMotoriInseritiNelPeriodo(LocalDate from, LocalDate to) {
         if (from == null || to == null) {
             throw new IllegalArgumentException("from/to non possono essere null");
         }
+        LocalDate safeFrom = from.isBefore(STATISTICS_START_DATE) ? STATISTICS_START_DATE : from;
+        if (safeFrom.isAfter(to)) {
+            return 0;
+        }
         return (int) engineDAO.findAll().stream()
-                .filter(engine -> !engine.getIntakeDate().isBefore(from) && !engine.getIntakeDate().isAfter(to))
+                .filter(engine -> !engine.getIntakeDate().isBefore(safeFrom) && !engine.getIntakeDate().isAfter(to))
                 .count();
     }
 
     public int getTempoMedioLavorazioneNelPeriodo(LocalDate from, LocalDate to) {
-        return (int) Math.round(engineDAO.averageProcessingDaysForDeliveredBetween(from, to));
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+        LocalDate safeFrom = from.isBefore(STATISTICS_START_DATE) ? STATISTICS_START_DATE : from;
+        if (safeFrom.isAfter(to)) {
+            return 0;
+        }
+        return (int) Math.round(engineDAO.averageProcessingDaysForDeliveredBetween(safeFrom, to));
     }
 
     public List<Map<String, Object>> getStoricoMensileKpi(int months) {
         int safeMonths = Math.max(1, months);
         YearMonth currentMonth = YearMonth.now();
-        YearMonth firstMonth = currentMonth.minusMonths(safeMonths - 1L);
+        YearMonth requestedFirstMonth = currentMonth.minusMonths(safeMonths - 1L);
+        YearMonth startMonth = YearMonth.from(STATISTICS_START_DATE);
+        YearMonth firstMonth = requestedFirstMonth.isBefore(startMonth) ? startMonth : requestedFirstMonth;
+        if (firstMonth.isAfter(currentMonth)) {
+            return List.of();
+        }
 
         Map<YearMonth, Integer> insertedByMonth = new HashMap<>();
         Map<YearMonth, Integer> deliveredByMonth = new HashMap<>();

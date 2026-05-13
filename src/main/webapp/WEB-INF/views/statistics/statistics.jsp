@@ -28,6 +28,12 @@
         </div>
 
         <div class="row g-4 mb-4">
+             <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-title">Motori in lavorazione</div>
+                    <div class="kpi-value">${motoriInLavorazione}</div>
+                </div>
+            </div>
             <div class="col-md-3">
                 <div class="kpi-card">
                     <div class="kpi-title">Motori inseriti (mese di ${meseCorrenteLabel})</div>
@@ -38,12 +44,6 @@
                 <div class="kpi-card">
                     <div class="kpi-title">Motori consegnati (mese di ${meseCorrenteLabel})</div>
                     <div class="kpi-value">${motoriConsegnatiMese}</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="kpi-card">
-                    <div class="kpi-title">Motori in lavorazione</div>
-                    <div class="kpi-value">${motoriInLavorazione}</div>
                 </div>
             </div>
             <div class="col-md-3">

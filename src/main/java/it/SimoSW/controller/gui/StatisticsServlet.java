@@ -12,12 +12,14 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 @WebServlet("/statistics")
 public class StatisticsServlet extends HttpServlet {
+    private static final LocalDate STATISTICS_START_DATE = LocalDate.of(2026, 1, 1);
 
     private DashboardController dashboardController;
 
@@ -33,6 +35,7 @@ public class StatisticsServlet extends HttpServlet {
         YearMonth currentMonth = YearMonth.from(today);
         LocalDate monthStart = currentMonth.atDay(1);
         LocalDate monthEnd = currentMonth.atEndOfMonth();
+        LocalDate effectiveMonthStart = monthStart.isBefore(STATISTICS_START_DATE) ? STATISTICS_START_DATE : monthStart;
 
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ITALIAN);
         String meseCorrenteLabel = monthFormatter.format(today);
@@ -40,12 +43,15 @@ public class StatisticsServlet extends HttpServlet {
             meseCorrenteLabel = Character.toUpperCase(meseCorrenteLabel.charAt(0)) + meseCorrenteLabel.substring(1);
         }
 
-        int insertedThisMonth = dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd);
-        int deliveredThisMonth = dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd);
+        int insertedThisMonth = dashboardController.getMotoriInseritiNelPeriodo(effectiveMonthStart, monthEnd);
+        int deliveredThisMonth = dashboardController.getMotoriConsegnatiNelPeriodo(effectiveMonthStart, monthEnd);
         int inProgressNow = dashboardController.getWorkInProgressEngines();
-        int avgDaysThisMonth = dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd);
+        int avgDaysThisMonth = dashboardController.getTempoMedioLavorazioneNelPeriodo(effectiveMonthStart, monthEnd);
 
-        List<Map<String, Object>> monthlyHistory = dashboardController.getStoricoMensileKpi(12);
+        YearMonth startMonth = YearMonth.from(STATISTICS_START_DATE);
+        long monthsBetween = ChronoUnit.MONTHS.between(startMonth, currentMonth) + 1;
+        int historyMonths = (int) Math.max(1, monthsBetween);
+        List<Map<String, Object>> monthlyHistory = dashboardController.getStoricoMensileKpi(historyMonths);
         List<Map<String, Object>> userActions = dashboardController.getRecentUserActions(20);
 
         request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);

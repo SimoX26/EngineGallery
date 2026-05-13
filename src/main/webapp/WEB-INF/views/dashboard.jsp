@@ -199,6 +199,76 @@
         </c:choose>
     </div>
 
+    <!-- NAVIGAZIONE RAPIDA -->
+    <div class="home-nav-section mt-4 mb-4">
+        <h5 class="mb-3 fw-semibold">Navigazione rapida</h5>
+        <div class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/dashboard">
+                    <div class="home-nav-card-title">Home</div>
+                    <p class="home-nav-card-desc mb-3">Panoramica generale dell'officina.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/customer/list">
+                    <div class="home-nav-card-title">Clienti</div>
+                    <p class="home-nav-card-desc mb-3">Gestione rubrica clienti e dettagli.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/list">
+                    <div class="home-nav-card-title">Motori</div>
+                    <p class="home-nav-card-desc mb-3">Motori clienti in lavorazione.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/archive">
+                    <div class="home-nav-card-title">Archivio motori</div>
+                    <p class="home-nav-card-desc mb-3">Storico motori consegnati.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/hydraulic-test/list">
+                    <div class="home-nav-card-title">Prove idrauliche</div>
+                    <p class="home-nav-card-desc mb-3">Video e schede test idraulici.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/warehouse/list">
+                    <div class="home-nav-card-title">Magazzino</div>
+                    <p class="home-nav-card-desc mb-3">Gestione articoli e disponibilità.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/ready-delivery">
+                    <div class="home-nav-card-title">Pronta Consegna</div>
+                    <p class="home-nav-card-desc mb-3">Sezione dedicata ai motori di pronta consegna.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/catalog">
+                    <div class="home-nav-card-title">Catalogo</div>
+                    <p class="home-nav-card-desc mb-3">Catalogo motori vendibili direttamente.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/statistics">
+                    <div class="home-nav-card-title">Statistiche</div>
+                    <p class="home-nav-card-desc mb-3">Storico KPI e andamento mensile.</p>
+                    <span class="btn btn-sm btn-engine">Apri sezione</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Bootstrap JS -->
