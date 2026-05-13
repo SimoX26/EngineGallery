@@ -28,6 +28,9 @@ public class DatabaseWarehouseImageDAO implements WarehouseImageDAO {
     private static final String FIND_BY_ITEM_SQL =
             "SELECT * FROM warehouse_images WHERE warehouse_item_id = ? ORDER BY upload_date DESC";
 
+    private static final String FIND_LATEST_SQL =
+            "SELECT * FROM warehouse_images ORDER BY upload_date DESC, id DESC LIMIT ?";
+
     @Override
     public WarehouseImage save(WarehouseImage image) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
@@ -110,6 +113,29 @@ public class DatabaseWarehouseImageDAO implements WarehouseImageDAO {
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante il recupero delle immagini articolo", e);
+        }
+
+        return images;
+    }
+
+    @Override
+    public List<WarehouseImage> findLatest(int limit) {
+        int safeLimit = Math.max(1, limit);
+        List<WarehouseImage> images = new ArrayList<>();
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_LATEST_SQL)) {
+
+            stmt.setInt(1, safeLimit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    images.add(mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero ultime immagini articolo", e);
         }
 
         return images;

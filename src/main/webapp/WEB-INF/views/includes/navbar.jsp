@@ -34,7 +34,15 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
+                <li class="nav-item nav-group-start">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/customer") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/customer/list">
+                        Clienti
+                    </a>
+                </li>
+
+                <li class="nav-item nav-group-start">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/engine")
                         && !fn:startsWith(servletPath, "/engine/ready")
@@ -52,17 +60,7 @@
                     </a>
                 </li>
 
-
-
-                <li class="nav-item">
-                    <a class="nav-link
-                       ${fn:startsWith(servletPath, "/customer") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/customer/list">
-                        Clienti
-                    </a>
-                </li>
-
-                <li class="nav-item">
+                <li class="nav-item nav-group-start">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/hydraulic-test") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/hydraulic-test/list">
@@ -70,7 +68,7 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
+                <li class="nav-item nav-group-start">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/warehouse") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/warehouse/list">
@@ -78,11 +76,19 @@
                     </a>
                 </li>
 
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link
-                       ${fn:startsWith(servletPath, "/engine/ready") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/engine/ready">
-                        Pronta consegna
+                       ${fn:startsWith(servletPath, "/ready-delivery") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/ready-delivery">
+                        Pronta Consegna
+                    </a>
+                </li>
+
+                <li class="nav-item nav-group-start">
+                    <a class="nav-link
+                       ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/statistics">
+                        Statistiche
                     </a>
                 </li>
 

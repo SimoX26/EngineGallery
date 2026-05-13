@@ -29,6 +29,9 @@ public class DatabaseImageDAO implements ImageDAO {
     private static final String FIND_COVER_BY_ENGINE_SQL =
             "SELECT * FROM images WHERE engine_id = ? ORDER BY upload_date ASC LIMIT 1";
 
+    private static final String FIND_LATEST_SQL =
+            "SELECT * FROM images ORDER BY upload_date DESC, id DESC LIMIT ?";
+
     @Override
     public Image save(Image image) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
@@ -136,6 +139,29 @@ public class DatabaseImageDAO implements ImageDAO {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public List<Image> findLatest(int limit) {
+        int safeLimit = Math.max(1, limit);
+        List<Image> images = new ArrayList<>();
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_LATEST_SQL)) {
+
+            stmt.setInt(1, safeLimit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    images.add(mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero ultime immagini motore", e);
+        }
+
+        return images;
     }
 
     /* =========================

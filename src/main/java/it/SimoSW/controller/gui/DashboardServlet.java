@@ -55,8 +55,6 @@ public class DashboardServlet extends HttpServlet {
         // Recupero dati AGGREGATI
         request.setAttribute("loggedUser", user);
 
-        request.setAttribute("workInProgressEngines", dashboardController.getWorkInProgressEngines());
-
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.from(today);
         LocalDate monthStart = currentMonth.atDay(1);
@@ -69,7 +67,8 @@ public class DashboardServlet extends HttpServlet {
         }
 
         request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);
-        request.setAttribute("clientiServitiMese", dashboardController.getClientiServitiNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("workInProgressEngines", dashboardController.getWorkInProgressEngines());
+        request.setAttribute("motoriInseritiMese", dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("tempoMedioLavorazioneMese", dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd));
 

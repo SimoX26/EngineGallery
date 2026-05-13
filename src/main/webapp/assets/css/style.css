@@ -486,6 +486,10 @@ body {
     margin-right: 1rem;
 }
 
+.navbar .nav-group-start {
+    margin-left: 0.75rem;
+}
+
 @media (max-width: 991.98px) {
     .navbar-action-btn {
         width: 2.4rem;
@@ -510,6 +514,12 @@ body {
         width: 100%;
         display: flex;
         justify-content: center;
+    }
+
+    .navbar .nav-group-start {
+        margin-left: 0;
+        margin-top: 0.2rem;
+        padding-top: 0.2rem;
     }
 
     .navbar .nav-link {
@@ -735,26 +745,31 @@ body {
 }
 
 .customer-row {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 28px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(170px, 1fr));
+    align-items: start;
+    gap: 14px 24px;
     text-align: left;
 }
 
 .customer-field {
-    min-width: 140px;
+    min-width: 0;
 }
 
 .customer-main {
     font-size: 1.2rem;
     font-weight: 600;
+    line-height: 1.25;
 }
 
 .customer-meta {
     font-size: 0.9rem;
     color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.customer-field > div:last-child {
+    word-break: break-word;
 }
 
 .customer-notes {
@@ -763,6 +778,24 @@ body {
     border-top: 1px solid #e5e7eb;
     text-align: center;
     font-size: 0.9rem;
+}
+
+@media (max-width: 992px) {
+    .customer-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 18px;
+    }
+
+    .customer-field--name {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 576px) {
+    .customer-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
 }
 
 

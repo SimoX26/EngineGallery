@@ -20,11 +20,13 @@
 
 <body>
 
-<!-- NAVBAR (sempre fuori dal container) -->
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-
 <!-- FAB -->
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
+
+<div class="engine-gallery-page">
+
+<!-- NAVBAR (sempre fuori dal container) -->
+<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
 <div class="container">
 
@@ -64,7 +66,7 @@
 
                     <div class="customer-row">
 
-                        <div class="customer-field">
+                        <div class="customer-field customer-field--name">
                             <div class="customer-main">
                                 ${customer.name}
                             </div>
@@ -87,6 +89,8 @@
         </c:forEach>
 
     </div>
+
+</div>
 
 </div>
 

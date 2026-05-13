@@ -14,4 +14,6 @@ public interface WarehouseImageDAO {
     Optional<WarehouseImage> findById(long imageId);
 
     List<WarehouseImage> findAllByWarehouseItemId(long itemId);
+
+    List<WarehouseImage> findLatest(int limit);
 }

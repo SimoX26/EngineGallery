@@ -16,4 +16,6 @@ public interface ImageDAO {
     List<Image> findAllByEngineId(long engineId);
 
     Optional<Image> findCoverByEngineId(long engineId);
+
+    List<Image> findLatest(int limit);
 }

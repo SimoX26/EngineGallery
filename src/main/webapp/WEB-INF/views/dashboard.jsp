@@ -44,20 +44,6 @@
     <!-- KPI -->
     <div class="row g-4 mb-5">
 
-        <!-- Clienti serviti mese corrente -->
-        <div class="col-md-3">
-            <a href="<%= request.getContextPath() %>/customer/list" class="kpi-card-link">
-                <div class="kpi-card">
-                    <div class="kpi-title">
-                        Clienti serviti (mese di ${meseCorrenteLabel})
-                    </div>
-                    <div class="kpi-value">
-                        ${clientiServitiMese}
-                    </div>
-                </div>
-            </a>
-        </div>
-
         <!-- Motori in lavorazione -->
         <div class="col-md-3">
             <a href="<%= request.getContextPath() %>/engine/list?status=WORK_IN_PROGRESS" class="kpi-card-link">
@@ -67,6 +53,20 @@
                     </div>
                     <div class="kpi-value">
                         ${workInProgressEngines}
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Motori inseriti mese corrente -->
+        <div class="col-md-3">
+            <a href="<%= request.getContextPath() %>/engine/list" class="kpi-card-link">
+                <div class="kpi-card">
+                    <div class="kpi-title">
+                        Motori inseriti (mese di ${meseCorrenteLabel})
+                    </div>
+                    <div class="kpi-value">
+                        ${motoriInseritiMese}
                     </div>
                 </div>
             </a>
@@ -102,7 +102,7 @@
 
 
     <!-- ULTIMI MOTORI -->
-    <div class="table-container">
+    <div class="table-container d-none d-md-block">
 
         <h5 class="mb-4 fw-semibold">Motori recenti</h5>
 
