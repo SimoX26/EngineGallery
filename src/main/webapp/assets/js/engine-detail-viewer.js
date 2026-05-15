@@ -136,25 +136,13 @@ if (!galleryRoot || clickableImages.length === 0) {
                 }
 
                 const resolvedImageUrl = new URL(imageUrl, window.location.origin).href;
-                const shareData = {
-                    title: 'RML • Engine Gallery',
-                    text: 'Guarda questa immagine del motore: ' + (config.engineRef || ''),
-                    url: resolvedImageUrl
-                };
-
                 try {
                     if (navigator.share) {
                         const imageFile = await tryBuildShareFile(resolvedImageUrl);
                         if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-                            await navigator.share({
-                                ...shareData,
-                                files: [imageFile]
-                            });
+                            await navigator.share({ files: [imageFile] });
                             return;
                         }
-
-                        await navigator.share(shareData);
-                        return;
                     }
 
                     await copyLinkFallback(resolvedImageUrl);
