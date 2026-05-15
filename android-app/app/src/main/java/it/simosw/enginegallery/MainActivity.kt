@@ -39,6 +39,7 @@ import android.net.http.SslError
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "EngineGalleryWebView"
+        private const val IMAGE_SHARE_TAG = "ImageShare"
         private const val PRIMARY_HOST = "rettificamotorilacroce.it"
         private const val WWW_HOST = "www.rettificamotorilacroce.it"
         private const val LEGACY_IP_HOST = "82.165.20.124"
@@ -428,25 +429,41 @@ class MainActivity : AppCompatActivity() {
                 return
             }
 
-            ioExecutor.execute {
-                val sharedFile = downloadImageForShare(imageUrl)
-                if (sharedFile == null) {
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Errore durante la preparazione dell'immagine", Toast.LENGTH_SHORT).show()
+            val normalizedUrl = upgradeToHttpsIfNeeded(Uri.parse(imageUrl)).toString()
+            runOnUiThread {
+                val userAgent = webView.settings.userAgentString ?: "Android WebView"
+                val referer = webView.url ?: BuildConfig.ENGINE_GALLERY_BASE_URL
+                val cookies = CookieManager.getInstance().getCookie(normalizedUrl)
+
+                ioExecutor.execute {
+                    val sharedFile = downloadImageForShare(
+                        normalizedUrl = normalizedUrl,
+                        userAgent = userAgent,
+                        referer = referer,
+                        cookies = cookies
+                    )
+                    if (sharedFile == null) {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "Errore durante la preparazione dell'immagine", Toast.LENGTH_SHORT).show()
+                        }
+                        return@execute
                     }
-                    return@execute
-                }
-                runOnUiThread {
-                    openImageShareChooser(sharedFile)
+                    runOnUiThread {
+                        openImageShareChooser(sharedFile)
+                    }
                 }
             }
         }
     }
 
-    private fun downloadImageForShare(imageUrl: String): File? {
+    private fun downloadImageForShare(
+        normalizedUrl: String,
+        userAgent: String,
+        referer: String,
+        cookies: String?
+    ): File? {
         var connection: HttpURLConnection? = null
         return try {
-            val normalizedUrl = upgradeToHttpsIfNeeded(Uri.parse(imageUrl)).toString()
             val shareDir = File(cacheDir, "shared").apply { mkdirs() }
             val extension = normalizedUrl.substringAfterLast('.', "jpg")
                 .substringBefore('?')
@@ -462,13 +479,12 @@ class MainActivity : AppCompatActivity() {
                 readTimeout = 20000
                 requestMethod = "GET"
                 doInput = true
-                val cookies = CookieManager.getInstance().getCookie(normalizedUrl)
                 if (!cookies.isNullOrBlank()) {
                     setRequestProperty("Cookie", cookies)
                 }
-                setRequestProperty("User-Agent", webView.settings.userAgentString ?: "Android WebView")
+                setRequestProperty("User-Agent", userAgent)
                 setRequestProperty("Accept", "image/*,*/*;q=0.8")
-                setRequestProperty("Referer", webView.url ?: BuildConfig.ENGINE_GALLERY_BASE_URL)
+                setRequestProperty("Referer", referer)
             }
 
             val code = connection.responseCode
@@ -479,6 +495,7 @@ class MainActivity : AppCompatActivity() {
                     ""
                 }
                 Log.e(TAG, "Share download HTTP error code=$code url=$normalizedUrl body=${body.take(200)}")
+                Log.e(IMAGE_SHARE_TAG, "Errore preparazione immagine: HTTP $code url=$normalizedUrl body=${body.take(200)}")
                 return null
             }
 
@@ -489,7 +506,8 @@ class MainActivity : AppCompatActivity() {
             }
             imageFile
         } catch (ex: Exception) {
-            Log.e(TAG, "Share download failed for url=$imageUrl", ex)
+            Log.e(TAG, "Share download failed for url=$normalizedUrl", ex)
+            Log.e(IMAGE_SHARE_TAG, "Errore preparazione immagine", ex)
             null
         } finally {
             try {
