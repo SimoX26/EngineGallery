@@ -6,7 +6,7 @@ plugins {
 }
 
 val engineGalleryBaseUrl = (project.findProperty("ENGINE_GALLERY_BASE_URL") as String?)
-    ?: "http://82.165.20.124/EngineGallery"
+    ?: "https://rettificamotorilacroce.it"
 
 android {
     namespace = "it.simosw.enginegallery"

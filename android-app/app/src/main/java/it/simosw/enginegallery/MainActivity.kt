@@ -8,13 +8,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
+import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -29,8 +33,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 import java.net.URL
 import java.util.concurrent.Executors
+import android.net.http.SslError
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "EngineGalleryWebView"
+        private const val PRIMARY_HOST = "rettificamotorilacroce.it"
+        private const val WWW_HOST = "www.rettificamotorilacroce.it"
+        private const val LEGACY_IP_HOST = "82.165.20.124"
+    }
 
     private lateinit var webView: WebView
     private lateinit var swipeRefresh: SwipeRefreshLayout
@@ -95,7 +106,9 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState)
         } else {
-            webView.loadUrl(BuildConfig.ENGINE_GALLERY_BASE_URL)
+            val startupUrl = BuildConfig.ENGINE_GALLERY_BASE_URL
+            Log.i(TAG, "Startup URL: $startupUrl")
+            webView.loadUrl(startupUrl)
         }
 
         swipeRefresh.setOnRefreshListener {
@@ -170,6 +183,12 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val uri = request?.url ?: return false
+                val upgradedUri = upgradeToHttpsIfNeeded(uri)
+                if (upgradedUri != uri) {
+                    Log.i(TAG, "Upgrading URL to HTTPS: $uri -> $upgradedUri")
+                    view?.loadUrl(upgradedUri.toString())
+                    return true
+                }
                 val scheme = uri.scheme.orEmpty()
 
                 return when {
@@ -192,7 +211,53 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 swipeRefresh.isRefreshing = false
+                Log.i(TAG, "Page finished: $url")
                 installShareBridgeScript()
+            }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+                if (request?.isForMainFrame == true) {
+                    Log.e(
+                        TAG,
+                        "Main frame error url=${request.url} code=${error?.errorCode} desc=${error?.description}"
+                    )
+                }
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: WebResourceResponse?
+            ) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                if (request?.isForMainFrame == true) {
+                    Log.e(
+                        TAG,
+                        "Main frame HTTP error url=${request.url} status=${errorResponse?.statusCode}"
+                    )
+                }
+            }
+
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler?,
+                error: SslError?
+            ) {
+                Log.e(
+                    TAG,
+                    "SSL error primary=${error?.primaryError} url=${error?.url}"
+                )
+                handler?.cancel()
+                Toast.makeText(
+                    this@MainActivity,
+                    "Errore SSL durante la connessione al server",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
@@ -211,6 +276,19 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
+    }
+
+    private fun upgradeToHttpsIfNeeded(uri: Uri): Uri {
+        val scheme = uri.scheme?.lowercase().orEmpty()
+        if (scheme != "http") {
+            return uri
+        }
+        val host = uri.host?.lowercase().orEmpty()
+        val isEngineGalleryHost = host == PRIMARY_HOST || host == WWW_HOST || host == LEGACY_IP_HOST
+        if (!isEngineGalleryHost) {
+            return uri
+        }
+        return uri.buildUpon().scheme("https").build()
     }
 
     override fun onPause() {

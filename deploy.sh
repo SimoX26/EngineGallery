@@ -7,7 +7,7 @@ REMOTE_USER_DEFAULT="root"
 REMOTE_HOST_DEFAULT="82.165.20.124"
 REMOTE_WEBAPPS_DEFAULT="/opt/tomcat/webapps"
 REMOTE_PASSWORD_DEFAULT="F1yKNvqwl6qw8ED"
-ANDROID_URL_DEFAULT="http://${REMOTE_HOST_DEFAULT}/EngineGallery"
+ANDROID_URL_DEFAULT="https://rettificamotorilacroce.it"
 
 usage() {
   cat <<'HELP'
@@ -22,7 +22,7 @@ Esempi:
   ./deploy.sh --target user@192.168.1.50:~/webapps/
   ./deploy.sh --android
   ./deploy.sh --apk
-  ./deploy.sh --android --android-url http://82.165.20.124/EngineGallery
+  ./deploy.sh --android --android-url https://rettificamotorilacroce.it
 
 Opzioni:
   --locale      Copia il WAR in locale su /home/simone/apache-tomcat-9.0.112/webapps
@@ -166,7 +166,7 @@ if [[ -z "$MODE" ]]; then
 fi
 
 if [[ "$ANDROID_URL_EXPLICIT" != "true" ]]; then
-  ANDROID_URL="http://${REMOTE_HOST}/EngineGallery"
+  ANDROID_URL="$ANDROID_URL_DEFAULT"
 fi
 
 if [[ "$MODE" == "target" ]] && ! [[ "$TARGET" =~ :/ ]]; then
