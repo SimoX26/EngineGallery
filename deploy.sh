@@ -7,7 +7,7 @@ REMOTE_USER_DEFAULT="root"
 REMOTE_HOST_DEFAULT="82.165.20.124"
 REMOTE_WEBAPPS_DEFAULT="/opt/tomcat/webapps"
 REMOTE_PASSWORD_DEFAULT="F1yKNvqwl6qw8ED"
-ANDROID_URL_DEFAULT="http://${REMOTE_HOST_DEFAULT}:8080/EngineGallery"
+ANDROID_URL_DEFAULT="http://${REMOTE_HOST_DEFAULT}/EngineGallery"
 
 usage() {
   cat <<'HELP'
@@ -22,7 +22,7 @@ Esempi:
   ./deploy.sh --target user@192.168.1.50:~/webapps/
   ./deploy.sh --android
   ./deploy.sh --apk
-  ./deploy.sh --android --android-url http://82.165.20.124:8080/EngineGallery
+  ./deploy.sh --android --android-url http://82.165.20.124/EngineGallery
 
 Opzioni:
   --locale      Copia il WAR in locale su /home/simone/apache-tomcat-9.0.112/webapps
@@ -166,7 +166,7 @@ if [[ -z "$MODE" ]]; then
 fi
 
 if [[ "$ANDROID_URL_EXPLICIT" != "true" ]]; then
-  ANDROID_URL="http://${REMOTE_HOST}:8080/EngineGallery"
+  ANDROID_URL="http://${REMOTE_HOST}/EngineGallery"
 fi
 
 if [[ "$MODE" == "target" ]] && ! [[ "$TARGET" =~ :/ ]]; then
@@ -282,9 +282,9 @@ if [[ "$MODE" == "locale" ]]; then
 
   LOCAL_IP="$(resolve_ipv4 "localhost")"
   if [[ "$APP_CONTEXT" == "ROOT" ]]; then
-    APP_URL="http://${LOCAL_IP}:8080/"
+    APP_URL="http://${LOCAL_IP}/"
   else
-    APP_URL="http://${LOCAL_IP}:8080/${APP_CONTEXT}/"
+    APP_URL="http://${LOCAL_IP}/${APP_CONTEXT}/"
   fi
   echo ">> Avvio applicativo: $APP_URL"
   exit 0
@@ -327,9 +327,9 @@ echo ">> Deploy completato con successo."
 if [[ "$MODE" == "remoto" ]]; then
   REMOTE_IP="$(resolve_ipv4 "$REMOTE_HOST")"
   if [[ "$APP_CONTEXT" == "ROOT" ]]; then
-    APP_URL="http://${REMOTE_IP}:8080/"
+    APP_URL="http://${REMOTE_IP}/"
   else
-    APP_URL="http://${REMOTE_IP}:8080/${APP_CONTEXT}/"
+    APP_URL="http://${REMOTE_IP}/${APP_CONTEXT}/"
   fi
   echo ">> Avvio applicativo: $APP_URL"
 fi
@@ -338,9 +338,9 @@ if [[ "$MODE" == "target" ]]; then
   TARGET_HOST="$(echo "$TARGET" | sed -E 's|^([^@]+@)?([^:]+):.*$|\2|')"
   TARGET_IP="$(resolve_ipv4 "$TARGET_HOST")"
   if [[ "$APP_CONTEXT" == "ROOT" ]]; then
-    APP_URL="http://${TARGET_IP}:8080/"
+    APP_URL="http://${TARGET_IP}/"
   else
-    APP_URL="http://${TARGET_IP}:8080/${APP_CONTEXT}/"
+    APP_URL="http://${TARGET_IP}/${APP_CONTEXT}/"
   fi
   echo ">> Avvio applicativo (stimato): $APP_URL"
 fi
