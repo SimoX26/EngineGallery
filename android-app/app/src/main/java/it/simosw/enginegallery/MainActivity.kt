@@ -2,6 +2,7 @@ package it.simosw.enginegallery
 
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
+import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -9,6 +10,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -25,6 +27,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
+import java.net.URL
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private var cameraUri: Uri? = null
     private val cameraUris = mutableListOf<Uri>()
+    private val ioExecutor = Executors.newSingleThreadExecutor()
 
     private val fileChooserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -156,6 +161,7 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = false
             displayZoomControls = false
         }
+        webView.addJavascriptInterface(AndroidShareBridge(), "AndroidShareBridge")
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, true)
@@ -186,6 +192,7 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 swipeRefresh.isRefreshing = false
+                installShareBridgeScript()
             }
         }
 
@@ -217,6 +224,11 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         webView.onResume()
         webView.resumeTimers()
+    }
+
+    override fun onDestroy() {
+        ioExecutor.shutdown()
+        super.onDestroy()
     }
 
     private fun buildFileChooserIntent(): Intent {
@@ -300,6 +312,103 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Exception) {
             Toast.makeText(this, R.string.file_error, Toast.LENGTH_SHORT).show()
             null
+        }
+    }
+
+    private fun installShareBridgeScript() {
+        val script = """
+            (function () {
+              if (window.__engineGalleryShareBridgeInstalled) return;
+              window.__engineGalleryShareBridgeInstalled = true;
+              const originalShare = navigator.share ? navigator.share.bind(navigator) : null;
+              navigator.share = function (data) {
+                try {
+                  const payload = data || {};
+                  const imageUrl = payload.url || '';
+                  if (window.AndroidShareBridge && imageUrl) {
+                    window.AndroidShareBridge.shareImage(imageUrl, payload.title || '', payload.text || '');
+                    return Promise.resolve();
+                  }
+                } catch (_e) {}
+                if (originalShare) return originalShare(data);
+                return Promise.reject(new Error('Share non disponibile'));
+              };
+            })();
+        """.trimIndent()
+        webView.evaluateJavascript(script, null)
+    }
+
+    inner class AndroidShareBridge {
+        @JavascriptInterface
+        fun shareImage(imageUrl: String?, title: String?, text: String?) {
+            if (imageUrl.isNullOrBlank()) {
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Immagine non disponibile", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+
+            ioExecutor.execute {
+                val sharedFile = downloadImageForShare(imageUrl)
+                if (sharedFile == null) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Errore durante la preparazione dell'immagine", Toast.LENGTH_SHORT).show()
+                    }
+                    return@execute
+                }
+                runOnUiThread {
+                    openImageShareChooser(sharedFile, title, text)
+                }
+            }
+        }
+    }
+
+    private fun downloadImageForShare(imageUrl: String): File? {
+        return try {
+            val shareDir = File(cacheDir, "shared").apply { mkdirs() }
+            val extension = imageUrl.substringAfterLast('.', "jpg")
+                .substringBefore('?')
+                .substringBefore('#')
+                .lowercase()
+                .ifBlank { "jpg" }
+            val safeExtension = if (extension.length in 2..5) extension else "jpg"
+            val imageFile = File.createTempFile("engine_gallery_share_", ".$safeExtension", shareDir)
+
+            URL(imageUrl).openStream().use { input ->
+                imageFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            imageFile
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun openImageShareChooser(imageFile: File, title: String?, text: String?) {
+        val imageUri = FileProvider.getUriForFile(
+            this,
+            "${BuildConfig.APPLICATION_ID}.fileprovider",
+            imageFile
+        )
+
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_STREAM, imageUri)
+            if (!title.isNullOrBlank()) {
+                putExtra(Intent.EXTRA_SUBJECT, title)
+            }
+            if (!text.isNullOrBlank()) {
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            clipData = ClipData.newUri(contentResolver, "engine-image", imageUri)
+        }
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, "Condividi immagine"))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, "Nessuna app disponibile per la condivisione", Toast.LENGTH_SHORT).show()
         }
     }
 }
