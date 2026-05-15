@@ -31,6 +31,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Executors
 import android.net.http.SslError
@@ -404,7 +405,7 @@ class MainActivity : AppCompatActivity() {
                   const payload = data || {};
                   const imageUrl = payload.url || '';
                   if (window.AndroidShareBridge && imageUrl) {
-                    window.AndroidShareBridge.shareImage(imageUrl, payload.title || '', payload.text || '');
+                    window.AndroidShareBridge.shareImage(imageUrl);
                     return Promise.resolve();
                   }
                 } catch (_e) {}
@@ -418,7 +419,8 @@ class MainActivity : AppCompatActivity() {
 
     inner class AndroidShareBridge {
         @JavascriptInterface
-        fun shareImage(imageUrl: String?, title: String?, text: String?) {
+        fun shareImage(imageUrl: String?) {
+            // Share only the image payload in Android apps.
             if (imageUrl.isNullOrBlank()) {
                 runOnUiThread {
                     Toast.makeText(this@MainActivity, "Immagine non disponibile", Toast.LENGTH_SHORT).show()
@@ -435,16 +437,18 @@ class MainActivity : AppCompatActivity() {
                     return@execute
                 }
                 runOnUiThread {
-                    openImageShareChooser(sharedFile, title, text)
+                    openImageShareChooser(sharedFile)
                 }
             }
         }
     }
 
     private fun downloadImageForShare(imageUrl: String): File? {
+        var connection: HttpURLConnection? = null
         return try {
+            val normalizedUrl = upgradeToHttpsIfNeeded(Uri.parse(imageUrl)).toString()
             val shareDir = File(cacheDir, "shared").apply { mkdirs() }
-            val extension = imageUrl.substringAfterLast('.', "jpg")
+            val extension = normalizedUrl.substringAfterLast('.', "jpg")
                 .substringBefore('?')
                 .substringBefore('#')
                 .lowercase()
@@ -452,18 +456,50 @@ class MainActivity : AppCompatActivity() {
             val safeExtension = if (extension.length in 2..5) extension else "jpg"
             val imageFile = File.createTempFile("engine_gallery_share_", ".$safeExtension", shareDir)
 
-            URL(imageUrl).openStream().use { input ->
+            connection = (URL(normalizedUrl).openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = true
+                connectTimeout = 15000
+                readTimeout = 20000
+                requestMethod = "GET"
+                doInput = true
+                val cookies = CookieManager.getInstance().getCookie(normalizedUrl)
+                if (!cookies.isNullOrBlank()) {
+                    setRequestProperty("Cookie", cookies)
+                }
+                setRequestProperty("User-Agent", webView.settings.userAgentString ?: "Android WebView")
+                setRequestProperty("Accept", "image/*,*/*;q=0.8")
+                setRequestProperty("Referer", webView.url ?: BuildConfig.ENGINE_GALLERY_BASE_URL)
+            }
+
+            val code = connection.responseCode
+            if (code !in 200..299) {
+                val body = try {
+                    connection.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+                } catch (_: Exception) {
+                    ""
+                }
+                Log.e(TAG, "Share download HTTP error code=$code url=$normalizedUrl body=${body.take(200)}")
+                return null
+            }
+
+            connection.inputStream.use { input ->
                 imageFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
             imageFile
-        } catch (_: Exception) {
+        } catch (ex: Exception) {
+            Log.e(TAG, "Share download failed for url=$imageUrl", ex)
             null
+        } finally {
+            try {
+                connection?.disconnect()
+            } catch (_: Exception) {
+            }
         }
     }
 
-    private fun openImageShareChooser(imageFile: File, title: String?, text: String?) {
+    private fun openImageShareChooser(imageFile: File) {
         val imageUri = FileProvider.getUriForFile(
             this,
             "${BuildConfig.APPLICATION_ID}.fileprovider",
@@ -473,12 +509,6 @@ class MainActivity : AppCompatActivity() {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "image/*"
             putExtra(Intent.EXTRA_STREAM, imageUri)
-            if (!title.isNullOrBlank()) {
-                putExtra(Intent.EXTRA_SUBJECT, title)
-            }
-            if (!text.isNullOrBlank()) {
-                putExtra(Intent.EXTRA_TEXT, text)
-            }
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             clipData = ClipData.newUri(contentResolver, "engine-image", imageUri)
         }

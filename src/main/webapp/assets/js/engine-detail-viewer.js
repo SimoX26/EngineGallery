@@ -22,6 +22,48 @@ if (!galleryRoot || clickableImages.length === 0) {
     });
     const dimensionCache = new Map();
 
+    function showShareMessage(message) {
+        alert(message);
+    }
+
+    function getFileNameFromUrl(url, fallback = 'immagine-motore.jpg') {
+        try {
+            const pathname = new URL(url).pathname;
+            const name = pathname.substring(pathname.lastIndexOf('/') + 1);
+            return name || fallback;
+        } catch (_error) {
+            return fallback;
+        }
+    }
+
+    async function tryBuildShareFile(imageUrl) {
+        try {
+            const response = await fetch(imageUrl, { credentials: 'include' });
+            if (!response.ok) {
+                return null;
+            }
+            const blob = await response.blob();
+            if (!blob || blob.size === 0) {
+                return null;
+            }
+            const fileName = getFileNameFromUrl(imageUrl);
+            return new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+        } catch (_error) {
+            return null;
+        }
+    }
+
+    async function copyLinkFallback(link) {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(link);
+            showShareMessage('Link copiato negli appunti');
+            return;
+        }
+
+        // Last-resort fallback for environments without Clipboard API.
+        window.prompt('Copia questo link:', link);
+    }
+
     function loadSlideDimensions(index) {
         if (index < 0 || index >= dataSource.length) {
             return Promise.resolve();
@@ -89,7 +131,7 @@ if (!galleryRoot || clickableImages.length === 0) {
                 const current = pswp.currSlide;
                 const imageUrl = current && current.data ? current.data.src : null;
                 if (!imageUrl) {
-                    alert('Immagine non disponibile');
+                    showShareMessage('Immagine non disponibile');
                     return;
                 }
 
@@ -102,20 +144,27 @@ if (!galleryRoot || clickableImages.length === 0) {
 
                 try {
                     if (navigator.share) {
+                        const imageFile = await tryBuildShareFile(resolvedImageUrl);
+                        if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+                            await navigator.share({
+                                ...shareData,
+                                files: [imageFile]
+                            });
+                            return;
+                        }
+
                         await navigator.share(shareData);
                         return;
                     }
 
-                    if (navigator.clipboard && window.isSecureContext) {
-                        await navigator.clipboard.writeText(resolvedImageUrl);
-                        alert('Link immagine copiato negli appunti');
-                        return;
-                    }
-
-                    alert('Condivisione non supportata su questo dispositivo o contesto.');
+                    await copyLinkFallback(resolvedImageUrl);
                 } catch (error) {
                     if (error && error.name !== 'AbortError') {
-                        alert('Errore durante la condivisione: ' + error.message);
+                        try {
+                            await copyLinkFallback(resolvedImageUrl);
+                        } catch (_fallbackError) {
+                            showShareMessage('Errore durante la condivisione: ' + error.message);
+                        }
                     }
                 }
             }
