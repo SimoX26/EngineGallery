@@ -918,57 +918,90 @@ body {
     }
 }
 
-.pswp__button--custom-share,
-.pswp__button--close {
-    width: 56px !important;
-    height: 56px !important;
-    margin-top: 20px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    background: rgba(31, 41, 51, 0.85) !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
-    color: #fff !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+.share-icon-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(148, 163, 184, 0.35);
+    background: rgba(15, 23, 42, 0.92);
+    color: #f8fafc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
 }
 
-.pswp__button--close {
-    opacity: 1 !important;
-    visibility: visible !important;
+.share-icon-btn:hover,
+.share-icon-btn:focus-visible {
+    background: rgba(30, 41, 59, 0.96);
+    border-color: rgba(248, 250, 252, 0.5);
+    color: #ffffff;
+    transform: scale(1.05);
 }
 
-.pswp__button--close .pswp__icn {
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-}
-
-.pswp__button--custom-share:hover,
-.pswp__button--close:hover {
-    background: rgba(31, 41, 51, 0.95) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    transform: scale(1.08);
-}
-
-.pswp__button--custom-share:active,
-.pswp__button--close:active {
+.share-icon-btn:active {
     transform: scale(0.95);
 }
 
-.pswp__button--close:hover {
-    transform: scale(1.08) rotate(90deg);
+.share-icon-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.engine-detail-section {
+    position: relative;
+}
+
+.engine-technical-share-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.pswp__button--custom-share {
+    width: 44px !important;
+    height: 44px !important;
+    margin-top: 16px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    border: 1.5px solid rgba(148, 163, 184, 0.35) !important;
+    background: rgba(15, 23, 42, 0.92) !important;
+    color: #f8fafc !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35) !important;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease !important;
+}
+
+.pswp__button--custom-share:hover,
+.pswp__button--custom-share:focus-visible {
+    background: rgba(30, 41, 59, 0.96) !important;
+    border-color: rgba(248, 250, 252, 0.5) !important;
+    color: #ffffff !important;
+    transform: scale(1.05);
+}
+
+.pswp__button--custom-share:active {
+    transform: scale(0.95);
 }
 
 .pswp__button--custom-share svg {
     display: block;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2.5;
+    stroke-width: 2.25;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
@@ -1005,6 +1038,18 @@ body {
 }
 
 @media (max-width: 768px) {
+    .share-icon-btn,
+    .pswp__button--custom-share {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .share-icon-btn svg,
+    .pswp__button--custom-share svg {
+        width: 17px;
+        height: 17px;
+    }
+
     .pswp__button--arrow--prev {
         left: 2px !important;
     }
