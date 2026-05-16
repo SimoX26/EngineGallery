@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Engine Share Diagnostic</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; }
+    .row { margin-bottom: 12px; }
+    textarea, input { width: 100%; box-sizing: border-box; }
+    textarea { min-height: 130px; }
+    button { margin-right: 8px; margin-bottom: 8px; }
+    pre { background: #111; color: #eee; padding: 12px; max-height: 45vh; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h2>Engine Gallery Share Diagnostic</h2>
+  <div class="row">
+    <label for="engineCode">Codice motore</label>
+    <input id="engineCode" type="text" value="TEST123" />
+  </div>
+  <div class="row">
+    <label for="imageUrls">URL immagini (una per riga)</label>
+    <textarea id="imageUrls" placeholder="https://.../img1.jpg\nhttps://.../img2.jpg"></textarea>
+  </div>
+  <div class="row">
+    <button id="shareTextBtn" type="button">1) Share solo testo</button>
+    <button id="shareSingleBtn" type="button">2) Share una immagine</button>
+    <button id="shareMultiBtn" type="button">3) Share più immagini</button>
+  </div>
+  <pre id="log"></pre>
+
+  <script>
+    const LOG_PREFIX = '[share-diagnostic]';
+    const logEl = document.getElementById('log');
+
+    function log(level, message, data) {
+      const line = `${new Date().toISOString()} ${level} ${message}` + (data ? ` ${JSON.stringify(data, null, 2)}` : '');
+      logEl.textContent += line + '\n';
+      if (level === 'ERROR') {
+        console.error(LOG_PREFIX, message, data || '');
+      } else if (level === 'WARN') {
+        console.warn(LOG_PREFIX, message, data || '');
+      } else {
+        console.log(LOG_PREFIX, message, data || '');
+      }
+    }
+
+    function engineCode() {
+      return (document.getElementById('engineCode').value || '').trim() || 'TEST123';
+    }
+
+    function parseUrls() {
+      return (document.getElementById('imageUrls').value || '')
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+
+    function toAbsoluteUrls(urls) {
+      return urls.map((u) => {
+        try { return new URL(u, window.location.href).href; } catch { return u; }
+      });
+    }
+
+    function extByMime(mime) {
+      const m = (mime || '').toLowerCase();
+      if (m.includes('png')) return 'png';
+      if (m.includes('webp')) return 'webp';
+      if (m.includes('jpeg') || m.includes('jpg')) return 'jpg';
+      return 'jpg';
+    }
+
+    async function fileFromUrl(url, idx) {
+      log('INFO', 'fetch start', { idx, originalUrl: url });
+      const res = await fetch(url, { credentials: 'include' });
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      log('INFO', 'fetch response', { idx, url, status: res.status, ok: res.ok, contentType });
+      if (!res.ok) return null;
+      if (contentType && !contentType.startsWith('image/')) {
+        log('WARN', 'content-type non image', { idx, url, contentType });
+        return null;
+      }
+      const blob = await res.blob();
+      const blobType = (blob.type || '').toLowerCase();
+      log('INFO', 'blob details', { idx, url, blobType, blobSize: blob.size });
+      if (!blob || blob.size <= 0) return null;
+      const mime = contentType.startsWith('image/') ? contentType.split(';')[0].trim() : (blobType || 'image/jpeg');
+      if (!mime.startsWith('image/')) return null;
+      const file = new File([blob], `test-${idx + 1}.${extByMime(mime)}`, { type: mime });
+      log('INFO', 'file created', { idx, fileName: file.name, fileType: file.type, fileSize: file.size });
+      return file;
+    }
+
+    function logCapabilities(files) {
+      const hasShare = typeof navigator.share === 'function';
+      const hasCanShare = typeof navigator.canShare === 'function';
+      let canSingle = false;
+      let canMulti = false;
+      try { canSingle = hasCanShare && files[0] ? navigator.canShare({ files: [files[0]] }) : false; } catch (e) { log('WARN', 'canShare single error', { name: e?.name, message: e?.message }); }
+      try { canMulti = hasCanShare && files.length > 1 ? navigator.canShare({ files }) : canSingle; } catch (e) { log('WARN', 'canShare multi error', { name: e?.name, message: e?.message }); }
+      log('INFO', 'capabilities', { hasShare, hasCanShare, canSingle, canMulti, filesCount: files.length, secureContext: window.isSecureContext });
+      return { hasShare, hasCanShare, canSingle, canMulti };
+    }
+
+    async function runShare(payload, tag) {
+      try {
+        log('INFO', `share payload ${tag}`, payload);
+        await navigator.share(payload);
+        log('INFO', `share success ${tag}`);
+      } catch (e) {
+        log('ERROR', `share fail ${tag}`, { name: e?.name, message: e?.message, stack: e?.stack });
+      }
+    }
+
+    document.getElementById('shareTextBtn').addEventListener('click', async () => {
+      const code = engineCode();
+      const payload = { title: 'Test Engine Gallery', text: `Codice motore: ${code}`, url: window.location.href };
+      log('INFO', 'test 1 start', { code });
+      if (typeof navigator.share !== 'function') {
+        log('WARN', 'navigator.share non disponibile');
+        return;
+      }
+      await runShare(payload, 'text-only');
+    });
+
+    document.getElementById('shareSingleBtn').addEventListener('click', async () => {
+      const code = engineCode();
+      const raw = parseUrls();
+      const abs = toAbsoluteUrls(raw);
+      log('INFO', 'test 2 start', { code, rawUrls: raw, absoluteUrls: abs });
+      if (!abs[0]) {
+        log('WARN', 'nessun URL immagine per test singolo');
+        return;
+      }
+      const file = await fileFromUrl(abs[0], 0);
+      const files = file ? [file] : [];
+      const caps = logCapabilities(files);
+      if (typeof navigator.share !== 'function') return;
+      if (!files.length || !caps.canSingle) {
+        await runShare({ title: 'Test Engine Gallery', text: `Codice motore: ${code}`, url: window.location.href }, 'single-fallback-text-url');
+        return;
+      }
+      await runShare({ title: 'Test Engine Gallery', text: `Codice motore: ${code}`, files }, 'single-file');
+    });
+
+    document.getElementById('shareMultiBtn').addEventListener('click', async () => {
+      const code = engineCode();
+      const raw = parseUrls();
+      const abs = toAbsoluteUrls(raw);
+      log('INFO', 'test 3 start', { code, rawUrls: raw, absoluteUrls: abs });
+      const files = [];
+      for (let i = 0; i < abs.length; i += 1) {
+        const f = await fileFromUrl(abs[i], i);
+        if (f) files.push(f);
+      }
+      const caps = logCapabilities(files);
+      if (typeof navigator.share !== 'function') return;
+      if (!files.length || !caps.canMulti) {
+        await runShare({ title: 'Test Engine Gallery', text: `Codice motore: ${code}`, url: window.location.href }, 'multi-fallback-text-url');
+        return;
+      }
+      await runShare({ title: 'Test Engine Gallery', text: `Codice motore: ${code}`, files }, 'multi-file');
+    });
+  </script>
+</body>
+</html>

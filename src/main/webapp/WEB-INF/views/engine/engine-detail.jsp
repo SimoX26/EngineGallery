@@ -162,10 +162,12 @@
                     <button
                             id="engineTechnicalShareBtn"
                             type="button"
-                            class="share-icon-btn engine-technical-share-btn"
+                            class="share-icon-btn engine-technical-share-btn js-engine-share-btn"
                             aria-label="Condividi scheda tecnica"
                             title="Condividi scheda tecnica"
                             data-engine-code="${detail.engine.engineCode}"
+                            data-share-source="#engineDetailGallery"
+                            data-image-selector=".clickable-image"
                             data-engine-status="${detail.engine.status}"
                             data-delivery-date="${engineDeliveryDateShare}">
                         <svg viewBox="0 0 24 24" aria-hidden="true">

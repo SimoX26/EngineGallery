@@ -3,31 +3,37 @@ import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/di
 const config = window.engineDetailViewerConfig || {};
 const galleryRoot = document.getElementById('engineDetailGallery');
 const navbar = document.querySelector('.navbar');
-const fab = document.querySelector('.fab-mobile-center');
 const clickableImages = Array.from(document.querySelectorAll('.clickable-image'));
-const technicalShareButton = document.getElementById('engineTechnicalShareBtn');
-const engineRefLabel = document.querySelector('.engine-ref-value');
-const shareFileCache = new Map();
-const SHARE_LOG_PREFIX = '[engine-share]';
+
+const SHARE_LOG_PREFIX = '[engine-share-v2]';
+let shareDelegationInitialized = false;
+const SHARE_FILE_SHARING_ENABLED = false;
+const SHARE_MULTIPLE_FILES_ENABLED = false;
 
 function showShareMessage(message) {
     alert(message);
 }
 
-function buildShareFallbackUrl(shareText) {
-    const subject = encodeURIComponent('Condivisione motore');
-    const body = encodeURIComponent(`${shareText}\n${window.location.href}`);
-    return `mailto:?subject=${subject}&body=${body}`;
-}
+function normalizeImageUrls(imageUrls) {
+    const normalized = [];
+    const seen = new Set();
 
-function getFileNameFromUrl(url, fallback = 'immagine-motore.jpg') {
-    try {
-        const pathname = new URL(url).pathname;
-        const name = pathname.substring(pathname.lastIndexOf('/') + 1);
-        return name || fallback;
-    } catch (_error) {
-        return fallback;
-    }
+    (imageUrls || []).forEach((rawUrl) => {
+        if (!rawUrl) {
+            return;
+        }
+        try {
+            const absolute = new URL(rawUrl, window.location.href).href;
+            if (!seen.has(absolute)) {
+                seen.add(absolute);
+                normalized.push(absolute);
+            }
+        } catch (error) {
+            console.warn(`${SHARE_LOG_PREFIX} URL immagine non valida`, rawUrl, error);
+        }
+    });
+
+    return normalized;
 }
 
 function getExtensionFromMimeType(mimeType) {
@@ -41,149 +47,295 @@ function getExtensionFromMimeType(mimeType) {
     if (normalized.includes('gif')) {
         return 'gif';
     }
-    if (normalized.includes('jpg') || normalized.includes('jpeg')) {
+    if (normalized.includes('jpeg') || normalized.includes('jpg')) {
         return 'jpg';
     }
     return 'jpg';
 }
 
-async function tryBuildShareFile(imageUrl) {
-    if (!imageUrl) {
-        return null;
+function inferMimeTypeFromUrl(url) {
+    const lower = (url || '').toLowerCase();
+    if (lower.endsWith('.png')) {
+        return 'image/png';
     }
-    if (shareFileCache.has(imageUrl)) {
-        return shareFileCache.get(imageUrl);
+    if (lower.endsWith('.webp')) {
+        return 'image/webp';
     }
+    if (lower.endsWith('.jpeg') || lower.endsWith('.jpg')) {
+        return 'image/jpeg';
+    }
+    return '';
+}
 
-    const promise = (async () => {
+function getFileNameFromUrl(url, fallback) {
     try {
-        console.info(`${SHARE_LOG_PREFIX} fetch immagine`, imageUrl);
-        const response = await fetch(imageUrl, { credentials: 'include' });
-        if (!response.ok) {
-            console.warn(`${SHARE_LOG_PREFIX} fetch non ok`, { url: imageUrl, status: response.status });
-            return null;
+        const pathname = new URL(url).pathname;
+        const rawName = pathname.substring(pathname.lastIndexOf('/') + 1);
+        return rawName || fallback;
+    } catch (_error) {
+        return fallback;
+    }
+}
+
+async function buildShareFiles(imageUrls) {
+    const files = [];
+
+    for (let i = 0; i < imageUrls.length; i += 1) {
+        const imageUrl = imageUrls[i];
+        try {
+            console.info(`${SHARE_LOG_PREFIX} fetch immagine`, { index: i, imageUrl });
+            const response = await fetch(imageUrl, { credentials: 'include' });
+            const headerContentType = (response.headers.get('content-type') || '').toLowerCase();
+            console.info(`${SHARE_LOG_PREFIX} fetch response`, {
+                index: i,
+                imageUrl,
+                status: response.status,
+                ok: response.ok,
+                headerContentType
+            });
+            if (!response.ok) {
+                console.warn(`${SHARE_LOG_PREFIX} fetch non ok`, { imageUrl, status: response.status });
+                continue;
+            }
+            if (headerContentType && !headerContentType.startsWith('image/')) {
+                console.warn(`${SHARE_LOG_PREFIX} content-type header non immagine`, { imageUrl, headerContentType });
+                continue;
+            }
+
+            const blob = await response.blob();
+            if (!blob || blob.size === 0) {
+                console.warn(`${SHARE_LOG_PREFIX} blob vuoto`, { imageUrl });
+                continue;
+            }
+
+            const blobType = (blob.type || '').toLowerCase();
+            const inferredMimeType = inferMimeTypeFromUrl(imageUrl);
+            const mimeType = (headerContentType && headerContentType.startsWith('image/'))
+                ? headerContentType.split(';')[0].trim()
+                : (blobType || inferredMimeType);
+            console.info(`${SHARE_LOG_PREFIX} blob dettagli`, {
+                index: i,
+                imageUrl,
+                blobType,
+                blobSize: blob.size,
+                inferredMimeType,
+                resolvedMimeType: mimeType
+            });
+            if (!mimeType.startsWith('image/')) {
+                console.warn(`${SHARE_LOG_PREFIX} mime non immagine`, { imageUrl, mimeType });
+                continue;
+            }
+
+            const fallbackName = `immagine-motore-${i + 1}`;
+            const baseName = getFileNameFromUrl(imageUrl, fallbackName);
+            const hasExtension = /\.[a-zA-Z0-9]+$/.test(baseName);
+            const filename = hasExtension ? baseName : `${baseName}.${getExtensionFromMimeType(mimeType)}`;
+            const file = new File([blob], filename, { type: mimeType });
+
+            console.info(`${SHARE_LOG_PREFIX} file creato`, {
+                index: i,
+                imageUrl,
+                filename,
+                mimeType,
+                fileType: file.type,
+                size: file.size
+            });
+
+            files.push(file);
+        } catch (error) {
+            console.error(`${SHARE_LOG_PREFIX} errore durante fetch/conversione file`, { imageUrl, error });
         }
-        const blob = await response.blob();
-        if (!blob || blob.size === 0) {
-            console.warn(`${SHARE_LOG_PREFIX} blob vuoto`, imageUrl);
-            return null;
-        }
-        const mimeType = blob.type || 'image/jpeg';
-        const baseName = getFileNameFromUrl(imageUrl, 'immagine-motore');
-        const hasExtension = /\.[a-zA-Z0-9]+$/.test(baseName);
-        const fileName = hasExtension ? baseName : `${baseName}.${getExtensionFromMimeType(mimeType)}`;
-        console.info(`${SHARE_LOG_PREFIX} file pronto`, { url: imageUrl, mimeType, fileName, size: blob.size });
-        return new File([blob], fileName, { type: mimeType });
-    } catch (error) {
-        console.error(`${SHARE_LOG_PREFIX} errore fetch immagine`, imageUrl, error);
-        return null;
     }
-    })();
 
-    shareFileCache.set(imageUrl, promise);
-    return promise;
+    return files;
 }
 
-function buildEngineShareText() {
-    const engineCode = (technicalShareButton && technicalShareButton.getAttribute('data-engine-code') || '').trim();
-    const engineStatus = (technicalShareButton && technicalShareButton.getAttribute('data-engine-status') || '').trim();
-    const deliveryDate = (technicalShareButton && technicalShareButton.getAttribute('data-delivery-date') || '').trim();
-    const engineReference = engineCode || (engineRefLabel && engineRefLabel.textContent || '').trim() || '-';
-
-    const textLines = [`Codice motore: ${engineReference}`];
-    if (engineStatus === 'DELIVERED' && deliveryDate) {
-        textLines.push('', `Consegnato il: ${deliveryDate}`);
+function readImageUrlsFromButton(button) {
+    const rawFromData = (button.getAttribute('data-image-urls') || '').trim();
+    if (rawFromData) {
+        return rawFromData
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
     }
-    return textLines.join('\n');
+
+    const sourceSelector = button.getAttribute('data-share-source') || '#engineDetailGallery';
+    const imageSelector = button.getAttribute('data-image-selector') || '.clickable-image';
+    const sourceRoot = document.querySelector(sourceSelector);
+    if (!sourceRoot) {
+        console.warn(`${SHARE_LOG_PREFIX} contenitore immagini non trovato`, { sourceSelector });
+        return [];
+    }
+
+    return Array.from(sourceRoot.querySelectorAll(imageSelector))
+        .map((node) => node.getAttribute('data-image-url') || node.getAttribute('src') || '')
+        .map((url) => url.trim())
+        .filter((url) => url.length > 0);
 }
 
-function getEngineImageUrls() {
-    return clickableImages
-        .map((item) => item.getAttribute('data-image-url'))
-        .filter((url) => !!url)
-        .map((url) => new URL(url, window.location.origin).href);
-}
-
-function canShareFiles(shareData) {
-    if (!navigator.share || !navigator.canShare) {
-        return false;
-    }
-    try {
-        const result = navigator.canShare(shareData);
-        console.info(`${SHARE_LOG_PREFIX} navigator.canShare(files)`, result);
-        return result;
-    } catch (error) {
-        console.warn(`${SHARE_LOG_PREFIX} navigator.canShare ha lanciato errore`, error);
-        return false;
-    }
-}
-
-async function shareTextAndLink(shareText) {
-    if (!navigator.share) {
-        console.warn(`${SHARE_LOG_PREFIX} navigator.share non disponibile, uso fallback mailto`);
-        window.location.href = buildShareFallbackUrl(shareText);
+async function copyFallbackText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        console.info(`${SHARE_LOG_PREFIX} fallback clipboard usato`);
+        showShareMessage('Condivisione file non disponibile: testo copiato negli appunti.');
         return;
     }
-    const shareData = {
-        text: shareText,
-        url: window.location.href
-    };
-    console.info(`${SHARE_LOG_PREFIX} fallback share text+url`);
-    await navigator.share(shareData);
+
+    console.warn(`${SHARE_LOG_PREFIX} clipboard non disponibile, fallback solo console`);
+    showShareMessage('Condivisione non disponibile su questo browser.');
 }
 
-async function shareCurrentEngine() {
-    const imageUrls = getEngineImageUrls();
-    const shareText = buildEngineShareText();
-    console.info(`${SHARE_LOG_PREFIX} click share ricevuto`, {
-        imagesFound: imageUrls.length,
-        imageUrls,
-        secureContext: window.isSecureContext,
-        hasNavigatorShare: !!navigator.share,
-        hasNavigatorCanShare: !!navigator.canShare
+async function shareEngine({ engineCode, imageUrls }) {
+    const safeCode = (engineCode || '').trim() || '-';
+    const shareTitle = 'Condivisione motore';
+    const shareText = `Motore: ${safeCode}`;
+    const pageUrl = window.location.href;
+
+    console.info(`${SHARE_LOG_PREFIX} share avviato`, {
+        engineCode: safeCode,
+        rawImages: imageUrls,
+        hasNavigatorShare: typeof navigator.share === 'function',
+        hasNavigatorCanShare: typeof navigator.canShare === 'function',
+        isSecureContext: window.isSecureContext
     });
 
+    const normalizedUrls = normalizeImageUrls(imageUrls);
+    console.info(`${SHARE_LOG_PREFIX} URL normalizzati`, { count: normalizedUrls.length, normalizedUrls });
+
+    if (typeof navigator.share !== 'function') {
+        console.warn(`${SHARE_LOG_PREFIX} navigator.share non disponibile, uso fallback clipboard`);
+        await copyFallbackText(`${shareText}\nLink: ${pageUrl}`);
+        return;
+    }
+
+    const files = await buildShareFiles(normalizedUrls);
+    console.info(`${SHARE_LOG_PREFIX} file validi pronti`, { count: files.length });
+
+    if (!SHARE_FILE_SHARING_ENABLED) {
+        console.warn(`${SHARE_LOG_PREFIX} file sharing disabilitato in configurazione: uso fallback text+url`);
+    } else if (files.length > 0 && typeof navigator.canShare === 'function') {
+        let canShareSingleFile = false;
+        let canShareMultipleFiles = false;
+        try {
+            canShareSingleFile = navigator.canShare({ files: [files[0]] });
+        } catch (error) {
+            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare({files:[single]}) errore`, error);
+        }
+        try {
+            canShareMultipleFiles = files.length > 1 ? navigator.canShare({ files }) : canShareSingleFile;
+        } catch (error) {
+            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare({files:[multi]}) errore`, error);
+        }
+        console.info(`${SHARE_LOG_PREFIX} compatibilità canShare`, {
+            canShareSingleFile,
+            canShareMultipleFiles,
+            filesCount: files.length
+        });
+
+        let filesForShare = files;
+        if (!SHARE_MULTIPLE_FILES_ENABLED && files.length > 1) {
+            filesForShare = [files[0]];
+            console.warn(`${SHARE_LOG_PREFIX} Fallback: condivisione singola immagine per compatibilità dispositivo`, {
+                requestedFiles: files.length,
+                sharedFiles: filesForShare.length
+            });
+        }
+
+        let canShareMultiFiles = false;
+        try {
+            canShareMultiFiles = navigator.canShare({ files: filesForShare });
+            console.info(`${SHARE_LOG_PREFIX} navigator.canShare({files})`, {
+                result: canShareMultiFiles,
+                filesCount: filesForShare.length
+            });
+        } catch (error) {
+            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare ha lanciato errore`, error);
+        }
+
+        if (canShareMultiFiles) {
+            try {
+                const filesPayload = {
+                    title: shareTitle,
+                    text: shareText,
+                    files: filesForShare
+                };
+                console.info(`${SHARE_LOG_PREFIX} payload navigator.share files`, {
+                    title: filesPayload.title,
+                    text: filesPayload.text,
+                    filesCount: filesPayload.files.length,
+                    files: filesPayload.files.map((f) => ({ name: f.name, type: f.type, size: f.size }))
+                });
+                await navigator.share(filesPayload);
+                console.info(`${SHARE_LOG_PREFIX} share con file completata`, { files: filesForShare.length });
+                return;
+            } catch (error) {
+                if (error && error.name === 'AbortError') {
+                    console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente (file)`);
+                    return;
+                }
+                console.error(`${SHARE_LOG_PREFIX} errore share con file`, {
+                    name: error?.name,
+                    message: error?.message,
+                    stack: error?.stack
+                });
+            }
+        } else {
+            console.warn(`${SHARE_LOG_PREFIX} file share non supportato, uso fallback text+url`);
+        }
+    } else if (SHARE_FILE_SHARING_ENABLED && files.length > 0) {
+        console.warn(`${SHARE_LOG_PREFIX} navigator.canShare non disponibile, uso fallback text+url`);
+    } else if (SHARE_FILE_SHARING_ENABLED) {
+        console.warn(`${SHARE_LOG_PREFIX} nessun file immagine valido, uso fallback text+url`);
+    }
+
     try {
-        const androidBridge = window.AndroidShareBridge;
-        if (androidBridge && androidBridge.shareTechnicalSheet) {
-            console.info(`${SHARE_LOG_PREFIX} uso AndroidShareBridge`);
-            androidBridge.shareTechnicalSheet(JSON.stringify(imageUrls), shareText);
-            return;
-        }
-
-        const files = await Promise.all(imageUrls.map((url) => tryBuildShareFile(url)));
-        const validFiles = files.filter((file) => !!file);
-        console.info(`${SHARE_LOG_PREFIX} file validi`, { validFiles: validFiles.length, requested: imageUrls.length });
-        if (imageUrls.length === 0) {
-            console.warn(`${SHARE_LOG_PREFIX} nessuna immagine associata: uso fallback testo+url`);
-        } else if (validFiles.length !== imageUrls.length) {
-            console.warn(`${SHARE_LOG_PREFIX} alcune immagini non valide: uso fallback testo+url`);
-        }
-        const shareDataWithFiles = {
-            files: validFiles,
-            text: shareText
+        const fallbackPayload = {
+            title: shareTitle,
+            text: shareText,
+            url: pageUrl
         };
-        const canUseFileShare = validFiles.length === imageUrls.length
-            && validFiles.length > 0
-            && canShareFiles(shareDataWithFiles);
-
-        if (canUseFileShare) {
-            console.info(`${SHARE_LOG_PREFIX} avvio share con file multipli`, { files: validFiles.length });
-            await navigator.share(shareDataWithFiles);
-            return;
-        }
-
-        await shareTextAndLink(shareText);
+        console.info(`${SHARE_LOG_PREFIX} payload navigator.share fallback`, fallbackPayload);
+        await navigator.share(fallbackPayload);
+        console.info(`${SHARE_LOG_PREFIX} fallback share text+url completata`);
     } catch (error) {
         if (error && error.name === 'AbortError') {
-            console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente`);
+            console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente (fallback)`);
             return;
         }
-        if (error) {
-            console.error(`${SHARE_LOG_PREFIX} errore durante la condivisione del motore`, error);
-            showShareMessage('Impossibile condividere il motore');
-        }
+        console.error(`${SHARE_LOG_PREFIX} errore fallback text+url`, {
+            name: error?.name,
+            message: error?.message,
+            stack: error?.stack
+        });
+        await copyFallbackText(`${shareText}\nLink: ${pageUrl}`);
     }
+}
+
+function initializeShareDelegation() {
+    if (shareDelegationInitialized) {
+        return;
+    }
+    shareDelegationInitialized = true;
+
+    document.addEventListener('click', async (event) => {
+        const trigger = event.target.closest('.js-engine-share-btn');
+        if (!trigger) {
+            return;
+        }
+
+        event.preventDefault();
+        const engineCode = trigger.getAttribute('data-engine-code') || (config.engineRef || '');
+        const imageUrls = readImageUrlsFromButton(trigger);
+
+        console.info(`${SHARE_LOG_PREFIX} share button cliccato`, {
+            triggerClass: trigger.className,
+            engineCode,
+            imagesFound: imageUrls.length,
+            imageUrlsRaw: imageUrls
+        });
+
+        await shareEngine({ engineCode, imageUrls });
+    });
 }
 
 if (!galleryRoot || clickableImages.length === 0) {
@@ -262,11 +414,13 @@ if (!galleryRoot || clickableImages.length === 0) {
             order: 8,
             isButton: true,
             tagName: 'button',
-            className: 'pswp__button pswp__button--custom-share',
+            className: 'pswp__button pswp__button--custom-share js-engine-share-btn',
             html: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>',
             title: 'Condividi immagine',
-            onClick: async () => {
-                await shareCurrentEngine();
+            onInit: (element) => {
+                element.setAttribute('data-engine-code', config.engineRef || '');
+                element.setAttribute('data-share-source', '#engineDetailGallery');
+                element.setAttribute('data-image-selector', '.clickable-image');
             }
         });
     });
@@ -293,14 +447,4 @@ if (!galleryRoot || clickableImages.length === 0) {
     });
 }
 
-if (technicalShareButton) {
-    technicalShareButton.addEventListener('click', async () => {
-        await shareCurrentEngine();
-    });
-}
-
-if (galleryRoot && clickableImages.length > 0) {
-    const urls = getEngineImageUrls();
-    console.info(`${SHARE_LOG_PREFIX} preload cache share avviato`, { images: urls.length });
-    void Promise.allSettled(urls.map((url) => tryBuildShareFile(url)));
-}
+initializeShareDelegation();
