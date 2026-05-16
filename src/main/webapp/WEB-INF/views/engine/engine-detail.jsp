@@ -40,7 +40,7 @@
         }
 
         .engine-tech-panel .engine-ref-value {
-            font-weight: 700;
+            font-weight: 400;
             margin-bottom: 14px;
             word-break: break-word;
         }
