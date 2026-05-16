@@ -36,6 +36,7 @@ import java.net.URL
 import java.util.Base64
 import java.util.concurrent.Executors
 import android.net.http.SslError
+import org.json.JSONArray
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -507,6 +508,71 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        @JavascriptInterface
+        fun shareTechnicalSheet(imageUrlsJson: String?, shareText: String?) {
+            if (imageUrlsJson.isNullOrBlank()) {
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Immagini non disponibili", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+
+            val normalizedUrls = try {
+                val jsonArray = JSONArray(imageUrlsJson)
+                val urls = mutableListOf<String>()
+                for (index in 0 until jsonArray.length()) {
+                    val raw = jsonArray.optString(index).orEmpty().trim()
+                    if (raw.isBlank()) {
+                        continue
+                    }
+                    val normalized = upgradeToHttpsIfNeeded(Uri.parse(raw)).toString()
+                    urls.add(normalized)
+                }
+                urls
+            } catch (ex: Exception) {
+                Log.e(IMAGE_SHARE_TAG, "Payload immagini non valido", ex)
+                emptyList()
+            }
+
+            if (normalizedUrls.isEmpty()) {
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Immagini non disponibili", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+
+            runOnUiThread {
+                val userAgent = webView.settings.userAgentString ?: "Android WebView"
+                val referer = webView.url ?: BuildConfig.ENGINE_GALLERY_BASE_URL
+                val cookiesByUrl = normalizedUrls.associateWith { url ->
+                    CookieManager.getInstance().getCookie(url)
+                }
+
+                ioExecutor.execute {
+                    val sharedFiles = mutableListOf<File>()
+                    for (url in normalizedUrls) {
+                        val sharedFile = downloadImageForShare(
+                            normalizedUrl = url,
+                            userAgent = userAgent,
+                            referer = referer,
+                            cookies = cookiesByUrl[url]
+                        )
+                        if (sharedFile == null) {
+                            runOnUiThread {
+                                Toast.makeText(this@MainActivity, "Errore durante la preparazione delle immagini", Toast.LENGTH_SHORT).show()
+                            }
+                            return@execute
+                        }
+                        sharedFiles.add(sharedFile)
+                    }
+
+                    runOnUiThread {
+                        openTechnicalSheetShareChooser(sharedFiles, shareText.orEmpty())
+                    }
+                }
+            }
+        }
     }
 
     private fun decodeDataUrlForShare(dataUrl: String, mimeType: String?, fileName: String?): File? {
@@ -642,6 +708,45 @@ class MainActivity : AppCompatActivity() {
 
         try {
             startActivity(Intent.createChooser(shareIntent, "Condividi immagine"))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, "Nessuna app disponibile per la condivisione", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openTechnicalSheetShareChooser(imageFiles: List<File>, shareText: String) {
+        if (imageFiles.isEmpty()) {
+            Toast.makeText(this, "Immagini non disponibili", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val imageUris = imageFiles.map { file ->
+            FileProvider.getUriForFile(
+                this,
+                "${BuildConfig.APPLICATION_ID}.fileprovider",
+                file
+            )
+        }
+
+        val shareIntent = if (imageUris.size == 1) {
+            Intent(Intent.ACTION_SEND).apply {
+                type = "image/*"
+                putExtra(Intent.EXTRA_STREAM, imageUris.first())
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                clipData = ClipData.newUri(contentResolver, "engine-image", imageUris.first())
+            }
+        } else {
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "image/*"
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(imageUris))
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                clipData = ClipData.newUri(contentResolver, "engine-image", imageUris.first())
+            }
+        }
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, "Condividi scheda tecnica"))
         } catch (_: ActivityNotFoundException) {
             Toast.makeText(this, "Nessuna app disponibile per la condivisione", Toast.LENGTH_SHORT).show()
         }

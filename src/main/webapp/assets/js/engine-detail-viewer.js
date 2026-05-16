@@ -5,6 +5,46 @@ const galleryRoot = document.getElementById('engineDetailGallery');
 const navbar = document.querySelector('.navbar');
 const fab = document.querySelector('.fab-mobile-center');
 const clickableImages = Array.from(document.querySelectorAll('.clickable-image'));
+const technicalShareButton = document.getElementById('engineTechnicalShareBtn');
+
+function showShareMessage(message) {
+    alert(message);
+}
+
+function getFileNameFromUrl(url, fallback = 'immagine-motore.jpg') {
+    try {
+        const pathname = new URL(url).pathname;
+        const name = pathname.substring(pathname.lastIndexOf('/') + 1);
+        return name || fallback;
+    } catch (_error) {
+        return fallback;
+    }
+}
+
+function toHttpsUrl(rawUrl) {
+    const url = new URL(rawUrl, window.location.origin);
+    if (url.protocol === 'http:') {
+        url.protocol = 'https:';
+    }
+    return url.href;
+}
+
+async function tryBuildShareFile(imageUrl) {
+    try {
+        const response = await fetch(imageUrl, { credentials: 'include' });
+        if (!response.ok) {
+            return null;
+        }
+        const blob = await response.blob();
+        if (!blob || blob.size === 0) {
+            return null;
+        }
+        const fileName = getFileNameFromUrl(imageUrl);
+        return new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+    } catch (_error) {
+        return null;
+    }
+}
 
 if (!galleryRoot || clickableImages.length === 0) {
     // Nothing to initialize on pages without images.
@@ -21,48 +61,6 @@ if (!galleryRoot || clickableImages.length === 0) {
         };
     });
     const dimensionCache = new Map();
-
-    function showShareMessage(message) {
-        alert(message);
-    }
-
-    function getFileNameFromUrl(url, fallback = 'immagine-motore.jpg') {
-        try {
-            const pathname = new URL(url).pathname;
-            const name = pathname.substring(pathname.lastIndexOf('/') + 1);
-            return name || fallback;
-        } catch (_error) {
-            return fallback;
-        }
-    }
-
-    async function tryBuildShareFile(imageUrl) {
-        try {
-            const response = await fetch(imageUrl, { credentials: 'include' });
-            if (!response.ok) {
-                return null;
-            }
-            const blob = await response.blob();
-            if (!blob || blob.size === 0) {
-                return null;
-            }
-            const fileName = getFileNameFromUrl(imageUrl);
-            return new File([blob], fileName, { type: blob.type || 'image/jpeg' });
-        } catch (_error) {
-            return null;
-        }
-    }
-
-    async function copyLinkFallback(link) {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(link);
-            showShareMessage('Link copiato negli appunti');
-            return;
-        }
-
-        // Last-resort fallback for environments without Clipboard API.
-        window.prompt('Copia questo link:', link);
-    }
 
     function loadSlideDimensions(index) {
         if (index < 0 || index >= dataSource.length) {
@@ -137,22 +135,21 @@ if (!galleryRoot || clickableImages.length === 0) {
 
                 const resolvedImageUrl = new URL(imageUrl, window.location.origin).href;
                 try {
-                    if (navigator.share) {
-                        const imageFile = await tryBuildShareFile(resolvedImageUrl);
-                        if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-                            await navigator.share({ files: [imageFile] });
-                            return;
-                        }
+                    if (!navigator.share || !navigator.canShare) {
+                        showShareMessage('La condivisione non è supportata su questo dispositivo');
+                        return;
                     }
 
-                    await copyLinkFallback(resolvedImageUrl);
+                    const imageFile = await tryBuildShareFile(resolvedImageUrl);
+                    if (!imageFile || !navigator.canShare({ files: [imageFile] })) {
+                        showShareMessage('Impossibile condividere l\'immagine');
+                        return;
+                    }
+
+                    await navigator.share({ files: [imageFile] });
                 } catch (error) {
                     if (error && error.name !== 'AbortError') {
-                        try {
-                            await copyLinkFallback(resolvedImageUrl);
-                        } catch (_fallbackError) {
-                            showShareMessage('Errore durante la condivisione: ' + error.message);
-                        }
+                        showShareMessage('Impossibile condividere l\'immagine');
                     }
                 }
             }
@@ -178,5 +175,58 @@ if (!galleryRoot || clickableImages.length === 0) {
                 openCurrent();
             }
         });
+    });
+}
+
+if (technicalShareButton) {
+    technicalShareButton.addEventListener('click', async () => {
+        const engineCode = (technicalShareButton.getAttribute('data-engine-code') || '').trim();
+        const engineStatus = (technicalShareButton.getAttribute('data-engine-status') || '').trim();
+        const deliveryDate = (technicalShareButton.getAttribute('data-delivery-date') || '').trim();
+        const imageUrls = clickableImages
+            .map((item) => item.getAttribute('data-image-url'))
+            .filter((url) => !!url)
+            .map((url) => toHttpsUrl(url));
+
+        if (imageUrls.length === 0) {
+            showShareMessage('Impossibile condividere: nessuna immagine disponibile');
+            return;
+        }
+
+        const textLines = [`Codice motore: ${engineCode || '-'}`];
+        if (engineStatus === 'DELIVERED' && deliveryDate) {
+            textLines.push('', `Consegnato il: ${deliveryDate}`);
+        }
+        const shareText = textLines.join('\n');
+
+        try {
+            if (window.AndroidShareBridge && typeof window.AndroidShareBridge.shareTechnicalSheet === 'function') {
+                window.AndroidShareBridge.shareTechnicalSheet(JSON.stringify(imageUrls), shareText);
+                return;
+            }
+
+            if (!navigator.share || !navigator.canShare) {
+                showShareMessage('La condivisione non è supportata su questo dispositivo');
+                return;
+            }
+
+            const files = await Promise.all(imageUrls.map((url) => tryBuildShareFile(url)));
+            if (files.some((file) => !file)) {
+                showShareMessage('Impossibile condividere l\'immagine');
+                return;
+            }
+
+            const shareData = { files: files.filter((file) => !!file), text: shareText };
+            if (!navigator.canShare(shareData)) {
+                showShareMessage('La condivisione multipla non è supportata su questo dispositivo');
+                return;
+            }
+
+            await navigator.share(shareData);
+        } catch (error) {
+            if (error && error.name !== 'AbortError') {
+                showShareMessage('Impossibile condividere l\'immagine');
+            }
+        }
     });
 }

@@ -94,6 +94,22 @@
                     <dt>Note:</dt>
                     <dd>${detail.engine.notes}</dd>
                 </dl>
+
+                <c:set var="engineDeliveryDateShare" value="" />
+                <c:if test="${detail.engine.deliveryDate != null}">
+                    <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
+                    <fmt:formatDate value="${engineDeliveryDateShareParsed}" pattern="dd/MM/yyyy" var="engineDeliveryDateShare" />
+                </c:if>
+
+                <button
+                        id="engineTechnicalShareBtn"
+                        type="button"
+                        class="btn btn-engine btn-sm mt-2"
+                        data-engine-code="${detail.engine.engineCode}"
+                        data-engine-status="${detail.engine.status}"
+                        data-delivery-date="${engineDeliveryDateShare}">
+                    Condividi scheda tecnica
+                </button>
             </div>
         </div>
 
