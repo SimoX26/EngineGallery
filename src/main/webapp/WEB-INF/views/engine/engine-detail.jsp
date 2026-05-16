@@ -27,6 +27,113 @@
             transform: scale(1.02);
             opacity: 0.9;
         }
+
+        .engine-tech-panel .engine-detail-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 12px;
+        }
+
+        .engine-tech-panel .engine-detail-list {
+            margin: 0;
+        }
+
+        .engine-tech-panel .engine-ref-value {
+            font-weight: 700;
+            margin-bottom: 14px;
+            word-break: break-word;
+        }
+
+        .engine-tech-panel .engine-tech-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 12px;
+            min-width: 0;
+        }
+
+        .engine-tech-panel .engine-tech-key {
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        .engine-tech-panel .engine-tech-value {
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow-wrap: anywhere;
+            font-weight: 400;
+        }
+
+        .engine-tech-panel .engine-tech-row:not(.engine-tech-row--notes) .engine-tech-value {
+            white-space: nowrap;
+        }
+
+        .engine-tech-panel .engine-tech-value .badge-status {
+            vertical-align: middle;
+        }
+
+        .engine-tech-panel .engine-technical-share-btn {
+            width: 44px;
+            height: 44px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            border: 1.5px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.92);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            flex: 0 0 auto;
+        }
+
+        .engine-tech-panel .engine-technical-share-btn:hover,
+        .engine-tech-panel .engine-technical-share-btn:focus-visible {
+            background: rgba(30, 41, 59, 0.96);
+            border-color: rgba(248, 250, 252, 0.5);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .engine-tech-panel .engine-technical-share-btn:active {
+            transform: scale(0.95);
+        }
+
+        .engine-tech-panel .engine-technical-share-btn svg {
+            display: block;
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .engine-tech-panel .engine-detail-header {
+                gap: 10px;
+            }
+
+            .engine-tech-panel .engine-tech-row {
+                align-items: flex-start;
+                flex-wrap: wrap;
+                gap: 4px 6px;
+                margin-bottom: 10px;
+            }
+
+            .engine-tech-panel .engine-tech-row:not(.engine-tech-row--notes) .engine-tech-value {
+                white-space: normal;
+            }
+
+            .engine-tech-panel .engine-technical-share-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .engine-tech-panel .engine-technical-share-btn svg {
+                width: 17px;
+                height: 17px;
+            }
+        }
     </style>
 </head>
 
@@ -43,7 +150,7 @@
     <div class="row g-4 card-base">
 
         <div class="col-lg-5">
-            <div class="engine-detail-section">
+            <div class="engine-detail-section engine-tech-panel">
                 <c:set var="engineDeliveryDateShare" value="" />
                 <c:if test="${detail.engine.deliveryDate != null}">
                     <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
@@ -62,11 +169,11 @@
                             data-engine-status="${detail.engine.status}"
                             data-delivery-date="${engineDeliveryDateShare}">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="18" cy="5" r="3"></circle>
-                            <circle cx="6" cy="12" r="3"></circle>
-                            <circle cx="18" cy="19" r="3"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                            <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                            <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                            <circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
                         </svg>
                     </button>
                 </div>
