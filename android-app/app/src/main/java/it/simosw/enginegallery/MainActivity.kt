@@ -33,6 +33,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.Base64
 import java.util.concurrent.Executors
 import android.net.http.SslError
 
@@ -409,6 +410,35 @@ class MainActivity : AppCompatActivity() {
                     window.AndroidShareBridge.shareImage(imageUrl);
                     return Promise.resolve();
                   }
+                  const files = payload.files;
+                  if (window.AndroidShareBridge && files && files.length > 0) {
+                    const first = files[0];
+                    if (first) {
+                      return new Promise((resolve, reject) => {
+                        try {
+                          const reader = new FileReader();
+                          reader.onload = function () {
+                            try {
+                              window.AndroidShareBridge.shareImageData(
+                                String(reader.result || ''),
+                                String(first.type || ''),
+                                String(first.name || '')
+                              );
+                              resolve();
+                            } catch (e) {
+                              reject(e);
+                            }
+                          };
+                          reader.onerror = function () {
+                            reject(new Error('Errore lettura file condiviso'));
+                          };
+                          reader.readAsDataURL(first);
+                        } catch (e) {
+                          reject(e);
+                        }
+                      });
+                    }
+                  }
                 } catch (_e) {}
                 if (originalShare) return originalShare(data);
                 return Promise.reject(new Error('Share non disponibile'));
@@ -454,6 +484,85 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        @JavascriptInterface
+        fun shareImageData(dataUrl: String?, mimeType: String?, fileName: String?) {
+            if (dataUrl.isNullOrBlank()) {
+                runOnUiThread {
+                    Toast.makeText(this@MainActivity, "Immagine non disponibile", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+
+            ioExecutor.execute {
+                val sharedFile = decodeDataUrlForShare(dataUrl, mimeType, fileName)
+                if (sharedFile == null) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Errore durante la preparazione dell'immagine", Toast.LENGTH_SHORT).show()
+                    }
+                    return@execute
+                }
+                runOnUiThread {
+                    openImageShareChooser(sharedFile)
+                }
+            }
+        }
+    }
+
+    private fun decodeDataUrlForShare(dataUrl: String, mimeType: String?, fileName: String?): File? {
+        return try {
+            val commaIndex = dataUrl.indexOf(',')
+            if (commaIndex <= 0) {
+                Log.e(IMAGE_SHARE_TAG, "Data URL non valido")
+                return null
+            }
+            val metadata = dataUrl.substring(0, commaIndex)
+            if (!metadata.contains(";base64")) {
+                Log.e(IMAGE_SHARE_TAG, "Data URL senza base64")
+                return null
+            }
+            val base64Payload = dataUrl.substring(commaIndex + 1)
+            val bytes = Base64.getDecoder().decode(base64Payload)
+            if (bytes.isEmpty()) {
+                Log.e(IMAGE_SHARE_TAG, "Data URL vuoto")
+                return null
+            }
+
+            val shareDir = File(cacheDir, "shared").apply { mkdirs() }
+            val extension = detectImageExtension(mimeType, fileName)
+            val imageFile = File.createTempFile("engine_gallery_share_", ".$extension", shareDir)
+            imageFile.outputStream().use { output ->
+                output.write(bytes)
+            }
+            imageFile
+        } catch (ex: Exception) {
+            Log.e(IMAGE_SHARE_TAG, "Errore decoding immagine condivisa", ex)
+            null
+        }
+    }
+
+    private fun detectImageExtension(mimeType: String?, fileName: String?): String {
+        val fromMime = mimeType
+            ?.substringAfter('/', "")
+            ?.lowercase()
+            ?.substringBefore(';')
+            ?.ifBlank { "" }
+            .orEmpty()
+        if (fromMime in setOf("jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif")) {
+            return if (fromMime == "jpeg") "jpg" else fromMime
+        }
+
+        val fromName = fileName
+            ?.substringAfterLast('.', "")
+            ?.lowercase()
+            ?.substringBefore('?')
+            ?.substringBefore('#')
+            ?.ifBlank { "" }
+            .orEmpty()
+        if (fromName in setOf("jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif")) {
+            return if (fromName == "jpeg") "jpg" else fromName
+        }
+        return "jpg"
     }
 
     private fun downloadImageForShare(
