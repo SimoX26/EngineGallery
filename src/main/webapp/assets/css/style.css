@@ -719,6 +719,43 @@ body {
     margin-bottom: 30px;
 }
 
+.engine-detail-list {
+    margin: 0;
+}
+
+.engine-detail-list .engine-ref-value {
+    font-weight: 700;
+    margin-bottom: 14px;
+    word-break: break-word;
+}
+
+.engine-tech-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 12px;
+    min-width: 0;
+}
+
+.engine-tech-key {
+    font-weight: 700;
+    flex: 0 0 auto;
+}
+
+.engine-tech-value {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+}
+
+.engine-tech-row:not(.engine-tech-row--notes) .engine-tech-value {
+    white-space: nowrap;
+}
+
+.engine-tech-value .badge-status {
+    vertical-align: middle;
+}
+
 .engine-footer {
     margin-top: 15px;
     display: flex;
@@ -933,6 +970,17 @@ body {
     box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
 }
 
+.engine-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.engine-detail-header h5 {
+    margin: 0;
+}
+
 .share-icon-btn:hover,
 .share-icon-btn:focus-visible {
     background: rgba(30, 41, 59, 0.96);
@@ -956,15 +1004,46 @@ body {
     stroke-linejoin: round;
 }
 
-.engine-detail-section {
-    position: relative;
+.engine-technical-share-btn {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    position: static !important;
+    vertical-align: middle;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    border: 1.5px solid rgba(148, 163, 184, 0.35) !important;
+    background: rgba(15, 23, 42, 0.92) !important;
+    color: #f8fafc !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35) !important;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease !important;
 }
 
-.engine-technical-share-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 2;
+.engine-technical-share-btn:hover,
+.engine-technical-share-btn:focus-visible {
+    background: rgba(30, 41, 59, 0.96) !important;
+    border-color: rgba(248, 250, 252, 0.5) !important;
+    color: #ffffff !important;
+    transform: scale(1.05);
+}
+
+.engine-technical-share-btn:active {
+    transform: scale(0.95);
+}
+
+.engine-technical-share-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .pswp__button--custom-share {
@@ -1038,14 +1117,39 @@ body {
 }
 
 @media (max-width: 768px) {
+    .engine-detail-header {
+        gap: 10px;
+    }
+
+    .engine-tech-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 4px 6px;
+        margin-bottom: 10px;
+    }
+
+    .engine-tech-row:not(.engine-tech-row--notes) .engine-tech-value {
+        white-space: normal;
+    }
+
     .share-icon-btn,
     .pswp__button--custom-share {
         width: 40px !important;
         height: 40px !important;
     }
 
+    .engine-technical-share-btn {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
     .share-icon-btn svg,
     .pswp__button--custom-share svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .engine-technical-share-btn svg {
         width: 17px;
         height: 17px;
     }

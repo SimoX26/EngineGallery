@@ -44,80 +44,92 @@
 
         <div class="col-lg-5">
             <div class="engine-detail-section">
-                <h5 class="fw-semibold mb-3">Dati tecnici</h5>
-
-                <dl class="engine-detail-list">
-                    <dt>Riferimento:</dt>
-                    <dd>${detail.engine.engineRef}</dd>
-
-                    <dt>Codice motore:</dt>
-                    <dd>${detail.engine.engineCode}</dd>
-
-                    <dt>Cliente:</dt>
-                    <dd>${detail.engine.customerName}</dd>
-
-                    <dt>Stato:</dt>
-                    <c:set var="st" value="${detail.engine.status}" />
-                    <dd>
-                        <span class="badge-status
-                                ${st == 'WAITING' ? 'status-stoccato' : ''}
-                                ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
-                                ${st == 'READY' ? 'status-ready' : ''}
-                                ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
-                            <c:choose>
-                                <c:when test="${st == 'WAITING'}">In attesa</c:when>
-                                <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
-                                <c:when test="${st == 'READY'}">Pronto</c:when>
-                                <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
-                                <c:otherwise>${st}</c:otherwise>
-                            </c:choose>
-                        </span>
-                    </dd>
-
-                    <dt>Data ingresso:</dt>
-                    <dd>
-                        <fmt:parseDate value="${detail.engine.intakeDate}" pattern="yyyy-MM-dd" var="engineIntakeDateParsed" />
-                        <fmt:formatDate value="${engineIntakeDateParsed}" pattern="dd / MM / yyyy" />
-                    </dd>
-
-                    <dt>Data consegna:</dt>
-                    <dd>
-                        <c:choose>
-                            <c:when test="${detail.engine.deliveryDate != null}">
-                                <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateParsed" />
-                                <fmt:formatDate value="${engineDeliveryDateParsed}" pattern="dd / MM / yyyy" />
-                            </c:when>
-                            <c:otherwise>-</c:otherwise>
-                        </c:choose>
-                    </dd>
-
-                    <dt>Note:</dt>
-                    <dd>${detail.engine.notes}</dd>
-                </dl>
-
                 <c:set var="engineDeliveryDateShare" value="" />
                 <c:if test="${detail.engine.deliveryDate != null}">
                     <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
                     <fmt:formatDate value="${engineDeliveryDateShareParsed}" pattern="dd/MM/yyyy" var="engineDeliveryDateShare" />
                 </c:if>
 
-                <button
-                        id="engineTechnicalShareBtn"
-                        type="button"
-                        class="share-icon-btn engine-technical-share-btn"
-                        aria-label="Condividi scheda tecnica"
-                        title="Condividi scheda tecnica"
-                        data-engine-code="${detail.engine.engineCode}"
-                        data-engine-status="${detail.engine.status}"
-                        data-delivery-date="${engineDeliveryDateShare}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                    </svg>
-                </button>
+                <div class="engine-detail-header mb-3">
+                    <h5 class="fw-semibold mb-0">Dati tecnici</h5>
+                    <button
+                            id="engineTechnicalShareBtn"
+                            type="button"
+                            class="share-icon-btn engine-technical-share-btn"
+                            aria-label="Condividi scheda tecnica"
+                            title="Condividi scheda tecnica"
+                            data-engine-code="${detail.engine.engineCode}"
+                            data-engine-status="${detail.engine.status}"
+                            data-delivery-date="${engineDeliveryDateShare}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="engine-detail-list">
+                    <div class="engine-ref-value">${detail.engine.engineRef}</div>
+
+                    <div class="engine-tech-row">
+                        <span class="engine-tech-key">Codice motore:</span>
+                        <span class="engine-tech-value">${detail.engine.engineCode}</span>
+                    </div>
+
+                    <div class="engine-tech-row">
+                        <span class="engine-tech-key">Cliente:</span>
+                        <span class="engine-tech-value">${detail.engine.customerName}</span>
+                    </div>
+
+                    <div class="engine-tech-row">
+                        <span class="engine-tech-key">Stato:</span>
+                        <c:set var="st" value="${detail.engine.status}" />
+                        <span class="engine-tech-value">
+                            <span class="badge-status
+                                    ${st == 'WAITING' ? 'status-stoccato' : ''}
+                                    ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                                    ${st == 'READY' ? 'status-ready' : ''}
+                                    ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
+                                <c:choose>
+                                    <c:when test="${st == 'WAITING'}">In attesa</c:when>
+                                    <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                                    <c:when test="${st == 'READY'}">Pronto</c:when>
+                                    <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
+                                    <c:otherwise>${st}</c:otherwise>
+                                </c:choose>
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="engine-tech-row">
+                        <span class="engine-tech-key">Data ingresso:</span>
+                        <span class="engine-tech-value">
+                            <fmt:parseDate value="${detail.engine.intakeDate}" pattern="yyyy-MM-dd" var="engineIntakeDateParsed" />
+                            <fmt:formatDate value="${engineIntakeDateParsed}" pattern="dd / MM / yyyy" />
+                        </span>
+                    </div>
+
+                    <div class="engine-tech-row">
+                        <span class="engine-tech-key">Data consegna:</span>
+                        <span class="engine-tech-value">
+                            <c:choose>
+                                <c:when test="${detail.engine.deliveryDate != null}">
+                                    <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateParsed" />
+                                    <fmt:formatDate value="${engineDeliveryDateParsed}" pattern="dd / MM / yyyy" />
+                                </c:when>
+                                <c:otherwise>-</c:otherwise>
+                            </c:choose>
+                        </span>
+                    </div>
+
+                    <div class="engine-tech-row engine-tech-row--notes">
+                        <span class="engine-tech-key">Note:</span>
+                        <span class="engine-tech-value">${detail.engine.notes}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
