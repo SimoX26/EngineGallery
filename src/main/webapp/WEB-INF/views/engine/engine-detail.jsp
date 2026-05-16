@@ -80,7 +80,7 @@
             padding: 0;
             border-radius: 50%;
             border: 1.5px solid rgba(148, 163, 184, 0.35);
-            background: rgba(15, 23, 42, 0.92);
+            background: var(--primary);
             color: #f8fafc;
             display: inline-flex;
             align-items: center;
@@ -92,8 +92,8 @@
 
         .engine-tech-panel .engine-technical-share-btn:hover,
         .engine-tech-panel .engine-technical-share-btn:focus-visible {
-            background: rgba(30, 41, 59, 0.96);
-            border-color: rgba(248, 250, 252, 0.5);
+            background: #374151;
+            border-color: #e5e7eb;
             color: #ffffff;
             transform: scale(1.05);
         }
