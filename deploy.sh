@@ -308,17 +308,38 @@ echo ">> Upload SCP verso: $TARGET"
 
 if [[ "$MODE" == "remoto" ]]; then
   SQL_BASE_PATH="${REMOTE_SQL_PATH:-~}"
-  mapfile -d '' SQL_FILES < <(find src/main/resources -type f -name "*.sql" -print0 | sort -z)
+  SQL_BASE_PATH_SHELL="${SQL_BASE_PATH/#\~/\$HOME}"
+  SQL_ROOT="src/main/resources"
+  DB_SQL_FILE="${SQL_ROOT}/db.sql"
+  MIGRATIONS_DIR="${SQL_ROOT}/migrations"
+  SQL_PATHS=()
 
-  if [[ "${#SQL_FILES[@]}" -gt 0 ]]; then
+  if [[ -f "$DB_SQL_FILE" ]]; then
+    SQL_PATHS+=("$DB_SQL_FILE")
+  fi
+
+  if [[ -d "$MIGRATIONS_DIR" ]]; then
+    while IFS= read -r -d '' migration_file; do
+      SQL_PATHS+=("$migration_file")
+    done < <(find "$MIGRATIONS_DIR" -type f -name "*.sql" -print0 | sort -z)
+  else
+    echo ">> Cartella migrations non trovata: ${MIGRATIONS_DIR} (skip)."
+  fi
+
+  if [[ "${#SQL_PATHS[@]}" -gt 0 ]]; then
     SCP_SQL_CMD=(sshpass -p "$PASSWORD" scp -P "$PORT")
+    SSH_CMD=(sshpass -p "$PASSWORD" ssh -p "$PORT")
 
-    echo ">> Upload script SQL in: ${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}"
-    for sql_file in "${SQL_FILES[@]}"; do
-      "${SCP_SQL_CMD[@]}" "$sql_file" "${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}/"
+    echo ">> Upload file database in: ${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}"
+    for sql_file in "${SQL_PATHS[@]}"; do
+      rel_path="${sql_file#${SQL_ROOT}/}"
+      remote_dir_shell="${SQL_BASE_PATH_SHELL%/}/$(dirname "$rel_path")"
+      remote_target="${SQL_BASE_PATH%/}/${rel_path}"
+      "${SSH_CMD[@]}" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell}"
+      "${SCP_SQL_CMD[@]}" "$sql_file" "${REMOTE_USER}@${REMOTE_HOST}:${remote_target}"
     done
   else
-    echo ">> Nessuno script SQL trovato in src/main/resources."
+    echo ">> Nessun file database trovato (${DB_SQL_FILE} o ${MIGRATIONS_DIR}/*.sql)."
   fi
 fi
 
