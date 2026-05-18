@@ -171,6 +171,7 @@
     const customerNames = Array.from(document.querySelectorAll('#customerOptions option'))
         .map((option) => option.value)
         .filter((name) => name && name.trim().length > 0);
+    let accumulatedSelectedFiles = [];
     const normalizeText = (value) => (value || '')
         .toString()
         .normalize('NFD')
@@ -258,6 +259,7 @@
                     }
                 });
                 input.files = transfer.files;
+                accumulatedSelectedFiles = Array.from(input.files || []);
                 renderSelectedImagesPreview(input, container);
             });
 
@@ -283,6 +285,18 @@
 
     if (imagesInput && imagesPreviewList) {
         imagesInput.addEventListener('change', function () {
+            const pickedFiles = imagesInput.files ? Array.from(imagesInput.files) : [];
+            if (pickedFiles.length > 0) {
+                const byKey = new Map();
+                const toKey = (file) => [file.name, file.size, file.lastModified, file.type].join('::');
+                accumulatedSelectedFiles.forEach((file) => byKey.set(toKey(file), file));
+                pickedFiles.forEach((file) => byKey.set(toKey(file), file));
+
+                const transfer = new DataTransfer();
+                Array.from(byKey.values()).forEach((file) => transfer.items.add(file));
+                imagesInput.files = transfer.files;
+            }
+            accumulatedSelectedFiles = Array.from(imagesInput.files || []);
             renderSelectedImagesPreview(imagesInput, imagesPreviewList);
         });
     }

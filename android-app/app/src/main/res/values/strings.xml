@@ -2,8 +2,8 @@
     <string name="app_name">RML</string>
     <string name="file_picker_title">Seleziona file</string>
     <string name="file_error">Impossibile preparare il file</string>
-    <string name="camera_continue_title">Aggiungere un\'altra foto?</string>
-    <string name="camera_continue_message">La foto è stata salvata. Vuoi scattarne un\'altra?</string>
-    <string name="camera_continue_positive">Scatta altra foto</string>
-    <string name="camera_continue_negative">Fine</string>
+    <string name="camera_session_capture">Scatta foto</string>
+    <string name="camera_session_done">Fatto</string>
+    <string name="camera_session_counter">Foto scattate: %1$d</string>
+    <string name="camera_session_thumbnail_content_desc">Anteprima foto scattata</string>
 </resources>
