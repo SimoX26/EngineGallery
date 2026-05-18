@@ -47,6 +47,7 @@ class CameraSessionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_session)
+        supportActionBar?.title = getString(R.string.camera_session_title)
 
         counterText = findViewById(R.id.cameraSessionCounter)
         thumbnailStrip = findViewById(R.id.cameraSessionThumbnailStrip)

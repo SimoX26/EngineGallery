@@ -78,7 +78,7 @@
                 </div>
                 <div id="iosCameraFlowWrap" class="mt-2 d-none">
                     <button type="button" id="iosCameraFlowOpenBtn" class="btn btn-outline-secondary btn-sm">
-                        Scatta foto (iPhone)
+                        Camera - RML
                     </button>
                 </div>
                 <input type="file"
@@ -222,23 +222,21 @@
 
         modal = document.createElement('div');
         modal.id = 'iosCameraCollectorModal';
-        modal.className = 'd-none position-fixed top-0 start-0 w-100 h-100';
-        modal.style.zIndex = '2100';
-        modal.style.backgroundColor = 'rgba(0,0,0,.45)';
+        modal.className = 'd-none camera-rml-overlay';
         modal.innerHTML = `
-            <div class="d-flex align-items-end justify-content-center h-100 p-3">
-                <div class="bg-white rounded-4 shadow w-100" style="max-width: 560px;">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <strong>Aggiungi foto</strong>
-                        <span id="iosCollectorCount" class="small text-muted">0 foto</span>
+            <div class="camera-rml-sheet-wrap">
+                <div class="camera-rml-sheet card-base">
+                    <div class="camera-rml-sheet-header">
+                        <strong class="camera-rml-title">Camera - RML</strong>
+                        <span id="iosCollectorCount" class="camera-rml-counter">0 foto</span>
                     </div>
-                    <div class="p-3">
+                    <div class="camera-rml-sheet-body">
                         <div id="iosCollectorPreviewList" class="engine-images-edit-list d-none"></div>
                         <p id="iosCollectorEmpty" class="small text-muted mb-0">Nessuna foto scattata in questa sessione.</p>
                     </div>
-                    <div class="p-3 border-top d-flex gap-2">
-                        <button type="button" id="iosCollectorCaptureBtn" class="btn-engine flex-fill">Scatta un'altra foto</button>
-                        <button type="button" id="iosCollectorDoneBtn" class="btn btn-outline-secondary flex-fill">Fatto</button>
+                    <div class="camera-rml-sheet-actions">
+                        <button type="button" id="iosCollectorCaptureBtn" class="btn btn-outline-secondary camera-rml-action-btn">Scatta un'altra foto</button>
+                        <button type="button" id="iosCollectorDoneBtn" class="btn-engine camera-rml-action-btn">Fatto</button>
                     </div>
                 </div>
             </div>
@@ -292,12 +290,14 @@
         iosSessionCapturedFiles = [];
         const modal = ensureIosCameraCollectorModal();
         modal.classList.remove('d-none');
+        document.body.classList.add('modal-open');
         renderIosCollectorPreview();
     }
 
     function closeIosCollector() {
         const modal = ensureIosCameraCollectorModal();
         modal.classList.add('d-none');
+        document.body.classList.remove('modal-open');
     }
 
     function commitIosCollectorToMainInput() {
