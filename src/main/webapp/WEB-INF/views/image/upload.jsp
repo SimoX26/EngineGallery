@@ -76,6 +76,16 @@
                         Seleziona immagini
                     </label>
                 </div>
+                <div id="iosCameraFlowWrap" class="mt-2 d-none">
+                    <button type="button" id="iosCameraFlowOpenBtn" class="btn btn-outline-secondary btn-sm">
+                        Scatta foto (iPhone)
+                    </button>
+                </div>
+                <input type="file"
+                       id="iosCameraCaptureInput"
+                       class="d-none"
+                       accept="image/*"
+                       capture="environment">
                 <div id="imagesPreviewList" class="engine-images-edit-list mt-2 d-none"></div>
             </div>
 
@@ -166,18 +176,141 @@
     const MAX_TOTAL_SIZE = 800 * 1024 * 1024;    // 800 MB
     const imagesInput = document.getElementById('imagesInput');
     const imagesPreviewList = document.getElementById('imagesPreviewList');
+    const iosCameraFlowWrap = document.getElementById('iosCameraFlowWrap');
+    const iosCameraFlowOpenBtn = document.getElementById('iosCameraFlowOpenBtn');
+    const iosCameraCaptureInput = document.getElementById('iosCameraCaptureInput');
     const customerInput = document.getElementById('customerInput');
     const customerSuggestions = document.getElementById('customerSuggestions');
     const customerNames = Array.from(document.querySelectorAll('#customerOptions option'))
         .map((option) => option.value)
         .filter((name) => name && name.trim().length > 0);
     let accumulatedSelectedFiles = [];
+    let iosSessionCapturedFiles = [];
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isStandalonePwa = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    const isIosSafariOrPwa = isIOSDevice && (isStandalonePwa || /Safari/i.test(navigator.userAgent));
     const normalizeText = (value) => (value || '')
         .toString()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .trim();
+    const fileKey = (file) => [file.name, file.size, file.lastModified, file.type].join('::');
+
+    function mergeFilesDedup(baseFiles, newFiles) {
+        const byKey = new Map();
+        baseFiles.forEach((file) => byKey.set(fileKey(file), file));
+        newFiles.forEach((file) => byKey.set(fileKey(file), file));
+        return Array.from(byKey.values());
+    }
+
+    function buildFileList(files) {
+        if (typeof DataTransfer === 'undefined') {
+            return null;
+        }
+        const transfer = new DataTransfer();
+        files.forEach((file) => transfer.items.add(file));
+        return transfer.files;
+    }
+
+    function ensureIosCameraCollectorModal() {
+        let modal = document.getElementById('iosCameraCollectorModal');
+        if (modal) {
+            return modal;
+        }
+
+        modal = document.createElement('div');
+        modal.id = 'iosCameraCollectorModal';
+        modal.className = 'd-none position-fixed top-0 start-0 w-100 h-100';
+        modal.style.zIndex = '2100';
+        modal.style.backgroundColor = 'rgba(0,0,0,.45)';
+        modal.innerHTML = `
+            <div class="d-flex align-items-end justify-content-center h-100 p-3">
+                <div class="bg-white rounded-4 shadow w-100" style="max-width: 560px;">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <strong>Aggiungi foto</strong>
+                        <span id="iosCollectorCount" class="small text-muted">0 foto</span>
+                    </div>
+                    <div class="p-3">
+                        <div id="iosCollectorPreviewList" class="engine-images-edit-list d-none"></div>
+                        <p id="iosCollectorEmpty" class="small text-muted mb-0">Nessuna foto scattata in questa sessione.</p>
+                    </div>
+                    <div class="p-3 border-top d-flex gap-2">
+                        <button type="button" id="iosCollectorCaptureBtn" class="btn-engine flex-fill">Scatta un'altra foto</button>
+                        <button type="button" id="iosCollectorDoneBtn" class="btn btn-outline-secondary flex-fill">Fatto</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    function renderIosCollectorPreview() {
+        const modal = ensureIosCameraCollectorModal();
+        const list = modal.querySelector('#iosCollectorPreviewList');
+        const empty = modal.querySelector('#iosCollectorEmpty');
+        const count = modal.querySelector('#iosCollectorCount');
+        if (!list || !empty || !count) {
+            return;
+        }
+
+        list.innerHTML = '';
+        const files = iosSessionCapturedFiles.filter((file) => file.type && file.type.startsWith('image/'));
+        count.textContent = files.length + (files.length === 1 ? ' foto' : ' foto');
+        if (files.length === 0) {
+            list.classList.add('d-none');
+            empty.classList.remove('d-none');
+            return;
+        }
+
+        empty.classList.add('d-none');
+        files.forEach((file) => {
+            const card = document.createElement('div');
+            card.className = 'engine-image-edit-card';
+
+            const img = document.createElement('img');
+            img.className = 'engine-image-edit-preview';
+            img.alt = file.name;
+            const objectUrl = URL.createObjectURL(file);
+            img.src = objectUrl;
+            img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+
+            const filename = document.createElement('div');
+            filename.className = 'small text-muted mt-1 text-truncate';
+            filename.textContent = file.name;
+
+            card.appendChild(img);
+            card.appendChild(filename);
+            list.appendChild(card);
+        });
+        list.classList.remove('d-none');
+    }
+
+    function openIosCollector() {
+        iosSessionCapturedFiles = [];
+        const modal = ensureIosCameraCollectorModal();
+        modal.classList.remove('d-none');
+        renderIosCollectorPreview();
+    }
+
+    function closeIosCollector() {
+        const modal = ensureIosCameraCollectorModal();
+        modal.classList.add('d-none');
+    }
+
+    function commitIosCollectorToMainInput() {
+        const fromInput = imagesInput && imagesInput.files ? Array.from(imagesInput.files) : [];
+        const merged = mergeFilesDedup(fromInput, iosSessionCapturedFiles);
+        const nextFiles = buildFileList(merged);
+        if (!nextFiles || !imagesInput) {
+            return;
+        }
+        imagesInput.files = nextFiles;
+        accumulatedSelectedFiles = Array.from(imagesInput.files || []);
+        renderSelectedImagesPreview(imagesInput, imagesPreviewList);
+    }
 
     function hideCustomerSuggestions() {
         if (customerSuggestions) {
@@ -287,17 +420,51 @@
         imagesInput.addEventListener('change', function () {
             const pickedFiles = imagesInput.files ? Array.from(imagesInput.files) : [];
             if (pickedFiles.length > 0) {
-                const byKey = new Map();
-                const toKey = (file) => [file.name, file.size, file.lastModified, file.type].join('::');
-                accumulatedSelectedFiles.forEach((file) => byKey.set(toKey(file), file));
-                pickedFiles.forEach((file) => byKey.set(toKey(file), file));
-
-                const transfer = new DataTransfer();
-                Array.from(byKey.values()).forEach((file) => transfer.items.add(file));
-                imagesInput.files = transfer.files;
+                const merged = mergeFilesDedup(accumulatedSelectedFiles, pickedFiles);
+                const mergedFiles = buildFileList(merged);
+                if (mergedFiles) {
+                    imagesInput.files = mergedFiles;
+                }
             }
             accumulatedSelectedFiles = Array.from(imagesInput.files || []);
             renderSelectedImagesPreview(imagesInput, imagesPreviewList);
+        });
+    }
+
+    if (isIosSafariOrPwa && iosCameraFlowWrap && iosCameraFlowOpenBtn && iosCameraCaptureInput && imagesInput) {
+        iosCameraFlowWrap.classList.remove('d-none');
+
+        iosCameraFlowOpenBtn.addEventListener('click', function () {
+            openIosCollector();
+        });
+
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('iosCameraCollectorModal');
+            if (!modal || modal.classList.contains('d-none')) {
+                return;
+            }
+
+            const captureBtn = event.target.closest('#iosCollectorCaptureBtn');
+            if (captureBtn) {
+                iosCameraCaptureInput.click();
+                return;
+            }
+
+            const doneBtn = event.target.closest('#iosCollectorDoneBtn');
+            if (doneBtn) {
+                commitIosCollectorToMainInput();
+                closeIosCollector();
+            }
+        });
+
+        iosCameraCaptureInput.addEventListener('change', function () {
+            const files = iosCameraCaptureInput.files ? Array.from(iosCameraCaptureInput.files) : [];
+            const onlyImages = files.filter((file) => file.type && file.type.startsWith('image/'));
+            if (onlyImages.length > 0) {
+                iosSessionCapturedFiles = mergeFilesDedup(iosSessionCapturedFiles, onlyImages);
+                renderIosCollectorPreview();
+            }
+            iosCameraCaptureInput.value = '';
         });
     }
 
