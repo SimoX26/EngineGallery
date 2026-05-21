@@ -1,8 +1,11 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WarehouseController;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
@@ -28,11 +31,13 @@ import java.util.List;
 public class WarehouseCreateServlet extends HttpServlet {
 
     private WarehouseController warehouseController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.warehouseController = initializer.getWarehouseController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -58,6 +63,13 @@ public class WarehouseCreateServlet extends HttpServlet {
             Integer quantity = parseQuantity(quantityParam);
             Long id = warehouseController.createItem(name, sku, quantity, location, notes);
             applyImageAdditions(request, id);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.CREATE,
+                    UserActivityEntityType.WAREHOUSE_ITEM,
+                    String.valueOf(id),
+                    "aggiunta articolo magazzino " + safeTrim(name)
+            );
             PostSubmitNavigationGuard.blockFormPageOnce(
                     request,
                     "/warehouse/new",

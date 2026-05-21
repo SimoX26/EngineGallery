@@ -1,7 +1,10 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.EngineController;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.util.bean.EngineDetailBean;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -13,11 +16,13 @@ import java.io.IOException;
 public class EngineDeleteServlet extends HttpServlet {
 
     private EngineController engineController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -64,6 +69,13 @@ public class EngineDeleteServlet extends HttpServlet {
 
         try {
             engineController.deleteEngine(engineRef);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.DELETE,
+                    UserActivityEntityType.MOTOR,
+                    engineRef,
+                    "eliminazione motore " + engineRef
+            );
             response.sendRedirect(request.getContextPath() + "/engine/list");
         } catch (IllegalStateException e) {
             // Motore non trovato

@@ -2,8 +2,11 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WarehouseController;
 import it.SimoSW.model.WarehouseItem;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
@@ -32,11 +35,13 @@ import java.util.Set;
 public class WarehouseEditServlet extends HttpServlet {
 
     private WarehouseController warehouseController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.warehouseController = initializer.getWarehouseController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -89,6 +94,13 @@ public class WarehouseEditServlet extends HttpServlet {
             warehouseController.updateItem(itemId, name, sku, quantity, location, notes);
             applyImageDeletions(request, itemId);
             applyImageAdditions(request, itemId);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.UPDATE,
+                    UserActivityEntityType.WAREHOUSE_ITEM,
+                    String.valueOf(itemId),
+                    "modifica articolo magazzino " + safeTrim(name)
+            );
             String formPath = "/warehouse/edit?id=" + itemId;
             String fallbackPath = "/warehouse/detail?id=" + itemId + "&updated=1&lockBack=1&navHome=1";
             PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);

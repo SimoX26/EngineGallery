@@ -1,7 +1,10 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.HydraulicTestController;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.util.UploadPathResolver;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
@@ -34,12 +37,14 @@ public class HydraulicTestCreateServlet extends HttpServlet {
     private static final long MIN_COMPRESSIBLE_BYTES = 1024L * 1024L; // 1MB
 
     private HydraulicTestController hydraulicTestController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer =
                 (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.hydraulicTestController = initializer.getHydraulicTestController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -152,6 +157,13 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     finalFilename,
                     testDate,
                     notes
+            );
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.CREATE,
+                    UserActivityEntityType.HYDRAULIC_TEST,
+                    null,
+                    "aggiunta prova idraulica " + engineCode
             );
             PostSubmitNavigationGuard.blockFormPageOnce(
                     request,

@@ -9,6 +9,9 @@ import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -36,12 +39,14 @@ public class EngineEditServlet extends HttpServlet {
 
     private EngineController engineController;
     private CustomerController customerController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
         this.customerController = initializer.getCustomerController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -147,6 +152,7 @@ public class EngineEditServlet extends HttpServlet {
         }
 
         try {
+            Long existingCustomerId = customerController.findCustomerIdByName(customerName);
             Long customerId = customerController.findOrCreateCustomerId(customerName);
 
             EngineBean bean = new EngineBean();
@@ -161,6 +167,22 @@ public class EngineEditServlet extends HttpServlet {
             engineController.updateEngine(bean);
             applyImageDeletions(request, engineRef);
             applyImageAdditions(request, engineRef);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.UPDATE,
+                    UserActivityEntityType.MOTOR,
+                    engineRef,
+                    "modifica motore " + engineRef
+            );
+            if (existingCustomerId == null) {
+                activityAuditLogger.logFromRequest(
+                        request,
+                        UserActivityActionType.CREATE,
+                        UserActivityEntityType.CUSTOMER,
+                        String.valueOf(customerId),
+                        "aggiunta cliente " + customerName
+                );
+            }
             String formPath = "/engine/edit?ref=" + engineRef;
             String fallbackPath = "/engine/detail?ref=" + engineRef + "&updated=1&lockBack=1&navHome=1";
             PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);

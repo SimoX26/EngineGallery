@@ -2,6 +2,9 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.model.Customer;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -16,12 +19,14 @@ import java.util.Optional;
 public class CustomerDeleteServlet extends HttpServlet {
 
     private CustomerController customerController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer =
                 (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.customerController = initializer.getCustomerController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -59,7 +64,15 @@ public class CustomerDeleteServlet extends HttpServlet {
         }
 
         try {
+            String customerName = customerController.findById(customerId).map(Customer::getName).orElse("ID " + customerId);
             customerController.deleteCustomer(customerId);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.DELETE,
+                    UserActivityEntityType.CUSTOMER,
+                    String.valueOf(customerId),
+                    "eliminazione cliente " + customerName
+            );
             response.sendRedirect(request.getContextPath() + "/customer/list");
         } catch (IllegalStateException ex) {
             response.sendRedirect(request.getContextPath() + "/customer/detail?id=" + customerId + "&deletedError=1");

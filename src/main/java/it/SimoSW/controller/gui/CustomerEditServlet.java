@@ -2,6 +2,9 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.model.Customer;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 
@@ -17,12 +20,14 @@ import java.util.Optional;
 public class CustomerEditServlet extends HttpServlet {
 
     private CustomerController customerController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer =
                 (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.customerController = initializer.getCustomerController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -70,6 +75,13 @@ public class CustomerEditServlet extends HttpServlet {
 
         try {
             customerController.updateCustomer(customerId, name, companyName, phone, email, notes);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.UPDATE,
+                    UserActivityEntityType.CUSTOMER,
+                    String.valueOf(customerId),
+                    "modifica cliente " + safeTrim(name)
+            );
             String formPath = "/customer/edit?id=" + customerId;
             String fallbackPath = "/customer/detail?id=" + customerId + "&updated=1&lockBack=1&navHome=1";
             PostSubmitNavigationGuard.blockFormPageOnce(request, formPath, fallbackPath);

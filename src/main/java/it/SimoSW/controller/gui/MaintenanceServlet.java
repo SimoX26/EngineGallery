@@ -1,7 +1,10 @@
 package it.SimoSW.controller.gui;
 
+import it.SimoSW.controller.app.UserActivityLogController;
 import it.SimoSW.model.User;
+import it.SimoSW.model.UserActivityLog;
 import it.SimoSW.model.UserRole;
+import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,6 +16,13 @@ import java.io.IOException;
 
 @WebServlet("/maintenance")
 public class MaintenanceServlet extends HttpServlet {
+    private UserActivityLogController userActivityLogController;
+
+    @Override
+    public void init() {
+        ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
+        this.userActivityLogController = initializer.getUserActivityLogController();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -25,7 +35,8 @@ public class MaintenanceServlet extends HttpServlet {
             return;
         }
 
+        java.util.List<UserActivityLog> recentLogs = userActivityLogController.getRecentLogs(100);
+        request.setAttribute("recentActivityLogs", recentLogs);
         request.getRequestDispatcher("/WEB-INF/views/maintenance/maintenance.jsp").forward(request, response);
     }
 }
-

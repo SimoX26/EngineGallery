@@ -8,6 +8,9 @@ import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.ImageOptimizationUtil;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -37,12 +40,14 @@ public class UploadServlet extends HttpServlet {
     private static final String SESSION_PENDING_NEW_ENGINE_REF = "pendingNewEngineRef";
     private EngineController engineController;
     private CustomerController customerController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
         this.customerController = initializer.getCustomerController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     /**
@@ -241,6 +246,7 @@ public class UploadServlet extends HttpServlet {
 
         // 5a. Se nuovo motore → creazione
         if ("new".equals(engineMode)) {
+            Long existingCustomerId = customerController.findCustomerIdByName(cliente);
 
             EngineBean engineBean = new EngineBean();
             engineBean.setEngineRef(engineRef);
@@ -262,6 +268,23 @@ public class UploadServlet extends HttpServlet {
                 engineRef = retryRef;
             }
             session.removeAttribute(SESSION_PENDING_NEW_ENGINE_REF);
+
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.CREATE,
+                    UserActivityEntityType.MOTOR,
+                    engineRef,
+                    "aggiunta motore " + engineRef
+            );
+            if (existingCustomerId == null) {
+                activityAuditLogger.logFromRequest(
+                        request,
+                        UserActivityActionType.CREATE,
+                        UserActivityEntityType.CUSTOMER,
+                        String.valueOf(customerId),
+                        "aggiunta cliente " + cliente
+                );
+            }
         }
 
         // 5b. Immagini (opzionali per nuovo motore)

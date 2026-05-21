@@ -4,7 +4,10 @@ import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
+import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
+import it.SimoSW.model.UserActivityActionType;
+import it.SimoSW.model.UserActivityEntityType;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,11 +21,13 @@ import java.time.LocalDate;
 public class EngineDetailServlet extends HttpServlet {
 
     private EngineController engineController;
+    private UserActivityAuditLogger activityAuditLogger;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.engineController = initializer.getEngineController();
+        this.activityAuditLogger = new UserActivityAuditLogger(initializer.getUserActivityLogController());
     }
 
     @Override
@@ -144,6 +149,13 @@ public class EngineDetailServlet extends HttpServlet {
             }
 
             engineController.updateEngine(updateBean);
+            activityAuditLogger.logFromRequest(
+                    request,
+                    UserActivityActionType.STATUS_CHANGE,
+                    UserActivityEntityType.MOTOR,
+                    engineRef,
+                    "cambio rapido stato motore " + engineRef + " -> " + newStatus.name()
+            );
 
             if (backToList) {
                 response.sendRedirect(request.getContextPath() + "/engine/list?statusUpdated=1");
