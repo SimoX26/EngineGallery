@@ -42,12 +42,20 @@
 
         .engine-detail-top-actions {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 0.4rem;
         }
 
-        .engine-detail-mobile-back-btn {
+        .engine-detail-top-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .engine-detail-round-btn {
             width: 44px;
             height: 44px;
             margin: 0;
@@ -64,22 +72,58 @@
             flex: 0 0 auto;
         }
 
-        .engine-detail-mobile-back-btn:hover,
-        .engine-detail-mobile-back-btn:focus-visible {
+        .engine-detail-round-btn:hover,
+        .engine-detail-round-btn:focus-visible {
             background: #374151;
             border-color: #e5e7eb;
             color: #ffffff;
             transform: scale(1.05);
         }
 
-        .engine-detail-mobile-back-btn:active {
+        .engine-detail-round-btn:active {
             transform: scale(0.95);
         }
 
-        .engine-detail-mobile-back-btn svg {
+        .engine-detail-round-btn svg {
             display: block;
             width: 18px;
             height: 18px;
+        }
+
+        .engine-detail-round-btn--delete {
+            background: #b91c1c;
+            border-color: #ef4444;
+        }
+
+        .engine-detail-round-btn--delete:hover,
+        .engine-detail-round-btn--delete:focus-visible {
+            background: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .engine-detail-round-btn--share {
+            background: #15803d;
+            border-color: #22c55e;
+        }
+
+        .engine-detail-round-btn--share:hover,
+        .engine-detail-round-btn--share:focus-visible {
+            background: #166534;
+            border-color: #86efac;
+        }
+
+        .engine-detail-desktop-share-btn {
+            background: #15803d;
+            border: 1px solid #22c55e;
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .engine-detail-desktop-share-btn:hover,
+        .engine-detail-desktop-share-btn:focus-visible {
+            background: #166534;
+            border-color: #86efac;
+            color: #ffffff;
         }
 
         .engine-detail-media-panel {
@@ -183,7 +227,6 @@
             }
 
             .engine-detail-top-actions {
-                justify-content: space-between;
                 margin-bottom: 0.6rem;
             }
 
@@ -203,7 +246,7 @@
                 height: 40px;
             }
 
-            .engine-detail-mobile-back-btn {
+            .engine-detail-round-btn {
                 width: 40px;
                 height: 40px;
             }
@@ -213,9 +256,19 @@
                 height: 17px;
             }
 
-            .engine-detail-mobile-back-btn svg {
+            .engine-detail-round-btn svg {
                 width: 17px;
                 height: 17px;
+            }
+
+            .detail-actions {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .engine-detail-top-actions {
+                display: none;
             }
         }
     </style>
@@ -243,39 +296,53 @@
     </c:if>
     <div class="row engine-detail-layout card-base">
         <div class="col-12 engine-detail-top-actions">
-            <button
-                    id="engineDetailMobileBackBtn"
-                    type="button"
-                    class="share-icon-btn engine-detail-mobile-back-btn d-inline-flex d-md-none"
-                    aria-label="Torna indietro"
-                    title="Torna indietro">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-            </button>
-            <c:set var="engineDeliveryDateShare" value="" />
-            <c:if test="${detail.engine.deliveryDate != null}">
-                <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
-                <fmt:formatDate value="${engineDeliveryDateShareParsed}" pattern="dd/MM/yyyy" var="engineDeliveryDateShare" />
-            </c:if>
-            <button
-                    id="engineTechnicalShareBtn"
-                    type="button"
-                    class="share-icon-btn engine-technical-share-btn js-engine-share-btn"
-                    aria-label="Condividi scheda tecnica"
-                    title="Condividi scheda tecnica"
-                    data-share-mode="all-motor-images"
-                    data-share-source="#engineDetailGallery"
-                    data-image-selector=".clickable-image"
-                    >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
-                    <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
-                    <circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
-                </svg>
-            </button>
+            <div class="engine-detail-top-toolbar">
+                <button
+                        id="engineDetailMobileBackBtn"
+                        type="button"
+                        class="share-icon-btn engine-detail-round-btn"
+                        aria-label="Torna indietro"
+                        title="Torna indietro">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}"
+                   class="share-icon-btn engine-detail-round-btn"
+                   aria-label="Modifica motore"
+                   title="Modifica motore">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 20l4.2-1 9.8-9.8-3.2-3.2L5 15.8 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                        <path d="M13.8 6.2l3.2 3.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                    </svg>
+                </a>
+                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}"
+                   class="share-icon-btn engine-detail-round-btn engine-detail-round-btn--delete"
+                   aria-label="Elimina motore"
+                   title="Elimina motore">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 7h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        <path d="M9 7V5h6v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        <path d="M8 7l1 12h6l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                    </svg>
+                </a>
+                <button
+                        type="button"
+                        class="share-icon-btn engine-detail-round-btn engine-detail-round-btn--share js-engine-share-btn"
+                        aria-label="Condividi scheda tecnica"
+                        title="Condividi scheda tecnica"
+                        data-share-mode="all-motor-images"
+                        data-share-source="#engineDetailGallery"
+                        data-image-selector=".clickable-image">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                        <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                        <circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <div class="col-lg-5">
@@ -404,6 +471,16 @@
                 <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}" class="btn btn-detail-delete px-4">
                     Elimina
                 </a>
+                <button
+                        type="button"
+                        class="btn px-4 engine-detail-desktop-share-btn js-engine-share-btn"
+                        aria-label="Condividi scheda tecnica"
+                        title="Condividi scheda tecnica"
+                        data-share-mode="all-motor-images"
+                        data-share-source="#engineDetailGallery"
+                        data-image-selector=".clickable-image">
+                    Condividi
+                </button>
             </div>
         </div>
 
