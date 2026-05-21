@@ -24,13 +24,8 @@
 <div class="container">
 
     <div class="page-header-with-search">
-        <div class="page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div>
-                <h1>Magazzino</h1>
-            </div>
-            <a href="<%= request.getContextPath() %>/warehouse/new" class="btn-engine">
-                Aggiungi articolo
-            </a>
+        <div class="page-header">
+            <h1>Magazzino</h1>
         </div>
 
         <div class="card-base search-panel-compact">
@@ -42,6 +37,12 @@
             <div id="warehouseKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                 Nessun articolo corrisponde alla ricerca.
             </div>
+        </div>
+
+        <div class="page-header-actions">
+            <a href="<%= request.getContextPath() %>/warehouse/new" class="btn-engine">
+                Aggiungi articolo
+            </a>
         </div>
     </div>
 

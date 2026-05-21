@@ -27,11 +27,8 @@
     <div class="container">
 
         <div class="page-header-with-search">
-            <div class="page-header d-flex align-items-center justify-content-between gap-2 flex-wrap">
-                <h1 class="mb-0">Prove idrauliche</h1>
-                <a class="btn-engine" href="<%= request.getContextPath() %>/hydraulic-test/new">
-                    Aggiungi prova idraulica
-                </a>
+            <div class="page-header">
+                <h1>Prove idrauliche</h1>
             </div>
 
             <div class="card-base search-panel-compact">
@@ -44,6 +41,12 @@
                 <div id="hydraulicKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                     Nessuna prova idraulica corrisponde alla ricerca.
                 </div>
+            </div>
+
+            <div class="page-header-actions">
+                <a class="btn-engine" href="<%= request.getContextPath() %>/hydraulic-test/new">
+                    Aggiungi prova idraulica
+                </a>
             </div>
         </div>
 

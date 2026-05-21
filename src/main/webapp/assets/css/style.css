@@ -193,22 +193,38 @@ body:not(.login-page) {
     margin: 0;
 }
 
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 @media (min-width: 992px) {
     .page-header-with-search {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(220px, auto) minmax(380px, 1fr) auto;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
     }
 
     .page-header-with-search .page-header {
-        flex: 1 1 auto;
+        grid-column: 1;
+        flex: initial;
         min-width: 0;
     }
 
     .page-header-with-search .search-panel-compact {
-        flex: 0 0 min(460px, 42%);
-        width: min(460px, 42%);
+        grid-column: 2;
+        width: 100%;
+        max-width: 760px;
+        justify-self: center;
+    }
+
+    .page-header-with-search .page-header-actions {
+        grid-column: 3;
+        justify-self: end;
+        flex-wrap: wrap;
     }
 
     .page-header-with-search .page-header h1 {
@@ -219,6 +235,11 @@ body:not(.login-page) {
 @media (max-width: 991.98px) {
     .page-header-with-search .search-panel-compact {
         margin-top: 1rem;
+    }
+
+    .page-header-with-search .page-header-actions {
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
     }
 }
 
@@ -753,9 +774,9 @@ body:not(.login-page) {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 92px;
-    max-height: 92px;
-    padding: 10px;
+    min-height: 102px;
+    max-height: 102px;
+    padding: 12px 10px;
 }
 
 .engine-kanban-card:hover,
@@ -766,12 +787,12 @@ body:not(.login-page) {
 
 .engine-kanban-card .engine-image,
 .engine-kanban-card .engine-image-empty {
-    width: 64px;
-    height: 64px;
-    min-width: 64px;
-    max-width: 64px;
-    min-height: 64px;
-    max-height: 64px;
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    min-height: 70px;
+    max-height: 70px;
     aspect-ratio: 1 / 1;
     border-radius: 8px;
     border: 1px solid var(--border-soft);

@@ -25,9 +25,6 @@
 
 <body>
 
-<!-- FAB -->
-<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
-
 <div class="engine-gallery-page">
 
     <!-- NAVBAR -->
@@ -44,21 +41,13 @@
                 <form method="get" action="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}" class="mb-0">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                         <label for="engineKeywordSearch" class="form-label fw-semibold mb-0">Ricerca per parola chiave</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <c:if test="${not archiveMode}">
-                                <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
-                                    <button type="button" id="engineViewListBtn" class="btn btn-outline-secondary active">Lista</button>
-                                    <button type="button" id="engineViewKanbanBtn" class="btn btn-outline-secondary">Kanban</button>
-                                </div>
-                            </c:if>
-                            <button class="btn btn-outline-secondary btn-sm"
-                                    type="button"
-                                    aria-expanded="false"
-                                    aria-controls="engineFiltersPanel"
-                                    id="engineFiltersToggle">
-                                Filtri
-                            </button>
-                        </div>
+                        <button class="btn btn-outline-secondary btn-sm"
+                                type="button"
+                                aria-expanded="false"
+                                aria-controls="engineFiltersPanel"
+                                id="engineFiltersToggle">
+                            Filtri
+                        </button>
                     </div>
                     <input type="search"
                            id="engineKeywordSearch"
@@ -101,6 +90,16 @@
                         </div>
                     </div>
                 </form>
+            </div>
+
+            <div class="page-header-actions">
+                <c:if test="${not archiveMode}">
+                    <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
+                        <button type="button" id="engineViewListBtn" class="btn btn-outline-secondary active">Lista</button>
+                        <button type="button" id="engineViewKanbanBtn" class="btn btn-outline-secondary">Kanban</button>
+                    </div>
+                    <a href="<%= request.getContextPath() %>/upload" class="btn btn-engine btn-sm">Aggiungi motore</a>
+                </c:if>
             </div>
         </div>
 
