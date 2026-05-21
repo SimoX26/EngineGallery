@@ -37,16 +37,6 @@
                 <h1><c:out value="${pageTitle}" /></h1>
             </div>
 
-            <div class="page-header-filter">
-                <button class="btn btn-outline-secondary btn-sm"
-                        type="button"
-                        aria-expanded="false"
-                        aria-controls="engineFiltersPanel"
-                        id="engineFiltersToggle">
-                    Filtri
-                </button>
-            </div>
-
             <form method="get" action="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}" class="mb-0 search-panel-compact">
                 <label for="engineKeywordSearch" class="form-label fw-semibold mb-0">Ricerca per parola chiave</label>
                 <input type="search"
@@ -90,6 +80,16 @@
                     </div>
                 </div>
             </form>
+
+            <div class="page-header-filter">
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="engineFiltersPanel"
+                        id="engineFiltersToggle">
+                    Filtri
+                </button>
+            </div>
 
             <div class="page-header-actions">
                 <c:if test="${not archiveMode}">
@@ -219,9 +219,7 @@
                                     <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
                                     <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
                                 </div>
-                                <div class="small text-muted mt-1 quick-status-feedback" data-quick-status-feedback aria-live="polite">
-                                    Modifica rapida: seleziona uno stato per salvare subito.
-                                </div>
+                                <div class="small text-muted mt-1 quick-status-feedback d-none" data-quick-status-feedback aria-live="polite"></div>
                             </form>
                         </div>
                     </div>
@@ -451,6 +449,13 @@
             const statusValueInput = form.querySelector('[data-quick-status-value]');
             const feedback = form.querySelector('[data-quick-status-feedback]');
             const statusOptions = form.querySelectorAll('[data-quick-status-option]');
+            const showFeedback = (message) => {
+                if (!feedback) {
+                    return;
+                }
+                feedback.textContent = message;
+                feedback.classList.remove('d-none');
+            };
 
             statusOptions.forEach((optionButton) => {
                 optionButton.addEventListener('click', () => {
@@ -466,9 +471,7 @@
                     }
 
                     if (selectedStatus === currentStatus) {
-                        if (feedback) {
-                            feedback.textContent = 'Stato gia selezionato.';
-                        }
+                        showFeedback('Stato gia selezionato.');
                         closeQuickStatusForm(form);
                         return;
                     }
@@ -477,9 +480,7 @@
                         statusValueInput.value = selectedStatus;
                     }
                     form.dataset.submitting = '1';
-                    if (feedback) {
-                        feedback.textContent = 'Salvataggio in corso...';
-                    }
+                    showFeedback('Salvataggio in corso...');
                     statusOptions.forEach((button) => {
                         button.disabled = true;
                     });

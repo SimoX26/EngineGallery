@@ -4,7 +4,8 @@
 :root {
     --bg-main: #f5f6f7;
     --bg-dark: #1f2933;
-    --bg-card: #ffffff;
+    --surface-bg: #ffffff;
+    --bg-card: var(--surface-bg);
 
     --primary: #1f2933;
     --primary-hover: #1f2933;
@@ -28,7 +29,8 @@
 [data-theme="dark"] {
     --bg-main: #16202a;
     --bg-dark: #131c25;
-    --bg-card: #22303d;
+    --surface-bg: #1f2933;
+    --bg-card: var(--surface-bg);
     --primary: #1f2933;
     --primary-hover: #374151;
     --text-main: #e6ebf1;

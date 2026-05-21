@@ -241,9 +241,7 @@
                                     <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
                                     <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
                                 </div>
-                                <div class="small text-muted mt-1 quick-status-feedback" data-quick-status-feedback aria-live="polite">
-                                    Modifica rapida: seleziona uno stato per salvare subito.
-                                </div>
+                                <div class="small text-muted mt-1 quick-status-feedback d-none" data-quick-status-feedback aria-live="polite"></div>
                             </form>
                         </span>
                     </div>
@@ -345,6 +343,13 @@
         const statusValueInput = quickStatusForm.querySelector('[data-quick-status-value]');
         const feedback = quickStatusForm.querySelector('[data-quick-status-feedback]');
         const statusOptions = quickStatusForm.querySelectorAll('[data-quick-status-option]');
+        const showFeedback = (message) => {
+            if (!feedback) {
+                return;
+            }
+            feedback.textContent = message;
+            feedback.classList.remove('d-none');
+        };
 
         const closeQuickStatusForm = () => {
             quickStatusForm.classList.add('d-none');
@@ -379,9 +384,7 @@
                 }
 
                 if (selectedStatus === currentStatus) {
-                    if (feedback) {
-                        feedback.textContent = 'Stato gia selezionato.';
-                    }
+                    showFeedback('Stato gia selezionato.');
                     closeQuickStatusForm();
                     return;
                 }
@@ -390,9 +393,7 @@
                     statusValueInput.value = selectedStatus;
                 }
                 quickStatusForm.dataset.submitting = '1';
-                if (feedback) {
-                    feedback.textContent = 'Salvataggio in corso...';
-                }
+                showFeedback('Salvataggio in corso...');
                 statusOptions.forEach((button) => {
                     button.disabled = true;
                 });
