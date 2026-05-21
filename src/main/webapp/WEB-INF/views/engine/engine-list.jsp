@@ -636,12 +636,26 @@
             let sourceStatus = '';
             let isUpdating = false;
             let dragMoved = false;
+            let suppressNextCardClick = false;
+            const touchDragThreshold = 12;
+            let pointerSession = null;
 
             const clearDragVisuals = () => {
                 kanbanColumns.forEach((col) => col.classList.remove('engine-kanban-col__body--drag-over'));
                 if (draggedCard) {
                     draggedCard.classList.remove('engine-kanban-card--dragging');
+                    draggedCard.classList.remove('engine-kanban-card--touch-dragging');
+                    draggedCard.style.removeProperty('--kanban-drag-left');
+                    draggedCard.style.removeProperty('--kanban-drag-top');
+                    draggedCard.style.removeProperty('--kanban-drag-width');
                 }
+            };
+
+            const canUseTouchPointerDrag = () => window.matchMedia('(max-width: 991.98px)').matches;
+
+            const findKanbanColumnFromPoint = (clientX, clientY) => {
+                const node = document.elementFromPoint(clientX, clientY);
+                return node ? node.closest('.engine-kanban-col__body[data-kanban-status]') : null;
             };
 
             kanbanCards.forEach((card) => {
@@ -674,11 +688,128 @@
                 });
 
                 card.addEventListener('click', (event) => {
-                    if (dragMoved) {
+                    if (dragMoved || suppressNextCardClick) {
                         event.preventDefault();
                         event.stopPropagation();
                         dragMoved = false;
+                        suppressNextCardClick = false;
                     }
+                });
+
+                card.addEventListener('pointerdown', (event) => {
+                    if (!canUseTouchPointerDrag() || isUpdating) {
+                        return;
+                    }
+                    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') {
+                        return;
+                    }
+                    if (event.button !== 0) {
+                        return;
+                    }
+                    pointerSession = {
+                        card,
+                        pointerId: event.pointerId,
+                        startX: event.clientX,
+                        startY: event.clientY,
+                        dragging: false,
+                        sourceColumn: card.closest('.engine-kanban-col__body'),
+                        sourceStatus: card.dataset.currentStatus || '',
+                        currentColumn: null
+                    };
+                });
+
+                card.addEventListener('pointermove', (event) => {
+                    if (!pointerSession || pointerSession.pointerId !== event.pointerId || isUpdating) {
+                        return;
+                    }
+                    const dx = event.clientX - pointerSession.startX;
+                    const dy = event.clientY - pointerSession.startY;
+
+                    if (!pointerSession.dragging) {
+                        const distance = Math.hypot(dx, dy);
+                        if (distance < touchDragThreshold) {
+                            return;
+                        }
+                        if (Math.abs(dx) < Math.abs(dy)) {
+                            pointerSession = null;
+                            return;
+                        }
+                        pointerSession.dragging = true;
+                        draggedCard = pointerSession.card;
+                        sourceColumn = pointerSession.sourceColumn;
+                        sourceStatus = pointerSession.sourceStatus;
+                        dragMoved = true;
+                        suppressNextCardClick = true;
+                        pointerSession.card.setPointerCapture(event.pointerId);
+                        pointerSession.card.classList.add('engine-kanban-card--touch-dragging');
+                        pointerSession.card.classList.add('engine-kanban-card--dragging');
+                        pointerSession.card.style.setProperty('--kanban-drag-width', `${pointerSession.card.offsetWidth}px`);
+                    }
+
+                    event.preventDefault();
+                    pointerSession.card.style.setProperty('--kanban-drag-left', `${event.clientX - pointerSession.card.offsetWidth / 2}px`);
+                    pointerSession.card.style.setProperty('--kanban-drag-top', `${event.clientY - 42}px`);
+
+                    kanbanColumns.forEach((col) => col.classList.remove('engine-kanban-col__body--drag-over'));
+                    const targetColumn = findKanbanColumnFromPoint(event.clientX, event.clientY);
+                    if (targetColumn) {
+                        targetColumn.classList.add('engine-kanban-col__body--drag-over');
+                    }
+                    pointerSession.currentColumn = targetColumn;
+                });
+
+                const finishPointerSession = async (event, cancelled) => {
+                    if (!pointerSession || pointerSession.pointerId !== event.pointerId) {
+                        return;
+                    }
+                    const session = pointerSession;
+                    pointerSession = null;
+
+                    if (!session.dragging) {
+                        return;
+                    }
+
+                    if (session.card.hasPointerCapture(event.pointerId)) {
+                        session.card.releasePointerCapture(event.pointerId);
+                    }
+
+                    clearDragVisuals();
+                    const destinationColumn = cancelled ? null : session.currentColumn;
+                    const destinationStatus = destinationColumn ? (destinationColumn.dataset.kanbanStatus || '') : '';
+                    const engineRef = session.card.dataset.engineRef || '';
+
+                    if (!engineRef || !destinationStatus || destinationStatus === session.sourceStatus) {
+                        return;
+                    }
+
+                    isUpdating = true;
+                    const previousColumn = session.sourceColumn;
+                    const previousStatus = session.sourceStatus;
+                    destinationColumn.appendChild(session.card);
+                    session.card.dataset.currentStatus = destinationStatus;
+                    updateKanbanCardBadge(session.card, destinationStatus);
+
+                    try {
+                        await postQuickStatusUpdate(engineRef, destinationStatus);
+                    } catch (error) {
+                        previousColumn.appendChild(session.card);
+                        session.card.dataset.currentStatus = previousStatus;
+                        updateKanbanCardBadge(session.card, previousStatus);
+                        alert("Errore durante l'aggiornamento rapido dello stato");
+                    } finally {
+                        isUpdating = false;
+                        draggedCard = null;
+                        sourceColumn = null;
+                        sourceStatus = '';
+                    }
+                };
+
+                card.addEventListener('pointerup', (event) => {
+                    finishPointerSession(event, false);
+                });
+
+                card.addEventListener('pointercancel', (event) => {
+                    finishPointerSession(event, true);
                 });
             });
 
