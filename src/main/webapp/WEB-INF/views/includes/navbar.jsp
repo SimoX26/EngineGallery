@@ -20,7 +20,7 @@
 </style>
 
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top"
-     style="background-color: #1f2933; position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 3000;">
+     style="background-color: var(--bg-dark); position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 3000;">
     <div class="container-fluid">
 
         <!-- BRAND -->

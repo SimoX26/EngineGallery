@@ -133,22 +133,22 @@
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--back {
-            color: var(--text-main);
-            background-color: var(--bg-card);
-            border-color: var(--border-soft);
+            color: #ffffff;
+            background-color: var(--bg-dark);
+            border-color: var(--bg-dark);
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--back:hover,
         .engine-detail-action-btn.engine-detail-action-btn--back:focus-visible {
-            color: var(--text-main);
-            background-color: var(--input-bg-focus);
-            border-color: var(--border-soft);
+            color: #ffffff;
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--edit {
             color: #ffffff;
-            background-color: var(--primary);
-            border-color: var(--primary);
+            background-color: var(--bg-dark);
+            border-color: var(--bg-dark);
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--edit:hover,
@@ -159,16 +159,16 @@
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--delete {
-            color: var(--action-danger-outline-text);
-            background-color: var(--action-danger-outline-bg);
+            color: var(--action-danger-text);
+            background-color: var(--action-danger-bg);
             border-color: var(--action-danger-border);
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--delete:hover,
         .engine-detail-action-btn.engine-detail-action-btn--delete:focus-visible {
-            color: var(--action-danger-outline-text-hover);
-            background-color: var(--action-danger-outline-bg-hover);
-            border-color: var(--action-danger-outline-border-hover);
+            color: var(--action-danger-text);
+            background-color: var(--action-danger-hover);
+            border-color: var(--action-danger-border-hover);
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--share {
@@ -499,7 +499,8 @@
                                             background-repeat: no-repeat;
                                             background-position: center;
                                             background-size: contain;
-                                            background-color: #1f2933;">
+                                            background-color: transparent;
+                                            border: none;">
                                 </div>
                             </div>
                         </c:forEach>
