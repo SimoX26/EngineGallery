@@ -1,13 +1,6 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.DashboardController;
-import it.SimoSW.controller.app.CustomerController;
-import it.SimoSW.controller.app.EngineController;
-import it.SimoSW.controller.app.HydraulicTestController;
-import it.SimoSW.model.Engine;
-import it.SimoSW.model.EngineStatus;
-import it.SimoSW.model.HydraulicTest;
-import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.model.User;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
@@ -22,26 +15,17 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 @WebServlet("/dashboard")
 public class DashboardServlet extends HttpServlet {
 
     private DashboardController dashboardController;
-    private EngineController engineController;
-    private CustomerController customerController;
-    private HydraulicTestController hydraulicTestController;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.dashboardController = initializer.getDashboardController();
-        this.engineController = initializer.getEngineController();
-        this.customerController = initializer.getCustomerController();
-        this.hydraulicTestController = initializer.getHydraulicTestController();
     }
 
     @Override
@@ -72,68 +56,14 @@ public class DashboardServlet extends HttpServlet {
         }
 
         request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);
-        request.setAttribute("motoriInseritiMese", dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("motoriProntiMese", dashboardController.getMotoriProntiNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("proveIdraulicheMese", hydraulicTestController.countHydraulicTestsBetween(monthStart, monthEnd));
-        request.setAttribute("clientiNuoviMese", customerController.countCustomersCreatedBetween(monthStart, monthEnd));
-
-        request.setAttribute("motoriInAttesa", dashboardController.getMotoriByStatus(EngineStatus.WAITING));
+        int motoriInseritiMese = dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd);
+        int motoriConsegnatiMese = dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd);
+        int tempoMedioLavorazioneMese = dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd);
+        request.setAttribute("motoriInseritiMese", motoriInseritiMese);
+        request.setAttribute("motoriConsegnatiMese", motoriConsegnatiMese);
         request.setAttribute("workInProgressEngines", dashboardController.getWorkInProgressEngines());
-        request.setAttribute("motoriPronti", dashboardController.getMotoriByStatus(EngineStatus.READY));
-        request.setAttribute("motoriConsegnatiTotali", dashboardController.getMotoriByStatus(EngineStatus.DELIVERED));
-        request.setAttribute("tempoMedioLavorazioneMese", dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("articoliMagazzinoTotali", dashboardController.getWarehouseItemCount());
-        request.setAttribute("quantitaMagazzinoTotale", dashboardController.getWarehouseTotalQuantity());
-        request.setAttribute("articoliEsauriti", dashboardController.getWarehouseOutOfStockCount());
-
-        List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(40).stream()
-                .filter(engine -> engine.getIntakeDate() != null
-                        && !engine.getIntakeDate().isBefore(monthStart)
-                        && !engine.getIntakeDate().isAfter(monthEnd))
-                .limit(8)
-                .toList();
-        request.setAttribute("ultimiMotori", ultimiMotori);
-
-        List<WarehouseItem> ultimiArticoliMagazzino = dashboardController.listaUltimiArticoliMagazzino(6);
-        request.setAttribute("ultimiArticoliMagazzino", ultimiArticoliMagazzino);
-        List<HydraulicTest> allHydraulicTests = hydraulicTestController.getAllHydraulicTests();
-        List<HydraulicTest> recentHydraulicTests = allHydraulicTests.stream()
-                .filter(test -> test.getTestDate() != null
-                        && !test.getTestDate().isBefore(monthStart)
-                        && !test.getTestDate().isAfter(monthEnd))
-                .sorted((a, b) -> {
-                    if (a.getCreatedAt() == null && b.getCreatedAt() == null) {
-                        return 0;
-                    }
-                    if (a.getCreatedAt() == null) {
-                        return 1;
-                    }
-                    if (b.getCreatedAt() == null) {
-                        return -1;
-                    }
-                    return b.getCreatedAt().compareTo(a.getCreatedAt());
-                })
-                .limit(6)
-                .toList();
-        request.setAttribute("proveIdraulicheRecentiMese", recentHydraulicTests);
-
-        Map<Long, String> coverImages = new HashMap<>();
-        for (Engine engine : ultimiMotori) {
-            engineController
-                    .getCoverFilenameForEngine(engine.getId())
-                    .ifPresent(filename -> coverImages.put(engine.getId(), filename));
-        }
-        request.setAttribute("coverImages", coverImages);
-
-        Map<Long, String> customerNames = new HashMap<>();
-        for (Engine engine : ultimiMotori) {
-            long customerId = engine.getCustomerId();
-            if (!customerNames.containsKey(customerId)) {
-                customerNames.put(customerId, customerController.findNameById(customerId));
-            }
-        }
-        request.setAttribute("customerNames", customerNames);
+        request.setAttribute("tempoMedioLavorazioneMese", tempoMedioLavorazioneMese);
+        request.setAttribute("tempoMedioDisponibile", motoriConsegnatiMese > 0);
 
 
         // Forward alla view
