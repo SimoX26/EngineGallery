@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stile globale Engine Gallery -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=7">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=8">
 </head>
 <body data-back-guard-form="1"
       data-back-guard-fallback="<%= request.getContextPath() %>/dashboard?navHome=1">
