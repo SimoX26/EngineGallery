@@ -15,6 +15,8 @@
 </head>
 <body>
 
+<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
+
 <div class="dashboard-page dashboard-crm-page">
     <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
