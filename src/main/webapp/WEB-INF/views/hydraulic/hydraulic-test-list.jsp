@@ -41,9 +41,68 @@
                 <div id="hydraulicKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                     Nessuna prova idraulica corrisponde alla ricerca.
                 </div>
+
+                <div class="modal fade" id="hydraulicFiltersModal" tabindex="-1" aria-labelledby="hydraulicFiltersModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-semibold" id="hydraulicFiltersModalLabel">Filtri prove idrauliche</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="hydraulicFiltersKeywordInput" class="form-label small mb-1">Parola chiave</label>
+                                <input type="search" id="hydraulicFiltersKeywordInput" class="form-control" placeholder="cerca...">
+                            </div>
+                            <div class="modal-footer filters-modal-footer">
+                                <button type="button" id="hydraulicFiltersResetBtn" class="btn btn-sm btn-outline-secondary filters-btn-secondary">Reimposta filtri</button>
+                                <button type="button" id="hydraulicFiltersApplyBtn" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-header-filter">
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="hydraulicFiltersModal"
+                        id="hydraulicFiltersToggle">
+                    Filtri
+                </button>
             </div>
 
             <div class="page-header-actions">
+                <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista prove idrauliche">
+                    <button type="button"
+                            id="hydraulicViewListBtn"
+                            class="btn btn-outline-secondary engine-view-toggle-btn"
+                            title="Vista lista"
+                            aria-label="Vista lista">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <line x1="5" y1="7" x2="19" y2="7"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <line x1="5" y1="17" x2="19" y2="17"></line>
+                        </svg>
+                        <span class="visually-hidden">Lista</span>
+                    </button>
+                    <button type="button"
+                            id="hydraulicViewGalleryBtn"
+                            class="btn btn-outline-secondary active engine-view-toggle-btn"
+                            title="Vista galleria"
+                            aria-label="Vista galleria">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="4" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="4" y="13" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="13" width="7" height="7" rx="1"></rect>
+                        </svg>
+                        <span class="visually-hidden">Galleria</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-header-actions page-header-actions--add">
                 <a class="btn btn-sm btn-add-plus" href="<%= request.getContextPath() %>/hydraulic-test/new">
                     Aggiungi +
                 </a>
@@ -56,6 +115,34 @@
 
         <c:choose>
             <c:when test="${not empty hydraulicTests}">
+                <div id="hydraulicListView" class="engine-list-view d-none">
+                    <c:forEach var="test" items="${hydraulicTests}">
+                        <a class="engine-list-row hydraulic-list-row-item"
+                           href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}"
+                           data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${test.testDate}">
+                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                                <span class="engine-image-empty-label">VIDEO</span>
+                            </div>
+                            <div class="engine-list-row__body">
+                                <div class="engine-list-row__main">
+                                    <c:out value="${test.engineCode}" default="—" /> - <c:out value="${test.customerName}" default="Cliente non disponibile" />
+                                </div>
+                                <div class="engine-list-row__sub">
+                                    Data prova:
+                                    <fmt:parseDate value="${test.testDate}" pattern="yyyy-MM-dd" var="hydraulicTestDateListParsed" />
+                                    <fmt:formatDate value="${hydraulicTestDateListParsed}" pattern="dd / MM / yyyy" />
+                                </div>
+                                <c:if test="${not empty test.notes}">
+                                    <div class="engine-list-row__meta">
+                                        <span><c:out value="${test.notes}" /></span>
+                                    </div>
+                                </c:if>
+                            </div>
+                            <span class="badge-status status-stoccato">Test</span>
+                        </a>
+                    </c:forEach>
+                </div>
+
                 <div class="row g-4" id="hydraulicGalleryGrid">
                     <c:forEach var="test" items="${hydraulicTests}">
                         <div class="col-xl-3 col-lg-4 col-md-6 hydraulic-card-col"
@@ -109,7 +196,19 @@
     <script>
         const searchInput = document.getElementById('hydraulicKeywordSearch');
         const hydraulicCards = document.querySelectorAll('.hydraulic-card-col');
+        const hydraulicListRows = document.querySelectorAll('.hydraulic-list-row-item');
         const emptyState = document.getElementById('hydraulicKeywordEmptyState');
+        const hydraulicViewListBtn = document.getElementById('hydraulicViewListBtn');
+        const hydraulicViewGalleryBtn = document.getElementById('hydraulicViewGalleryBtn');
+        const hydraulicListView = document.getElementById('hydraulicListView');
+        const hydraulicGalleryView = document.getElementById('hydraulicGalleryGrid');
+        const hydraulicViewStorageKey = 'hydraulic.viewMode';
+        const hydraulicFiltersToggle = document.getElementById('hydraulicFiltersToggle');
+        const hydraulicFiltersModalEl = document.getElementById('hydraulicFiltersModal');
+        const hydraulicFiltersModal = bootstrap.Modal.getOrCreateInstance(hydraulicFiltersModalEl);
+        const hydraulicFiltersKeywordInput = document.getElementById('hydraulicFiltersKeywordInput');
+        const hydraulicFiltersApplyBtn = document.getElementById('hydraulicFiltersApplyBtn');
+        const hydraulicFiltersResetBtn = document.getElementById('hydraulicFiltersResetBtn');
 
         const normalizeText = (value) => (value || '')
             .toString()
@@ -131,11 +230,47 @@
                 }
             });
 
+            hydraulicListRows.forEach((row) => {
+                const haystack = normalizeText(row.dataset.search);
+                const isVisible = keyword.length === 0 || haystack.includes(keyword);
+                row.classList.toggle('d-none', !isVisible);
+            });
+
             const showEmptyState = keyword.length > 0 && visibleCount === 0;
             emptyState.classList.toggle('d-none', !showEmptyState);
         };
 
         searchInput.addEventListener('input', applyHydraulicFilter);
+
+        hydraulicFiltersToggle.addEventListener('click', () => {
+            hydraulicFiltersKeywordInput.value = searchInput.value;
+            hydraulicFiltersModal.show();
+        });
+
+        hydraulicFiltersApplyBtn.addEventListener('click', () => {
+            searchInput.value = hydraulicFiltersKeywordInput.value || '';
+            applyHydraulicFilter();
+            hydraulicFiltersModal.hide();
+        });
+
+        hydraulicFiltersResetBtn.addEventListener('click', () => {
+            hydraulicFiltersKeywordInput.value = '';
+            searchInput.value = '';
+            applyHydraulicFilter();
+            hydraulicFiltersModal.hide();
+        });
+        const applyHydraulicViewMode = (mode) => {
+            const safeMode = mode === 'list' ? 'list' : 'gallery';
+            hydraulicListView.classList.toggle('d-none', safeMode !== 'list');
+            hydraulicGalleryView.classList.toggle('d-none', safeMode !== 'gallery');
+            hydraulicViewListBtn.classList.toggle('active', safeMode === 'list');
+            hydraulicViewGalleryBtn.classList.toggle('active', safeMode === 'gallery');
+            sessionStorage.setItem(hydraulicViewStorageKey, safeMode);
+        };
+
+        hydraulicViewListBtn.addEventListener('click', () => applyHydraulicViewMode('list'));
+        hydraulicViewGalleryBtn.addEventListener('click', () => applyHydraulicViewMode('gallery'));
+        applyHydraulicViewMode(sessionStorage.getItem(hydraulicViewStorageKey) || 'gallery');
         applyHydraulicFilter();
     </script>
 

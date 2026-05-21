@@ -101,34 +101,34 @@
                 </button>
             </div>
 
-            <c:if test="${not archiveMode}">
-                <div class="page-header-actions page-header-actions--view">
-                    <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista motori">
-                        <button type="button"
-                                id="engineViewListBtn"
-                                class="btn btn-outline-secondary engine-view-toggle-btn"
-                                title="Vista lista"
-                                aria-label="Vista lista">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <line x1="5" y1="7" x2="19" y2="7"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                <line x1="5" y1="17" x2="19" y2="17"></line>
-                            </svg>
-                            <span class="visually-hidden">Lista</span>
-                        </button>
-                        <button type="button"
-                                id="engineViewGalleryBtn"
-                                class="btn btn-outline-secondary active engine-view-toggle-btn"
-                                title="Vista galleria"
-                                aria-label="Vista galleria">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="4" y="4" width="7" height="7" rx="1"></rect>
-                                <rect x="13" y="4" width="7" height="7" rx="1"></rect>
-                                <rect x="4" y="13" width="7" height="7" rx="1"></rect>
-                                <rect x="13" y="13" width="7" height="7" rx="1"></rect>
-                            </svg>
-                            <span class="visually-hidden">Galleria</span>
-                        </button>
+            <div class="page-header-actions page-header-actions--view">
+                <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista motori">
+                    <button type="button"
+                            id="engineViewListBtn"
+                            class="btn btn-outline-secondary engine-view-toggle-btn"
+                            title="Vista lista"
+                            aria-label="Vista lista">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <line x1="5" y1="7" x2="19" y2="7"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <line x1="5" y1="17" x2="19" y2="17"></line>
+                        </svg>
+                        <span class="visually-hidden">Lista</span>
+                    </button>
+                    <button type="button"
+                            id="engineViewGalleryBtn"
+                            class="btn btn-outline-secondary active engine-view-toggle-btn"
+                            title="Vista galleria"
+                            aria-label="Vista galleria">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="4" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="4" y="13" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="13" width="7" height="7" rx="1"></rect>
+                        </svg>
+                        <span class="visually-hidden">Galleria</span>
+                    </button>
+                    <c:if test="${not archiveMode}">
                         <button type="button"
                                 id="engineViewKanbanBtn"
                                 class="btn btn-outline-secondary engine-view-toggle-btn"
@@ -141,8 +141,10 @@
                             </svg>
                             <span class="visually-hidden">Kanban</span>
                         </button>
-                    </div>
+                    </c:if>
                 </div>
+            </div>
+            <c:if test="${not archiveMode}">
                 <div class="page-header-actions page-header-actions--add">
                     <a href="<%= request.getContextPath() %>/upload" class="btn btn-sm btn-add-plus">Aggiungi +</a>
                 </div>
@@ -742,27 +744,37 @@
             if (mode === 'list' || mode === 'gallery' || mode === 'kanban') {
                 safeMode = mode;
             }
-            if (!engineGalleryGrid || !engineKanbanBoard || !engineListView) {
+            if (!engineGalleryGrid || !engineListView) {
                 return;
             }
-            const showKanban = safeMode === 'kanban';
+            const hasKanban = !!engineKanbanBoard && !!engineViewKanbanBtn;
+            if (!hasKanban && safeMode === 'kanban') {
+                safeMode = 'gallery';
+            }
+            const showKanban = hasKanban && safeMode === 'kanban';
             const showList = safeMode === 'list';
             const showGallery = safeMode === 'gallery';
             engineListView.classList.toggle('d-none', !showList);
             engineGalleryGrid.classList.toggle('d-none', !showGallery);
-            engineKanbanBoard.classList.toggle('d-none', !showKanban);
-            if (engineViewListBtn && engineViewGalleryBtn && engineViewKanbanBtn) {
+            if (engineKanbanBoard) {
+                engineKanbanBoard.classList.toggle('d-none', !showKanban);
+            }
+            if (engineViewListBtn && engineViewGalleryBtn) {
                 engineViewListBtn.classList.toggle('active', showList);
                 engineViewGalleryBtn.classList.toggle('active', showGallery);
-                engineViewKanbanBtn.classList.toggle('active', showKanban);
+                if (engineViewKanbanBtn) {
+                    engineViewKanbanBtn.classList.toggle('active', showKanban);
+                }
             }
             sessionStorage.setItem(viewStorageKey, safeMode);
         };
 
-        if (engineViewListBtn && engineViewGalleryBtn && engineViewKanbanBtn) {
+        if (engineViewListBtn && engineViewGalleryBtn) {
             engineViewListBtn.addEventListener('click', () => applyViewMode('list'));
             engineViewGalleryBtn.addEventListener('click', () => applyViewMode('gallery'));
-            engineViewKanbanBtn.addEventListener('click', () => applyViewMode('kanban'));
+            if (engineViewKanbanBtn) {
+                engineViewKanbanBtn.addEventListener('click', () => applyViewMode('kanban'));
+            }
         }
         applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery');
         initKanbanDragAndDrop();
