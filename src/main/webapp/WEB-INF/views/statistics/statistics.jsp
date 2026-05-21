@@ -116,21 +116,26 @@
         <div class="row g-3 g-lg-4 mb-4">
             <div class="col-12 col-lg-7">
                 <div class="table-container h-100">
-                    <h5 class="mb-3 fw-semibold">Storico KPI mensili</h5>
+                    <h5 class="mb-3 fw-semibold">Storico Dati Mensili</h5>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0" id="monthlyKpiTable">
                             <thead>
                             <tr>
-                                <th>Mese</th>
-                                <th>Inseriti</th>
-                                <th>Consegnati</th>
-                                <th>In lavorazione</th>
-                                <th>Tempo medio</th>
+                                <th role="button" tabindex="0" data-sort-key="month" data-sort-type="text" aria-sort="none">Mese <span class="small text-muted" data-sort-indicator></span></th>
+                                <th role="button" tabindex="0" data-sort-key="inserted" data-sort-type="number" aria-sort="none">Inseriti <span class="small text-muted" data-sort-indicator></span></th>
+                                <th role="button" tabindex="0" data-sort-key="delivered" data-sort-type="number" aria-sort="none">Consegnati <span class="small text-muted" data-sort-indicator></span></th>
+                                <th role="button" tabindex="0" data-sort-key="inProgress" data-sort-type="number" aria-sort="none">In lavorazione <span class="small text-muted" data-sort-indicator></span></th>
+                                <th role="button" tabindex="0" data-sort-key="avgDays" data-sort-type="number" aria-sort="none">Tempo medio <span class="small text-muted" data-sort-indicator></span></th>
                             </tr>
                             </thead>
                             <tbody>
                             <c:forEach var="row" items="${monthlyHistory}">
-                                <tr>
+                                <tr data-month-key="${row.monthKey}"
+                                    data-month-label="${row.monthLabel}"
+                                    data-inserted="${row.inserted}"
+                                    data-delivered="${row.delivered}"
+                                    data-in-progress="${row.inProgress}"
+                                    data-avg-days="${row.avgDays}">
                                     <td>${row.monthLabel}</td>
                                     <td>${row.inserted}</td>
                                     <td>${row.delivered}</td>
@@ -369,6 +374,86 @@
                     }
                 });
             }
+        }
+
+        const monthlyKpiTable = document.getElementById('monthlyKpiTable');
+        if (monthlyKpiTable) {
+            const sortableHeaders = monthlyKpiTable.querySelectorAll('thead th[data-sort-key]');
+            const tableBody = monthlyKpiTable.querySelector('tbody');
+            let currentSortKey = 'month';
+            let currentSortDirection = 'asc';
+
+            const getSortValue = (row, key, type) => {
+                if (key === 'month') {
+                    return row.dataset.monthKey || row.dataset.monthLabel || '';
+                }
+                if (key === 'inserted') {
+                    return Number(row.dataset.inserted || 0);
+                }
+                if (key === 'delivered') {
+                    return Number(row.dataset.delivered || 0);
+                }
+                if (key === 'inProgress') {
+                    return Number(row.dataset.inProgress || 0);
+                }
+                if (key === 'avgDays') {
+                    return Number(row.dataset.avgDays || 0);
+                }
+                return type === 'number' ? 0 : '';
+            };
+
+            const updateIndicators = () => {
+                sortableHeaders.forEach((header) => {
+                    const indicator = header.querySelector('[data-sort-indicator]');
+                    if (!indicator) {
+                        return;
+                    }
+                    const isActive = header.dataset.sortKey === currentSortKey;
+                    indicator.textContent = isActive ? (currentSortDirection === 'asc' ? '▲' : '▼') : '';
+                    header.setAttribute('aria-sort', isActive ? (currentSortDirection === 'asc' ? 'ascending' : 'descending') : 'none');
+                });
+            };
+
+            const sortTable = (key, type) => {
+                const rows = Array.from(tableBody.querySelectorAll('tr'))
+                    .filter((row) => row.dataset.monthKey || row.dataset.monthLabel);
+                rows.sort((a, b) => {
+                    const aVal = getSortValue(a, key, type);
+                    const bVal = getSortValue(b, key, type);
+                    if (aVal < bVal) {
+                        return currentSortDirection === 'asc' ? -1 : 1;
+                    }
+                    if (aVal > bVal) {
+                        return currentSortDirection === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+                rows.forEach((row) => tableBody.appendChild(row));
+                updateIndicators();
+            };
+
+            sortableHeaders.forEach((header) => {
+                const handleSort = () => {
+                    const key = header.dataset.sortKey;
+                    const type = header.dataset.sortType || 'text';
+                    if (currentSortKey === key) {
+                        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSortKey = key;
+                        currentSortDirection = 'asc';
+                    }
+                    sortTable(key, type);
+                };
+                header.addEventListener('click', handleSort);
+                header.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleSort();
+                    }
+                });
+            });
+
+            updateIndicators();
         }
     </script>
 </div>

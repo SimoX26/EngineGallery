@@ -2364,3 +2364,49 @@ body.modal-open {
     background-color: #1f2937 !important;
     color: var(--text-main) !important;
 }
+
+/* =====================
+   STATISTICS TABLES
+   ===================== */
+.statistics-analytics-page .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border-soft);
+    --bs-table-hover-bg: rgba(15, 23, 42, 0.04);
+    --bs-table-hover-color: var(--text-main);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+}
+
+.statistics-analytics-page .table > :not(caption) > * > * {
+    background-color: transparent;
+    color: var(--text-main);
+    border-bottom-color: var(--border-soft);
+    box-shadow: none;
+}
+
+.statistics-analytics-page .table > thead > tr > th {
+    background-color: rgba(15, 23, 42, 0.04);
+    color: var(--text-main);
+    border-bottom-color: var(--border-soft);
+}
+
+[data-theme="dark"] .statistics-analytics-page .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border-soft);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-color: var(--text-main);
+}
+
+[data-theme="dark"] .statistics-analytics-page .table > :not(caption) > * > * {
+    background-color: transparent;
+    color: var(--text-main);
+    border-bottom-color: var(--border-soft);
+}
+
+[data-theme="dark"] .statistics-analytics-page .table > thead > tr > th {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    border-bottom-color: var(--border-soft);
+}
