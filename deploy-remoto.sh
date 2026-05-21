@@ -4,7 +4,7 @@ set -euo pipefail
 REMOTE_USER_DEFAULT="root"
 REMOTE_HOST_DEFAULT="82.165.20.124"
 REMOTE_WEBAPPS_DEFAULT="/opt/tomcat/webapps"
-REMOTE_PASSWORD_DEFAULT="F1yKNvqwl6qw8ED"
+REMOTE_PORT_DEFAULT="22"
 
 usage() {
   cat <<'HELP'
@@ -20,7 +20,7 @@ Esempi:
 Opzioni:
   --skip-build      Salta 'mvn clean package' e usa WAR già presente in target/
   --port            Porta SSH (default: 22)
-  --password        Password SSH (default remoto preconfigurato)
+  --password        Password SSH (se assente viene chiesta in input nascosto)
   --remote-user     Utente SSH remoto (default: root)
   --remote-host     Host SSH remoto (default: 82.165.20.124)
   --remote-path     Cartella remota webapps (default: /opt/tomcat/webapps)
@@ -53,8 +53,8 @@ resolve_ipv4() {
   echo "$ip"
 }
 
-PORT="22"
-PASSWORD="$REMOTE_PASSWORD_DEFAULT"
+PORT="$REMOTE_PORT_DEFAULT"
+PASSWORD=""
 REMOTE_USER="$REMOTE_USER_DEFAULT"
 REMOTE_HOST="$REMOTE_HOST_DEFAULT"
 REMOTE_PATH="$REMOTE_WEBAPPS_DEFAULT"
@@ -102,6 +102,16 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -z "$PASSWORD" ]]; then
+  read -r -s -p "Inserisci password SSH per ${REMOTE_USER}@${REMOTE_HOST}: " PASSWORD
+  echo
+fi
+
+if [[ -z "$PASSWORD" ]]; then
+  echo "Errore: password SSH non fornita." >&2
+  exit 1
+fi
 
 if [[ "$SKIP_BUILD" != "true" ]]; then
   echo ">> Eseguo build Maven: mvn clean package"
