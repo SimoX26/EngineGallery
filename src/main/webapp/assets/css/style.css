@@ -1718,6 +1718,33 @@ body.kanban-dragging {
     cursor: not-allowed;
 }
 
+.btn-cancel-action {
+    color: #ffffff;
+    background-color: #b91c1c;
+    border: 1px solid #ef4444;
+}
+
+.btn-cancel-action:hover,
+.btn-cancel-action:focus {
+    color: #ffffff;
+    background-color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.btn-save-action {
+    color: #f8fafc;
+    background-color: #15803d;
+    border: 1px solid #22c55e;
+    font-weight: 600;
+}
+
+.btn-save-action:hover,
+.btn-save-action:focus {
+    color: #ffffff;
+    background-color: #166534;
+    border-color: #86efac;
+}
+
 .detail-actions .btn {
     min-width: 140px;
 }

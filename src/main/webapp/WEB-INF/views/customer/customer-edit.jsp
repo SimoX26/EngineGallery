@@ -78,11 +78,11 @@
             </div>
 
             <div class="d-flex gap-2">
-                <a href="<%= request.getContextPath() %>/customer/detail?id=${customerId}" class="btn btn-outline-secondary w-50">
+                <a href="<%= request.getContextPath() %>/customer/detail?id=${customerId}" class="btn btn-cancel-action w-50">
                     Annulla
                 </a>
-                <button type="submit" class="btn-engine w-50">
-                    Salva modifiche
+                <button type="submit" class="btn btn-save-action w-50">
+                    Salva
                 </button>
             </div>
 

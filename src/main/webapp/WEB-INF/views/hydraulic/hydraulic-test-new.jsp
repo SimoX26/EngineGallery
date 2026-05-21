@@ -72,7 +72,7 @@
             </div>
 
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-secondary" href="<%= request.getContextPath() %>/hydraulic-test/list">Annulla</a>
+                <a class="btn btn-cancel-action" href="<%= request.getContextPath() %>/hydraulic-test/list">Annulla</a>
                 <button type="submit" class="btn-engine">Salva prova idraulica</button>
             </div>
         </form>

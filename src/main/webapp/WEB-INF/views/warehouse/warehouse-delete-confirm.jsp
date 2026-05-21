@@ -30,7 +30,7 @@
 
                     <div class="d-flex flex-wrap gap-2">
                         <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
-                           class="btn btn-outline-secondary px-4">
+                           class="btn btn-cancel-action px-4">
                             Annulla
                         </a>
 

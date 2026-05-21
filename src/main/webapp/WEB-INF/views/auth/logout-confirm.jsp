@@ -29,7 +29,7 @@
                             <p class="mb-4">Sei veramente sicuro?</p>
 
                             <div class="d-flex flex-wrap gap-2">
-                                <a href="<%= request.getContextPath() %>/dashboard" class="btn btn-outline-secondary px-4">
+                                <a href="<%= request.getContextPath() %>/dashboard" class="btn btn-cancel-action px-4">
                                     Annulla
                                 </a>
 
@@ -51,7 +51,7 @@
                             <p class="mb-4">Sei sicuro di fare logout?</p>
 
                             <div class="d-flex flex-wrap gap-2">
-                                <a href="<%= request.getContextPath() %>/dashboard" class="btn btn-outline-secondary px-4">
+                                <a href="<%= request.getContextPath() %>/dashboard" class="btn btn-cancel-action px-4">
                                     Annulla
                                 </a>
 

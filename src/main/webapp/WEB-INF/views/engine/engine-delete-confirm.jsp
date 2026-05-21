@@ -30,7 +30,7 @@
 
                     <div class="d-flex flex-wrap gap-2">
                         <a href="<%= request.getContextPath() %>/engine/detail?ref=${detail.engine.engineRef}"
-                           class="btn btn-outline-secondary px-4">
+                           class="btn btn-cancel-action px-4">
                             Annulla
                         </a>
 
