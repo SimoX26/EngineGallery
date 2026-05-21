@@ -1260,6 +1260,11 @@ body:not(.login-page) {
     transform: scale(0.98);
 }
 
+.engine-kanban-card--pressing {
+    transform: scale(0.99);
+    box-shadow: 0 10px 22px rgba(2, 6, 23, 0.2);
+}
+
 .engine-kanban-card--touch-dragging {
     position: fixed;
     z-index: 1200;

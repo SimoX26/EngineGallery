@@ -638,12 +638,15 @@
             let dragMoved = false;
             let suppressNextCardClick = false;
             const touchDragThreshold = 12;
+            const touchLongPressDelayMs = 500;
+            const touchScrollCancelThreshold = 10;
             let pointerSession = null;
 
             const clearDragVisuals = () => {
                 kanbanColumns.forEach((col) => col.classList.remove('engine-kanban-col__body--drag-over'));
                 if (draggedCard) {
                     draggedCard.classList.remove('engine-kanban-card--dragging');
+                    draggedCard.classList.remove('engine-kanban-card--pressing');
                     draggedCard.classList.remove('engine-kanban-card--touch-dragging');
                     draggedCard.style.removeProperty('--kanban-drag-left');
                     draggedCard.style.removeProperty('--kanban-drag-top');
@@ -712,9 +715,17 @@
                         startX: event.clientX,
                         startY: event.clientY,
                         dragging: false,
+                        longPressArmed: false,
                         sourceColumn: card.closest('.engine-kanban-col__body'),
                         sourceStatus: card.dataset.currentStatus || '',
-                        currentColumn: null
+                        currentColumn: null,
+                        longPressTimer: window.setTimeout(() => {
+                            if (!pointerSession || pointerSession.pointerId !== event.pointerId) {
+                                return;
+                            }
+                            pointerSession.longPressArmed = true;
+                            pointerSession.card.classList.add('engine-kanban-card--pressing');
+                        }, touchLongPressDelayMs)
                     };
                 });
 
@@ -724,16 +735,21 @@
                     }
                     const dx = event.clientX - pointerSession.startX;
                     const dy = event.clientY - pointerSession.startY;
+                    const distance = Math.hypot(dx, dy);
 
                     if (!pointerSession.dragging) {
-                        const distance = Math.hypot(dx, dy);
+                        if (!pointerSession.longPressArmed) {
+                            if (distance >= touchScrollCancelThreshold) {
+                                clearTimeout(pointerSession.longPressTimer);
+                                pointerSession.card.classList.remove('engine-kanban-card--pressing');
+                                pointerSession = null;
+                            }
+                            return;
+                        }
                         if (distance < touchDragThreshold) {
                             return;
                         }
-                        if (Math.abs(dx) < Math.abs(dy)) {
-                            pointerSession = null;
-                            return;
-                        }
+                        clearTimeout(pointerSession.longPressTimer);
                         pointerSession.dragging = true;
                         draggedCard = pointerSession.card;
                         sourceColumn = pointerSession.sourceColumn;
@@ -741,6 +757,7 @@
                         dragMoved = true;
                         suppressNextCardClick = true;
                         pointerSession.card.setPointerCapture(event.pointerId);
+                        pointerSession.card.classList.remove('engine-kanban-card--pressing');
                         pointerSession.card.classList.add('engine-kanban-card--touch-dragging');
                         pointerSession.card.classList.add('engine-kanban-card--dragging');
                         pointerSession.card.style.setProperty('--kanban-drag-width', `${pointerSession.card.offsetWidth}px`);
@@ -764,6 +781,8 @@
                     }
                     const session = pointerSession;
                     pointerSession = null;
+                    clearTimeout(session.longPressTimer);
+                    session.card.classList.remove('engine-kanban-card--pressing');
 
                     if (!session.dragging) {
                         return;

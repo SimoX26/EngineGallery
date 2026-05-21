@@ -43,7 +43,43 @@
         .engine-detail-top-actions {
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             margin-bottom: 0.4rem;
+        }
+
+        .engine-detail-mobile-back-btn {
+            width: 44px;
+            height: 44px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            border: 1.5px solid rgba(148, 163, 184, 0.35);
+            background: var(--primary);
+            color: #f8fafc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            flex: 0 0 auto;
+        }
+
+        .engine-detail-mobile-back-btn:hover,
+        .engine-detail-mobile-back-btn:focus-visible {
+            background: #374151;
+            border-color: #e5e7eb;
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .engine-detail-mobile-back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .engine-detail-mobile-back-btn svg {
+            display: block;
+            width: 18px;
+            height: 18px;
         }
 
         .engine-detail-media-panel {
@@ -147,6 +183,7 @@
             }
 
             .engine-detail-top-actions {
+                justify-content: space-between;
                 margin-bottom: 0.6rem;
             }
 
@@ -166,7 +203,17 @@
                 height: 40px;
             }
 
+            .engine-detail-mobile-back-btn {
+                width: 40px;
+                height: 40px;
+            }
+
             .engine-tech-panel .engine-technical-share-btn svg {
+                width: 17px;
+                height: 17px;
+            }
+
+            .engine-detail-mobile-back-btn svg {
                 width: 17px;
                 height: 17px;
             }
@@ -196,6 +243,16 @@
     </c:if>
     <div class="row engine-detail-layout card-base">
         <div class="col-12 engine-detail-top-actions">
+            <button
+                    id="engineDetailMobileBackBtn"
+                    type="button"
+                    class="share-icon-btn engine-detail-mobile-back-btn d-inline-flex d-md-none"
+                    aria-label="Torna indietro"
+                    title="Torna indietro">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </button>
             <c:set var="engineDeliveryDateShare" value="" />
             <c:if test="${detail.engine.deliveryDate != null}">
                 <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
@@ -381,6 +438,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    (function () {
+        const backButton = document.getElementById('engineDetailMobileBackBtn');
+        if (!backButton) {
+            return;
+        }
+        backButton.addEventListener('click', () => {
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+            window.location.href = '<%= request.getContextPath() %>/engine/list';
+        });
+    })();
+
     (function () {
         const quickStatusTrigger = document.querySelector('[data-quick-status-trigger]');
         const quickStatusModalEl = document.getElementById('quickStatusModalDetail');
