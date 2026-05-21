@@ -1,15 +1,15 @@
 import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
 
-const config = window.engineDetailViewerConfig || {};
 const galleryRoot = document.getElementById('engineDetailGallery');
 const navbar = document.querySelector('.navbar');
 const clickableImages = Array.from(document.querySelectorAll('.clickable-image'));
 
 const SHARE_LOG_PREFIX = '[engine-share-v2]';
 let shareDelegationInitialized = false;
-const SHARE_FILE_SHARING_ENABLED = true;
-const SHARE_MAX_FILES = 3;
 const SHARE_MAX_SINGLE_FILE_BYTES = 8 * 1024 * 1024;
+const SHARE_MODE_CURRENT = 'current-image-only';
+const SHARE_MODE_ALL = 'all-motor-images';
+let activeLightboxIndex = 0;
 
 function showShareMessage(message) {
     alert(message);
@@ -80,10 +80,8 @@ function getFileNameFromUrl(url, fallback) {
 
 async function buildShareFiles(imageUrls) {
     const files = [];
-    const limitedUrls = imageUrls.slice(0, SHARE_MAX_FILES);
-
-    for (let i = 0; i < limitedUrls.length; i += 1) {
-        const imageUrl = limitedUrls[i];
+    for (let i = 0; i < imageUrls.length; i += 1) {
+        const imageUrl = imageUrls[i];
         try {
             console.info(`${SHARE_LOG_PREFIX} fetch immagine`, { index: i, imageUrl });
             const response = await fetch(imageUrl, { credentials: 'include' });
@@ -183,172 +181,76 @@ function readImageUrlsFromButton(button) {
         .filter((url) => url.length > 0);
 }
 
-async function copyFallbackText(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        console.info(`${SHARE_LOG_PREFIX} fallback clipboard usato`);
-        showShareMessage('Condivisione file non disponibile: testo copiato negli appunti.');
-        return;
+function isFileShareSupported(files) {
+    if (typeof navigator.share !== 'function') {
+        return false;
     }
-
-    console.warn(`${SHARE_LOG_PREFIX} clipboard non disponibile, fallback solo console`);
-    showShareMessage('Condivisione non disponibile su questo browser.');
+    if (typeof navigator.canShare !== 'function') {
+        return true;
+    }
+    try {
+        return navigator.canShare({ files });
+    } catch (_error) {
+        return false;
+    }
 }
 
-async function shareEngine({ engineCode, imageUrls }) {
-    const safeCode = (engineCode || '').trim() || '-';
-    const shareTitle = 'Condivisione motore';
-    const shareText = buildShareText({
-        engineCode: safeCode,
-        customerName: config.customerName || '',
-        engineRef: config.engineRef || '',
-        engineStatus: config.engineStatus || '',
-        deliveryDate: config.deliveryDate || ''
-    });
-    const pageUrl = window.location.href;
-
-    console.info(`${SHARE_LOG_PREFIX} share avviato`, {
-        engineCode: safeCode,
-        rawImages: imageUrls,
-        hasNavigatorShare: typeof navigator.share === 'function',
-        hasNavigatorCanShare: typeof navigator.canShare === 'function',
-        isSecureContext: window.isSecureContext
-    });
-
-    const normalizedUrls = normalizeImageUrls(imageUrls);
-    console.info(`${SHARE_LOG_PREFIX} URL normalizzati`, { count: normalizedUrls.length, normalizedUrls });
-
-    if (typeof navigator.share !== 'function') {
-        console.warn(`${SHARE_LOG_PREFIX} navigator.share non disponibile, uso fallback clipboard`);
-        await copyFallbackText(`${shareText}\nLink: ${pageUrl}`);
+async function shareFilesOnly(files, errorMessage) {
+    if (!files || files.length === 0) {
+        showShareMessage(errorMessage);
         return;
     }
-
-    if (window.AndroidShareBridge && typeof window.AndroidShareBridge.shareTechnicalSheet === 'function') {
-        if (normalizedUrls.length > 0) {
-            try {
-                window.AndroidShareBridge.shareTechnicalSheet(
-                    JSON.stringify(normalizedUrls.slice(0, SHARE_MAX_FILES)),
-                    `${shareText}\nLink: ${pageUrl}`
-                );
-                console.info(`${SHARE_LOG_PREFIX} share Android bridge avviato`);
-                return;
-            } catch (error) {
-                console.warn(`${SHARE_LOG_PREFIX} Android bridge shareTechnicalSheet errore, fallback Web Share`, error);
-            }
-        }
+    if (!isFileShareSupported(files)) {
+        showShareMessage('Condivisione immagini non supportata su questo browser/dispositivo.');
+        return;
     }
-
-    if (SHARE_FILE_SHARING_ENABLED && normalizedUrls.length > 0) {
-        const files = await buildShareFiles(normalizedUrls);
-        console.info(`${SHARE_LOG_PREFIX} file validi pronti`, { count: files.length });
-        if (files.length === 0) {
-            console.warn(`${SHARE_LOG_PREFIX} nessun file immagine valido, uso fallback text+url`);
-        } else if (typeof navigator.canShare === 'function') {
-        let canShareSingleFile = false;
-        let canShareMultipleFiles = false;
-        try {
-            canShareSingleFile = navigator.canShare({ files: [files[0]] });
-        } catch (error) {
-            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare({files:[single]}) errore`, error);
-        }
-        try {
-            canShareMultipleFiles = files.length > 1 ? navigator.canShare({ files }) : canShareSingleFile;
-        } catch (error) {
-            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare({files:[multi]}) errore`, error);
-        }
-        console.info(`${SHARE_LOG_PREFIX} compatibilità canShare`, {
-            canShareSingleFile,
-            canShareMultipleFiles,
-            filesCount: files.length
-        });
-
-        let filesForShare = files;
-        if (!canShareMultipleFiles && canShareSingleFile) {
-            filesForShare = [files[0]];
-        }
-
-        let canShareMultiFiles = false;
-        try {
-            canShareMultiFiles = navigator.canShare({ files: filesForShare });
-            console.info(`${SHARE_LOG_PREFIX} navigator.canShare({files})`, {
-                result: canShareMultiFiles,
-                filesCount: filesForShare.length
-            });
-        } catch (error) {
-            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare ha lanciato errore`, error);
-        }
-
-        if (canShareMultiFiles) {
-            try {
-                const filesPayload = {
-                    title: shareTitle,
-                    text: shareText,
-                    files: filesForShare
-                };
-                console.info(`${SHARE_LOG_PREFIX} payload navigator.share files`, {
-                    title: filesPayload.title,
-                    text: filesPayload.text,
-                    filesCount: filesPayload.files.length,
-                    files: filesPayload.files.map((f) => ({ name: f.name, type: f.type, size: f.size }))
-                });
-                await navigator.share(filesPayload);
-                console.info(`${SHARE_LOG_PREFIX} share con file completata`, { files: filesForShare.length });
-                return;
-            } catch (error) {
-                if (error && error.name === 'AbortError') {
-                    console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente (file)`);
-                    return;
-                }
-                console.warn(`${SHARE_LOG_PREFIX} errore share con file, fallback text+url`, {
-                    name: error?.name,
-                    message: error?.message,
-                    stack: error?.stack
-                });
-            }
-        } else {
-            console.warn(`${SHARE_LOG_PREFIX} file share non supportato, uso fallback text+url`);
-        }
-        } else {
-            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare non disponibile, uso fallback text+url`);
-        }
-    }
-
     try {
-        const fallbackPayload = {
-            title: shareTitle,
-            text: shareText,
-            url: pageUrl
-        };
-        console.info(`${SHARE_LOG_PREFIX} payload navigator.share fallback`, fallbackPayload);
-        await navigator.share(fallbackPayload);
-        console.info(`${SHARE_LOG_PREFIX} fallback share text+url completata`);
+        await navigator.share({ files });
     } catch (error) {
         if (error && error.name === 'AbortError') {
-            console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente (fallback)`);
+            console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente`);
             return;
         }
-        console.warn(`${SHARE_LOG_PREFIX} errore fallback text+url`, {
+        console.warn(`${SHARE_LOG_PREFIX} errore condivisione file`, {
             name: error?.name,
             message: error?.message,
             stack: error?.stack
         });
-        await copyFallbackText(`${shareText}\nLink: ${pageUrl}`);
+        showShareMessage(errorMessage);
     }
 }
 
-function buildShareText({ engineCode, customerName, engineRef, engineStatus, deliveryDate }) {
-    const lines = [
-        `Codice motore: ${(engineCode || '').trim() || '-'}`,
-        `Cliente: ${(customerName || '').trim() || '-'}`,
-        `Codice RML: ${(engineRef || '').trim() || '-'}`,
-        `Stato: ${(engineStatus || '').trim() || '-'}`
-    ];
-    const delivery = (deliveryDate || '').trim();
-    if (delivery) {
-        lines.push(`Data consegna: ${delivery}`);
+function readCurrentLightboxImageUrl() {
+    if (!galleryRoot || !clickableImages.length) {
+        return '';
     }
-    return lines.join('\n');
+    const safeIndex = Math.max(0, Math.min(activeLightboxIndex, clickableImages.length - 1));
+    const node = clickableImages[safeIndex];
+    return (node?.getAttribute('data-image-url') || node?.getAttribute('src') || '').trim();
+}
+
+async function shareCurrentImageOnly() {
+    const currentUrl = readCurrentLightboxImageUrl();
+    const normalizedUrls = normalizeImageUrls(currentUrl ? [currentUrl] : []);
+    const files = await buildShareFiles(normalizedUrls);
+    await shareFilesOnly(files, 'Immagine corrente non condivisibile.');
+}
+
+async function shareAllMotorImages(imageUrls) {
+    const normalizedUrls = normalizeImageUrls(imageUrls);
+
+    if (window.AndroidShareBridge && typeof window.AndroidShareBridge.shareTechnicalSheet === 'function') {
+        try {
+            window.AndroidShareBridge.shareTechnicalSheet(JSON.stringify(normalizedUrls), '');
+            console.info(`${SHARE_LOG_PREFIX} share all images via Android bridge`);
+            return;
+        } catch (error) {
+            console.warn(`${SHARE_LOG_PREFIX} Android bridge shareTechnicalSheet errore`, error);
+        }
+    }
+
+    const files = await buildShareFiles(normalizedUrls);
+    await shareFilesOnly(files, 'Nessuna immagine condivisibile disponibile.');
 }
 
 function initializeShareDelegation() {
@@ -364,43 +266,21 @@ function initializeShareDelegation() {
         }
 
         event.preventDefault();
-        const engineCode = trigger.getAttribute('data-engine-code') || (config.engineCode || '');
-        const customerName = trigger.getAttribute('data-customer-name') || (config.customerName || '');
-        const engineRef = trigger.getAttribute('data-engine-ref') || (config.engineRef || '');
-        const engineStatus = trigger.getAttribute('data-engine-status') || (config.engineStatus || '');
-        const deliveryDate = trigger.getAttribute('data-delivery-date') || (config.deliveryDate || '');
+        const shareMode = trigger.getAttribute('data-share-mode') || SHARE_MODE_ALL;
         const imageUrls = readImageUrlsFromButton(trigger);
 
         console.info(`${SHARE_LOG_PREFIX} share button cliccato`, {
             triggerClass: trigger.className,
-            engineCode,
-            customerName,
-            engineRef,
-            engineStatus,
-            deliveryDate,
+            shareMode,
             imagesFound: imageUrls.length,
             imageUrlsRaw: imageUrls
         });
 
-        const previousConfig = {
-            customerName: config.customerName,
-            engineRef: config.engineRef,
-            engineStatus: config.engineStatus,
-            deliveryDate: config.deliveryDate
-        };
-
-        config.customerName = customerName;
-        config.engineRef = engineRef;
-        config.engineStatus = engineStatus;
-        config.deliveryDate = deliveryDate;
-        try {
-            await shareEngine({ engineCode, imageUrls });
-        } finally {
-            config.customerName = previousConfig.customerName;
-            config.engineRef = previousConfig.engineRef;
-            config.engineStatus = previousConfig.engineStatus;
-            config.deliveryDate = previousConfig.deliveryDate;
+        if (shareMode === SHARE_MODE_CURRENT) {
+            await shareCurrentImageOnly();
+            return;
         }
+        await shareAllMotorImages(imageUrls);
     });
 }
 
@@ -466,12 +346,17 @@ if (!galleryRoot || clickableImages.length === 0) {
         if (navbar) {
             navbar.classList.add('navbar-hidden');
         }
+        activeLightboxIndex = Number(lightbox.pswp?.currIndex || 0);
     });
 
     lightbox.on('close', () => {
         if (navbar) {
             navbar.classList.remove('navbar-hidden');
         }
+    });
+
+    lightbox.on('change', () => {
+        activeLightboxIndex = Number(lightbox.pswp?.currIndex || 0);
     });
 
     lightbox.on('uiRegister', () => {
@@ -484,11 +369,7 @@ if (!galleryRoot || clickableImages.length === 0) {
             html: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>',
             title: 'Condividi immagine',
             onInit: (element) => {
-                element.setAttribute('data-engine-code', config.engineCode || '');
-                element.setAttribute('data-customer-name', config.customerName || '');
-                element.setAttribute('data-engine-ref', config.engineRef || '');
-                element.setAttribute('data-engine-status', config.engineStatus || '');
-                element.setAttribute('data-delivery-date', config.deliveryDate || '');
+                element.setAttribute('data-share-mode', SHARE_MODE_CURRENT);
                 element.setAttribute('data-share-source', '#engineDetailGallery');
                 element.setAttribute('data-image-selector', '.clickable-image');
             }

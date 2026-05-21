@@ -207,13 +207,10 @@
                     class="share-icon-btn engine-technical-share-btn js-engine-share-btn"
                     aria-label="Condividi scheda tecnica"
                     title="Condividi scheda tecnica"
-                    data-engine-code="${detail.engine.engineCode}"
-                    data-customer-name="${detail.engine.customerName}"
-                    data-engine-ref="${detail.engine.engineRef}"
+                    data-share-mode="all-motor-images"
                     data-share-source="#engineDetailGallery"
                     data-image-selector=".clickable-image"
-                    data-engine-status="${detail.engine.status}"
-                    data-delivery-date="${engineDeliveryDateShare}">
+                    >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
                     <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
@@ -455,11 +452,6 @@
     })();
 
     window.engineDetailViewerConfig = {
-        engineCode: '${detail.engine.engineCode}',
-        customerName: '${detail.engine.customerName}',
-        engineRef: '${detail.engine.engineRef}',
-        engineStatus: '${detail.engine.status}',
-        deliveryDate: '${engineDeliveryDateShare}',
         contextPath: '<%= request.getContextPath() %>'
     };
 </script>

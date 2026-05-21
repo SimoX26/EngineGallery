@@ -431,7 +431,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
-        fun shareTechnicalSheet(imageUrlsJson: String?, shareText: String?) {
+        fun shareTechnicalSheet(imageUrlsJson: String?, @Suppress("UNUSED_PARAMETER") shareText: String?) {
             if (imageUrlsJson.isNullOrBlank()) {
                 runOnUiThread {
                     Toast.makeText(this@MainActivity, "Immagini non disponibili", Toast.LENGTH_SHORT).show()
@@ -480,16 +480,21 @@ class MainActivity : AppCompatActivity() {
                             cookies = cookiesByUrl[url]
                         )
                         if (sharedFile == null) {
-                            runOnUiThread {
-                                Toast.makeText(this@MainActivity, "Errore durante la preparazione delle immagini", Toast.LENGTH_SHORT).show()
-                            }
-                            return@execute
+                            Log.w(IMAGE_SHARE_TAG, "Immagine non condivisibile, skip: $url")
+                            continue
                         }
                         sharedFiles.add(sharedFile)
                     }
 
+                    if (sharedFiles.isEmpty()) {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "Nessuna immagine condivisibile", Toast.LENGTH_SHORT).show()
+                        }
+                        return@execute
+                    }
+
                     runOnUiThread {
-                        openTechnicalSheetShareChooser(sharedFiles, shareText.orEmpty())
+                        openTechnicalSheetShareChooser(sharedFiles)
                     }
                 }
             }
@@ -634,7 +639,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openTechnicalSheetShareChooser(imageFiles: List<File>, shareText: String) {
+    private fun openTechnicalSheetShareChooser(imageFiles: List<File>) {
         if (imageFiles.isEmpty()) {
             Toast.makeText(this, "Immagini non disponibili", Toast.LENGTH_SHORT).show()
             return
@@ -652,7 +657,6 @@ class MainActivity : AppCompatActivity() {
             Intent(Intent.ACTION_SEND).apply {
                 type = "image/*"
                 putExtra(Intent.EXTRA_STREAM, imageUris.first())
-                putExtra(Intent.EXTRA_TEXT, shareText)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 clipData = ClipData.newUri(contentResolver, "engine-image", imageUris.first())
             }
@@ -660,7 +664,6 @@ class MainActivity : AppCompatActivity() {
             Intent(Intent.ACTION_SEND_MULTIPLE).apply {
                 type = "image/*"
                 putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(imageUris))
-                putExtra(Intent.EXTRA_TEXT, shareText)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 clipData = ClipData.newUri(contentResolver, "engine-image", imageUris.first())
             }
