@@ -256,12 +256,14 @@
                     <p class="home-nav-card-desc mb-3">Catalogo motori vendibili direttamente.</p>
                 </a>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/statistics">
-                    <div class="home-nav-card-title">Statistiche</div>
-                    <p class="home-nav-card-desc mb-3">Storico KPI e andamento mensile.</p>
-                </a>
-            </div>
+            <c:if test="${sessionScope.loggedUser != null && (sessionScope.loggedUser.role == 'ADMIN' || sessionScope.loggedUser.role == 'INSPECTOR')}">
+                <div class="col-lg-4 col-md-6">
+                    <a class="home-nav-card card-base" href="<%= request.getContextPath() %>/statistics">
+                        <div class="home-nav-card-title">Statistiche</div>
+                        <p class="home-nav-card-desc mb-3">Storico KPI e andamento mensile.</p>
+                    </a>
+                </div>
+            </c:if>
         </div>
     </div>
 

@@ -1,6 +1,8 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.DashboardController;
+import it.SimoSW.model.User;
+import it.SimoSW.model.UserRole;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -8,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -31,6 +34,14 @@ public class StatisticsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User loggedUser = session != null ? (User) session.getAttribute("loggedUser") : null;
+        UserRole role = loggedUser != null ? loggedUser.getRole() : null;
+        if (role == null || !role.canAccessStatistics()) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
+
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.from(today);
         LocalDate monthStart = currentMonth.atDay(1);

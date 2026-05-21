@@ -87,7 +87,14 @@ public class DatabaseUserDAO implements UserDAO {
         user.setId(rs.getLong("id"));
         user.setUsername(rs.getString("username"));
         user.setPasswordHash(rs.getString("password_hash"));
-        user.setRole(UserRole.valueOf(rs.getString("role").toUpperCase()));
+        String rawRole = rs.getString("role");
+        UserRole role;
+        try {
+            role = UserRole.valueOf(rawRole.toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            role = UserRole.OPERATOR;
+        }
+        user.setRole(role);
 
         return user;
     }

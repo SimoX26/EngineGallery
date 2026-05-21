@@ -3,6 +3,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <c:set var="servletPath" value="${pageContext.request.servletPath}" />
+<c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
+<c:set var="canViewStatistics" value="${loggedRole == 'ADMIN' || loggedRole == 'INSPECTOR'}" />
 
 <style>
     body:not(.login-page) {
@@ -105,13 +107,15 @@
                     </a>
                 </li>
 
-                <li class="nav-item nav-group-start">
-                    <a class="nav-link
-                       ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/statistics">
-                        Statistiche
-                    </a>
-                </li>
+                <c:if test="${canViewStatistics}">
+                    <li class="nav-item nav-group-start">
+                        <a class="nav-link
+                           ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
+                           href="<%= request.getContextPath() %>/statistics">
+                            Statistiche
+                        </a>
+                    </li>
+                </c:if>
 
 
             </ul>

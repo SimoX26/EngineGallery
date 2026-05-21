@@ -2,6 +2,7 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.AuthenticationController;
 import it.SimoSW.model.User;
+import it.SimoSW.model.UserRole;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.security.CookieSecurityUtil;
 import it.SimoSW.util.security.CsrfTokenUtil;
@@ -70,6 +71,8 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
+        ensureLoggedUserRole(req);
+
         if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
             res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
             return;
@@ -81,6 +84,29 @@ public class AuthenticationFilter implements Filter {
     private boolean isLoggedIn(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         return session != null && session.getAttribute("loggedUser") != null;
+    }
+
+    private void ensureLoggedUserRole(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        if (session == null) {
+            return;
+        }
+        Object value = session.getAttribute("loggedUser");
+        if (!(value instanceof User)) {
+            return;
+        }
+        User sessionUser = (User) value;
+        if (sessionUser.getRole() != null) {
+            return;
+        }
+
+        Optional<User> refreshed = authenticationController.findById(sessionUser.getId());
+        if (refreshed.isPresent()) {
+            session.setAttribute("loggedUser", refreshed.get());
+        } else {
+            sessionUser.setRole(UserRole.OPERATOR);
+            session.setAttribute("loggedUser", sessionUser);
+        }
     }
 
     private void ensureAutoLogin(HttpServletRequest req, HttpServletResponse res) {

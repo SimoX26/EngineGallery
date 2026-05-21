@@ -18,7 +18,7 @@ CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('INSPECTOR', 'OPERATOR') NOT NULL
+    role ENUM('ADMIN', 'OPERATOR') NOT NULL
 );
 
 
@@ -131,7 +131,7 @@ INSERT INTO users (username, password_hash, role) VALUES
 ('manuel',    SHA2('rml', 256), 'OPERATOR'),
 ('simone',    SHA2('rml', 256), 'OPERATOR'),
 ('emanuele',  SHA2('rml', 256), 'OPERATOR'),
-('capo',      SHA2('rml', 256), 'OPERATOR'),
+('capo',      SHA2('rml', 256), 'ADMIN'),
 ('federica',  SHA2('rml', 256), 'OPERATOR'),
 ('Marco',     SHA2('rml', 256), 'OPERATOR'),
 ('Larissa',   SHA2('rml', 256), 'OPERATOR');
