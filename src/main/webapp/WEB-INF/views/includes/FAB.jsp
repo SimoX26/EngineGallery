@@ -1,6 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <style>
+  .fab-mobile-center {
+    display: none !important;
+  }
+
 @media (min-width: 769px) {
   .fab-mobile-center {
     display: none !important;
@@ -9,6 +13,7 @@
 
 @media (max-width: 768px) {
   .fab-mobile-center {
+    display: flex !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
@@ -27,7 +32,6 @@
      width: 64px !important;
      height: 64px !important;
      border-radius: 50% !important;
-     display: flex !important;
      align-items: center !important;
      justify-content: center !important;
      background: #1f2933 !important;

@@ -31,8 +31,41 @@
         .engine-tech-panel .engine-detail-header {
             display: flex !important;
             align-items: center !important;
-            justify-content: space-between !important;
+            justify-content: flex-start !important;
             gap: 12px;
+        }
+
+        .engine-detail-layout {
+            --bs-gutter-x: 1rem;
+            --bs-gutter-y: 1rem;
+        }
+
+        .engine-detail-top-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.4rem;
+        }
+
+        .engine-detail-media-panel {
+            max-width: 96%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 992px) {
+            .engine-detail-layout {
+                --bs-gutter-x: 0.9rem;
+            }
+
+            .engine-detail-top-actions {
+                margin-bottom: 0.55rem;
+            }
+
+            .engine-detail-media-panel {
+                max-width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
         }
 
         .engine-tech-panel .engine-detail-list {
@@ -113,6 +146,10 @@
                 gap: 10px;
             }
 
+            .engine-detail-top-actions {
+                margin-bottom: 0.6rem;
+            }
+
             .engine-tech-panel .engine-tech-row {
                 align-items: flex-start;
                 flex-wrap: wrap;
@@ -157,37 +194,38 @@
             <c:out value="${param.statusUpdateError}" />
         </div>
     </c:if>
-    <div class="row g-4 card-base">
+    <div class="row engine-detail-layout card-base">
+        <div class="col-12 engine-detail-top-actions">
+            <c:set var="engineDeliveryDateShare" value="" />
+            <c:if test="${detail.engine.deliveryDate != null}">
+                <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
+                <fmt:formatDate value="${engineDeliveryDateShareParsed}" pattern="dd/MM/yyyy" var="engineDeliveryDateShare" />
+            </c:if>
+            <button
+                    id="engineTechnicalShareBtn"
+                    type="button"
+                    class="share-icon-btn engine-technical-share-btn js-engine-share-btn"
+                    aria-label="Condividi scheda tecnica"
+                    title="Condividi scheda tecnica"
+                    data-engine-code="${detail.engine.engineCode}"
+                    data-share-source="#engineDetailGallery"
+                    data-image-selector=".clickable-image"
+                    data-engine-status="${detail.engine.status}"
+                    data-delivery-date="${engineDeliveryDateShare}">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                    <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                    <circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
+                </svg>
+            </button>
+        </div>
 
         <div class="col-lg-5">
             <div class="engine-detail-section engine-tech-panel">
-                <c:set var="engineDeliveryDateShare" value="" />
-                <c:if test="${detail.engine.deliveryDate != null}">
-                    <fmt:parseDate value="${detail.engine.deliveryDate}" pattern="yyyy-MM-dd" var="engineDeliveryDateShareParsed" />
-                    <fmt:formatDate value="${engineDeliveryDateShareParsed}" pattern="dd/MM/yyyy" var="engineDeliveryDateShare" />
-                </c:if>
-
                 <div class="engine-detail-header mb-3">
                     <h5 class="fw-semibold mb-0">Dati tecnici</h5>
-                    <button
-                            id="engineTechnicalShareBtn"
-                            type="button"
-                            class="share-icon-btn engine-technical-share-btn js-engine-share-btn"
-                            aria-label="Condividi scheda tecnica"
-                            title="Condividi scheda tecnica"
-                            data-engine-code="${detail.engine.engineCode}"
-                            data-share-source="#engineDetailGallery"
-                            data-image-selector=".clickable-image"
-                            data-engine-status="${detail.engine.status}"
-                            data-delivery-date="${engineDeliveryDateShare}">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
-                            <circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
-                            <circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></line>
-                        </svg>
-                    </button>
                 </div>
 
                 <div class="engine-detail-list">
@@ -261,7 +299,7 @@
         </div>
 
         <div class="col-lg-7">
-            <div class="engine-detail-section">
+            <div class="engine-detail-section engine-detail-media-panel">
                 <h5 class="fw-semibold mb-3">Immagini</h5>
 
                 <div id="engineCarousel" class="carousel slide" data-bs-ride="false">

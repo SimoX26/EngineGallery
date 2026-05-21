@@ -298,11 +298,14 @@
                         <div class="engine-kanban-col__header engine-kanban-col__header--waiting">
                             <span>In attesa</span>
                         </div>
-                        <div class="engine-kanban-col__body">
+                        <div class="engine-kanban-col__body" data-kanban-status="WAITING">
                             <c:forEach var="engine" items="${engines}">
                                 <c:if test="${engine.status == 'WAITING'}">
                                     <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                                    <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                                    <a class="engine-kanban-card"
+                                       href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
+                                       data-engine-ref="${engine.engineRef}"
+                                       data-current-status="WAITING">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -334,11 +337,14 @@
                         <div class="engine-kanban-col__header engine-kanban-col__header--working">
                             <span>In lavorazione</span>
                         </div>
-                        <div class="engine-kanban-col__body">
+                        <div class="engine-kanban-col__body" data-kanban-status="WORK_IN_PROGRESS">
                             <c:forEach var="engine" items="${engines}">
                                 <c:if test="${engine.status == 'WORK_IN_PROGRESS'}">
                                     <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                                    <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                                    <a class="engine-kanban-card"
+                                       href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
+                                       data-engine-ref="${engine.engineRef}"
+                                       data-current-status="WORK_IN_PROGRESS">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -370,11 +376,14 @@
                         <div class="engine-kanban-col__header engine-kanban-col__header--ready">
                             <span>Pronto</span>
                         </div>
-                        <div class="engine-kanban-col__body">
+                        <div class="engine-kanban-col__body" data-kanban-status="READY">
                             <c:forEach var="engine" items="${engines}">
                                 <c:if test="${engine.status == 'READY'}">
                                     <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                                    <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                                    <a class="engine-kanban-card"
+                                       href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
+                                       data-engine-ref="${engine.engineRef}"
+                                       data-current-status="READY">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -456,6 +465,19 @@
         const quickStatusValueInput = quickStatusModalForm.querySelector('[data-quick-status-value]');
         const quickStatusRedirectInput = quickStatusModalForm.querySelector('[data-quick-status-redirect]');
         const quickStatusOptions = quickStatusModalForm.querySelectorAll('[data-quick-status-option]');
+        const csrfTokenInput = quickStatusModalForm.querySelector('input[name="csrfToken"]');
+        const kanbanStatusLabels = {
+            WAITING: 'In attesa',
+            WORK_IN_PROGRESS: 'In lavorazione',
+            READY: 'Pronto',
+            DELIVERED: 'Consegnato'
+        };
+        const kanbanStatusClassNames = {
+            WAITING: 'status-stoccato',
+            WORK_IN_PROGRESS: 'status-lavorazione',
+            READY: 'status-ready',
+            DELIVERED: 'status-consegnato'
+        };
 
         const hasActiveFilters = () => {
             const params = ['keyword', 'status', 'customerId'];
@@ -558,6 +580,163 @@
             });
         });
 
+        const canUseKanbanDrag = () => window.matchMedia('(min-width: 992px)').matches;
+
+        const updateKanbanCardBadge = (card, nextStatus) => {
+            const badge = card.querySelector('.badge-status');
+            if (!badge) {
+                return;
+            }
+            badge.textContent = kanbanStatusLabels[nextStatus] || nextStatus;
+            badge.classList.remove('status-stoccato', 'status-lavorazione', 'status-ready', 'status-consegnato');
+            const nextClass = kanbanStatusClassNames[nextStatus];
+            if (nextClass) {
+                badge.classList.add(nextClass);
+            }
+        };
+
+        const postQuickStatusUpdate = async (engineRef, nextStatus) => {
+            const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+            const payload = new URLSearchParams();
+            payload.set('ref', engineRef);
+            payload.set('status', nextStatus);
+            payload.set('redirectTo', 'list');
+            payload.set('csrfToken', csrfToken);
+
+            const response = await fetch('<%= request.getContextPath() %>/engine/detail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: payload.toString(),
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error('Errore HTTP durante aggiornamento stato');
+            }
+
+            const finalUrl = response.url || '';
+            if (finalUrl.includes('statusUpdateError=')) {
+                throw new Error('Aggiornamento stato non riuscito');
+            }
+        };
+
+        const initKanbanDragAndDrop = () => {
+            if (!engineKanbanBoard) {
+                return;
+            }
+
+            const kanbanCards = engineKanbanBoard.querySelectorAll('.engine-kanban-card');
+            const kanbanColumns = engineKanbanBoard.querySelectorAll('.engine-kanban-col__body[data-kanban-status]');
+            let draggedCard = null;
+            let sourceColumn = null;
+            let sourceStatus = '';
+            let isUpdating = false;
+            let dragMoved = false;
+
+            const clearDragVisuals = () => {
+                kanbanColumns.forEach((col) => col.classList.remove('engine-kanban-col__body--drag-over'));
+                if (draggedCard) {
+                    draggedCard.classList.remove('engine-kanban-card--dragging');
+                }
+            };
+
+            kanbanCards.forEach((card) => {
+                card.setAttribute('draggable', canUseKanbanDrag() ? 'true' : 'false');
+
+                card.addEventListener('dragstart', (event) => {
+                    if (!canUseKanbanDrag() || isUpdating) {
+                        event.preventDefault();
+                        return;
+                    }
+                    draggedCard = card;
+                    sourceColumn = card.closest('.engine-kanban-col__body');
+                    sourceStatus = card.dataset.currentStatus || '';
+                    dragMoved = false;
+                    card.classList.add('engine-kanban-card--dragging');
+                    if (event.dataTransfer) {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', card.dataset.engineRef || '');
+                    }
+                });
+
+                card.addEventListener('dragend', () => {
+                    clearDragVisuals();
+                    setTimeout(() => {
+                        draggedCard = null;
+                        sourceColumn = null;
+                        sourceStatus = '';
+                        dragMoved = false;
+                    }, 0);
+                });
+
+                card.addEventListener('click', (event) => {
+                    if (dragMoved) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        dragMoved = false;
+                    }
+                });
+            });
+
+            kanbanColumns.forEach((column) => {
+                column.addEventListener('dragover', (event) => {
+                    if (!draggedCard || !canUseKanbanDrag() || isUpdating) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    column.classList.add('engine-kanban-col__body--drag-over');
+                });
+
+                column.addEventListener('dragleave', () => {
+                    column.classList.remove('engine-kanban-col__body--drag-over');
+                });
+
+                column.addEventListener('drop', async (event) => {
+                    if (!draggedCard || !sourceColumn || isUpdating || !canUseKanbanDrag()) {
+                        return;
+                    }
+                    event.preventDefault();
+                    dragMoved = true;
+                    clearDragVisuals();
+
+                    const destinationStatus = column.dataset.kanbanStatus || '';
+                    const engineRef = draggedCard.dataset.engineRef || '';
+                    if (!engineRef || !destinationStatus || destinationStatus === sourceStatus) {
+                        return;
+                    }
+
+                    isUpdating = true;
+                    const previousColumn = sourceColumn;
+                    const previousStatus = sourceStatus;
+
+                    column.appendChild(draggedCard);
+                    draggedCard.dataset.currentStatus = destinationStatus;
+                    updateKanbanCardBadge(draggedCard, destinationStatus);
+
+                    try {
+                        await postQuickStatusUpdate(engineRef, destinationStatus);
+                    } catch (error) {
+                        previousColumn.appendChild(draggedCard);
+                        draggedCard.dataset.currentStatus = previousStatus;
+                        updateKanbanCardBadge(draggedCard, previousStatus);
+                        alert("Errore durante l'aggiornamento rapido dello stato");
+                    } finally {
+                        isUpdating = false;
+                    }
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                const isDesktopDrag = canUseKanbanDrag();
+                kanbanCards.forEach((card) => {
+                    card.setAttribute('draggable', isDesktopDrag && !isUpdating ? 'true' : 'false');
+                });
+            });
+        };
+
         const applyViewMode = (mode) => {
             let safeMode = 'gallery';
             if (mode === 'list' || mode === 'gallery' || mode === 'kanban') {
@@ -586,6 +765,7 @@
             engineViewKanbanBtn.addEventListener('click', () => applyViewMode('kanban'));
         }
         applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery');
+        initKanbanDragAndDrop();
 
         restoreScrollAfterQuickStatusSubmit();
     </script>

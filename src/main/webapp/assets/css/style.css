@@ -28,12 +28,18 @@
     --border-soft: #e5e7eb;
     --input-bg: #ffffff;
     --input-bg-focus: #f8fbff;
-    --status-waiting-bg: #e2e8f0;
-    --status-waiting-text: #334155;
-    --status-working-bg: #fed7aa;
-    --status-working-text: #9a3412;
-    --status-ready-bg: #34d399;
-    --status-ready-text: #064e3b;
+    --status-waiting-bg: #dbe4ef;
+    --status-waiting-text: #26384d;
+    --status-waiting-border: #9eb0c7;
+    --status-working-bg: #f6d7b3;
+    --status-working-text: #7a3d10;
+    --status-working-border: #d9a979;
+    --status-ready-bg: #b7e5d2;
+    --status-ready-text: #0f5132;
+    --status-ready-border: #7bc3a7;
+    --status-delivered-bg: #c9e0f8;
+    --status-delivered-text: #184a74;
+    --status-delivered-border: #8fb9df;
 }
 
 
@@ -51,6 +57,18 @@
     --border-soft: #344657;
     --input-bg: #1f2c38;
     --input-bg-focus: #263543;
+    --status-waiting-bg: #33465c;
+    --status-waiting-text: #dbe7f5;
+    --status-waiting-border: #4a6380;
+    --status-working-bg: #6f4a28;
+    --status-working-text: #fde7d1;
+    --status-working-border: #8b633d;
+    --status-ready-bg: #235a46;
+    --status-ready-text: #d8f5e9;
+    --status-ready-border: #2f7560;
+    --status-delivered-bg: #2a4d70;
+    --status-delivered-text: #d8eafc;
+    --status-delivered-border: #3b688f;
 }
 
 /* =====================
@@ -337,25 +355,25 @@ body:not(.login-page) {
 .quick-status-option--waiting {
     background-color: var(--status-waiting-bg);
     color: var(--status-waiting-text);
-    border-color: #94a3b8;
+    border-color: var(--status-waiting-border);
 }
 
 .quick-status-option--working {
     background-color: var(--status-working-bg);
     color: var(--status-working-text);
-    border-color: #fdba74;
+    border-color: var(--status-working-border);
 }
 
 .quick-status-option--ready {
     background-color: var(--status-ready-bg);
     color: var(--status-ready-text);
-    border-color: #10b981;
+    border-color: var(--status-ready-border);
 }
 
 .quick-status-option--delivered {
-    background-color: #bae6fd;
-    color: #0c4a6e;
-    border-color: #7dd3fc;
+    background-color: var(--status-delivered-bg);
+    color: var(--status-delivered-text);
+    border-color: var(--status-delivered-border);
 }
 
 .quick-status-option:hover,
@@ -598,8 +616,8 @@ body:not(.login-page) {
 }
 
 .status-consegnato {
-    background-color: #bae6fd;
-    color: #0c4a6e;
+    background-color: var(--status-delivered-bg);
+    color: var(--status-delivered-text);
 }
 
 .quick-status-trigger {
@@ -773,19 +791,19 @@ body:not(.login-page) {
 }
 
 .status-dot-waiting {
-    background-color: #e2e8f0;
+    background-color: var(--status-waiting-bg);
 }
 
 .status-dot-work {
-    background-color: #fed7aa;
+    background-color: var(--status-working-bg);
 }
 
 .status-dot-ready {
-    background-color: #34d399;
+    background-color: var(--status-ready-bg);
 }
 
 .status-dot-delivered {
-    background-color: #bae6fd;
+    background-color: var(--status-delivered-bg);
 }
 
 
@@ -1093,6 +1111,12 @@ body:not(.login-page) {
     gap: 12px;
 }
 
+.engine-kanban-col__body--drag-over {
+    background-color: rgba(59, 130, 246, 0.08);
+    outline: 2px dashed rgba(59, 130, 246, 0.45);
+    outline-offset: -4px;
+}
+
 .engine-kanban-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-soft);
@@ -1106,6 +1130,11 @@ body:not(.login-page) {
     min-height: 102px;
     max-height: 102px;
     padding: 12px 10px;
+}
+
+.engine-kanban-card--dragging {
+    opacity: 0.6;
+    transform: scale(0.98);
 }
 
 .engine-kanban-card:hover,
@@ -2076,58 +2105,19 @@ body.modal-open {
 
     .engine-list-row__body {
         grid-template-areas:
-            "main"
-            "sub"
-            "meta";
-        grid-template-columns: 1fr;
+            "main meta"
+            "sub meta";
+        grid-template-columns: minmax(0, 1.35fr) minmax(140px, 0.9fr);
         gap: 2px;
-        text-align: center;
-    }
-
-    .engine-list-row__main,
-    .engine-list-row__sub,
-    .engine-list-row__meta {
-        text-align: center;
-        justify-self: center;
     }
 
     .engine-list-row__meta {
-        display: none;
+        display: inline-flex;
     }
 
     .engine-list-row .badge-status {
-        grid-column: 1 / -1;
-        justify-self: center;
-    }
-
-    .engine-kanban-card {
-        min-height: 118px;
-        max-height: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 8px;
-    }
-
-    .engine-kanban-card .engine-image,
-    .engine-kanban-card .engine-image-empty {
-        margin-inline: auto;
-    }
-
-    .engine-kanban-card__body {
-        width: 100%;
-        align-items: center;
-        text-align: center;
-    }
-
-    .engine-kanban-card__body .engine-code,
-    .engine-kanban-card__body .engine-client {
-        text-align: center;
-    }
-
-    .engine-kanban-card__body .badge-status {
-        margin-inline: auto;
+        grid-column: auto;
+        justify-self: end;
     }
 
     .customer-row,
@@ -2156,13 +2146,19 @@ body.modal-open {
 
     /* Galleria motori: card piu compatte solo su mobile */
     #engineGalleryGrid {
-        --bs-gutter-x: 0.7rem;
-        --bs-gutter-y: 0.7rem;
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.7rem;
     }
 
     #engineGalleryGrid .engine-card-col {
-        flex: 0 0 33.3333%;
-        max-width: 33.3333%;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     #engineGalleryGrid .engine-image {
@@ -2190,15 +2186,13 @@ body.modal-open {
 
 @media (max-width: 520px) {
     #engineGalleryGrid .engine-card-col {
-        flex: 0 0 50%;
-        max-width: 50%;
+        width: 100%;
     }
 }
 
 @media (max-width: 360px) {
-    #engineGalleryGrid .engine-card-col {
-        flex: 0 0 100%;
-        max-width: 100%;
+    #engineGalleryGrid {
+        grid-template-columns: 1fr;
     }
 }
 
