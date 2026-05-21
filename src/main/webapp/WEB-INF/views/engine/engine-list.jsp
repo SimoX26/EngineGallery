@@ -15,7 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=3">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
     <style>
         .engine-card-link-main {
             height: auto;

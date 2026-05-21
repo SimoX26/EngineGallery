@@ -11,7 +11,7 @@
     <title>Engine Gallery • Nuova prova idraulica</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=9">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
 </head>
 <body data-back-guard-form="1"
       data-back-guard-fallback="<%= request.getContextPath() %>/hydraulic-test/list">

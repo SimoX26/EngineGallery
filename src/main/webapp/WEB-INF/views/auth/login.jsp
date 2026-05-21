@@ -18,7 +18,19 @@
           rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
+    <script>
+        (function () {
+            const key = 'enginegallery.theme';
+            const pref = localStorage.getItem(key) || 'auto';
+            let applied = pref;
+            if (pref === 'auto') {
+                applied = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', applied);
+            document.documentElement.setAttribute('data-theme-preference', pref);
+        })();
+    </script>
 </head>
 
 <body class="login-page">
