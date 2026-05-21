@@ -299,9 +299,24 @@
                 + '</div>';
             document.body.appendChild(overlay);
 
+            const hideOverlay = function () {
+                overlay.classList.remove('is-visible');
+                overlay.setAttribute('aria-hidden', 'true');
+            };
+
             const showOverlay = function () {
                 overlay.classList.add('is-visible');
                 overlay.setAttribute('aria-hidden', 'false');
+            };
+
+            // expose helpers for page-specific async flows (safe no-op if not used)
+            window.showGlobalLoader = showOverlay;
+            window.hideGlobalLoader = hideOverlay;
+
+            const resetStaleUiState = function () {
+                hideOverlay();
+                // Safety reset for stale lock states restored from history cache.
+                document.body.classList.remove('modal-open');
             };
 
             const isSameOrigin = function (url) {
@@ -373,6 +388,21 @@
             window.addEventListener('beforeunload', function () {
                 showOverlay();
             });
+
+            // Critical for back/forward cache restores:
+            // ensure stale loader state is always cleared when the page becomes active again.
+            window.addEventListener('pageshow', function () {
+                resetStaleUiState();
+            });
+
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    resetStaleUiState();
+                }
+            });
+
+            // Initial safety pass in case markup is restored with stale classes.
+            resetStaleUiState();
         }
 
         initPostSubmitBackGuard();
