@@ -119,6 +119,12 @@
             <!-- LOGOUT -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
+                    <a href="<%= request.getContextPath() %>/settings"
+                       class="nav-link ${fn:startsWith(servletPath, '/settings') ? 'active' : ''}">
+                        Impostazioni
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="<%= request.getContextPath() %>/logout"
                        class="nav-link text-danger fw-semibold">
                         Logout
@@ -131,6 +137,41 @@
 </nav>
 
 <script>
+    (function () {
+        const THEME_KEY = 'enginegallery.theme';
+        const root = document.documentElement;
+
+        function getSavedTheme() {
+            const value = localStorage.getItem(THEME_KEY) || 'auto';
+            if (value === 'light' || value === 'dark' || value === 'auto') {
+                return value;
+            }
+            return 'auto';
+        }
+
+        function applyThemeFromPreference(themePreference) {
+            let applied = themePreference;
+            if (themePreference === 'auto') {
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applied = prefersDark ? 'dark' : 'light';
+            }
+            root.setAttribute('data-theme', applied);
+            root.setAttribute('data-theme-preference', themePreference);
+        }
+
+        applyThemeFromPreference(getSavedTheme());
+
+        if (window.matchMedia) {
+            const media = window.matchMedia('(prefers-color-scheme: dark)');
+            media.addEventListener('change', function () {
+                const current = getSavedTheme();
+                if (current === 'auto') {
+                    applyThemeFromPreference(current);
+                }
+            });
+        }
+    })();
+
     (function () {
         const BACK_LOCK_KEY = 'postSubmitBackLock.currentFallback';
         const FINAL_HOME_WALL_KEY = 'postSubmitBackLock.finalHomeWall';
