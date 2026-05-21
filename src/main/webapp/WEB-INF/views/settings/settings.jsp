@@ -22,14 +22,12 @@
     <div class="container">
         <div class="page-header">
             <h1>Impostazioni</h1>
-            <p>Preferenze di tema e notifiche del dispositivo</p>
         </div>
 
         <div class="row g-4">
             <div class="col-12 col-lg-6">
                 <div class="card-base">
-                    <h5 class="fw-semibold mb-2">Tema applicazione</h5>
-                    <p class="text-muted mb-3">Scegli il tema grafico dell'interfaccia.</p>
+                    <h5 class="fw-semibold mb-3">Tema applicazione</h5>
 
                     <label class="form-label fw-semibold" for="themeSelect">Tema</label>
                     <select id="themeSelect" class="form-select">
@@ -43,10 +41,9 @@
 
             <div class="col-12 col-lg-6">
                 <div class="card-base">
-                    <h5 class="fw-semibold mb-2">Notifiche Android</h5>
-                    <p class="text-muted mb-3">Gestione permessi notifiche del browser/app installata.</p>
+                    <h5 class="fw-semibold mb-3">Notifiche Android</h5>
 
-                    <div class="form-check form-switch mb-3">
+                    <div class="form-check form-switch mb-2">
                         <input class="form-check-input" type="checkbox" role="switch" id="notificationsToggle">
                         <label class="form-check-label fw-semibold" for="notificationsToggle">Abilita notifiche</label>
                     </div>
@@ -103,7 +100,7 @@
                     notificationsToggle.checked = false;
                     notificationsToggle.disabled = true;
                     notificationsStatus.textContent = 'Stato notifiche: non supportate';
-                    notificationsHint.textContent = 'Questo browser/dispositivo non supporta l\'API Notification.';
+                    notificationsHint.textContent = 'Browser o dispositivo non compatibile.';
                     return;
                 }
 
@@ -113,20 +110,20 @@
                 if (permission === 'granted' && !userOptOut) {
                     notificationsToggle.checked = true;
                     notificationsStatus.textContent = 'Stato notifiche: abilitate';
-                    notificationsHint.textContent = 'Permesso browser concesso.';
+                    notificationsHint.textContent = 'Permesso browser attivo.';
                     return;
                 }
 
                 if (permission === 'denied') {
                     notificationsToggle.checked = false;
                     notificationsStatus.textContent = 'Stato notifiche: permesso negato';
-                    notificationsHint.textContent = 'Riabilita manualmente dalle impostazioni del browser/dispositivo.';
+                    notificationsHint.textContent = 'Riabilita dalle impostazioni del browser.';
                     return;
                 }
 
                 notificationsToggle.checked = false;
                 notificationsStatus.textContent = 'Stato notifiche: disabilitate';
-                notificationsHint.textContent = 'Attivando lo switch verrà richiesto il permesso del browser.';
+                notificationsHint.textContent = 'Attiva lo switch per richiedere il permesso.';
             }
 
             if (themeSelect) {
