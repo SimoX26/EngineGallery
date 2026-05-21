@@ -7,8 +7,9 @@ const clickableImages = Array.from(document.querySelectorAll('.clickable-image')
 
 const SHARE_LOG_PREFIX = '[engine-share-v2]';
 let shareDelegationInitialized = false;
-const SHARE_FILE_SHARING_ENABLED = false;
-const SHARE_MULTIPLE_FILES_ENABLED = false;
+const SHARE_FILE_SHARING_ENABLED = true;
+const SHARE_MAX_FILES = 3;
+const SHARE_MAX_SINGLE_FILE_BYTES = 8 * 1024 * 1024;
 
 function showShareMessage(message) {
     alert(message);
@@ -79,9 +80,10 @@ function getFileNameFromUrl(url, fallback) {
 
 async function buildShareFiles(imageUrls) {
     const files = [];
+    const limitedUrls = imageUrls.slice(0, SHARE_MAX_FILES);
 
-    for (let i = 0; i < imageUrls.length; i += 1) {
-        const imageUrl = imageUrls[i];
+    for (let i = 0; i < limitedUrls.length; i += 1) {
+        const imageUrl = limitedUrls[i];
         try {
             console.info(`${SHARE_LOG_PREFIX} fetch immagine`, { index: i, imageUrl });
             const response = await fetch(imageUrl, { credentials: 'include' });
@@ -105,6 +107,14 @@ async function buildShareFiles(imageUrls) {
             const blob = await response.blob();
             if (!blob || blob.size === 0) {
                 console.warn(`${SHARE_LOG_PREFIX} blob vuoto`, { imageUrl });
+                continue;
+            }
+            if (blob.size > SHARE_MAX_SINGLE_FILE_BYTES) {
+                console.warn(`${SHARE_LOG_PREFIX} file troppo grande, salto immagine`, {
+                    imageUrl,
+                    size: blob.size,
+                    maxSize: SHARE_MAX_SINGLE_FILE_BYTES
+                });
                 continue;
             }
 
@@ -188,7 +198,13 @@ async function copyFallbackText(text) {
 async function shareEngine({ engineCode, imageUrls }) {
     const safeCode = (engineCode || '').trim() || '-';
     const shareTitle = 'Condivisione motore';
-    const shareText = `Motore: ${safeCode}`;
+    const shareText = buildShareText({
+        engineCode: safeCode,
+        customerName: config.customerName || '',
+        engineRef: config.engineRef || '',
+        engineStatus: config.engineStatus || '',
+        deliveryDate: config.deliveryDate || ''
+    });
     const pageUrl = window.location.href;
 
     console.info(`${SHARE_LOG_PREFIX} share avviato`, {
@@ -208,12 +224,27 @@ async function shareEngine({ engineCode, imageUrls }) {
         return;
     }
 
-    const files = await buildShareFiles(normalizedUrls);
-    console.info(`${SHARE_LOG_PREFIX} file validi pronti`, { count: files.length });
+    if (window.AndroidShareBridge && typeof window.AndroidShareBridge.shareTechnicalSheet === 'function') {
+        if (normalizedUrls.length > 0) {
+            try {
+                window.AndroidShareBridge.shareTechnicalSheet(
+                    JSON.stringify(normalizedUrls.slice(0, SHARE_MAX_FILES)),
+                    `${shareText}\nLink: ${pageUrl}`
+                );
+                console.info(`${SHARE_LOG_PREFIX} share Android bridge avviato`);
+                return;
+            } catch (error) {
+                console.warn(`${SHARE_LOG_PREFIX} Android bridge shareTechnicalSheet errore, fallback Web Share`, error);
+            }
+        }
+    }
 
-    if (!SHARE_FILE_SHARING_ENABLED) {
-        console.warn(`${SHARE_LOG_PREFIX} file sharing disabilitato in configurazione: uso fallback text+url`);
-    } else if (files.length > 0 && typeof navigator.canShare === 'function') {
+    if (SHARE_FILE_SHARING_ENABLED && normalizedUrls.length > 0) {
+        const files = await buildShareFiles(normalizedUrls);
+        console.info(`${SHARE_LOG_PREFIX} file validi pronti`, { count: files.length });
+        if (files.length === 0) {
+            console.warn(`${SHARE_LOG_PREFIX} nessun file immagine valido, uso fallback text+url`);
+        } else if (typeof navigator.canShare === 'function') {
         let canShareSingleFile = false;
         let canShareMultipleFiles = false;
         try {
@@ -233,12 +264,8 @@ async function shareEngine({ engineCode, imageUrls }) {
         });
 
         let filesForShare = files;
-        if (!SHARE_MULTIPLE_FILES_ENABLED && files.length > 1) {
+        if (!canShareMultipleFiles && canShareSingleFile) {
             filesForShare = [files[0]];
-            console.warn(`${SHARE_LOG_PREFIX} Fallback: condivisione singola immagine per compatibilità dispositivo`, {
-                requestedFiles: files.length,
-                sharedFiles: filesForShare.length
-            });
         }
 
         let canShareMultiFiles = false;
@@ -273,7 +300,7 @@ async function shareEngine({ engineCode, imageUrls }) {
                     console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente (file)`);
                     return;
                 }
-                console.error(`${SHARE_LOG_PREFIX} errore share con file`, {
+                console.warn(`${SHARE_LOG_PREFIX} errore share con file, fallback text+url`, {
                     name: error?.name,
                     message: error?.message,
                     stack: error?.stack
@@ -282,10 +309,9 @@ async function shareEngine({ engineCode, imageUrls }) {
         } else {
             console.warn(`${SHARE_LOG_PREFIX} file share non supportato, uso fallback text+url`);
         }
-    } else if (SHARE_FILE_SHARING_ENABLED && files.length > 0) {
-        console.warn(`${SHARE_LOG_PREFIX} navigator.canShare non disponibile, uso fallback text+url`);
-    } else if (SHARE_FILE_SHARING_ENABLED) {
-        console.warn(`${SHARE_LOG_PREFIX} nessun file immagine valido, uso fallback text+url`);
+        } else {
+            console.warn(`${SHARE_LOG_PREFIX} navigator.canShare non disponibile, uso fallback text+url`);
+        }
     }
 
     try {
@@ -302,13 +328,27 @@ async function shareEngine({ engineCode, imageUrls }) {
             console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente (fallback)`);
             return;
         }
-        console.error(`${SHARE_LOG_PREFIX} errore fallback text+url`, {
+        console.warn(`${SHARE_LOG_PREFIX} errore fallback text+url`, {
             name: error?.name,
             message: error?.message,
             stack: error?.stack
         });
         await copyFallbackText(`${shareText}\nLink: ${pageUrl}`);
     }
+}
+
+function buildShareText({ engineCode, customerName, engineRef, engineStatus, deliveryDate }) {
+    const lines = [
+        `Codice motore: ${(engineCode || '').trim() || '-'}`,
+        `Cliente: ${(customerName || '').trim() || '-'}`,
+        `Codice RML: ${(engineRef || '').trim() || '-'}`,
+        `Stato: ${(engineStatus || '').trim() || '-'}`
+    ];
+    const delivery = (deliveryDate || '').trim();
+    if (delivery) {
+        lines.push(`Data consegna: ${delivery}`);
+    }
+    return lines.join('\n');
 }
 
 function initializeShareDelegation() {
@@ -324,17 +364,43 @@ function initializeShareDelegation() {
         }
 
         event.preventDefault();
-        const engineCode = trigger.getAttribute('data-engine-code') || (config.engineRef || '');
+        const engineCode = trigger.getAttribute('data-engine-code') || (config.engineCode || '');
+        const customerName = trigger.getAttribute('data-customer-name') || (config.customerName || '');
+        const engineRef = trigger.getAttribute('data-engine-ref') || (config.engineRef || '');
+        const engineStatus = trigger.getAttribute('data-engine-status') || (config.engineStatus || '');
+        const deliveryDate = trigger.getAttribute('data-delivery-date') || (config.deliveryDate || '');
         const imageUrls = readImageUrlsFromButton(trigger);
 
         console.info(`${SHARE_LOG_PREFIX} share button cliccato`, {
             triggerClass: trigger.className,
             engineCode,
+            customerName,
+            engineRef,
+            engineStatus,
+            deliveryDate,
             imagesFound: imageUrls.length,
             imageUrlsRaw: imageUrls
         });
 
-        await shareEngine({ engineCode, imageUrls });
+        const previousConfig = {
+            customerName: config.customerName,
+            engineRef: config.engineRef,
+            engineStatus: config.engineStatus,
+            deliveryDate: config.deliveryDate
+        };
+
+        config.customerName = customerName;
+        config.engineRef = engineRef;
+        config.engineStatus = engineStatus;
+        config.deliveryDate = deliveryDate;
+        try {
+            await shareEngine({ engineCode, imageUrls });
+        } finally {
+            config.customerName = previousConfig.customerName;
+            config.engineRef = previousConfig.engineRef;
+            config.engineStatus = previousConfig.engineStatus;
+            config.deliveryDate = previousConfig.deliveryDate;
+        }
     });
 }
 
@@ -418,7 +484,11 @@ if (!galleryRoot || clickableImages.length === 0) {
             html: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>',
             title: 'Condividi immagine',
             onInit: (element) => {
-                element.setAttribute('data-engine-code', config.engineRef || '');
+                element.setAttribute('data-engine-code', config.engineCode || '');
+                element.setAttribute('data-customer-name', config.customerName || '');
+                element.setAttribute('data-engine-ref', config.engineRef || '');
+                element.setAttribute('data-engine-status', config.engineStatus || '');
+                element.setAttribute('data-delivery-date', config.deliveryDate || '');
                 element.setAttribute('data-share-source', '#engineDetailGallery');
                 element.setAttribute('data-image-selector', '.clickable-image');
             }

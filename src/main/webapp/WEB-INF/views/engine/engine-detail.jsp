@@ -208,6 +208,8 @@
                     aria-label="Condividi scheda tecnica"
                     title="Condividi scheda tecnica"
                     data-engine-code="${detail.engine.engineCode}"
+                    data-customer-name="${detail.engine.customerName}"
+                    data-engine-ref="${detail.engine.engineRef}"
                     data-share-source="#engineDetailGallery"
                     data-image-selector=".clickable-image"
                     data-engine-status="${detail.engine.status}"
@@ -453,7 +455,11 @@
     })();
 
     window.engineDetailViewerConfig = {
+        engineCode: '${detail.engine.engineCode}',
+        customerName: '${detail.engine.customerName}',
         engineRef: '${detail.engine.engineRef}',
+        engineStatus: '${detail.engine.status}',
+        deliveryDate: '${engineDeliveryDateShare}',
         contextPath: '<%= request.getContextPath() %>'
     };
 </script>
