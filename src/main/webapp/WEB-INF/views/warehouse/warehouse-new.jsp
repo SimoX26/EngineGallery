@@ -112,8 +112,8 @@
                 <a href="<%= request.getContextPath() %>/warehouse/list" class="btn btn-cancel-action w-50">
                     Annulla
                 </a>
-                <button type="submit" class="btn-engine w-50">
-                    Salva articolo
+                <button type="submit" class="btn btn-save-action w-50">
+                    Salva
                 </button>
             </div>
 

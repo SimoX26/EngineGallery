@@ -40,21 +40,26 @@
     --status-delivered-bg: #c9e0f8;
     --status-delivered-text: #184a74;
     --status-delivered-border: #8fb9df;
-    --action-success-bg: #15803d;
-    --action-success-hover: #166534;
-    --action-success-border: #22c55e;
-    --action-success-border-hover: #86efac;
+    --action-success-bg: #2f7a4f;
+    --action-success-hover: #2a6a45;
+    --action-success-border: #4f9a6a;
+    --action-success-border-hover: #6eaf85;
     --action-success-text: #ffffff;
-    --action-danger-bg: #b91c1c;
-    --action-danger-hover: #991b1b;
-    --action-danger-border: #ef4444;
-    --action-danger-border-hover: #fca5a5;
-    --action-danger-outline-border-hover: #dc2626;
+    --action-danger-bg: #a24747;
+    --action-danger-hover: #8f3c3c;
+    --action-danger-border: #bd6a6a;
+    --action-danger-border-hover: #d08a8a;
+    --action-danger-outline-border-hover: #a85a5a;
     --action-danger-text: #ffffff;
-    --action-danger-outline-text: #b91c1c;
-    --action-danger-outline-text-hover: #991b1b;
+    --action-danger-outline-text: #a24747;
+    --action-danger-outline-text-hover: #8f3c3c;
     --action-danger-outline-bg: #ffffff;
-    --action-danger-outline-bg-hover: #fee2e2;
+    --action-danger-outline-bg-hover: #f4e6e6;
+    --action-share-bg: #4f8fb3;
+    --action-share-hover: #447d9c;
+    --action-share-border: #79aecd;
+    --action-share-border-hover: #9bc1d9;
+    --action-share-text: #ffffff;
 }
 
 
@@ -84,21 +89,26 @@
     --status-delivered-bg: #2a4d70;
     --status-delivered-text: #d8eafc;
     --status-delivered-border: #3b688f;
-    --action-success-bg: #15803d;
-    --action-success-hover: #166534;
-    --action-success-border: #22c55e;
-    --action-success-border-hover: #86efac;
+    --action-success-bg: #2f7a4f;
+    --action-success-hover: #2a6a45;
+    --action-success-border: #4f9a6a;
+    --action-success-border-hover: #6eaf85;
     --action-success-text: #ffffff;
-    --action-danger-bg: #b91c1c;
-    --action-danger-hover: #991b1b;
-    --action-danger-border: #ef4444;
-    --action-danger-border-hover: #fca5a5;
-    --action-danger-outline-border-hover: #dc2626;
+    --action-danger-bg: #a24747;
+    --action-danger-hover: #8f3c3c;
+    --action-danger-border: #bd6a6a;
+    --action-danger-border-hover: #d08a8a;
+    --action-danger-outline-border-hover: #a85a5a;
     --action-danger-text: #ffffff;
-    --action-danger-outline-text: #fca5a5;
-    --action-danger-outline-text-hover: #fecaca;
-    --action-danger-outline-bg: #1f2933;
-    --action-danger-outline-bg-hover: #3b1f24;
+    --action-danger-outline-text: #dcb0b0;
+    --action-danger-outline-text-hover: #e8c6c6;
+    --action-danger-outline-bg: #2a2222;
+    --action-danger-outline-bg-hover: #35282a;
+    --action-share-bg: #4f8fb3;
+    --action-share-hover: #447d9c;
+    --action-share-border: #79aecd;
+    --action-share-border-hover: #9bc1d9;
+    --action-share-text: #ffffff;
 }
 
 /* =====================
@@ -1797,8 +1807,8 @@ body.kanban-dragging {
     padding: 0;
     border-radius: 50%;
     border: 1.5px solid rgba(148, 163, 184, 0.35);
-    background: var(--primary);
-    color: #f8fafc;
+    background: var(--action-share-bg);
+    color: var(--action-share-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1819,9 +1829,9 @@ body.kanban-dragging {
 
 .share-icon-btn:hover,
 .share-icon-btn:focus-visible {
-    background: #374151;
-    border-color: #e5e7eb;
-    color: #ffffff;
+    background: var(--action-share-hover);
+    border-color: var(--action-share-border-hover);
+    color: var(--action-share-text);
     transform: scale(1.05);
 }
 
@@ -1850,8 +1860,8 @@ body.kanban-dragging {
     padding: 0 !important;
     border-radius: 50% !important;
     border: 1.5px solid rgba(148, 163, 184, 0.35) !important;
-    background: var(--primary) !important;
-    color: #f8fafc !important;
+    background: var(--action-share-bg) !important;
+    color: var(--action-share-text) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1861,9 +1871,9 @@ body.kanban-dragging {
 
 .engine-technical-share-btn:hover,
 .engine-technical-share-btn:focus-visible {
-    background: #374151 !important;
-    border-color: #e5e7eb !important;
-    color: #ffffff !important;
+    background: var(--action-share-hover) !important;
+    border-color: var(--action-share-border-hover) !important;
+    color: var(--action-share-text) !important;
     transform: scale(1.05);
 }
 
@@ -1889,8 +1899,8 @@ body.kanban-dragging {
     padding: 0 !important;
     border-radius: 50% !important;
     border: 1.5px solid rgba(148, 163, 184, 0.35) !important;
-    background: var(--primary) !important;
-    color: #f8fafc !important;
+    background: var(--action-share-bg) !important;
+    color: var(--action-share-text) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1900,9 +1910,9 @@ body.kanban-dragging {
 
 .pswp__button--custom-share:hover,
 .pswp__button--custom-share:focus-visible {
-    background: #374151 !important;
-    border-color: #e5e7eb !important;
-    color: #ffffff !important;
+    background: var(--action-share-hover) !important;
+    border-color: var(--action-share-border-hover) !important;
+    color: var(--action-share-text) !important;
     transform: scale(1.05);
 }
 

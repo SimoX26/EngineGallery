@@ -102,14 +102,14 @@
         }
 
         .engine-detail-round-btn--share {
-            background: var(--action-success-bg);
-            border-color: var(--action-success-border);
+            background: var(--action-share-bg);
+            border-color: var(--action-share-border);
         }
 
         .engine-detail-round-btn--share:hover,
         .engine-detail-round-btn--share:focus-visible {
-            background: var(--action-success-hover);
-            border-color: var(--action-success-border-hover);
+            background: var(--action-share-hover);
+            border-color: var(--action-share-border-hover);
         }
 
         .engine-detail-actions-toolbar {
@@ -172,16 +172,16 @@
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--share {
-            color: var(--action-success-text);
-            background: var(--action-success-bg);
-            border-color: var(--action-success-border);
+            color: var(--action-share-text);
+            background: var(--action-share-bg);
+            border-color: var(--action-share-border);
         }
 
         .engine-detail-action-btn.engine-detail-action-btn--share:hover,
         .engine-detail-action-btn.engine-detail-action-btn--share:focus-visible {
-            color: var(--action-success-text);
-            background: var(--action-success-hover);
-            border-color: var(--action-success-border-hover);
+            color: var(--action-share-text);
+            background: var(--action-share-hover);
+            border-color: var(--action-share-border-hover);
         }
 
         .engine-detail-media-panel {
