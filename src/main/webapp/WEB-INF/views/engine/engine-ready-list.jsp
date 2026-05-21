@@ -35,12 +35,12 @@
                 <h1>Pronta consegna</h1>
             </div>
 
-            <div class="card-base search-panel-compact">
+            <div class="search-panel-compact">
                 <label for="engineKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
                 <input type="search"
                        id="engineKeywordSearch"
                        class="form-control"
-                       placeholder="Cerca per codice, riferimento, cliente o stato...">
+                       placeholder="cerca...">
                 <div id="engineKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                     Nessun motore corrisponde alla ricerca.
                 </div>

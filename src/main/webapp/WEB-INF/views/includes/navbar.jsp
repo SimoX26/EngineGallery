@@ -5,6 +5,7 @@
 <c:set var="servletPath" value="${pageContext.request.servletPath}" />
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
 <c:set var="canViewStatistics" value="${loggedRole == 'ADMIN' || loggedRole == 'INSPECTOR'}" />
+<c:set var="canViewMaintenance" value="${loggedRole == 'ADMIN'}" />
 
 <style>
     body:not(.login-page) {
@@ -113,6 +114,16 @@
                            ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
                            href="<%= request.getContextPath() %>/statistics">
                             Statistiche
+                        </a>
+                    </li>
+                </c:if>
+
+                <c:if test="${canViewMaintenance}">
+                    <li class="nav-item">
+                        <a class="nav-link
+                           ${fn:startsWith(servletPath, "/maintenance") ? "active" : ""}"
+                           href="<%= request.getContextPath() %>/maintenance">
+                            Manutenzione
                         </a>
                     </li>
                 </c:if>

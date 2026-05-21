@@ -37,68 +37,89 @@
                 <h1><c:out value="${pageTitle}" /></h1>
             </div>
 
-            <div class="card-base search-panel-compact">
-                <form method="get" action="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}" class="mb-0">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                        <label for="engineKeywordSearch" class="form-label fw-semibold mb-0">Ricerca per parola chiave</label>
-                        <button class="btn btn-outline-secondary btn-sm"
-                                type="button"
-                                aria-expanded="false"
-                                aria-controls="engineFiltersPanel"
-                                id="engineFiltersToggle">
-                            Filtri
-                        </button>
-                    </div>
-                    <input type="search"
-                           id="engineKeywordSearch"
-                           name="keyword"
-                           value="<c:out value='${filterKeyword}' />"
-                           class="form-control"
-                           placeholder="Inserisci ciò che stai cercando.. ">
-                    <div class="collapse mt-3" id="engineFiltersPanel">
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <label for="engineStatusFilter" class="form-label small mb-1">Stato</label>
-                                <select id="engineStatusFilter" name="status" class="form-select" ${archiveMode ? 'disabled' : ''}>
-                                    <option value="">Tutti gli stati</option>
-                                    <option value="WAITING" ${filterStatus == 'WAITING' ? 'selected' : ''}>In attesa</option>
-                                    <option value="WORK_IN_PROGRESS" ${filterStatus == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                                    <option value="READY" ${filterStatus == 'READY' ? 'selected' : ''}>Pronto</option>
-                                    <option value="DELIVERED" ${filterStatus == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
-                                </select>
-                                <c:if test="${archiveMode}">
-                                    <input type="hidden" name="status" value="DELIVERED">
-                                </c:if>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="engineCustomerFilter" class="form-label small mb-1">Cliente</label>
-                                <select id="engineCustomerFilter" name="customerId" class="form-select">
-                                    <option value="">Tutti i clienti</option>
-                                    <c:forEach var="entry" items="${customerNames}">
-                                        <option value="${entry.key}" ${filterCustomerId == entry.key ? 'selected' : ''}>
-                                            <c:out value="${entry.value}" default="—" />
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                            <div class="col-12 d-flex justify-content-end gap-2">
-                                <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
-                                   id="engineFiltersReset"
-                                   class="btn btn-link btn-sm text-decoration-none px-0">Reimposta filtri</a>
-                                <button type="submit" class="btn btn-sm btn-engine">Applica filtri</button>
-                            </div>
+            <div class="page-header-filter">
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="engineFiltersPanel"
+                        id="engineFiltersToggle">
+                    Filtri
+                </button>
+            </div>
+
+            <form method="get" action="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}" class="mb-0 search-panel-compact">
+                <label for="engineKeywordSearch" class="form-label fw-semibold mb-0">Ricerca per parola chiave</label>
+                <input type="search"
+                       id="engineKeywordSearch"
+                       name="keyword"
+                       value="<c:out value='${filterKeyword}' />"
+                       class="form-control"
+                       placeholder="cerca...">
+                <div class="collapse mt-3" id="engineFiltersPanel">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label for="engineStatusFilter" class="form-label small mb-1">Stato</label>
+                            <select id="engineStatusFilter" name="status" class="form-select" ${archiveMode ? 'disabled' : ''}>
+                                <option value="">Tutti gli stati</option>
+                                <option value="WAITING" ${filterStatus == 'WAITING' ? 'selected' : ''}>In attesa</option>
+                                <option value="WORK_IN_PROGRESS" ${filterStatus == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
+                                <option value="READY" ${filterStatus == 'READY' ? 'selected' : ''}>Pronto</option>
+                                <option value="DELIVERED" ${filterStatus == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
+                            </select>
+                            <c:if test="${archiveMode}">
+                                <input type="hidden" name="status" value="DELIVERED">
+                            </c:if>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="engineCustomerFilter" class="form-label small mb-1">Cliente</label>
+                            <select id="engineCustomerFilter" name="customerId" class="form-select">
+                                <option value="">Tutti i clienti</option>
+                                <c:forEach var="entry" items="${customerNames}">
+                                    <option value="${entry.key}" ${filterCustomerId == entry.key ? 'selected' : ''}>
+                                        <c:out value="${entry.value}" default="—" />
+                                    </option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end gap-2">
+                            <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
+                               id="engineFiltersReset"
+                               class="btn btn-link btn-sm text-decoration-none px-0">Reimposta filtri</a>
+                            <button type="submit" class="btn btn-sm btn-engine">Applica filtri</button>
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
 
             <div class="page-header-actions">
                 <c:if test="${not archiveMode}">
                     <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
-                        <button type="button" id="engineViewListBtn" class="btn btn-outline-secondary active">Lista</button>
-                        <button type="button" id="engineViewKanbanBtn" class="btn btn-outline-secondary">Kanban</button>
+                        <button type="button"
+                                id="engineViewListBtn"
+                                class="btn btn-outline-secondary active engine-view-toggle-btn"
+                                title="Vista lista"
+                                aria-label="Vista lista">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <line x1="5" y1="7" x2="19" y2="7"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <line x1="5" y1="17" x2="19" y2="17"></line>
+                            </svg>
+                            <span class="visually-hidden">Lista</span>
+                        </button>
+                        <button type="button"
+                                id="engineViewKanbanBtn"
+                                class="btn btn-outline-secondary engine-view-toggle-btn"
+                                title="Vista Kanban"
+                                aria-label="Vista Kanban">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <rect x="4" y="5" width="4" height="14" rx="1"></rect>
+                                <rect x="10" y="8" width="4" height="11" rx="1"></rect>
+                                <rect x="16" y="3" width="4" height="16" rx="1"></rect>
+                            </svg>
+                            <span class="visually-hidden">Kanban</span>
+                        </button>
                     </div>
-                    <a href="<%= request.getContextPath() %>/upload" class="btn btn-engine btn-sm">Aggiungi motore</a>
+                    <a href="<%= request.getContextPath() %>/upload" class="btn btn-sm btn-add-plus">Aggiungi +</a>
                 </c:if>
             </div>
         </div>

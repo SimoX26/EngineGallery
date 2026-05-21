@@ -37,12 +37,12 @@
             <h1>Rubrica Clienti</h1>
         </div>
 
-        <div class="card-base search-panel-compact">
+        <div class="search-panel-compact">
             <label for="customerKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
             <input type="search"
                    id="customerKeywordSearch"
                    class="form-control"
-                   placeholder="Cerca per nome, telefono, azienda, email o note...">
+                   placeholder="cerca...">
             <div id="customerKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                 Nessun cliente corrisponde alla ricerca.
             </div>

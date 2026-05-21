@@ -28,20 +28,20 @@
             <h1>Magazzino</h1>
         </div>
 
-        <div class="card-base search-panel-compact">
+        <div class="search-panel-compact">
             <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
             <input type="search"
                    id="warehouseKeywordSearch"
                    class="form-control"
-                   placeholder="Cerca per nome, codice, ubicazione, quantita o note...">
+                   placeholder="cerca...">
             <div id="warehouseKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                 Nessun articolo corrisponde alla ricerca.
             </div>
         </div>
 
         <div class="page-header-actions">
-            <a href="<%= request.getContextPath() %>/warehouse/new" class="btn-engine">
-                Aggiungi articolo
+            <a href="<%= request.getContextPath() %>/warehouse/new" class="btn btn-sm btn-add-plus">
+                Aggiungi +
             </a>
         </div>
     </div>

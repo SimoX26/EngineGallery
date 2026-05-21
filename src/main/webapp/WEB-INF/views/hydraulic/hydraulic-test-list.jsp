@@ -31,21 +31,21 @@
                 <h1>Prove idrauliche</h1>
             </div>
 
-            <div class="card-base search-panel-compact">
+            <div class="search-panel-compact">
                 <label for="hydraulicKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
                 <input type="search"
                        id="hydraulicKeywordSearch"
                        class="form-control"
                        value="${fn:escapeXml(keyword)}"
-                       placeholder="Cerca per cliente, codice motore o note...">
+                       placeholder="cerca...">
                 <div id="hydraulicKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                     Nessuna prova idraulica corrisponde alla ricerca.
                 </div>
             </div>
 
             <div class="page-header-actions">
-                <a class="btn-engine" href="<%= request.getContextPath() %>/hydraulic-test/new">
-                    Aggiungi prova idraulica
+                <a class="btn btn-sm btn-add-plus" href="<%= request.getContextPath() %>/hydraulic-test/new">
+                    Aggiungi +
                 </a>
             </div>
         </div>
