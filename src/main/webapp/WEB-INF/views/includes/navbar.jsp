@@ -331,6 +331,12 @@
                     return;
                 }
 
+                // Quick-status trigger lives inside clickable cards in some views:
+                // ignore it here to avoid showing loader without real navigation.
+                if (event.target.closest('[data-quick-status-trigger]')) {
+                    return;
+                }
+
                 const link = event.target.closest('a[href]');
                 if (!link) {
                     return;

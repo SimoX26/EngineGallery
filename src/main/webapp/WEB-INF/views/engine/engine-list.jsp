@@ -101,9 +101,9 @@
                 </button>
             </div>
 
-            <div class="page-header-actions">
-                <c:if test="${not archiveMode}">
-                    <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
+            <c:if test="${not archiveMode}">
+                <div class="page-header-actions page-header-actions--view">
+                    <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista motori">
                         <button type="button"
                                 id="engineViewListBtn"
                                 class="btn btn-outline-secondary engine-view-toggle-btn"
@@ -142,9 +142,11 @@
                             <span class="visually-hidden">Kanban</span>
                         </button>
                     </div>
+                </div>
+                <div class="page-header-actions page-header-actions--add">
                     <a href="<%= request.getContextPath() %>/upload" class="btn btn-sm btn-add-plus">Aggiungi +</a>
-                </c:if>
-            </div>
+                </div>
+            </c:if>
         </div>
 
         <c:if test="${not empty error}">
@@ -183,6 +185,11 @@
                     <div class="engine-list-row__body">
                         <div class="engine-list-row__main">${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" /></div>
                         <div class="engine-list-row__sub">${engine.engineRef}</div>
+                        <div class="engine-list-row__meta">
+                            <span class="engine-list-row__intake-label">Ingresso:</span>
+                            <fmt:parseDate value="${engine.intakeDate}" pattern="yyyy-MM-dd" var="engineListIntakeDateParsed" />
+                            <span class="engine-list-row__intake-value"><fmt:formatDate value="${engineListIntakeDateParsed}" pattern="dd / MM / yyyy" /></span>
+                        </div>
                     </div>
                     <button type="button"
                             class="badge-status quick-status-trigger
@@ -551,19 +558,12 @@
             });
         });
 
-        const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
         const applyViewMode = (mode) => {
             let safeMode = 'gallery';
             if (mode === 'list' || mode === 'gallery' || mode === 'kanban') {
                 safeMode = mode;
             }
             if (!engineGalleryGrid || !engineKanbanBoard || !engineListView) {
-                return;
-            }
-            if (!isDesktop()) {
-                engineListView.classList.add('d-none');
-                engineGalleryGrid.classList.remove('d-none');
-                engineKanbanBoard.classList.add('d-none');
                 return;
             }
             const showKanban = safeMode === 'kanban';
@@ -585,7 +585,6 @@
             engineViewGalleryBtn.addEventListener('click', () => applyViewMode('gallery'));
             engineViewKanbanBtn.addEventListener('click', () => applyViewMode('kanban'));
         }
-        window.addEventListener('resize', () => applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery'));
         applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery');
 
         restoreScrollAfterQuickStatusSubmit();
