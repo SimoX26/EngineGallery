@@ -4,7 +4,7 @@
 
 <c:set var="servletPath" value="${pageContext.request.servletPath}" />
 
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top"
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top"
      style="background-color: #1f2933;">
     <div class="container-fluid">
 
