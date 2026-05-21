@@ -214,9 +214,11 @@
                                     ${st == 'READY' ? 'status-ready' : ''}
                                     ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
                                     data-quick-status-trigger
-                                    data-target-form="quickStatusFormDetail"
+                                    data-engine-ref="${detail.engine.engineRef}"
+                                    data-current-status="${st}"
                                     aria-expanded="false"
-                                    aria-controls="quickStatusFormDetail"
+                                    aria-controls="quickStatusModalDetail"
+                                    aria-haspopup="dialog"
                                     title="Clicca per modificare rapidamente lo stato">
                                 <c:choose>
                                     <c:when test="${st == 'WAITING'}">In attesa</c:when>
@@ -226,23 +228,6 @@
                                     <c:otherwise>${st}</c:otherwise>
                                 </c:choose>
                             </button>
-                            <form id="quickStatusFormDetail"
-                                  class="quick-status-form d-none mt-2"
-                                  data-quick-status-form
-                                  data-current-status="${st}"
-                                  action="<%= request.getContextPath() %>/engine/detail"
-                                  method="post">
-                                <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
-                                <input type="hidden" name="ref" value="${detail.engine.engineRef}">
-                                <input type="hidden" name="status" value="${st}" data-quick-status-value>
-                                <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
-                                </div>
-                                <div class="small text-muted mt-1 quick-status-feedback d-none" data-quick-status-feedback aria-live="polite"></div>
-                            </form>
                         </span>
                     </div>
 
@@ -331,73 +316,100 @@
     </div>
 </div>
 
+<div class="modal fade" id="quickStatusModalDetail" tabindex="-1" aria-labelledby="quickStatusModalDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="quickStatusModalDetailLabel">Cambia stato motore</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickStatusModalFormDetail"
+                      action="<%= request.getContextPath() %>/engine/detail"
+                      method="post">
+                    <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+                    <input type="hidden" name="ref" value="${detail.engine.engineRef}" data-quick-status-ref>
+                    <input type="hidden" name="status" value="" data-quick-status-value>
+                    <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
+                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
+                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
+                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
+                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     (function () {
         const quickStatusTrigger = document.querySelector('[data-quick-status-trigger]');
-        const quickStatusForm = document.querySelector('[data-quick-status-form]');
-        if (!quickStatusTrigger || !quickStatusForm) {
+        const quickStatusModalEl = document.getElementById('quickStatusModalDetail');
+        const quickStatusModalForm = document.getElementById('quickStatusModalFormDetail');
+        if (!quickStatusTrigger || !quickStatusModalEl || !quickStatusModalForm) {
             return;
         }
 
-        const statusValueInput = quickStatusForm.querySelector('[data-quick-status-value]');
-        const feedback = quickStatusForm.querySelector('[data-quick-status-feedback]');
-        const statusOptions = quickStatusForm.querySelectorAll('[data-quick-status-option]');
-        const showFeedback = (message) => {
-            if (!feedback) {
-                return;
-            }
-            feedback.textContent = message;
-            feedback.classList.remove('d-none');
-        };
-
-        const closeQuickStatusForm = () => {
-            quickStatusForm.classList.add('d-none');
-            quickStatusTrigger.setAttribute('aria-expanded', 'false');
-        };
+        const quickStatusModal = bootstrap.Modal.getOrCreateInstance(quickStatusModalEl);
+        const statusValueInput = quickStatusModalForm.querySelector('[data-quick-status-value]');
+        const statusOptions = quickStatusModalForm.querySelectorAll('[data-quick-status-option]');
+        const quickStatusRef = quickStatusModalForm.querySelector('[data-quick-status-ref]');
 
         quickStatusTrigger.addEventListener('click', () => {
-            const isHidden = quickStatusForm.classList.contains('d-none');
-            if (!isHidden) {
-                closeQuickStatusForm();
-                return;
-            }
-            quickStatusForm.classList.remove('d-none');
+            const currentStatus = quickStatusTrigger.dataset.currentStatus || '';
+            quickStatusModalForm.dataset.currentStatus = currentStatus;
+            quickStatusRef.value = quickStatusTrigger.dataset.engineRef || quickStatusRef.value;
+            statusOptions.forEach((button) => {
+                const isCurrent = button.dataset.statusValue === currentStatus;
+                button.disabled = isCurrent;
+                button.classList.toggle('is-current', isCurrent);
+            });
             quickStatusTrigger.setAttribute('aria-expanded', 'true');
-            const firstOption = quickStatusForm.querySelector('[data-quick-status-option]');
+            quickStatusModal.show();
+            const firstOption = quickStatusModalForm.querySelector('[data-quick-status-option]:not(:disabled)');
             if (firstOption) {
                 firstOption.focus();
             }
         });
 
+        quickStatusModalEl.addEventListener('hidden.bs.modal', () => {
+            quickStatusTrigger.setAttribute('aria-expanded', 'false');
+            statusOptions.forEach((button) => {
+                button.disabled = false;
+                button.classList.remove('is-current');
+            });
+            delete quickStatusModalForm.dataset.submitting;
+        });
+
         statusOptions.forEach((optionButton) => {
             optionButton.addEventListener('click', () => {
-                if (quickStatusForm.dataset.submitting === '1') {
+                if (quickStatusModalForm.dataset.submitting === '1') {
                     return;
                 }
 
                 const selectedStatus = optionButton.dataset.statusValue;
-                const currentStatus = quickStatusForm.dataset.currentStatus;
+                const currentStatus = quickStatusModalForm.dataset.currentStatus;
 
                 if (!selectedStatus) {
                     return;
                 }
 
                 if (selectedStatus === currentStatus) {
-                    showFeedback('Stato gia selezionato.');
-                    closeQuickStatusForm();
+                    quickStatusModal.hide();
                     return;
                 }
 
                 if (statusValueInput) {
                     statusValueInput.value = selectedStatus;
                 }
-                quickStatusForm.dataset.submitting = '1';
-                showFeedback('Salvataggio in corso...');
+                quickStatusModalForm.dataset.submitting = '1';
                 statusOptions.forEach((button) => {
                     button.disabled = true;
                 });
-                quickStatusForm.requestSubmit();
+                quickStatusModal.hide();
+                quickStatusModalForm.requestSubmit();
             });
         });
     })();

@@ -1,6 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 
 <style>
+@media (min-width: 769px) {
+  .fab-mobile-center {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
   .fab-mobile-center {
     left: 50% !important;

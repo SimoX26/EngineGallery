@@ -45,37 +45,47 @@
                        value="<c:out value='${filterKeyword}' />"
                        class="form-control"
                        placeholder="cerca...">
-                <div class="collapse mt-3" id="engineFiltersPanel">
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <label for="engineStatusFilter" class="form-label small mb-1">Stato</label>
-                            <select id="engineStatusFilter" name="status" class="form-select" ${archiveMode ? 'disabled' : ''}>
-                                <option value="">Tutti gli stati</option>
-                                <option value="WAITING" ${filterStatus == 'WAITING' ? 'selected' : ''}>In attesa</option>
-                                <option value="WORK_IN_PROGRESS" ${filterStatus == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                                <option value="READY" ${filterStatus == 'READY' ? 'selected' : ''}>Pronto</option>
-                                <option value="DELIVERED" ${filterStatus == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
-                            </select>
-                            <c:if test="${archiveMode}">
-                                <input type="hidden" name="status" value="DELIVERED">
-                            </c:if>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="engineCustomerFilter" class="form-label small mb-1">Cliente</label>
-                            <select id="engineCustomerFilter" name="customerId" class="form-select">
-                                <option value="">Tutti i clienti</option>
-                                <c:forEach var="entry" items="${customerNames}">
-                                    <option value="${entry.key}" ${filterCustomerId == entry.key ? 'selected' : ''}>
-                                        <c:out value="${entry.value}" default="—" />
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="col-12 d-flex justify-content-end gap-2">
-                            <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
-                               id="engineFiltersReset"
-                               class="btn btn-link btn-sm text-decoration-none px-0">Reimposta filtri</a>
-                            <button type="submit" class="btn btn-sm btn-engine">Applica filtri</button>
+                <div class="modal fade" id="engineFiltersModal" tabindex="-1" aria-labelledby="engineFiltersModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-semibold" id="engineFiltersModalLabel">Filtri motori</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label for="engineStatusFilter" class="form-label small mb-1">Stato</label>
+                                        <select id="engineStatusFilter" name="status" class="form-select" ${archiveMode ? 'disabled' : ''}>
+                                            <option value="">Tutti gli stati</option>
+                                            <option value="WAITING" ${filterStatus == 'WAITING' ? 'selected' : ''}>In attesa</option>
+                                            <option value="WORK_IN_PROGRESS" ${filterStatus == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
+                                            <option value="READY" ${filterStatus == 'READY' ? 'selected' : ''}>Pronto</option>
+                                            <option value="DELIVERED" ${filterStatus == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
+                                        </select>
+                                        <c:if test="${archiveMode}">
+                                            <input type="hidden" name="status" value="DELIVERED">
+                                        </c:if>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="engineCustomerFilter" class="form-label small mb-1">Cliente</label>
+                                        <select id="engineCustomerFilter" name="customerId" class="form-select">
+                                            <option value="">Tutti i clienti</option>
+                                            <c:forEach var="entry" items="${customerNames}">
+                                                <option value="${entry.key}" ${filterCustomerId == entry.key ? 'selected' : ''}>
+                                                    <c:out value="${entry.value}" default="—" />
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-end gap-2">
+                                <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
+                                   id="engineFiltersReset"
+                                   class="btn btn-link btn-sm text-decoration-none px-0">Reimposta filtri</a>
+                                <button type="submit" class="btn btn-sm btn-engine">Applica filtri</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -85,7 +95,7 @@
                 <button class="btn btn-outline-secondary btn-sm"
                         type="button"
                         aria-expanded="false"
-                        aria-controls="engineFiltersPanel"
+                        aria-controls="engineFiltersModal"
                         id="engineFiltersToggle">
                     Filtri
                 </button>
@@ -182,9 +192,12 @@
                                         ${st == 'READY' ? 'status-ready' : ''}
                                         ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
                                         data-quick-status-trigger
-                                        data-target-form="quickStatusForm-${engine.id}"
+                                        data-engine-ref="${engine.engineRef}"
+                                        data-current-status="${st}"
+                                        data-redirect-to="${archiveMode ? 'archive' : 'list'}"
+                                        aria-haspopup="dialog"
                                         aria-expanded="false"
-                                        aria-controls="quickStatusForm-${engine.id}"
+                                        aria-controls="quickStatusModal"
                                         title="Clicca per modificare rapidamente lo stato">
 
                                     <c:choose>
@@ -203,24 +216,6 @@
                                 </div>
                             </c:if>
 
-                            <form id="quickStatusForm-${engine.id}"
-                                  class="quick-status-form d-none mt-2"
-                                  data-quick-status-form
-                                  data-current-status="${st}"
-                                  action="<%= request.getContextPath() %>/engine/detail"
-                                  method="post">
-                                <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
-                                <input type="hidden" name="redirectTo" value="${archiveMode ? 'archive' : 'list'}">
-                                <input type="hidden" name="ref" value="${engine.engineRef}">
-                                <input type="hidden" name="status" value="${st}" data-quick-status-value>
-                                <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
-                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
-                                </div>
-                                <div class="small text-muted mt-1 quick-status-feedback d-none" data-quick-status-feedback aria-live="polite"></div>
-                            </form>
                         </div>
                     </div>
 
@@ -233,7 +228,7 @@
             <div id="engineKanbanBoard" class="engine-kanban-board d-none">
                 <div class="engine-kanban-board__scroll">
                     <div class="engine-kanban-col">
-                        <div class="engine-kanban-col__header">
+                        <div class="engine-kanban-col__header engine-kanban-col__header--waiting">
                             <span>In attesa</span>
                         </div>
                         <div class="engine-kanban-col__body">
@@ -269,7 +264,7 @@
                     </div>
 
                     <div class="engine-kanban-col">
-                        <div class="engine-kanban-col__header">
+                        <div class="engine-kanban-col__header engine-kanban-col__header--working">
                             <span>In lavorazione</span>
                         </div>
                         <div class="engine-kanban-col__body">
@@ -305,7 +300,7 @@
                     </div>
 
                     <div class="engine-kanban-col">
-                        <div class="engine-kanban-col__header">
+                        <div class="engine-kanban-col__header engine-kanban-col__header--ready">
                             <span>Pronto</span>
                         </div>
                         <div class="engine-kanban-col__body">
@@ -345,20 +340,53 @@
 
     </div>
 
+    <div class="modal fade" id="quickStatusModal" tabindex="-1" aria-labelledby="quickStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="quickStatusModalLabel">Cambia stato motore</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="quickStatusModalForm"
+                          action="<%= request.getContextPath() %>/engine/detail"
+                          method="post">
+                        <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+                        <input type="hidden" name="redirectTo" value="${archiveMode ? 'archive' : 'list'}" data-quick-status-redirect>
+                        <input type="hidden" name="ref" value="" data-quick-status-ref>
+                        <input type="hidden" name="status" value="" data-quick-status-value>
+                        <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
+                            <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
+                            <button type="button" class="quick-status-option" data-status-value="WORK_IN_PROGRESS" data-quick-status-option>In lavorazione</button>
+                            <button type="button" class="quick-status-option" data-status-value="READY" data-quick-status-option>Pronto</button>
+                            <button type="button" class="quick-status-option" data-status-value="DELIVERED" data-quick-status-option>Consegnato</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const filtersToggle = document.getElementById('engineFiltersToggle');
-        const filtersPanel = document.getElementById('engineFiltersPanel');
-        const quickStatusForms = document.querySelectorAll('[data-quick-status-form]');
+        const filtersModalEl = document.getElementById('engineFiltersModal');
         const quickStatusTriggers = document.querySelectorAll('[data-quick-status-trigger]');
         const engineViewListBtn = document.getElementById('engineViewListBtn');
         const engineViewKanbanBtn = document.getElementById('engineViewKanbanBtn');
         const engineGalleryGrid = document.getElementById('engineGalleryGrid');
         const engineKanbanBoard = document.getElementById('engineKanbanBoard');
-        const filtersCollapse = bootstrap.Collapse.getOrCreateInstance(filtersPanel, { toggle: false });
+        const filtersModal = bootstrap.Modal.getOrCreateInstance(filtersModalEl);
         const queryParams = new URLSearchParams(window.location.search);
         const quickStatusScrollKey = 'engineList.quickStatus.scrollY';
         const viewStorageKey = 'engineList.viewMode';
+        const quickStatusModalEl = document.getElementById('quickStatusModal');
+        const quickStatusModal = bootstrap.Modal.getOrCreateInstance(quickStatusModalEl);
+        const quickStatusModalForm = document.getElementById('quickStatusModalForm');
+        const quickStatusRefInput = quickStatusModalForm.querySelector('[data-quick-status-ref]');
+        const quickStatusValueInput = quickStatusModalForm.querySelector('[data-quick-status-value]');
+        const quickStatusRedirectInput = quickStatusModalForm.querySelector('[data-quick-status-redirect]');
+        const quickStatusOptions = quickStatusModalForm.querySelectorAll('[data-quick-status-option]');
 
         const hasActiveFilters = () => {
             const params = ['keyword', 'status', 'customerId'];
@@ -369,25 +397,9 @@
         };
 
         if (hasActiveFilters()) {
-            filtersCollapse.show();
             filtersToggle.classList.remove('btn-outline-secondary');
             filtersToggle.classList.add('btn-secondary');
         }
-
-        const closeQuickStatusForm = (form) => {
-            if (!form || form.classList.contains('d-none')) {
-                return;
-            }
-            form.classList.add('d-none');
-            const trigger = document.querySelector(`[data-target-form="${form.id}"]`);
-            if (trigger) {
-                trigger.setAttribute('aria-expanded', 'false');
-            }
-        };
-
-        const closeAllQuickStatusForms = () => {
-            quickStatusForms.forEach((form) => closeQuickStatusForm(form));
-        };
 
         const restoreScrollAfterQuickStatusSubmit = () => {
             const hasQuickStatusFeedback = queryParams.get('statusUpdated') === '1'
@@ -408,10 +420,10 @@
             });
         };
 
-        filtersPanel.addEventListener('shown.bs.collapse', () => {
+        filtersModalEl.addEventListener('shown.bs.modal', () => {
             filtersToggle.setAttribute('aria-expanded', 'true');
         });
-        filtersPanel.addEventListener('hidden.bs.collapse', () => {
+        filtersModalEl.addEventListener('hidden.bs.modal', () => {
             filtersToggle.setAttribute('aria-expanded', 'false');
             if (!hasActiveFilters()) {
                 filtersToggle.classList.add('btn-outline-secondary');
@@ -420,76 +432,58 @@
         });
 
         filtersToggle.addEventListener('click', () => {
-            filtersCollapse.toggle();
+            filtersModal.show();
+        });
+
+        const resetQuickStatusOptions = () => {
+            quickStatusOptions.forEach((button) => {
+                button.disabled = false;
+                button.classList.remove('is-current');
+            });
+            delete quickStatusModalForm.dataset.submitting;
+        };
+
+        quickStatusModalEl.addEventListener('hidden.bs.modal', () => {
+            resetQuickStatusOptions();
+            quickStatusTriggers.forEach((trigger) => trigger.setAttribute('aria-expanded', 'false'));
         });
 
         quickStatusTriggers.forEach((trigger) => {
             trigger.addEventListener('click', () => {
-                const targetFormId = trigger.dataset.targetForm;
-                const targetForm = document.getElementById(targetFormId);
-                if (!targetForm) {
-                    return;
-                }
+                resetQuickStatusOptions();
+                quickStatusRefInput.value = trigger.dataset.engineRef || '';
+                quickStatusRedirectInput.value = trigger.dataset.redirectTo || '${archiveMode ? "archive" : "list"}';
+                const currentStatus = trigger.dataset.currentStatus || '';
+                quickStatusModalForm.dataset.currentStatus = currentStatus;
 
-                const isHidden = targetForm.classList.contains('d-none');
-                closeAllQuickStatusForms();
+                quickStatusOptions.forEach((button) => {
+                    const isCurrent = button.dataset.statusValue === currentStatus;
+                    button.classList.toggle('is-current', isCurrent);
+                    button.disabled = isCurrent;
+                });
 
-                if (isHidden) {
-                    targetForm.classList.remove('d-none');
-                    trigger.setAttribute('aria-expanded', 'true');
-                    const firstStatusOption = targetForm.querySelector('[data-quick-status-option]');
-                    if (firstStatusOption) {
-                        firstStatusOption.focus();
-                    }
-                }
+                trigger.setAttribute('aria-expanded', 'true');
+                quickStatusModal.show();
             });
         });
 
-        quickStatusForms.forEach((form) => {
-            const statusValueInput = form.querySelector('[data-quick-status-value]');
-            const feedback = form.querySelector('[data-quick-status-feedback]');
-            const statusOptions = form.querySelectorAll('[data-quick-status-option]');
-            const showFeedback = (message) => {
-                if (!feedback) {
+        quickStatusOptions.forEach((button) => {
+            button.addEventListener('click', () => {
+                if (quickStatusModalForm.dataset.submitting === '1') {
                     return;
                 }
-                feedback.textContent = message;
-                feedback.classList.remove('d-none');
-            };
-
-            statusOptions.forEach((optionButton) => {
-                optionButton.addEventListener('click', () => {
-                    if (form.dataset.submitting === '1') {
-                        return;
-                    }
-
-                    const selectedStatus = optionButton.dataset.statusValue;
-                    const currentStatus = form.dataset.currentStatus;
-
-                    if (!selectedStatus) {
-                        return;
-                    }
-
-                    if (selectedStatus === currentStatus) {
-                        showFeedback('Stato gia selezionato.');
-                        closeQuickStatusForm(form);
-                        return;
-                    }
-
-                    if (statusValueInput) {
-                        statusValueInput.value = selectedStatus;
-                    }
-                    form.dataset.submitting = '1';
-                    showFeedback('Salvataggio in corso...');
-                    statusOptions.forEach((button) => {
-                        button.disabled = true;
-                    });
-                    form.requestSubmit();
-                });
-            });
-
-            form.addEventListener('submit', () => {
+                const selectedStatus = button.dataset.statusValue;
+                if (!selectedStatus) {
+                    return;
+                }
+                quickStatusModalForm.dataset.submitting = '1';
+                quickStatusValueInput.value = selectedStatus;
                 sessionStorage.setItem(quickStatusScrollKey, String(window.scrollY));
+                quickStatusOptions.forEach((opt) => {
+                    opt.disabled = true;
+                });
+                quickStatusModal.hide();
+                quickStatusModalForm.requestSubmit();
             });
         });
 

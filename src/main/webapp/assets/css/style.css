@@ -23,6 +23,12 @@
     --border-soft: #e5e7eb;
     --input-bg: #ffffff;
     --input-bg-focus: #f8fbff;
+    --status-waiting-bg: #e2e8f0;
+    --status-waiting-text: #334155;
+    --status-working-bg: #fed7aa;
+    --status-working-text: #9a3412;
+    --status-ready-bg: #34d399;
+    --status-ready-text: #064e3b;
 }
 
 
@@ -223,6 +229,13 @@ body:not(.login-page) {
     color: #fff;
     border: 1px solid #1f2933;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    min-height: 42px;
+    padding: 0.55rem 1rem;
+    border-radius: 10px;
+    white-space: nowrap;
 }
 
 .btn-add-plus:hover,
@@ -271,6 +284,12 @@ body:not(.login-page) {
 .quick-status-option:hover,
 .quick-status-option:focus {
     background-color: var(--input-bg-focus);
+}
+
+.quick-status-option.is-current,
+.quick-status-option:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .quick-status-trigger {
@@ -459,19 +478,19 @@ body:not(.login-page) {
 }
 
 .status-stoccato {
-    background-color: #e2e8f0;
-    color: #334155;
+    background-color: var(--status-waiting-bg);
+    color: var(--status-waiting-text);
 }
 
 .status-lavorazione {
-    background-color: #fed7aa;
-    color: #9a3412;
+    background-color: var(--status-working-bg);
+    color: var(--status-working-text);
 }
 
 
 .status-ready {
-    background-color: #34d399;
-    color: #064e3b;
+    background-color: var(--status-ready-bg);
+    color: var(--status-ready-text);
 }
 
 .status-consegnato {
@@ -828,12 +847,34 @@ body:not(.login-page) {
 .engine-kanban-col__header {
     padding: 12px 14px;
     border-bottom: 1px solid var(--border-soft);
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 1.02rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--text-main);
     position: sticky;
     top: 0;
     background-color: var(--bg-card);
     z-index: 1;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+}
+
+.engine-kanban-col__header--waiting {
+    background-color: var(--status-waiting-bg);
+    color: var(--status-waiting-text);
+}
+
+.engine-kanban-col__header--working {
+    background-color: var(--status-working-bg);
+    color: var(--status-working-text);
+}
+
+.engine-kanban-col__header--ready {
+    background-color: var(--status-ready-bg);
+    color: var(--status-ready-text);
 }
 
 .engine-kanban-col__body {
@@ -1137,6 +1178,10 @@ body:not(.login-page) {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.customer-directory-card {
+    padding: 16px 18px;
+}
+
 .customer-card-link {
     display: block;
     text-decoration: none;
@@ -1167,10 +1212,20 @@ body:not(.login-page) {
     line-height: 1.25;
 }
 
+.customer-directory-card .customer-main {
+    font-size: 1.04rem;
+}
+
 .customer-meta {
     font-size: 0.9rem;
     color: var(--text-muted);
     margin-bottom: 2px;
+}
+
+.customer-directory-card .customer-meta,
+.customer-directory-card .customer-field > div:last-child {
+    font-size: 0.88rem;
+    line-height: 1.25;
 }
 
 .customer-field > div:last-child {

@@ -62,8 +62,14 @@
         <c:forEach var="customer" items="${customers}">
             <a href="<%= request.getContextPath() %>/customer/detail?id=${customer.id}"
                class="customer-card-link customer-card-item"
+               data-customer-id="${customer.id}"
+               data-customer-name="${fn:escapeXml(customer.name)}"
+               data-customer-company="${fn:escapeXml(customer.companyName)}"
+               data-customer-phone="${fn:escapeXml(customer.phone)}"
+               data-customer-email="${fn:escapeXml(customer.email)}"
+               data-customer-notes="${fn:escapeXml(customer.notes)}"
                data-search="${fn:escapeXml(customer.name)} ${fn:escapeXml(customer.phone)} ${fn:escapeXml(customer.companyName)} ${fn:escapeXml(customer.email)} ${fn:escapeXml(customer.notes)}">
-                <div class="card-base customer-card">
+                <div class="card-base customer-card customer-directory-card">
 
                     <div class="customer-row">
 
@@ -95,12 +101,57 @@
 
 </div>
 
+<div class="modal fade" id="customerDetailOverlay" tabindex="-1" aria-labelledby="customerDetailOverlayLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="customerDetailOverlayLabel">Dettaglio cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="engine-detail-list mb-0">
+                    <dt>Nome:</dt>
+                    <dd id="customerOverlayName">—</dd>
+
+                    <dt>Azienda:</dt>
+                    <dd id="customerOverlayCompany">—</dd>
+
+                    <dt>Telefono:</dt>
+                    <dd id="customerOverlayPhone">—</dd>
+
+                    <dt>Email:</dt>
+                    <dd id="customerOverlayEmail">—</dd>
+
+                    <dt>Note:</dt>
+                    <dd id="customerOverlayNotes">—</dd>
+                </dl>
+            </div>
+            <div class="modal-footer justify-content-center justify-content-md-end gap-2">
+                <a id="customerOverlayEditLink" href="#" class="btn btn-detail-edit px-4">Modifica</a>
+                <a id="customerOverlayDeleteLink" href="#" class="btn btn-detail-delete px-4">Elimina</a>
+                <a id="customerOverlayDetailLink" href="#" class="btn btn-outline-secondary px-4">Apri pagina</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const searchInput = document.getElementById('customerKeywordSearch');
     const customerCards = document.querySelectorAll('.customer-card-item');
     const emptyState = document.getElementById('customerKeywordEmptyState');
+    const customerDetailOverlayEl = document.getElementById('customerDetailOverlay');
+    const customerDetailOverlay = bootstrap.Modal.getOrCreateInstance(customerDetailOverlayEl);
+    const customerOverlayName = document.getElementById('customerOverlayName');
+    const customerOverlayCompany = document.getElementById('customerOverlayCompany');
+    const customerOverlayPhone = document.getElementById('customerOverlayPhone');
+    const customerOverlayEmail = document.getElementById('customerOverlayEmail');
+    const customerOverlayNotes = document.getElementById('customerOverlayNotes');
+    const customerOverlayEditLink = document.getElementById('customerOverlayEditLink');
+    const customerOverlayDeleteLink = document.getElementById('customerOverlayDeleteLink');
+    const customerOverlayDetailLink = document.getElementById('customerOverlayDetailLink');
+    const contextPath = '<%= request.getContextPath() %>';
 
     const normalizeText = (value) => (value || '')
         .toString()
@@ -126,6 +177,34 @@
     };
 
     searchInput.addEventListener('input', applyCustomerFilter);
+
+    const withFallback = (value) => {
+        const normalized = (value || '').trim();
+        return normalized.length > 0 ? normalized : '—';
+    };
+
+    customerCards.forEach((card) => {
+        card.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            const customerId = card.dataset.customerId;
+            if (!customerId) {
+                return;
+            }
+
+            customerOverlayName.textContent = withFallback(card.dataset.customerName);
+            customerOverlayCompany.textContent = withFallback(card.dataset.customerCompany);
+            customerOverlayPhone.textContent = withFallback(card.dataset.customerPhone);
+            customerOverlayEmail.textContent = withFallback(card.dataset.customerEmail);
+            customerOverlayNotes.textContent = withFallback(card.dataset.customerNotes);
+
+            customerOverlayEditLink.href = `${contextPath}/customer/edit?id=${customerId}`;
+            customerOverlayDeleteLink.href = `${contextPath}/customer/delete?id=${customerId}`;
+            customerOverlayDetailLink.href = `${contextPath}/customer/detail?id=${customerId}`;
+
+            customerDetailOverlay.show();
+        });
+    });
 </script>
 
 </body>
