@@ -97,8 +97,10 @@
                        id="customerInput"
                        name="customer"
                        class="form-control"
-                       autocomplete="off"
-                       list="customerOptions"
+                       autocomplete="new-password"
+                       autocorrect="off"
+                       autocapitalize="none"
+                       spellcheck="false"
                        value="${customer}"
                        required>
                     <div id="customerSuggestions"

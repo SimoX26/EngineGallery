@@ -224,6 +224,24 @@ body:not(.login-page) {
     min-height: 42px;
 }
 
+.page-header-with-search .search-panel-compact .form-control,
+.page-header-with-search .page-header-filter .btn,
+.page-header-with-search .page-header-actions .btn-add-plus {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.page-header-with-search .search-panel-compact .form-control::placeholder {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-muted);
+    opacity: 0.78;
+}
+
 .btn-add-plus {
     background: #1f2933;
     color: #fff;
@@ -283,9 +301,33 @@ body:not(.login-page) {
     min-height: 46px;
 }
 
+.quick-status-option--waiting {
+    background-color: var(--status-waiting-bg);
+    color: var(--status-waiting-text);
+    border-color: #94a3b8;
+}
+
+.quick-status-option--working {
+    background-color: var(--status-working-bg);
+    color: var(--status-working-text);
+    border-color: #fdba74;
+}
+
+.quick-status-option--ready {
+    background-color: var(--status-ready-bg);
+    color: var(--status-ready-text);
+    border-color: #10b981;
+}
+
+.quick-status-option--delivered {
+    background-color: #bae6fd;
+    color: #0c4a6e;
+    border-color: #7dd3fc;
+}
+
 .quick-status-option:hover,
 .quick-status-option:focus {
-    background-color: var(--input-bg-focus);
+    filter: brightness(0.97);
 }
 
 .quick-status-option.is-current,
@@ -1962,8 +2004,8 @@ body.modal-open {
 
     /* Galleria motori: card piu compatte solo su mobile */
     #engineGalleryGrid {
-        --bs-gutter-x: 0.8rem;
-        --bs-gutter-y: 0.8rem;
+        --bs-gutter-x: 0.7rem;
+        --bs-gutter-y: 0.7rem;
     }
 
     #engineGalleryGrid .engine-card-col {
@@ -1972,20 +2014,20 @@ body.modal-open {
     }
 
     #engineGalleryGrid .engine-image {
-        aspect-ratio: 4 / 3;
+        aspect-ratio: 16 / 9;
     }
 
     #engineGalleryGrid .engine-body {
-        padding: 12px;
+        padding: 10px;
     }
 
     #engineGalleryGrid .engine-code {
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         line-height: 1.2;
     }
 
     #engineGalleryGrid .engine-client {
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         line-height: 1.2;
     }
 

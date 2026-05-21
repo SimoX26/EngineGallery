@@ -331,10 +331,10 @@
                     <input type="hidden" name="ref" value="${detail.engine.engineRef}" data-quick-status-ref>
                     <input type="hidden" name="status" value="" data-quick-status-value>
                     <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
-                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
-                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
-                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
-                        <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
+                        <button type="button" class="quick-status-option quick-status-option--waiting" data-quick-status-option data-status-value="WAITING">In attesa</button>
+                        <button type="button" class="quick-status-option quick-status-option--working" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
+                        <button type="button" class="quick-status-option quick-status-option--ready" data-quick-status-option data-status-value="READY">Pronto</button>
+                        <button type="button" class="quick-status-option quick-status-option--delivered" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
                     </div>
                 </form>
             </div>
