@@ -91,39 +91,97 @@
         }
 
         .engine-detail-round-btn--delete {
-            background: #b91c1c;
-            border-color: #ef4444;
+            background: var(--action-danger-bg);
+            border-color: var(--action-danger-border);
         }
 
         .engine-detail-round-btn--delete:hover,
         .engine-detail-round-btn--delete:focus-visible {
-            background: #991b1b;
-            border-color: #fca5a5;
+            background: var(--action-danger-hover);
+            border-color: var(--action-danger-border-hover);
         }
 
         .engine-detail-round-btn--share {
-            background: #15803d;
-            border-color: #22c55e;
+            background: var(--action-success-bg);
+            border-color: var(--action-success-border);
         }
 
         .engine-detail-round-btn--share:hover,
         .engine-detail-round-btn--share:focus-visible {
-            background: #166534;
-            border-color: #86efac;
+            background: var(--action-success-hover);
+            border-color: var(--action-success-border-hover);
         }
 
-        .engine-detail-desktop-share-btn {
-            background: #15803d;
-            border: 1px solid #22c55e;
-            color: #f8fafc;
+        .engine-detail-actions-toolbar {
+            gap: 0.7rem !important;
+            align-items: center;
+        }
+
+        .engine-detail-action-btn {
+            min-width: 148px;
+            height: 44px;
+            padding: 0 1.05rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
             font-weight: 600;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-width: 1px;
+            transition: all 0.2s ease;
         }
 
-        .engine-detail-desktop-share-btn:hover,
-        .engine-detail-desktop-share-btn:focus-visible {
-            background: #166534;
-            border-color: #86efac;
+        .engine-detail-action-btn.engine-detail-action-btn--back {
+            color: var(--text-main);
+            background-color: var(--bg-card);
+            border-color: var(--border-soft);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--back:hover,
+        .engine-detail-action-btn.engine-detail-action-btn--back:focus-visible {
+            color: var(--text-main);
+            background-color: var(--input-bg-focus);
+            border-color: var(--border-soft);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--edit {
             color: #ffffff;
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--edit:hover,
+        .engine-detail-action-btn.engine-detail-action-btn--edit:focus-visible {
+            color: #ffffff;
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--delete {
+            color: var(--action-danger-outline-text);
+            background-color: var(--action-danger-outline-bg);
+            border-color: var(--action-danger-border);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--delete:hover,
+        .engine-detail-action-btn.engine-detail-action-btn--delete:focus-visible {
+            color: var(--action-danger-outline-text-hover);
+            background-color: var(--action-danger-outline-bg-hover);
+            border-color: var(--action-danger-outline-border-hover);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--share {
+            color: var(--action-success-text);
+            background: var(--action-success-bg);
+            border-color: var(--action-success-border);
+        }
+
+        .engine-detail-action-btn.engine-detail-action-btn--share:hover,
+        .engine-detail-action-btn.engine-detail-action-btn--share:focus-visible {
+            color: var(--action-success-text);
+            background: var(--action-success-hover);
+            border-color: var(--action-success-border-hover);
         }
 
         .engine-detail-media-panel {
@@ -459,21 +517,21 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-12 detail-actions d-flex flex-wrap justify-content-center gap-2 gap-md-3">
-                <a href="<%= request.getContextPath() %>/engine/list" class="btn btn-outline-secondary px-4">
+            <div class="col-12 detail-actions engine-detail-actions-toolbar d-flex flex-wrap justify-content-center">
+                <a href="<%= request.getContextPath() %>/engine/list" class="btn engine-detail-action-btn engine-detail-action-btn--back">
                     Indietro
                 </a>
 
-                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}" class="btn btn-detail-edit px-4">
+                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}" class="btn engine-detail-action-btn engine-detail-action-btn--edit">
                     Modifica
                 </a>
 
-                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}" class="btn btn-detail-delete px-4">
+                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}" class="btn engine-detail-action-btn engine-detail-action-btn--delete">
                     Elimina
                 </a>
                 <button
                         type="button"
-                        class="btn px-4 engine-detail-desktop-share-btn js-engine-share-btn"
+                        class="btn engine-detail-action-btn engine-detail-action-btn--share js-engine-share-btn"
                         aria-label="Condividi scheda tecnica"
                         title="Condividi scheda tecnica"
                         data-share-mode="all-motor-images"

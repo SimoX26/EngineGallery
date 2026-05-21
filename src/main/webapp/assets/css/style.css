@@ -40,6 +40,21 @@
     --status-delivered-bg: #c9e0f8;
     --status-delivered-text: #184a74;
     --status-delivered-border: #8fb9df;
+    --action-success-bg: #15803d;
+    --action-success-hover: #166534;
+    --action-success-border: #22c55e;
+    --action-success-border-hover: #86efac;
+    --action-success-text: #ffffff;
+    --action-danger-bg: #b91c1c;
+    --action-danger-hover: #991b1b;
+    --action-danger-border: #ef4444;
+    --action-danger-border-hover: #fca5a5;
+    --action-danger-outline-border-hover: #dc2626;
+    --action-danger-text: #ffffff;
+    --action-danger-outline-text: #b91c1c;
+    --action-danger-outline-text-hover: #991b1b;
+    --action-danger-outline-bg: #ffffff;
+    --action-danger-outline-bg-hover: #fee2e2;
 }
 
 
@@ -69,6 +84,21 @@
     --status-delivered-bg: #2a4d70;
     --status-delivered-text: #d8eafc;
     --status-delivered-border: #3b688f;
+    --action-success-bg: #15803d;
+    --action-success-hover: #166534;
+    --action-success-border: #22c55e;
+    --action-success-border-hover: #86efac;
+    --action-success-text: #ffffff;
+    --action-danger-bg: #b91c1c;
+    --action-danger-hover: #991b1b;
+    --action-danger-border: #ef4444;
+    --action-danger-border-hover: #fca5a5;
+    --action-danger-outline-border-hover: #dc2626;
+    --action-danger-text: #ffffff;
+    --action-danger-outline-text: #fca5a5;
+    --action-danger-outline-text-hover: #fecaca;
+    --action-danger-outline-bg: #1f2933;
+    --action-danger-outline-bg-hover: #3b1f24;
 }
 
 /* =====================
@@ -1699,16 +1729,16 @@ body.kanban-dragging {
 }
 
 .btn-detail-delete {
-    color: #b91c1c;
-    background-color: #fff;
-    border: 1px solid #ef4444;
+    color: var(--action-danger-outline-text);
+    background-color: var(--action-danger-outline-bg);
+    border: 1px solid var(--action-danger-border);
 }
 
 .btn-detail-delete:hover,
 .btn-detail-delete:focus {
-    color: #991b1b;
-    background-color: #fee2e2;
-    border-color: #dc2626;
+    color: var(--action-danger-outline-text-hover);
+    background-color: var(--action-danger-outline-bg-hover);
+    border-color: var(--action-danger-outline-border-hover);
 }
 
 .btn-detail-delete:disabled {
@@ -1719,30 +1749,30 @@ body.kanban-dragging {
 }
 
 .btn-cancel-action {
-    color: #ffffff;
-    background-color: #b91c1c;
-    border: 1px solid #ef4444;
+    color: var(--action-danger-text);
+    background-color: var(--action-danger-bg);
+    border: 1px solid var(--action-danger-border);
 }
 
 .btn-cancel-action:hover,
 .btn-cancel-action:focus {
-    color: #ffffff;
-    background-color: #991b1b;
-    border-color: #fca5a5;
+    color: var(--action-danger-text);
+    background-color: var(--action-danger-hover);
+    border-color: var(--action-danger-border-hover);
 }
 
 .btn-save-action {
-    color: #f8fafc;
-    background-color: #15803d;
-    border: 1px solid #22c55e;
+    color: var(--action-success-text);
+    background-color: var(--action-success-bg);
+    border: 1px solid var(--action-success-border);
     font-weight: 600;
 }
 
 .btn-save-action:hover,
 .btn-save-action:focus {
-    color: #ffffff;
-    background-color: #166534;
-    border-color: #86efac;
+    color: var(--action-success-text);
+    background-color: var(--action-success-hover);
+    border-color: var(--action-success-border-hover);
 }
 
 .detail-actions .btn {
