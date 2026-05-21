@@ -641,6 +641,35 @@
             const touchLongPressDelayMs = 500;
             const touchScrollCancelThreshold = 10;
             let pointerSession = null;
+            let scrollLockY = null;
+
+            const lockPageScrollForKanbanDrag = () => {
+                if (document.body.classList.contains('kanban-dragging')) {
+                    return;
+                }
+                scrollLockY = window.scrollY || window.pageYOffset || 0;
+                document.body.classList.add('kanban-dragging');
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${scrollLockY}px`;
+                document.body.style.left = '0';
+                document.body.style.right = '0';
+                document.body.style.width = '100%';
+            };
+
+            const unlockPageScrollForKanbanDrag = () => {
+                if (!document.body.classList.contains('kanban-dragging')) {
+                    return;
+                }
+                document.body.classList.remove('kanban-dragging');
+                document.body.style.removeProperty('position');
+                document.body.style.removeProperty('top');
+                document.body.style.removeProperty('left');
+                document.body.style.removeProperty('right');
+                document.body.style.removeProperty('width');
+                const restoreY = typeof scrollLockY === 'number' ? scrollLockY : 0;
+                scrollLockY = null;
+                window.scrollTo(0, restoreY);
+            };
 
             const clearDragVisuals = () => {
                 kanbanColumns.forEach((col) => col.classList.remove('engine-kanban-col__body--drag-over'));
@@ -757,6 +786,7 @@
                         dragMoved = true;
                         suppressNextCardClick = true;
                         pointerSession.card.setPointerCapture(event.pointerId);
+                        lockPageScrollForKanbanDrag();
                         pointerSession.card.classList.remove('engine-kanban-card--pressing');
                         pointerSession.card.classList.add('engine-kanban-card--touch-dragging');
                         pointerSession.card.classList.add('engine-kanban-card--dragging');
@@ -792,6 +822,7 @@
                         session.card.releasePointerCapture(event.pointerId);
                     }
 
+                    unlockPageScrollForKanbanDrag();
                     clearDragVisuals();
                     const destinationColumn = cancelled ? null : session.currentColumn;
                     const destinationStatus = destinationColumn ? (destinationColumn.dataset.kanbanStatus || '') : '';
@@ -830,6 +861,17 @@
                 card.addEventListener('pointercancel', (event) => {
                     finishPointerSession(event, true);
                 });
+
+                card.addEventListener('lostpointercapture', () => {
+                    if (pointerSession && pointerSession.card === card && pointerSession.dragging) {
+                        unlockPageScrollForKanbanDrag();
+                        clearDragVisuals();
+                    }
+                });
+
+                card.addEventListener('touchcancel', () => {
+                    unlockPageScrollForKanbanDrag();
+                }, { passive: true });
             });
 
             kanbanColumns.forEach((column) => {
@@ -879,6 +921,16 @@
                         isUpdating = false;
                     }
                 });
+            });
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState !== 'visible') {
+                    unlockPageScrollForKanbanDrag();
+                }
+            });
+
+            window.addEventListener('pagehide', () => {
+                unlockPageScrollForKanbanDrag();
             });
 
             window.addEventListener('resize', () => {

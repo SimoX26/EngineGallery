@@ -1277,6 +1277,12 @@ body:not(.login-page) {
     transform: scale(1.01);
 }
 
+body.kanban-dragging {
+    overflow: hidden !important;
+    touch-action: none;
+    overscroll-behavior: none;
+}
+
 .engine-kanban-card:hover,
 .engine-kanban-card:focus {
     color: inherit;
