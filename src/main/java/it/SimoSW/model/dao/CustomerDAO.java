@@ -2,6 +2,7 @@ package it.SimoSW.model.dao;
 
 import it.SimoSW.model.Customer;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,5 +27,7 @@ public interface CustomerDAO {
     int countEnginesByCustomerId(Long customerId);
 
     int countClientiConMotoriInOfficina();
+
+    int countCreatedBetween(LocalDate from, LocalDate to);
 
 }

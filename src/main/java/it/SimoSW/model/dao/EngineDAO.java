@@ -41,6 +41,8 @@ public interface EngineDAO {
        Dashboard / KPI
        ========================= */
     int countByStatus(EngineStatus status);
+    int countByIntakeBetween(LocalDate from, LocalDate to);
+    int countByStatusAndIntakeBetween(EngineStatus status, LocalDate from, LocalDate to);
     int countInWorkshop();
     int countDeliveredBetween(LocalDate from, LocalDate to);
     int countDistinctCustomersDeliveredBetween(LocalDate from, LocalDate to);

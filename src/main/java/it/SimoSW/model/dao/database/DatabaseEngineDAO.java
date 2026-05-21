@@ -63,6 +63,17 @@ public class DatabaseEngineDAO implements EngineDAO {
 
     private static final String COUNT_BY_STATUS_SQL =
             "SELECT COUNT(*) FROM engines WHERE status = ?";
+    private static final String COUNT_BY_INTAKE_BETWEEN_SQL = """
+        SELECT COUNT(*)
+        FROM engines
+        WHERE intake_date BETWEEN ? AND ?
+    """;
+    private static final String COUNT_BY_STATUS_AND_INTAKE_BETWEEN_SQL = """
+        SELECT COUNT(*)
+        FROM engines
+        WHERE status = ?
+          AND intake_date BETWEEN ? AND ?
+    """;
 
     private static final String COUNT_IN_WORKSHOP_SQL =
             "SELECT COUNT(*) FROM engines WHERE status IN ('WAITING', 'WORK_IN_PROGRESS', 'READY')";
@@ -258,6 +269,29 @@ public class DatabaseEngineDAO implements EngineDAO {
     @Override
     public int countByStatus(EngineStatus status) {
         return count(COUNT_BY_STATUS_SQL, ps -> ps.setString(1, status.name()));
+    }
+
+    @Override
+    public int countByIntakeBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+        return count(COUNT_BY_INTAKE_BETWEEN_SQL, ps -> {
+            ps.setDate(1, Date.valueOf(from));
+            ps.setDate(2, Date.valueOf(to));
+        });
+    }
+
+    @Override
+    public int countByStatusAndIntakeBetween(EngineStatus status, LocalDate from, LocalDate to) {
+        if (status == null || from == null || to == null) {
+            throw new IllegalArgumentException("status/from/to non possono essere null");
+        }
+        return count(COUNT_BY_STATUS_AND_INTAKE_BETWEEN_SQL, ps -> {
+            ps.setString(1, status.name());
+            ps.setDate(2, Date.valueOf(from));
+            ps.setDate(3, Date.valueOf(to));
+        });
     }
 
     @Override

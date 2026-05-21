@@ -25,31 +25,31 @@
         <c:set var="canViewMaintenance" value="${loggedRole == 'ADMIN'}" />
 
         <div class="page-header dashboard-crm-header">
-            <h1>Dashboard</h1>
-            <p>Panoramica operativa rapida per officina, test e magazzino.</p>
+            <h1>Dashboard mese corrente</h1>
+            <p>Panoramica operativa di ${meseCorrenteLabel}.</p>
         </div>
 
         <div class="row g-3 g-lg-4 mb-4 dashboard-kpi-grid">
             <div class="col-6 col-lg-2">
                 <a href="<%= request.getContextPath() %>/engine/list" class="kpi-card-link">
                     <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">Motori totali</div>
-                        <div class="kpi-value">${motoriTotali}</div>
+                        <div class="kpi-title">Inseriti nel mese</div>
+                        <div class="kpi-value">${motoriInseritiMese}</div>
                     </div>
                 </a>
             </div>
             <div class="col-6 col-lg-2">
-                <a href="<%= request.getContextPath() %>/engine/list?status=WAITING" class="kpi-card-link">
+                <a href="<%= request.getContextPath() %>/engine/list?status=DELIVERED" class="kpi-card-link">
                     <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">In attesa</div>
-                        <div class="kpi-value">${motoriInAttesa}</div>
+                        <div class="kpi-title">Consegnati nel mese</div>
+                        <div class="kpi-value">${motoriConsegnatiMese}</div>
                     </div>
                 </a>
             </div>
             <div class="col-6 col-lg-2">
                 <a href="<%= request.getContextPath() %>/engine/list?status=WORK_IN_PROGRESS" class="kpi-card-link">
                     <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">In lavorazione</div>
+                        <div class="kpi-title">In lavorazione ora</div>
                         <div class="kpi-value">${workInProgressEngines}</div>
                     </div>
                 </a>
@@ -57,24 +57,24 @@
             <div class="col-6 col-lg-2">
                 <a href="<%= request.getContextPath() %>/engine/list?status=READY" class="kpi-card-link">
                     <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">Pronti</div>
-                        <div class="kpi-value">${motoriPronti}</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-lg-2">
-                <a href="<%= request.getContextPath() %>/engine/list?status=DELIVERED" class="kpi-card-link">
-                    <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">Consegnati</div>
-                        <div class="kpi-value">${motoriConsegnatiTotali}</div>
+                        <div class="kpi-title">Pronti nel mese</div>
+                        <div class="kpi-value">${motoriProntiMese}</div>
                     </div>
                 </a>
             </div>
             <div class="col-6 col-lg-2">
                 <a href="<%= request.getContextPath() %>/hydraulic-test/list" class="kpi-card-link">
                     <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">Prove idrauliche</div>
-                        <div class="kpi-value">${proveIdraulicheTotali}</div>
+                        <div class="kpi-title">Prove del mese</div>
+                        <div class="kpi-value">${proveIdraulicheMese}</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-lg-2">
+                <a href="<%= request.getContextPath() %>/customer/list" class="kpi-card-link">
+                    <div class="kpi-card dashboard-kpi-card">
+                        <div class="kpi-title">Nuovi clienti mese</div>
+                        <div class="kpi-value">${clientiNuoviMese}</div>
                     </div>
                 </a>
             </div>
@@ -127,7 +127,7 @@
                     </div>
                     <div class="dashboard-warehouse-metrics mt-3">
                         <div class="dashboard-warehouse-metric">
-                            <span class="dashboard-warehouse-label">Articoli</span>
+                            <span class="dashboard-warehouse-label">Articoli totali</span>
                             <strong>${articoliMagazzinoTotali}</strong>
                         </div>
                         <div class="dashboard-warehouse-metric">
@@ -139,8 +139,8 @@
                             <strong>${articoliEsauriti}</strong>
                         </div>
                         <div class="dashboard-warehouse-metric">
-                            <span class="dashboard-warehouse-label">Clienti</span>
-                            <strong>${clientiTotali}</strong>
+                            <span class="dashboard-warehouse-label">Tempo medio mese</span>
+                            <strong>${tempoMedioLavorazioneMese} gg</strong>
                         </div>
                     </div>
                 </div>
@@ -151,7 +151,7 @@
             <div class="col-12 col-xl-6">
                 <div class="table-container h-100">
                     <div class="dashboard-section-head mb-3">
-                        <h5 class="mb-0 fw-semibold">Motori recenti</h5>
+                        <h5 class="mb-0 fw-semibold">Motori recenti del mese</h5>
                     </div>
                     <c:choose>
                         <c:when test="${not empty ultimiMotori}">
@@ -203,35 +203,12 @@
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="table-container h-100">
                     <div class="dashboard-section-head mb-3">
-                        <h5 class="mb-0 fw-semibold">Clienti recenti</h5>
+                        <h5 class="mb-0 fw-semibold">Prove idrauliche del mese</h5>
                     </div>
                     <c:choose>
-                        <c:when test="${not empty clientiRecenti}">
+                        <c:when test="${not empty proveIdraulicheRecentiMese}">
                             <div class="list-group dashboard-recent-list">
-                                <c:forEach var="cliente" items="${clientiRecenti}">
-                                    <a href="<%= request.getContextPath() %>/customer/list" class="list-group-item list-group-item-action">
-                                        <div class="fw-semibold"><c:out value="${cliente.name}" default="—" /></div>
-                                        <small class="text-muted"><c:out value="${cliente.companyName}" default="Nessuna azienda" /></small>
-                                    </a>
-                                </c:forEach>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <p class="text-muted mb-0">Nessun cliente disponibile.</p>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-xl-3">
-                <div class="table-container h-100">
-                    <div class="dashboard-section-head mb-3">
-                        <h5 class="mb-0 fw-semibold">Prove idrauliche recenti</h5>
-                    </div>
-                    <c:choose>
-                        <c:when test="${not empty proveIdraulicheRecenti}">
-                            <div class="list-group dashboard-recent-list">
-                                <c:forEach var="test" items="${proveIdraulicheRecenti}">
+                                <c:forEach var="test" items="${proveIdraulicheRecentiMese}">
                                     <a href="<%= request.getContextPath() %>/hydraulic-test/detail?id=${test.id}" class="list-group-item list-group-item-action">
                                         <div class="fw-semibold"><c:out value="${test.engineCode}" default="—" /></div>
                                         <small class="text-muted"><c:out value="${test.customerName}" default="Cliente non disponibile" /></small>
@@ -240,7 +217,7 @@
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <p class="text-muted mb-0">Nessuna prova idraulica disponibile.</p>
+                            <p class="text-muted mb-0">Nessuna prova idraulica registrata nel mese.</p>
                         </c:otherwise>
                     </c:choose>
                 </div>

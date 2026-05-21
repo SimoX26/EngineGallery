@@ -3,6 +3,7 @@ package it.SimoSW.controller.app;
 import it.SimoSW.model.Customer;
 import it.SimoSW.model.dao.CustomerDAO;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,13 @@ public class CustomerController {
 
     public List<Customer> getAllCustomers() {
         return customerDAO.findAll();
+    }
+
+    public int countCustomersCreatedBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            return 0;
+        }
+        return customerDAO.countCreatedBetween(from, to);
     }
 
     public Long findOrCreateCustomerId(String name) {

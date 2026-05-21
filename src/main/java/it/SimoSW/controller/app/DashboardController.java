@@ -106,9 +106,18 @@ public class DashboardController {
         if (safeFrom.isAfter(to)) {
             return 0;
         }
-        return (int) engineDAO.findAll().stream()
-                .filter(engine -> !engine.getIntakeDate().isBefore(safeFrom) && !engine.getIntakeDate().isAfter(to))
-                .count();
+        return engineDAO.countByIntakeBetween(safeFrom, to);
+    }
+
+    public int getMotoriProntiNelPeriodo(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+        LocalDate safeFrom = from.isBefore(STATISTICS_START_DATE) ? STATISTICS_START_DATE : from;
+        if (safeFrom.isAfter(to)) {
+            return 0;
+        }
+        return engineDAO.countByStatusAndIntakeBetween(EngineStatus.READY, safeFrom, to);
     }
 
     public int getTempoMedioLavorazioneNelPeriodo(LocalDate from, LocalDate to) {

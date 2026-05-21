@@ -72,26 +72,36 @@ public class DashboardServlet extends HttpServlet {
         }
 
         request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);
-        request.setAttribute("motoriTotali", engineController.getAllEngines().size());
+        request.setAttribute("motoriInseritiMese", dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("motoriProntiMese", dashboardController.getMotoriProntiNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("proveIdraulicheMese", hydraulicTestController.countHydraulicTestsBetween(monthStart, monthEnd));
+        request.setAttribute("clientiNuoviMese", customerController.countCustomersCreatedBetween(monthStart, monthEnd));
+
         request.setAttribute("motoriInAttesa", dashboardController.getMotoriByStatus(EngineStatus.WAITING));
         request.setAttribute("workInProgressEngines", dashboardController.getWorkInProgressEngines());
         request.setAttribute("motoriPronti", dashboardController.getMotoriByStatus(EngineStatus.READY));
         request.setAttribute("motoriConsegnatiTotali", dashboardController.getMotoriByStatus(EngineStatus.DELIVERED));
-        request.setAttribute("motoriInseritiMese", dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("tempoMedioLavorazioneMese", dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("clientiTotali", customerController.getAllCustomers().size());
         request.setAttribute("articoliMagazzinoTotali", dashboardController.getWarehouseItemCount());
         request.setAttribute("quantitaMagazzinoTotale", dashboardController.getWarehouseTotalQuantity());
         request.setAttribute("articoliEsauriti", dashboardController.getWarehouseOutOfStockCount());
 
-        List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(8);
+        List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(40).stream()
+                .filter(engine -> engine.getIntakeDate() != null
+                        && !engine.getIntakeDate().isBefore(monthStart)
+                        && !engine.getIntakeDate().isAfter(monthEnd))
+                .limit(8)
+                .toList();
         request.setAttribute("ultimiMotori", ultimiMotori);
 
         List<WarehouseItem> ultimiArticoliMagazzino = dashboardController.listaUltimiArticoliMagazzino(6);
         request.setAttribute("ultimiArticoliMagazzino", ultimiArticoliMagazzino);
         List<HydraulicTest> allHydraulicTests = hydraulicTestController.getAllHydraulicTests();
         List<HydraulicTest> recentHydraulicTests = allHydraulicTests.stream()
+                .filter(test -> test.getTestDate() != null
+                        && !test.getTestDate().isBefore(monthStart)
+                        && !test.getTestDate().isAfter(monthEnd))
                 .sorted((a, b) -> {
                     if (a.getCreatedAt() == null && b.getCreatedAt() == null) {
                         return 0;
@@ -106,9 +116,7 @@ public class DashboardServlet extends HttpServlet {
                 })
                 .limit(6)
                 .toList();
-        request.setAttribute("proveIdraulicheTotali", allHydraulicTests.size());
-        request.setAttribute("proveIdraulicheRecenti", recentHydraulicTests);
-        request.setAttribute("clientiRecenti", customerController.getAllCustomers().stream().limit(6).toList());
+        request.setAttribute("proveIdraulicheRecentiMese", recentHydraulicTests);
 
         Map<Long, String> coverImages = new HashMap<>();
         for (Engine engine : ultimiMotori) {

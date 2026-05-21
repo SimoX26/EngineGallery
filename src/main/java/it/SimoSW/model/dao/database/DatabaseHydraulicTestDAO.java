@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,11 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
            OR engine_code LIKE ?
            OR notes LIKE ?
         ORDER BY test_date DESC, id DESC
+    """;
+    private static final String COUNT_BY_TEST_DATE_BETWEEN_SQL = """
+        SELECT COUNT(*)
+        FROM hydraulic_tests
+        WHERE test_date BETWEEN ? AND ?
     """;
 
     @Override
@@ -114,6 +120,26 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public int countByTestDateBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(COUNT_BY_TEST_DATE_BETWEEN_SQL)) {
+            stmt.setDate(1, Date.valueOf(from));
+            stmt.setDate(2, Date.valueOf(to));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel conteggio prove idrauliche nel periodo", e);
+        }
+        return 0;
     }
 
     @Override

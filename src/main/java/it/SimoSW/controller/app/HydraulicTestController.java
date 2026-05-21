@@ -19,6 +19,13 @@ public class HydraulicTestController {
         return hydraulicTestDAO.findAll();
     }
 
+    public int countHydraulicTestsBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            return 0;
+        }
+        return hydraulicTestDAO.countByTestDateBetween(from, to);
+    }
+
     public List<HydraulicTest> searchHydraulicTests(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return List.of();

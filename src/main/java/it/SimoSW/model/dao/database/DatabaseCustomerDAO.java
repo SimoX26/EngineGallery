@@ -5,9 +5,11 @@ import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.dao.CustomerDAO;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +53,11 @@ public class DatabaseCustomerDAO implements CustomerDAO {
 
     private static final String COUNT_ENGINES_BY_CUSTOMER_SQL =
             "SELECT COUNT(*) FROM engines WHERE customer_id = ?";
+    private static final String COUNT_CREATED_BETWEEN_SQL = """
+            SELECT COUNT(*)
+            FROM customers
+            WHERE DATE(created_at) BETWEEN ? AND ?
+            """;
 
 
     @Override
@@ -285,6 +292,29 @@ public class DatabaseCustomerDAO implements CustomerDAO {
                     "Errore nel conteggio clienti con motori in officina",
                     e
             );
+        }
+
+        return 0;
+    }
+
+    @Override
+    public int countCreatedBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to non possono essere null");
+        }
+
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(COUNT_CREATED_BETWEEN_SQL)) {
+            stmt.setDate(1, Date.valueOf(from));
+            stmt.setDate(2, Date.valueOf(to));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel conteggio clienti creati nel periodo", e);
         }
 
         return 0;
