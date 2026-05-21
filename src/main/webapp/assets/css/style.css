@@ -739,7 +739,12 @@ body:not(.login-page) {
     overflow: hidden;
     text-decoration: none !important;
     color: inherit;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 92px;
+    max-height: 92px;
+    padding: 10px;
 }
 
 .engine-kanban-card:hover,
@@ -748,8 +753,61 @@ body:not(.login-page) {
     text-decoration: none !important;
 }
 
+.engine-kanban-card .engine-image,
+.engine-kanban-card .engine-image-empty {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    background-size: cover;
+    background-position: center;
+}
+
+.engine-kanban-card .engine-image-empty-label {
+    display: none;
+}
+
 .engine-kanban-card__body {
-    padding: 12px;
+    padding: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+}
+
+.engine-kanban-card__body .engine-code {
+    font-size: 0.92rem;
+    line-height: 1.2;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.engine-kanban-card__body .engine-client {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.engine-kanban-card__body .badge-status {
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .engine-card-link {
