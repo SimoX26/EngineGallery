@@ -265,9 +265,9 @@ body:not(.login-page) {
 }
 
 .quick-status-options {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
 }
 
 .quick-status-option {
@@ -275,10 +275,12 @@ body:not(.login-page) {
     background-color: var(--bg-card);
     color: var(--text-main);
     border-radius: 8px;
-    padding: 0.34rem 0.5rem;
-    font-size: 0.8rem;
-    line-height: 1.2;
-    text-align: center;
+    padding: 0.72rem 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: left;
+    min-height: 46px;
 }
 
 .quick-status-option:hover,
@@ -294,6 +296,33 @@ body:not(.login-page) {
 
 .quick-status-trigger {
     cursor: pointer;
+}
+
+.filters-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.filters-modal-footer .filters-btn-primary,
+.filters-modal-footer .filters-btn-secondary {
+    min-height: 40px;
+    padding: 0.45rem 0.9rem;
+    font-weight: 600;
+}
+
+.filters-modal-footer .filters-btn-secondary {
+    color: var(--text-main);
+    border-color: var(--border-soft);
+    background-color: transparent;
+}
+
+.filters-modal-footer .filters-btn-secondary:hover,
+.filters-modal-footer .filters-btn-secondary:focus {
+    color: var(--text-main);
+    border-color: #94a3b8;
+    background-color: var(--input-bg-focus);
 }
 
 @media (min-width: 992px) {
@@ -811,6 +840,72 @@ body:not(.login-page) {
 
 .engine-gallery-card:hover {
     transform: translateY(-4px);
+}
+
+.engine-list-view {
+    display: grid;
+    gap: 12px;
+}
+
+.engine-list-row {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    box-shadow: var(--shadow-soft);
+    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.engine-list-row:hover,
+.engine-list-row:focus {
+    color: inherit;
+    text-decoration: none !important;
+}
+
+.engine-list-row .engine-image,
+.engine-list-row .engine-image-empty {
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    min-height: 70px;
+    max-height: 70px;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    background-size: cover;
+    background-position: center;
+}
+
+.engine-list-row .engine-image-empty-label {
+    display: none;
+}
+
+.engine-list-row__body {
+    min-width: 0;
+}
+
+.engine-list-row__main {
+    font-size: 0.96rem;
+    font-weight: 700;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.engine-list-row__sub {
+    margin-top: 2px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .engine-kanban-board {
@@ -1758,32 +1853,66 @@ body.modal-open {
 
     .page-header h1 {
         font-size: 1.6rem;
-        text-align: center;
+        text-align: left;
     }
 
     .page-header,
     .page-header p {
-        text-align: center;
+        text-align: left;
     }
 
     .page-header-with-search {
-        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+        width: 100%;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-soft);
+        padding: 14px 16px;
+        gap: 0.65rem;
+    }
+
+    .page-header-with-search .page-header,
+    .page-header-with-search .search-panel-compact {
+        grid-column: 1 / -1;
     }
 
     .page-header-with-search .search-panel-compact {
-        width: min(100%, 560px);
-        margin-left: auto;
-        margin-right: auto;
+        width: 100%;
+        margin: 0;
     }
 
     .page-header-filter,
     .page-header-actions {
         width: 100%;
         justify-content: center;
+        margin: 0;
+    }
+
+    .page-header-filter {
+        grid-column: 1;
+    }
+
+    .page-header-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+    }
+
+    .page-header-with-search .page-header-filter + .page-header-actions {
+        grid-column: 2;
+    }
+
+    .page-header-filter .btn,
+    .page-header-actions .btn-add-plus {
+        width: 100%;
     }
 
     .page-header-actions .btn-add-plus {
-        width: fit-content;
+        min-width: 0;
     }
 
     .engine-body,
@@ -1797,6 +1926,16 @@ body.modal-open {
         gap: 10px;
     }
 
+    .engine-list-row {
+        grid-template-columns: 62px minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .engine-list-row .badge-status {
+        grid-column: 1 / -1;
+        justify-self: center;
+    }
+
     .customer-row,
     .customer-field,
     .customer-main,
@@ -1807,6 +1946,58 @@ body.modal-open {
 
     .detail-actions {
         justify-content: center !important;
+    }
+
+    .filters-modal-footer {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .filters-modal-footer .filters-btn-primary,
+    .filters-modal-footer .filters-btn-secondary {
+        flex: 1 1 50%;
+        min-width: 0;
+        justify-content: center;
+    }
+
+    /* Galleria motori: card piu compatte solo su mobile */
+    #engineGalleryGrid {
+        --bs-gutter-x: 0.8rem;
+        --bs-gutter-y: 0.8rem;
+    }
+
+    #engineGalleryGrid .engine-card-col {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    #engineGalleryGrid .engine-image {
+        aspect-ratio: 4 / 3;
+    }
+
+    #engineGalleryGrid .engine-body {
+        padding: 12px;
+    }
+
+    #engineGalleryGrid .engine-code {
+        font-size: 0.92rem;
+        line-height: 1.2;
+    }
+
+    #engineGalleryGrid .engine-client {
+        font-size: 0.82rem;
+        line-height: 1.2;
+    }
+
+    #engineGalleryGrid .engine-footer {
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 420px) {
+    #engineGalleryGrid .engine-card-col {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }
 

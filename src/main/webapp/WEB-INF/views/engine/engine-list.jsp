@@ -80,11 +80,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer d-flex justify-content-end gap-2">
+                            <div class="modal-footer filters-modal-footer">
                                 <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
                                    id="engineFiltersReset"
-                                   class="btn btn-link btn-sm text-decoration-none px-0">Reimposta filtri</a>
-                                <button type="submit" class="btn btn-sm btn-engine">Applica filtri</button>
+                                   class="btn btn-sm btn-outline-secondary filters-btn-secondary">Reimposta filtri</a>
+                                <button type="submit" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
                             </div>
                         </div>
                     </div>
@@ -106,7 +106,7 @@
                     <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
                         <button type="button"
                                 id="engineViewListBtn"
-                                class="btn btn-outline-secondary active engine-view-toggle-btn"
+                                class="btn btn-outline-secondary engine-view-toggle-btn"
                                 title="Vista lista"
                                 aria-label="Vista lista">
                             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -115,6 +115,19 @@
                                 <line x1="5" y1="17" x2="19" y2="17"></line>
                             </svg>
                             <span class="visually-hidden">Lista</span>
+                        </button>
+                        <button type="button"
+                                id="engineViewGalleryBtn"
+                                class="btn btn-outline-secondary active engine-view-toggle-btn"
+                                title="Vista galleria"
+                                aria-label="Vista galleria">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <rect x="4" y="4" width="7" height="7" rx="1"></rect>
+                                <rect x="13" y="4" width="7" height="7" rx="1"></rect>
+                                <rect x="4" y="13" width="7" height="7" rx="1"></rect>
+                                <rect x="13" y="13" width="7" height="7" rx="1"></rect>
+                            </svg>
+                            <span class="visually-hidden">Galleria</span>
                         </button>
                         <button type="button"
                                 id="engineViewKanbanBtn"
@@ -149,6 +162,53 @@
                 Nessun motore corrisponde alla ricerca.
             </div>
         </c:if>
+
+        <div id="engineListView" class="engine-list-view d-none">
+            <c:forEach var="engine" items="${engines}">
+                <c:set var="st" value="${engine.status}" />
+                <c:set var="coverFilename" value="${coverImages[engine.id]}" />
+                <a class="engine-list-row" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                    <c:choose>
+                        <c:when test="${not empty coverFilename}">
+                            <div class="engine-image"
+                                 style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                                <span class="engine-image-empty-label">Nessuna immagine</span>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                    <div class="engine-list-row__body">
+                        <div class="engine-list-row__main">${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" /></div>
+                        <div class="engine-list-row__sub">${engine.engineRef}</div>
+                    </div>
+                    <button type="button"
+                            class="badge-status quick-status-trigger
+                            ${st == 'WAITING' ? 'status-stoccato' : ''}
+                            ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
+                            ${st == 'READY' ? 'status-ready' : ''}
+                            ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
+                            data-quick-status-trigger
+                            data-engine-ref="${engine.engineRef}"
+                            data-current-status="${st}"
+                            data-redirect-to="${archiveMode ? 'archive' : 'list'}"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            aria-controls="quickStatusModal"
+                            title="Clicca per modificare rapidamente lo stato">
+                        <c:choose>
+                            <c:when test="${st == 'WAITING'}">In attesa</c:when>
+                            <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
+                            <c:when test="${st == 'READY'}">Pronto</c:when>
+                            <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
+                            <c:otherwise>${st}</c:otherwise>
+                        </c:choose>
+                    </button>
+                </a>
+            </c:forEach>
+        </div>
 
         <div class="row g-4" id="engineGalleryGrid">
 
@@ -373,7 +433,9 @@
         const filtersModalEl = document.getElementById('engineFiltersModal');
         const quickStatusTriggers = document.querySelectorAll('[data-quick-status-trigger]');
         const engineViewListBtn = document.getElementById('engineViewListBtn');
+        const engineViewGalleryBtn = document.getElementById('engineViewGalleryBtn');
         const engineViewKanbanBtn = document.getElementById('engineViewKanbanBtn');
+        const engineListView = document.getElementById('engineListView');
         const engineGalleryGrid = document.getElementById('engineGalleryGrid');
         const engineKanbanBoard = document.getElementById('engineKanbanBoard');
         const filtersModal = bootstrap.Modal.getOrCreateInstance(filtersModalEl);
@@ -449,7 +511,9 @@
         });
 
         quickStatusTriggers.forEach((trigger) => {
-            trigger.addEventListener('click', () => {
+            trigger.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 resetQuickStatusOptions();
                 quickStatusRefInput.value = trigger.dataset.engineRef || '';
                 quickStatusRedirectInput.value = trigger.dataset.redirectTo || '${archiveMode ? "archive" : "list"}';
@@ -489,31 +553,40 @@
 
         const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
         const applyViewMode = (mode) => {
-            const safeMode = mode === 'kanban' ? 'kanban' : 'list';
-            if (!engineGalleryGrid || !engineKanbanBoard) {
+            let safeMode = 'gallery';
+            if (mode === 'list' || mode === 'gallery' || mode === 'kanban') {
+                safeMode = mode;
+            }
+            if (!engineGalleryGrid || !engineKanbanBoard || !engineListView) {
                 return;
             }
             if (!isDesktop()) {
+                engineListView.classList.add('d-none');
                 engineGalleryGrid.classList.remove('d-none');
                 engineKanbanBoard.classList.add('d-none');
                 return;
             }
             const showKanban = safeMode === 'kanban';
-            engineGalleryGrid.classList.toggle('d-none', showKanban);
+            const showList = safeMode === 'list';
+            const showGallery = safeMode === 'gallery';
+            engineListView.classList.toggle('d-none', !showList);
+            engineGalleryGrid.classList.toggle('d-none', !showGallery);
             engineKanbanBoard.classList.toggle('d-none', !showKanban);
-            if (engineViewListBtn && engineViewKanbanBtn) {
-                engineViewListBtn.classList.toggle('active', !showKanban);
+            if (engineViewListBtn && engineViewGalleryBtn && engineViewKanbanBtn) {
+                engineViewListBtn.classList.toggle('active', showList);
+                engineViewGalleryBtn.classList.toggle('active', showGallery);
                 engineViewKanbanBtn.classList.toggle('active', showKanban);
             }
             sessionStorage.setItem(viewStorageKey, safeMode);
         };
 
-        if (engineViewListBtn && engineViewKanbanBtn) {
+        if (engineViewListBtn && engineViewGalleryBtn && engineViewKanbanBtn) {
             engineViewListBtn.addEventListener('click', () => applyViewMode('list'));
+            engineViewGalleryBtn.addEventListener('click', () => applyViewMode('gallery'));
             engineViewKanbanBtn.addEventListener('click', () => applyViewMode('kanban'));
         }
-        window.addEventListener('resize', () => applyViewMode(sessionStorage.getItem(viewStorageKey) || 'list'));
-        applyViewMode(sessionStorage.getItem(viewStorageKey) || 'list');
+        window.addEventListener('resize', () => applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery'));
+        applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery');
 
         restoreScrollAfterQuickStatusSubmit();
     </script>
