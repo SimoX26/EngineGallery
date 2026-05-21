@@ -80,7 +80,7 @@ public class DashboardServlet extends HttpServlet {
         request.setAttribute("motoriInseritiMese", dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("tempoMedioLavorazioneMese", dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd));
-        request.setAttribute("clientiTotali", customerController.findAll().size());
+        request.setAttribute("clientiTotali", customerController.getAllCustomers().size());
         request.setAttribute("articoliMagazzinoTotali", dashboardController.getWarehouseItemCount());
         request.setAttribute("quantitaMagazzinoTotale", dashboardController.getWarehouseTotalQuantity());
         request.setAttribute("articoliEsauriti", dashboardController.getWarehouseOutOfStockCount());
@@ -108,7 +108,7 @@ public class DashboardServlet extends HttpServlet {
                 .toList();
         request.setAttribute("proveIdraulicheTotali", allHydraulicTests.size());
         request.setAttribute("proveIdraulicheRecenti", recentHydraulicTests);
-        request.setAttribute("clientiRecenti", customerController.findAll().stream().limit(6).toList());
+        request.setAttribute("clientiRecenti", customerController.getAllCustomers().stream().limit(6).toList());
 
         Map<Long, String> coverImages = new HashMap<>();
         for (Engine engine : ultimiMotori) {
