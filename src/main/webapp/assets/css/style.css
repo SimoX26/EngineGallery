@@ -196,7 +196,7 @@ body:not(.login-page) {
 @media (min-width: 992px) {
     .page-header-with-search {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         gap: 1rem;
     }
@@ -209,6 +209,10 @@ body:not(.login-page) {
     .page-header-with-search .search-panel-compact {
         flex: 0 0 min(460px, 42%);
         width: min(460px, 42%);
+    }
+
+    .page-header-with-search .page-header h1 {
+        margin-bottom: 0;
     }
 }
 
@@ -699,12 +703,13 @@ body:not(.login-page) {
     gap: 16px;
     overflow-x: auto;
     padding-bottom: 6px;
+    width: 100%;
+    align-items: stretch;
 }
 
 .engine-kanban-col {
-    min-width: 320px;
-    max-width: 360px;
-    flex: 0 0 320px;
+    min-width: 300px;
+    flex: 1 1 0;
     background-color: var(--bg-card);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
@@ -712,6 +717,12 @@ body:not(.login-page) {
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 210px);
+}
+
+@media (min-width: 1200px) {
+    .engine-kanban-col {
+        min-width: 320px;
+    }
 }
 
 .engine-kanban-col__header {

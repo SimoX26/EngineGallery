@@ -45,10 +45,12 @@
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                         <label for="engineKeywordSearch" class="form-label fw-semibold mb-0">Ricerca per parola chiave</label>
                         <div class="d-flex align-items-center gap-2">
-                            <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
-                                <button type="button" id="engineViewListBtn" class="btn btn-outline-secondary active">Lista</button>
-                                <button type="button" id="engineViewKanbanBtn" class="btn btn-outline-secondary">Kanban</button>
-                            </div>
+                            <c:if test="${not archiveMode}">
+                                <div class="btn-group btn-group-sm d-none d-lg-inline-flex" role="group" aria-label="Cambia vista motori">
+                                    <button type="button" id="engineViewListBtn" class="btn btn-outline-secondary active">Lista</button>
+                                    <button type="button" id="engineViewKanbanBtn" class="btn btn-outline-secondary">Kanban</button>
+                                </div>
+                            </c:if>
                             <button class="btn btn-outline-secondary btn-sm"
                                     type="button"
                                     aria-expanded="false"
@@ -209,124 +211,16 @@
 
         </div>
 
-        <div id="engineKanbanBoard" class="engine-kanban-board d-none">
-            <div class="engine-kanban-board__scroll">
-                <div class="engine-kanban-col">
-                    <div class="engine-kanban-col__header">
-                        <span>In attesa</span>
-                    </div>
-                    <div class="engine-kanban-col__body">
-                        <c:forEach var="engine" items="${engines}">
-                            <c:if test="${engine.status == 'WAITING'}">
-                                <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                                <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
-                                    <c:choose>
-                                        <c:when test="${not empty coverFilename}">
-                                            <div class="engine-image"
-                                                 style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
-                                                <span class="engine-image-empty-label">Nessuna immagine</span>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <div class="engine-kanban-card__body">
-                                        <div class="engine-code">
-                                            ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
-                                        </div>
-                                        <div class="engine-client">${engine.engineRef}</div>
-                                        <div class="mt-2">
-                                            <span class="badge-status status-stoccato">In attesa</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </c:if>
-                        </c:forEach>
-                    </div>
-                </div>
-
-                <div class="engine-kanban-col">
-                    <div class="engine-kanban-col__header">
-                        <span>In lavorazione</span>
-                    </div>
-                    <div class="engine-kanban-col__body">
-                        <c:forEach var="engine" items="${engines}">
-                            <c:if test="${engine.status == 'WORK_IN_PROGRESS'}">
-                                <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                                <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
-                                    <c:choose>
-                                        <c:when test="${not empty coverFilename}">
-                                            <div class="engine-image"
-                                                 style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
-                                                <span class="engine-image-empty-label">Nessuna immagine</span>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <div class="engine-kanban-card__body">
-                                        <div class="engine-code">
-                                            ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
-                                        </div>
-                                        <div class="engine-client">${engine.engineRef}</div>
-                                        <div class="mt-2">
-                                            <span class="badge-status status-lavorazione">In lavorazione</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </c:if>
-                        </c:forEach>
-                    </div>
-                </div>
-
-                <div class="engine-kanban-col">
-                    <div class="engine-kanban-col__header">
-                        <span>Pronto</span>
-                    </div>
-                    <div class="engine-kanban-col__body">
-                        <c:forEach var="engine" items="${engines}">
-                            <c:if test="${engine.status == 'READY'}">
-                                <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                                <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
-                                    <c:choose>
-                                        <c:when test="${not empty coverFilename}">
-                                            <div class="engine-image"
-                                                 style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
-                                                <span class="engine-image-empty-label">Nessuna immagine</span>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                    <div class="engine-kanban-card__body">
-                                        <div class="engine-code">
-                                            ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
-                                        </div>
-                                        <div class="engine-client">${engine.engineRef}</div>
-                                        <div class="mt-2">
-                                            <span class="badge-status status-ready">Pronto</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </c:if>
-                        </c:forEach>
-                    </div>
-                </div>
-
-                <c:if test="${archiveMode}">
+        <c:if test="${not archiveMode}">
+            <div id="engineKanbanBoard" class="engine-kanban-board d-none">
+                <div class="engine-kanban-board__scroll">
                     <div class="engine-kanban-col">
                         <div class="engine-kanban-col__header">
-                            <span>Consegnato</span>
+                            <span>In attesa</span>
                         </div>
                         <div class="engine-kanban-col__body">
                             <c:forEach var="engine" items="${engines}">
-                                <c:if test="${engine.status == 'DELIVERED'}">
+                                <c:if test="${engine.status == 'WAITING'}">
                                     <c:set var="coverFilename" value="${coverImages[engine.id]}" />
                                     <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                                         <c:choose>
@@ -347,7 +241,7 @@
                                             </div>
                                             <div class="engine-client">${engine.engineRef}</div>
                                             <div class="mt-2">
-                                                <span class="badge-status status-consegnato">Consegnato</span>
+                                                <span class="badge-status status-stoccato">In attesa</span>
                                             </div>
                                         </div>
                                     </a>
@@ -355,9 +249,81 @@
                             </c:forEach>
                         </div>
                     </div>
-                </c:if>
+
+                    <div class="engine-kanban-col">
+                        <div class="engine-kanban-col__header">
+                            <span>In lavorazione</span>
+                        </div>
+                        <div class="engine-kanban-col__body">
+                            <c:forEach var="engine" items="${engines}">
+                                <c:if test="${engine.status == 'WORK_IN_PROGRESS'}">
+                                    <c:set var="coverFilename" value="${coverImages[engine.id]}" />
+                                    <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                                        <c:choose>
+                                            <c:when test="${not empty coverFilename}">
+                                                <div class="engine-image"
+                                                     style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                                                    <span class="engine-image-empty-label">Nessuna immagine</span>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <div class="engine-kanban-card__body">
+                                            <div class="engine-code">
+                                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
+                                            </div>
+                                            <div class="engine-client">${engine.engineRef}</div>
+                                            <div class="mt-2">
+                                                <span class="badge-status status-lavorazione">In lavorazione</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </c:if>
+                            </c:forEach>
+                        </div>
+                    </div>
+
+                    <div class="engine-kanban-col">
+                        <div class="engine-kanban-col__header">
+                            <span>Pronto</span>
+                        </div>
+                        <div class="engine-kanban-col__body">
+                            <c:forEach var="engine" items="${engines}">
+                                <c:if test="${engine.status == 'READY'}">
+                                    <c:set var="coverFilename" value="${coverImages[engine.id]}" />
+                                    <a class="engine-kanban-card" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                                        <c:choose>
+                                            <c:when test="${not empty coverFilename}">
+                                                <div class="engine-image"
+                                                     style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                                                    <span class="engine-image-empty-label">Nessuna immagine</span>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <div class="engine-kanban-card__body">
+                                            <div class="engine-code">
+                                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
+                                            </div>
+                                            <div class="engine-client">${engine.engineRef}</div>
+                                            <div class="mt-2">
+                                                <span class="badge-status status-ready">Pronto</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </c:if>
+                            </c:forEach>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </c:if>
 
     </div>
 
