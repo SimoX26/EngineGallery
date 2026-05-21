@@ -296,7 +296,7 @@ body:not(.login-page) {
 .btn-add-plus {
     background: #1f2933;
     color: #fff;
-    border: 1px solid #1f2933;
+    border: 1px solid var(--border-soft);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
     font-size: var(--action-control-font-size);
     font-weight: 600;
@@ -311,7 +311,7 @@ body:not(.login-page) {
 .btn-add-plus:focus {
     background: #1f2933;
     color: #fff;
-    border-color: #1f2933;
+    border-color: var(--border-soft);
     opacity: 0.94;
 }
 
