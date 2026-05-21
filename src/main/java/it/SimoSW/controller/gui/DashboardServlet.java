@@ -3,7 +3,10 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.DashboardController;
 import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
+import it.SimoSW.controller.app.HydraulicTestController;
 import it.SimoSW.model.Engine;
+import it.SimoSW.model.EngineStatus;
+import it.SimoSW.model.HydraulicTest;
 import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.model.User;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
@@ -30,6 +33,7 @@ public class DashboardServlet extends HttpServlet {
     private DashboardController dashboardController;
     private EngineController engineController;
     private CustomerController customerController;
+    private HydraulicTestController hydraulicTestController;
 
     @Override
     public void init() {
@@ -37,6 +41,7 @@ public class DashboardServlet extends HttpServlet {
         this.dashboardController = initializer.getDashboardController();
         this.engineController = initializer.getEngineController();
         this.customerController = initializer.getCustomerController();
+        this.hydraulicTestController = initializer.getHydraulicTestController();
     }
 
     @Override
@@ -67,16 +72,43 @@ public class DashboardServlet extends HttpServlet {
         }
 
         request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);
+        request.setAttribute("motoriTotali", engineController.getAllEngines().size());
+        request.setAttribute("motoriInAttesa", dashboardController.getMotoriByStatus(EngineStatus.WAITING));
         request.setAttribute("workInProgressEngines", dashboardController.getWorkInProgressEngines());
+        request.setAttribute("motoriPronti", dashboardController.getMotoriByStatus(EngineStatus.READY));
+        request.setAttribute("motoriConsegnatiTotali", dashboardController.getMotoriByStatus(EngineStatus.DELIVERED));
         request.setAttribute("motoriInseritiMese", dashboardController.getMotoriInseritiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("motoriConsegnatiMese", dashboardController.getMotoriConsegnatiNelPeriodo(monthStart, monthEnd));
         request.setAttribute("tempoMedioLavorazioneMese", dashboardController.getTempoMedioLavorazioneNelPeriodo(monthStart, monthEnd));
+        request.setAttribute("clientiTotali", customerController.findAll().size());
+        request.setAttribute("articoliMagazzinoTotali", dashboardController.getWarehouseItemCount());
+        request.setAttribute("quantitaMagazzinoTotale", dashboardController.getWarehouseTotalQuantity());
+        request.setAttribute("articoliEsauriti", dashboardController.getWarehouseOutOfStockCount());
 
         List<Engine> ultimiMotori = dashboardController.listaUltimiMotori(8);
         request.setAttribute("ultimiMotori", ultimiMotori);
 
         List<WarehouseItem> ultimiArticoliMagazzino = dashboardController.listaUltimiArticoliMagazzino(6);
         request.setAttribute("ultimiArticoliMagazzino", ultimiArticoliMagazzino);
+        List<HydraulicTest> allHydraulicTests = hydraulicTestController.getAllHydraulicTests();
+        List<HydraulicTest> recentHydraulicTests = allHydraulicTests.stream()
+                .sorted((a, b) -> {
+                    if (a.getCreatedAt() == null && b.getCreatedAt() == null) {
+                        return 0;
+                    }
+                    if (a.getCreatedAt() == null) {
+                        return 1;
+                    }
+                    if (b.getCreatedAt() == null) {
+                        return -1;
+                    }
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                })
+                .limit(6)
+                .toList();
+        request.setAttribute("proveIdraulicheTotali", allHydraulicTests.size());
+        request.setAttribute("proveIdraulicheRecenti", recentHydraulicTests);
+        request.setAttribute("clientiRecenti", customerController.findAll().stream().limit(6).toList());
 
         Map<Long, String> coverImages = new HashMap<>();
         for (Engine engine : ultimiMotori) {

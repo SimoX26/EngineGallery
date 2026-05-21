@@ -70,6 +70,13 @@ public class DashboardController {
         return engineDAO.countByStatus(EngineStatus.WORK_IN_PROGRESS);
     }
 
+    public int getMotoriByStatus(EngineStatus status) {
+        if (status == null) {
+            return 0;
+        }
+        return engineDAO.countByStatus(status);
+    }
+
     public int getMotoriConsegnatiUltimaSettimana() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(7);
