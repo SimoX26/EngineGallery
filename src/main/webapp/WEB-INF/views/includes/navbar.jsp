@@ -4,8 +4,20 @@
 
 <c:set var="servletPath" value="${pageContext.request.servletPath}" />
 
+<style>
+    body:not(.login-page) {
+        padding-top: 72px;
+    }
+
+    @media (max-width: 768px) {
+        body:not(.login-page) {
+            padding-top: 66px;
+        }
+    }
+</style>
+
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top"
-     style="background-color: #1f2933;">
+     style="background-color: #1f2933; position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 3000;">
     <div class="container-fluid">
 
         <!-- BRAND -->
