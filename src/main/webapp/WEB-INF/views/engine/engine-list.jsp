@@ -206,22 +206,22 @@
                             <form id="quickStatusForm-${engine.id}"
                                   class="quick-status-form d-none mt-2"
                                   data-quick-status-form
+                                  data-current-status="${st}"
                                   action="<%= request.getContextPath() %>/engine/detail"
                                   method="post">
                                 <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
                                 <input type="hidden" name="redirectTo" value="${archiveMode ? 'archive' : 'list'}">
                                 <input type="hidden" name="ref" value="${engine.engineRef}">
-                                <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
-                                    <select class="form-select form-select-sm" name="status" required>
-                                        <option value="WAITING" ${st == 'WAITING' ? 'selected' : ''}>In attesa</option>
-                                        <option value="WORK_IN_PROGRESS" ${st == 'WORK_IN_PROGRESS' ? 'selected' : ''}>In lavorazione</option>
-                                        <option value="READY" ${st == 'READY' ? 'selected' : ''}>Pronto</option>
-                                        <option value="DELIVERED" ${st == 'DELIVERED' ? 'selected' : ''}>Consegnato</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-engine quick-status-save">Salva</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-quick-status-cancel>Annulla</button>
+                                <input type="hidden" name="status" value="${st}" data-quick-status-value>
+                                <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
                                 </div>
-                                <div class="small text-muted mt-1">Modifica rapida: solo stato motore.</div>
+                                <div class="small text-muted mt-1 quick-status-feedback" data-quick-status-feedback aria-live="polite">
+                                    Modifica rapida: seleziona uno stato per salvare subito.
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -353,7 +353,6 @@
         const filtersPanel = document.getElementById('engineFiltersPanel');
         const quickStatusForms = document.querySelectorAll('[data-quick-status-form]');
         const quickStatusTriggers = document.querySelectorAll('[data-quick-status-trigger]');
-        const quickStatusCancelButtons = document.querySelectorAll('[data-quick-status-cancel]');
         const engineViewListBtn = document.getElementById('engineViewListBtn');
         const engineViewKanbanBtn = document.getElementById('engineViewKanbanBtn');
         const engineGalleryGrid = document.getElementById('engineGalleryGrid');
@@ -440,29 +439,56 @@
                 if (isHidden) {
                     targetForm.classList.remove('d-none');
                     trigger.setAttribute('aria-expanded', 'true');
-                    const statusSelect = targetForm.querySelector('select[name="status"]');
-                    if (statusSelect) {
-                        statusSelect.focus();
+                    const firstStatusOption = targetForm.querySelector('[data-quick-status-option]');
+                    if (firstStatusOption) {
+                        firstStatusOption.focus();
                     }
                 }
             });
         });
 
-        quickStatusCancelButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const form = button.closest('[data-quick-status-form]');
-                closeQuickStatusForm(form);
-            });
-        });
-
         quickStatusForms.forEach((form) => {
+            const statusValueInput = form.querySelector('[data-quick-status-value]');
+            const feedback = form.querySelector('[data-quick-status-feedback]');
+            const statusOptions = form.querySelectorAll('[data-quick-status-option]');
+
+            statusOptions.forEach((optionButton) => {
+                optionButton.addEventListener('click', () => {
+                    if (form.dataset.submitting === '1') {
+                        return;
+                    }
+
+                    const selectedStatus = optionButton.dataset.statusValue;
+                    const currentStatus = form.dataset.currentStatus;
+
+                    if (!selectedStatus) {
+                        return;
+                    }
+
+                    if (selectedStatus === currentStatus) {
+                        if (feedback) {
+                            feedback.textContent = 'Stato gia selezionato.';
+                        }
+                        closeQuickStatusForm(form);
+                        return;
+                    }
+
+                    if (statusValueInput) {
+                        statusValueInput.value = selectedStatus;
+                    }
+                    form.dataset.submitting = '1';
+                    if (feedback) {
+                        feedback.textContent = 'Salvataggio in corso...';
+                    }
+                    statusOptions.forEach((button) => {
+                        button.disabled = true;
+                    });
+                    form.requestSubmit();
+                });
+            });
+
             form.addEventListener('submit', () => {
                 sessionStorage.setItem(quickStatusScrollKey, String(window.scrollY));
-                const submitButton = form.querySelector('button[type="submit"]');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Salvataggio...';
-                }
             });
         });
 

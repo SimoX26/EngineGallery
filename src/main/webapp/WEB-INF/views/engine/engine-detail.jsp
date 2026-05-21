@@ -147,6 +147,16 @@
             Modifiche salvate correttamente.
         </div>
     </c:if>
+    <c:if test="${param.statusUpdated == '1'}">
+        <div class="alert alert-success" role="alert">
+            Stato aggiornato correttamente.
+        </div>
+    </c:if>
+    <c:if test="${not empty param.statusUpdateError}">
+        <div class="alert alert-danger" role="alert">
+            <c:out value="${param.statusUpdateError}" />
+        </div>
+    </c:if>
     <div class="row g-4 card-base">
 
         <div class="col-lg-5">
@@ -197,11 +207,17 @@
                         <span class="engine-tech-key">Stato:</span>
                         <c:set var="st" value="${detail.engine.status}" />
                         <span class="engine-tech-value">
-                            <span class="badge-status
+                            <button type="button"
+                                    class="badge-status quick-status-trigger
                                     ${st == 'WAITING' ? 'status-stoccato' : ''}
                                     ${st == 'WORK_IN_PROGRESS' ? 'status-lavorazione' : ''}
                                     ${st == 'READY' ? 'status-ready' : ''}
-                                    ${st == 'DELIVERED' ? 'status-consegnato' : ''}">
+                                    ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
+                                    data-quick-status-trigger
+                                    data-target-form="quickStatusFormDetail"
+                                    aria-expanded="false"
+                                    aria-controls="quickStatusFormDetail"
+                                    title="Clicca per modificare rapidamente lo stato">
                                 <c:choose>
                                     <c:when test="${st == 'WAITING'}">In attesa</c:when>
                                     <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
@@ -209,7 +225,26 @@
                                     <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
                                     <c:otherwise>${st}</c:otherwise>
                                 </c:choose>
-                            </span>
+                            </button>
+                            <form id="quickStatusFormDetail"
+                                  class="quick-status-form d-none mt-2"
+                                  data-quick-status-form
+                                  data-current-status="${st}"
+                                  action="<%= request.getContextPath() %>/engine/detail"
+                                  method="post">
+                                <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+                                <input type="hidden" name="ref" value="${detail.engine.engineRef}">
+                                <input type="hidden" name="status" value="${st}" data-quick-status-value>
+                                <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WAITING">In attesa</button>
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="WORK_IN_PROGRESS">In lavorazione</button>
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="READY">Pronto</button>
+                                    <button type="button" class="quick-status-option" data-quick-status-option data-status-value="DELIVERED">Consegnato</button>
+                                </div>
+                                <div class="small text-muted mt-1 quick-status-feedback" data-quick-status-feedback aria-live="polite">
+                                    Modifica rapida: seleziona uno stato per salvare subito.
+                                </div>
+                            </form>
                         </span>
                     </div>
 
@@ -300,6 +335,72 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    (function () {
+        const quickStatusTrigger = document.querySelector('[data-quick-status-trigger]');
+        const quickStatusForm = document.querySelector('[data-quick-status-form]');
+        if (!quickStatusTrigger || !quickStatusForm) {
+            return;
+        }
+
+        const statusValueInput = quickStatusForm.querySelector('[data-quick-status-value]');
+        const feedback = quickStatusForm.querySelector('[data-quick-status-feedback]');
+        const statusOptions = quickStatusForm.querySelectorAll('[data-quick-status-option]');
+
+        const closeQuickStatusForm = () => {
+            quickStatusForm.classList.add('d-none');
+            quickStatusTrigger.setAttribute('aria-expanded', 'false');
+        };
+
+        quickStatusTrigger.addEventListener('click', () => {
+            const isHidden = quickStatusForm.classList.contains('d-none');
+            if (!isHidden) {
+                closeQuickStatusForm();
+                return;
+            }
+            quickStatusForm.classList.remove('d-none');
+            quickStatusTrigger.setAttribute('aria-expanded', 'true');
+            const firstOption = quickStatusForm.querySelector('[data-quick-status-option]');
+            if (firstOption) {
+                firstOption.focus();
+            }
+        });
+
+        statusOptions.forEach((optionButton) => {
+            optionButton.addEventListener('click', () => {
+                if (quickStatusForm.dataset.submitting === '1') {
+                    return;
+                }
+
+                const selectedStatus = optionButton.dataset.statusValue;
+                const currentStatus = quickStatusForm.dataset.currentStatus;
+
+                if (!selectedStatus) {
+                    return;
+                }
+
+                if (selectedStatus === currentStatus) {
+                    if (feedback) {
+                        feedback.textContent = 'Stato gia selezionato.';
+                    }
+                    closeQuickStatusForm();
+                    return;
+                }
+
+                if (statusValueInput) {
+                    statusValueInput.value = selectedStatus;
+                }
+                quickStatusForm.dataset.submitting = '1';
+                if (feedback) {
+                    feedback.textContent = 'Salvataggio in corso...';
+                }
+                statusOptions.forEach((button) => {
+                    button.disabled = true;
+                });
+                quickStatusForm.requestSubmit();
+            });
+        });
+    })();
+
     window.engineDetailViewerConfig = {
         engineRef: '${detail.engine.engineRef}',
         contextPath: '<%= request.getContextPath() %>'

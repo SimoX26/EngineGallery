@@ -249,6 +249,32 @@ body:not(.login-page) {
     stroke-linejoin: round;
 }
 
+.quick-status-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+}
+
+.quick-status-option {
+    border: 1px solid var(--border-soft);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-radius: 8px;
+    padding: 0.34rem 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.quick-status-option:hover,
+.quick-status-option:focus {
+    background-color: var(--input-bg-focus);
+}
+
+.quick-status-trigger {
+    cursor: pointer;
+}
+
 @media (min-width: 992px) {
     .page-header-with-search {
         display: flex;
