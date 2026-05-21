@@ -2082,42 +2082,47 @@ body.modal-open {
         min-width: 0;
     }
 
-    .engine-body,
-    .engine-code,
-    .engine-client {
-        text-align: center;
-    }
-
-    .engine-footer {
-        justify-content: center;
-        gap: 10px;
-    }
-
     .engine-list-row {
-        grid-template-columns: 62px minmax(0, 1fr);
+        grid-template-columns: 62px minmax(0, 1fr) auto;
         gap: 10px;
+        align-items: center;
     }
 
     .engine-list-row .engine-image,
     .engine-list-row .engine-image-empty {
-        justify-self: center;
+        justify-self: start;
     }
 
     .engine-list-row__body {
         grid-template-areas:
-            "main meta"
-            "sub meta";
-        grid-template-columns: minmax(0, 1.35fr) minmax(140px, 0.9fr);
+            "main"
+            "sub";
+        grid-template-columns: 1fr;
         gap: 2px;
     }
 
     .engine-list-row__meta {
-        display: inline-flex;
+        display: none;
     }
 
     .engine-list-row .badge-status {
-        grid-column: auto;
+        grid-column: 3;
+        grid-row: 1;
         justify-self: end;
+    }
+
+    .engine-gallery-card .engine-body,
+    .engine-gallery-card .engine-code,
+    .engine-gallery-card .engine-client,
+    .engine-kanban-card__body .engine-code,
+    .engine-kanban-card__body .engine-client {
+        text-align: left;
+    }
+
+    .engine-gallery-card .engine-footer,
+    .engine-kanban-card .engine-footer {
+        justify-content: space-between;
+        gap: 10px;
     }
 
     .customer-row,
