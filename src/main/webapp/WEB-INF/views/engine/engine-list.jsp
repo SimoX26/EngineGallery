@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -170,8 +171,12 @@
         <div id="engineListView" class="engine-list-view d-none">
             <c:forEach var="engine" items="${engines}">
                 <c:set var="st" value="${engine.status}" />
+                <c:set var="statusSearchLabel"
+                       value="${st == 'WAITING' ? 'in attesa' : st == 'WORK_IN_PROGRESS' ? 'in lavorazione' : st == 'READY' ? 'pronto' : st == 'DELIVERED' ? 'consegnato' : st}" />
                 <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                <a class="engine-list-row" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
+                <a class="engine-list-row"
+                   href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
+                   data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${st} ${statusSearchLabel}">
                     <c:choose>
                         <c:when test="${not empty coverFilename}">
                             <div class="engine-image"
@@ -223,8 +228,10 @@
 
             <c:forEach var="engine" items="${engines}">
                 <c:set var="st" value="${engine.status}" />
-                <div class="col-xl-3 col-lg-4 col-md-6 engine-card-col">
-
+                <c:set var="statusSearchLabel"
+                       value="${st == 'WAITING' ? 'in attesa' : st == 'WORK_IN_PROGRESS' ? 'in lavorazione' : st == 'READY' ? 'pronto' : st == 'DELIVERED' ? 'consegnato' : st}" />
+                <div class="col-xl-3 col-lg-4 col-md-6 engine-card-col"
+                     data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${st} ${statusSearchLabel}">
                     <div class="engine-gallery-card">
                         <a class="engine-card-link engine-card-link-main" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                             <c:set var="coverFilename" value="${coverImages[engine.id]}" />
@@ -307,7 +314,9 @@
                                     <a class="engine-kanban-card"
                                        href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
                                        data-engine-ref="${engine.engineRef}"
-                                       data-current-status="WAITING">
+                                       data-current-status="WAITING"
+                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)}"
+                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} WAITING in attesa">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -346,7 +355,9 @@
                                     <a class="engine-kanban-card"
                                        href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
                                        data-engine-ref="${engine.engineRef}"
-                                       data-current-status="WORK_IN_PROGRESS">
+                                       data-current-status="WORK_IN_PROGRESS"
+                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)}"
+                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} WORK_IN_PROGRESS in lavorazione">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -385,7 +396,9 @@
                                     <a class="engine-kanban-card"
                                        href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
                                        data-engine-ref="${engine.engineRef}"
-                                       data-current-status="READY">
+                                       data-current-status="READY"
+                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)}"
+                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} READY pronto">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -446,6 +459,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<%= request.getContextPath() %>/assets/js/live-search.js"></script>
     <script>
         const filtersToggle = document.getElementById('engineFiltersToggle');
         const filtersModalEl = document.getElementById('engineFiltersModal');
@@ -480,6 +494,19 @@
             READY: 'status-ready',
             DELIVERED: 'status-consegnato'
         };
+        const searchInput = document.getElementById('engineKeywordSearch');
+        const filterController = window.EngineGalleryLiveSearch && searchInput
+            ? window.EngineGalleryLiveSearch.init({
+                input: searchInput,
+                groups: [
+                    { selector: '#engineListView .engine-list-row' },
+                    { selector: '#engineGalleryGrid .engine-card-col' },
+                    { selector: '#engineKanbanBoard .engine-kanban-card' }
+                ],
+                emptyState: '#engineKeywordEmptyState',
+                debounceMs: 180
+            })
+            : null;
 
         const hasActiveFilters = () => {
             const params = ['keyword', 'status', 'customerId'];
@@ -595,6 +622,15 @@
             if (nextClass) {
                 badge.classList.add(nextClass);
             }
+        };
+
+        const updateKanbanCardSearchData = (card, nextStatus) => {
+            if (!card) {
+                return;
+            }
+            const base = card.dataset.searchBase || '';
+            const label = kanbanStatusLabels[nextStatus] || nextStatus || '';
+            card.dataset.search = `${base} ${nextStatus || ''} ${label}`;
         };
 
         const postQuickStatusUpdate = async (engineRef, nextStatus) => {
@@ -838,6 +874,10 @@
                     destinationColumn.appendChild(session.card);
                     session.card.dataset.currentStatus = destinationStatus;
                     updateKanbanCardBadge(session.card, destinationStatus);
+                    updateKanbanCardSearchData(session.card, destinationStatus);
+                    if (filterController) {
+                        filterController.apply();
+                    }
 
                     try {
                         await postQuickStatusUpdate(engineRef, destinationStatus);
@@ -845,6 +885,10 @@
                         previousColumn.appendChild(session.card);
                         session.card.dataset.currentStatus = previousStatus;
                         updateKanbanCardBadge(session.card, previousStatus);
+                        updateKanbanCardSearchData(session.card, previousStatus);
+                        if (filterController) {
+                            filterController.apply();
+                        }
                         alert("Errore durante l'aggiornamento rapido dello stato");
                     } finally {
                         isUpdating = false;
@@ -909,6 +953,10 @@
                     column.appendChild(draggedCard);
                     draggedCard.dataset.currentStatus = destinationStatus;
                     updateKanbanCardBadge(draggedCard, destinationStatus);
+                    updateKanbanCardSearchData(draggedCard, destinationStatus);
+                    if (filterController) {
+                        filterController.apply();
+                    }
 
                     try {
                         await postQuickStatusUpdate(engineRef, destinationStatus);
@@ -916,6 +964,10 @@
                         previousColumn.appendChild(draggedCard);
                         draggedCard.dataset.currentStatus = previousStatus;
                         updateKanbanCardBadge(draggedCard, previousStatus);
+                        updateKanbanCardSearchData(draggedCard, previousStatus);
+                        if (filterController) {
+                            filterController.apply();
+                        }
                         alert("Errore durante l'aggiornamento rapido dello stato");
                     } finally {
                         isUpdating = false;
@@ -969,6 +1021,9 @@
                 }
             }
             sessionStorage.setItem(viewStorageKey, safeMode);
+            if (filterController) {
+                filterController.apply();
+            }
         };
 
         if (engineViewListBtn && engineViewGalleryBtn) {
@@ -980,6 +1035,9 @@
         }
         applyViewMode(sessionStorage.getItem(viewStorageKey) || 'gallery');
         initKanbanDragAndDrop();
+        if (filterController) {
+            filterController.apply();
+        }
 
         restoreScrollAfterQuickStatusSubmit();
     </script>

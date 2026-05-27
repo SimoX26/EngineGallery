@@ -165,6 +165,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<%= request.getContextPath() %>/assets/js/live-search.js"></script>
 <script>
     const searchInput = document.getElementById('warehouseKeywordSearch');
     const warehouseCards = document.querySelectorAll('.warehouse-card-item');
@@ -182,36 +183,17 @@
     const warehouseFiltersApplyBtn = document.getElementById('warehouseFiltersApplyBtn');
     const warehouseFiltersResetBtn = document.getElementById('warehouseFiltersResetBtn');
 
-    const normalizeText = (value) => (value || '')
-        .toString()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
-
-    const applyWarehouseFilter = () => {
-        const keyword = normalizeText(searchInput.value);
-        let visibleCount = 0;
-
-        warehouseCards.forEach((card) => {
-            const haystack = normalizeText(card.dataset.search);
-            const isVisible = keyword.length === 0 || haystack.includes(keyword);
-            card.classList.toggle('d-none', !isVisible);
-            if (isVisible) {
-                visibleCount += 1;
-            }
-        });
-
-        warehouseListRows.forEach((row) => {
-            const haystack = normalizeText(row.dataset.search);
-            const isVisible = keyword.length === 0 || haystack.includes(keyword);
-            row.classList.toggle('d-none', !isVisible);
-        });
-
-        emptyState.classList.toggle('d-none', visibleCount > 0);
-    };
-
-    searchInput.addEventListener('input', applyWarehouseFilter);
+    const filterController = window.EngineGalleryLiveSearch && searchInput
+        ? window.EngineGalleryLiveSearch.init({
+            input: searchInput,
+            groups: [
+                { elements: warehouseCards },
+                { elements: warehouseListRows }
+            ],
+            emptyState,
+            debounceMs: 180
+        })
+        : null;
 
     warehouseFiltersToggle.addEventListener('click', () => {
         warehouseFiltersKeywordInput.value = searchInput.value;
@@ -220,14 +202,18 @@
 
     warehouseFiltersApplyBtn.addEventListener('click', () => {
         searchInput.value = warehouseFiltersKeywordInput.value || '';
-        applyWarehouseFilter();
+        if (filterController) {
+            filterController.apply();
+        }
         warehouseFiltersModal.hide();
     });
 
     warehouseFiltersResetBtn.addEventListener('click', () => {
         warehouseFiltersKeywordInput.value = '';
         searchInput.value = '';
-        applyWarehouseFilter();
+        if (filterController) {
+            filterController.apply();
+        }
         warehouseFiltersModal.hide();
     });
 
@@ -243,6 +229,9 @@
     warehouseViewListBtn.addEventListener('click', () => applyWarehouseViewMode('list'));
     warehouseViewGalleryBtn.addEventListener('click', () => applyWarehouseViewMode('gallery'));
     applyWarehouseViewMode(sessionStorage.getItem(warehouseViewStorageKey) || 'gallery');
+    if (filterController) {
+        filterController.apply();
+    }
 </script>
 
 </body>

@@ -193,6 +193,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<%= request.getContextPath() %>/assets/js/live-search.js"></script>
     <script>
         const searchInput = document.getElementById('hydraulicKeywordSearch');
         const hydraulicCards = document.querySelectorAll('.hydraulic-card-col');
@@ -210,37 +211,17 @@
         const hydraulicFiltersApplyBtn = document.getElementById('hydraulicFiltersApplyBtn');
         const hydraulicFiltersResetBtn = document.getElementById('hydraulicFiltersResetBtn');
 
-        const normalizeText = (value) => (value || '')
-            .toString()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .trim();
-
-        const applyHydraulicFilter = () => {
-            const keyword = normalizeText(searchInput.value);
-            let visibleCount = 0;
-
-            hydraulicCards.forEach((card) => {
-                const haystack = normalizeText(card.dataset.search);
-                const isVisible = keyword.length === 0 || haystack.includes(keyword);
-                card.classList.toggle('d-none', !isVisible);
-                if (isVisible) {
-                    visibleCount += 1;
-                }
-            });
-
-            hydraulicListRows.forEach((row) => {
-                const haystack = normalizeText(row.dataset.search);
-                const isVisible = keyword.length === 0 || haystack.includes(keyword);
-                row.classList.toggle('d-none', !isVisible);
-            });
-
-            const showEmptyState = keyword.length > 0 && visibleCount === 0;
-            emptyState.classList.toggle('d-none', !showEmptyState);
-        };
-
-        searchInput.addEventListener('input', applyHydraulicFilter);
+        const filterController = window.EngineGalleryLiveSearch && searchInput
+            ? window.EngineGalleryLiveSearch.init({
+                input: searchInput,
+                groups: [
+                    { elements: hydraulicCards },
+                    { elements: hydraulicListRows }
+                ],
+                emptyState,
+                debounceMs: 180
+            })
+            : null;
 
         hydraulicFiltersToggle.addEventListener('click', () => {
             hydraulicFiltersKeywordInput.value = searchInput.value;
@@ -249,14 +230,18 @@
 
         hydraulicFiltersApplyBtn.addEventListener('click', () => {
             searchInput.value = hydraulicFiltersKeywordInput.value || '';
-            applyHydraulicFilter();
+            if (filterController) {
+                filterController.apply();
+            }
             hydraulicFiltersModal.hide();
         });
 
         hydraulicFiltersResetBtn.addEventListener('click', () => {
             hydraulicFiltersKeywordInput.value = '';
             searchInput.value = '';
-            applyHydraulicFilter();
+            if (filterController) {
+                filterController.apply();
+            }
             hydraulicFiltersModal.hide();
         });
         const applyHydraulicViewMode = (mode) => {
@@ -271,7 +256,9 @@
         hydraulicViewListBtn.addEventListener('click', () => applyHydraulicViewMode('list'));
         hydraulicViewGalleryBtn.addEventListener('click', () => applyHydraulicViewMode('gallery'));
         applyHydraulicViewMode(sessionStorage.getItem(hydraulicViewStorageKey) || 'gallery');
-        applyHydraulicFilter();
+        if (filterController) {
+            filterController.apply();
+        }
     </script>
 
 </div>

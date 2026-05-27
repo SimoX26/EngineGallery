@@ -218,6 +218,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<%= request.getContextPath() %>/assets/js/live-search.js"></script>
     <script>
         const searchInput = document.getElementById('engineKeywordSearch');
         const engineCards = document.querySelectorAll('.engine-card-col');
@@ -235,36 +236,17 @@
         const readyFiltersApplyBtn = document.getElementById('readyFiltersApplyBtn');
         const readyFiltersResetBtn = document.getElementById('readyFiltersResetBtn');
 
-        const normalizeText = (value) => (value || '')
-            .toString()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .trim();
-
-        const applyEngineFilter = () => {
-            const keyword = normalizeText(searchInput.value);
-            let visibleCount = 0;
-
-            engineCards.forEach((card) => {
-                const haystack = normalizeText(card.dataset.search);
-                const isVisible = keyword.length === 0 || haystack.includes(keyword);
-                card.classList.toggle('d-none', !isVisible);
-                if (isVisible) {
-                    visibleCount += 1;
-                }
-            });
-
-            listRows.forEach((row) => {
-                const haystack = normalizeText(row.dataset.search);
-                const isVisible = keyword.length === 0 || haystack.includes(keyword);
-                row.classList.toggle('d-none', !isVisible);
-            });
-
-            emptyState.classList.toggle('d-none', visibleCount > 0);
-        };
-
-        searchInput.addEventListener('input', applyEngineFilter);
+        const filterController = window.EngineGalleryLiveSearch && searchInput
+            ? window.EngineGalleryLiveSearch.init({
+                input: searchInput,
+                groups: [
+                    { elements: engineCards },
+                    { elements: listRows }
+                ],
+                emptyState,
+                debounceMs: 180
+            })
+            : null;
 
         readyFiltersToggle.addEventListener('click', () => {
             readyFiltersKeywordInput.value = searchInput.value;
@@ -273,14 +255,18 @@
 
         readyFiltersApplyBtn.addEventListener('click', () => {
             searchInput.value = readyFiltersKeywordInput.value || '';
-            applyEngineFilter();
+            if (filterController) {
+                filterController.apply();
+            }
             readyFiltersModal.hide();
         });
 
         readyFiltersResetBtn.addEventListener('click', () => {
             readyFiltersKeywordInput.value = '';
             searchInput.value = '';
-            applyEngineFilter();
+            if (filterController) {
+                filterController.apply();
+            }
             readyFiltersModal.hide();
         });
 
@@ -296,6 +282,9 @@
         readyViewListBtn.addEventListener('click', () => applyViewMode('list'));
         readyViewGalleryBtn.addEventListener('click', () => applyViewMode('gallery'));
         applyViewMode(sessionStorage.getItem(readyViewStorageKey) || 'gallery');
+        if (filterController) {
+            filterController.apply();
+        }
     </script>
 
 </div>

@@ -137,6 +137,7 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="<%= request.getContextPath() %>/assets/js/live-search.js"></script>
 <script>
     const searchInput = document.getElementById('customerKeywordSearch');
     const customerCards = document.querySelectorAll('.customer-card-item');
@@ -153,30 +154,14 @@
     const customerOverlayDetailLink = document.getElementById('customerOverlayDetailLink');
     const contextPath = '<%= request.getContextPath() %>';
 
-    const normalizeText = (value) => (value || '')
-        .toString()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
-
-    const applyCustomerFilter = () => {
-        const keyword = normalizeText(searchInput.value);
-        let visibleCount = 0;
-
-        customerCards.forEach((card) => {
-            const haystack = normalizeText(card.dataset.search);
-            const isVisible = keyword.length === 0 || haystack.includes(keyword);
-            card.classList.toggle('d-none', !isVisible);
-            if (isVisible) {
-                visibleCount += 1;
-            }
-        });
-
-        emptyState.classList.toggle('d-none', visibleCount > 0);
-    };
-
-    searchInput.addEventListener('input', applyCustomerFilter);
+    const filterController = window.EngineGalleryLiveSearch && searchInput
+        ? window.EngineGalleryLiveSearch.init({
+            input: searchInput,
+            groups: [{ elements: customerCards }],
+            emptyState,
+            debounceMs: 180
+        })
+        : null;
 
     const withFallback = (value) => {
         const normalized = (value || '').trim();
@@ -205,6 +190,9 @@
             customerDetailOverlay.show();
         });
     });
+    if (filterController) {
+        filterController.apply();
+    }
 </script>
 
 </body>
