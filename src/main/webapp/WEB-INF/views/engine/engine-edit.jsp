@@ -81,7 +81,7 @@
                            class="file-input-native"
                            accept="image/*"
                            multiple>
-                    <label for="newImagesInput" class="file-input-visual file-input-visual-label mb-0">
+                    <label for="newImagesInput" class="file-input-visual file-input-visual-label media-action-button mb-0">
                         Seleziona immagini
                     </label>
                 </div>

@@ -862,6 +862,28 @@ body:not(.login-page) {
     position: relative;
 }
 
+.media-action-button {
+    width: 100%;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 12px;
+    border: 2px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
 .file-input-native {
     position: absolute;
     inset: 0;
@@ -906,6 +928,18 @@ body:not(.login-page) {
     border-color: var(--primary);
     box-shadow: 0 0 0 0.2rem rgba(31, 41, 51, 0.18);
     background-color: var(--input-bg-focus);
+}
+
+.media-action-button:hover,
+.media-action-button:focus {
+    color: var(--text-main);
+    border-color: #94a3b8;
+    background-color: var(--input-bg-focus);
+}
+
+.media-action-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(31, 41, 51, 0.18);
 }
 
 .field-icon-wrap {
