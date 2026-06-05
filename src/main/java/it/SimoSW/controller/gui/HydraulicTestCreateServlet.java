@@ -1,6 +1,7 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.HydraulicTestController;
+import it.SimoSW.model.HydraulicTest;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.util.UploadPathResolver;
@@ -151,7 +152,7 @@ public class HydraulicTestCreateServlet extends HttpServlet {
         }
 
         try {
-            hydraulicTestController.createHydraulicTest(
+            HydraulicTest createdTest = hydraulicTestController.createHydraulicTest(
                     customerName,
                     engineCode,
                     finalFilename,
@@ -162,7 +163,7 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     request,
                     UserActivityActionType.CREATE,
                     UserActivityEntityType.HYDRAULIC_TEST,
-                    null,
+                    String.valueOf(createdTest.getId()),
                     "aggiunta prova idraulica " + engineCode
             );
             PostSubmitNavigationGuard.blockFormPageOnce(

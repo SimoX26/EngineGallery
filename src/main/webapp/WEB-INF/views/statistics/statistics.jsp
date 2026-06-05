@@ -188,10 +188,57 @@
             </div>
         </div>
 
-        <div class="table-container mt-4">
-            <h5 class="mb-3 fw-semibold">Azioni utenti recenti</h5>
+        <div class="table-container mt-4 user-actions-panel">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                <div>
+                    <h5 class="mb-1 fw-semibold">Azioni utenti</h5>
+                    <p class="text-muted mb-0">Controllo operativo delle attività registrate negli ultimi 10 giorni.</p>
+                </div>
+                <div class="user-actions-quick-check">
+                    <span class="user-actions-quick-label">maurizio oggi</span>
+                    <strong>${maurizioEngineCreatesToday}</strong>
+                    <span class="text-muted">aggiunte motore</span>
+                </div>
+            </div>
+
+            <form method="get" action="<%= request.getContextPath() %>/statistics" class="row g-2 align-items-end mb-3">
+                <input type="hidden" name="months" value="${selectedMonths}">
+                <input type="hidden" name="fromMonth" value="${fromMonth}">
+                <input type="hidden" name="toMonth" value="${toMonth}">
+                <div class="col-12 col-md-5">
+                    <label for="activityUser" class="form-label mb-1">Utente</label>
+                    <input type="search"
+                           class="form-control"
+                           id="activityUser"
+                           name="activityUser"
+                           value="${activityUser}"
+                           placeholder="es. maurizio">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="activityScope" class="form-label mb-1">Periodo</label>
+                    <select class="form-select" id="activityScope" name="activityScope">
+                        <option value="all" ${activityScope == 'all' ? 'selected' : ''}>Ultimi 10 giorni</option>
+                        <option value="today" ${activityScope == 'today' ? 'selected' : ''}>Oggi</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3 d-grid">
+                    <button type="submit" class="btn btn-engine">Filtra azioni</button>
+                </div>
+            </form>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="<%= request.getContextPath() %>/statistics?months=${selectedMonths}&fromMonth=${fromMonth}&toMonth=${toMonth}&activityUser=maurizio&activityScope=today">
+                    maurizio oggi
+                </a>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="<%= request.getContextPath() %>/statistics?months=${selectedMonths}&fromMonth=${fromMonth}&toMonth=${toMonth}&activityScope=today">
+                    tutte oggi
+                </a>
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 user-actions-table">
                     <thead>
                     <tr>
                         <th>Utente</th>
@@ -205,18 +252,27 @@
                     <c:choose>
                         <c:when test="${not empty userActions}">
                             <c:forEach var="action" items="${userActions}">
-                                <tr>
-                                    <td>${action.username}</td>
-                                    <td>${action.action}</td>
-                                    <td>${action.timestampLabel}</td>
-                                    <td>${action.entity}</td>
-                                    <td>${action.description}</td>
+                                <tr class="${action.engineCreate ? 'user-action-row--engine-create' : ''}">
+                                    <td class="fw-semibold"><c:out value="${action.username}" /></td>
+                                    <td>
+                                        <span class="user-action-badge ${action.engineCreate ? 'user-action-badge--engine-create' : ''}">
+                                            <c:out value="${action.actionLabel}" />
+                                        </span>
+                                    </td>
+                                    <td><c:out value="${action.createdAtLabel}" /></td>
+                                    <td>
+                                        <c:out value="${action.entityLabel}" />
+                                        <c:if test="${not empty action.entityId}">
+                                            <span class="text-muted">#<c:out value="${action.entityId}" /></span>
+                                        </c:if>
+                                    </td>
+                                    <td><c:out value="${action.description}" /></td>
                                 </tr>
                             </c:forEach>
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="5" class="text-muted">Nessuna azione utente disponibile al momento.</td>
+                                <td colspan="5" class="text-muted">Nessuna azione registrata negli ultimi 10 giorni.</td>
                             </tr>
                         </c:otherwise>
                     </c:choose>

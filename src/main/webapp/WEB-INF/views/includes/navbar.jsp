@@ -4,7 +4,7 @@
 
 <c:set var="servletPath" value="${pageContext.request.servletPath}" />
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
-<c:set var="canViewStatistics" value="${loggedRole == 'ADMIN' || loggedRole == 'INSPECTOR'}" />
+<c:set var="canViewStatistics" value="${loggedRole == 'ADMIN'}" />
 <c:set var="canViewMaintenance" value="${loggedRole == 'ADMIN'}" />
 <c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
 

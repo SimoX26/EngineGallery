@@ -1,8 +1,13 @@
 package it.SimoSW.model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class UserActivityLog {
+    private static final DateTimeFormatter DISPLAY_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.ITALIAN);
+
     private long id;
     private String username;
     private String userRole;
@@ -91,5 +96,63 @@ public class UserActivityLog {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCreatedAtLabel() {
+        return createdAt != null ? DISPLAY_FORMATTER.format(createdAt) : "";
+    }
+
+    public String getActionLabel() {
+        if ("CREATE".equals(actionType) && "MOTOR".equals(entityType)) {
+            return "aggiunta motore";
+        }
+        if ("UPDATE".equals(actionType) && "MOTOR".equals(entityType)) {
+            return "modifica motore";
+        }
+        if ("DELETE".equals(actionType) && "MOTOR".equals(entityType)) {
+            return "eliminazione motore";
+        }
+        if ("STATUS_CHANGE".equals(actionType) && "MOTOR".equals(entityType)) {
+            return "cambio stato motore";
+        }
+        if ("CREATE".equals(actionType) && "HYDRAULIC_TEST".equals(entityType)) {
+            return "aggiunta prova idraulica";
+        }
+        if ("UPDATE".equals(actionType) && "HYDRAULIC_TEST".equals(entityType)) {
+            return "modifica prova idraulica";
+        }
+        if ("DELETE".equals(actionType) && "HYDRAULIC_TEST".equals(entityType)) {
+            return "eliminazione prova idraulica";
+        }
+        if ("CREATE".equals(actionType) && "CUSTOMER".equals(entityType)) {
+            return "aggiunta cliente";
+        }
+        if ("UPDATE".equals(actionType) && "CUSTOMER".equals(entityType)) {
+            return "modifica cliente";
+        }
+        if ("DELETE".equals(actionType) && "CUSTOMER".equals(entityType)) {
+            return "eliminazione cliente";
+        }
+        return actionType != null ? actionType : "";
+    }
+
+    public String getEntityLabel() {
+        if ("MOTOR".equals(entityType)) {
+            return "Motore";
+        }
+        if ("HYDRAULIC_TEST".equals(entityType)) {
+            return "Prova idraulica";
+        }
+        if ("CUSTOMER".equals(entityType)) {
+            return "Cliente";
+        }
+        if ("WAREHOUSE_ITEM".equals(entityType)) {
+            return "Articolo magazzino";
+        }
+        return entityType != null ? entityType : "";
+    }
+
+    public boolean isEngineCreate() {
+        return "CREATE".equals(actionType) && "MOTOR".equals(entityType);
     }
 }

@@ -1,7 +1,9 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.DashboardController;
+import it.SimoSW.controller.app.UserActivityLogController;
 import it.SimoSW.model.User;
+import it.SimoSW.model.UserActivityLog;
 import it.SimoSW.model.UserRole;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
@@ -24,13 +26,16 @@ import java.util.Map;
 @WebServlet("/statistics")
 public class StatisticsServlet extends HttpServlet {
     private static final LocalDate STATISTICS_START_DATE = LocalDate.of(2026, 1, 1);
+    private static final int USER_ACTION_LIMIT = 50;
 
     private DashboardController dashboardController;
+    private UserActivityLogController userActivityLogController;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
         this.dashboardController = initializer.getDashboardController();
+        this.userActivityLogController = initializer.getUserActivityLogController();
     }
 
     @Override
@@ -75,7 +80,15 @@ public class StatisticsServlet extends HttpServlet {
         if (!fromParam.isBlank() && !toParam.isBlank()) {
             monthlyHistory = filterHistoryByMonthRange(monthlyHistory, fromParam, toParam);
         }
-        List<Map<String, Object>> userActions = dashboardController.getRecentUserActions(20);
+        String activityUser = safeTrim(request.getParameter("activityUser"));
+        String activityScope = safeTrim(request.getParameter("activityScope"));
+        boolean activityTodayOnly = "today".equalsIgnoreCase(activityScope);
+        List<UserActivityLog> userActions = loadUserActions(activityUser, activityTodayOnly, today);
+        List<UserActivityLog> maurizioTodayActions =
+                userActivityLogController.getLogsByUsernameAndDate("maurizio", today, 100);
+        long maurizioEngineCreatesToday = maurizioTodayActions.stream()
+                .filter(UserActivityLog::isEngineCreate)
+                .count();
         Forecast forecast = buildForecast(monthlyHistory);
 
         request.setAttribute("meseCorrenteLabel", meseCorrenteLabel);
@@ -90,6 +103,10 @@ public class StatisticsServlet extends HttpServlet {
         request.setAttribute("tempoMedioLavorazioneMese", avgDaysThisMonth);
         request.setAttribute("monthlyHistory", monthlyHistory);
         request.setAttribute("userActions", userActions);
+        request.setAttribute("activityUser", activityUser);
+        request.setAttribute("activityScope", activityTodayOnly ? "today" : "all");
+        request.setAttribute("maurizioEngineCreatesToday", maurizioEngineCreatesToday);
+        request.setAttribute("maurizioTodayActions", maurizioTodayActions);
         request.setAttribute("selectedMonths", selectedMonths);
         request.setAttribute("fromMonth", fromParam);
         request.setAttribute("toMonth", toParam);
@@ -99,6 +116,19 @@ public class StatisticsServlet extends HttpServlet {
         request.setAttribute("forecastHasEnoughData", forecast.hasEnoughData);
 
         request.getRequestDispatcher("/WEB-INF/views/statistics/statistics.jsp").forward(request, response);
+    }
+
+    private List<UserActivityLog> loadUserActions(String activityUser, boolean todayOnly, LocalDate today) {
+        if (todayOnly && !activityUser.isBlank()) {
+            return userActivityLogController.getLogsByUsernameAndDate(activityUser, today, USER_ACTION_LIMIT);
+        }
+        if (todayOnly) {
+            return userActivityLogController.getLogsByDate(today, USER_ACTION_LIMIT);
+        }
+        if (!activityUser.isBlank()) {
+            return userActivityLogController.getLogsByUsername(activityUser, USER_ACTION_LIMIT);
+        }
+        return userActivityLogController.getRecentLogs(USER_ACTION_LIMIT);
     }
 
     private static int parseMonths(String raw, int defaultValue, int maxValue) {

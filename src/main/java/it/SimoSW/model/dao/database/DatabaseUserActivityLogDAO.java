@@ -8,11 +8,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseUserActivityLogDAO implements UserActivityLogDAO {
+    private static final int RECENT_ACTIVITY_DAYS = 10;
+
     private static final String INSERT_SQL = """
             INSERT INTO user_activity_log
             (username, user_role, action_type, entity_type, entity_id, description)
@@ -22,6 +26,35 @@ public class DatabaseUserActivityLogDAO implements UserActivityLogDAO {
     private static final String FIND_RECENT_SQL = """
             SELECT id, username, user_role, action_type, entity_type, entity_id, description, created_at
             FROM user_activity_log
+            WHERE created_at >= ?
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """;
+
+    private static final String FIND_BY_USERNAME_SQL = """
+            SELECT id, username, user_role, action_type, entity_type, entity_id, description, created_at
+            FROM user_activity_log
+            WHERE LOWER(username) = LOWER(?)
+              AND created_at >= ?
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """;
+
+    private static final String FIND_BY_DATE_SQL = """
+            SELECT id, username, user_role, action_type, entity_type, entity_id, description, created_at
+            FROM user_activity_log
+            WHERE created_at >= ?
+              AND created_at >= ? AND created_at < ?
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """;
+
+    private static final String FIND_BY_USERNAME_AND_DATE_SQL = """
+            SELECT id, username, user_role, action_type, entity_type, entity_id, description, created_at
+            FROM user_activity_log
+            WHERE LOWER(username) = LOWER(?)
+              AND created_at >= ?
+              AND created_at >= ? AND created_at < ?
             ORDER BY created_at DESC, id DESC
             LIMIT ?
             """;
@@ -54,7 +87,8 @@ public class DatabaseUserActivityLogDAO implements UserActivityLogDAO {
         List<UserActivityLog> logs = new ArrayList<>();
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(FIND_RECENT_SQL)) {
-            stmt.setInt(1, safeLimit);
+            stmt.setTimestamp(1, recentActivityCutoff());
+            stmt.setInt(2, safeLimit);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     logs.add(mapRow(rs));
@@ -64,6 +98,77 @@ public class DatabaseUserActivityLogDAO implements UserActivityLogDAO {
             throw new RuntimeException("Errore durante il recupero log attività", e);
         }
         return logs;
+    }
+
+    @Override
+    public List<UserActivityLog> findByUsername(String username, int limit) {
+        int safeLimit = Math.max(1, limit);
+        List<UserActivityLog> logs = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_USERNAME_SQL)) {
+            stmt.setString(1, username);
+            stmt.setTimestamp(2, recentActivityCutoff());
+            stmt.setInt(3, safeLimit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero log attività per utente", e);
+        }
+        return logs;
+    }
+
+    @Override
+    public List<UserActivityLog> findByDate(LocalDate date, int limit) {
+        int safeLimit = Math.max(1, limit);
+        List<UserActivityLog> logs = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_DATE_SQL)) {
+            stmt.setTimestamp(1, recentActivityCutoff());
+            bindDateRange(stmt, date, 2);
+            stmt.setInt(4, safeLimit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero log attività per data", e);
+        }
+        return logs;
+    }
+
+    @Override
+    public List<UserActivityLog> findByUsernameAndDate(String username, LocalDate date, int limit) {
+        int safeLimit = Math.max(1, limit);
+        List<UserActivityLog> logs = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_USERNAME_AND_DATE_SQL)) {
+            stmt.setString(1, username);
+            stmt.setTimestamp(2, recentActivityCutoff());
+            bindDateRange(stmt, date, 3);
+            stmt.setInt(5, safeLimit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero log attività per utente e data", e);
+        }
+        return logs;
+    }
+
+    private static Timestamp recentActivityCutoff() {
+        return Timestamp.valueOf(LocalDate.now().minusDays(RECENT_ACTIVITY_DAYS - 1L).atStartOfDay());
+    }
+
+    private static void bindDateRange(PreparedStatement stmt, LocalDate date, int startIndex) throws SQLException {
+        LocalDate safeDate = date != null ? date : LocalDate.now();
+        stmt.setTimestamp(startIndex, Timestamp.valueOf(safeDate.atStartOfDay()));
+        stmt.setTimestamp(startIndex + 1, Timestamp.valueOf(safeDate.plusDays(1).atStartOfDay()));
     }
 
     private static UserActivityLog mapRow(ResultSet rs) throws SQLException {
