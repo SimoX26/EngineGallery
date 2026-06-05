@@ -15,6 +15,9 @@
 </head>
 <body>
 
+<c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
+<c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
+
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
 <div class="dashboard-page dashboard-crm-page">
@@ -74,7 +77,9 @@
             </div>
             <div class="row g-3">
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/list"><div class="home-nav-card-title">Motori</div><p class="home-nav-card-desc mb-0">Gestione motori in lavorazione.</p></a></div>
-                <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/archive"><div class="home-nav-card-title">Archivio motori</div><p class="home-nav-card-desc mb-0">Storico motori consegnati.</p></a></div>
+                <c:if test="${canViewEngineArchive}">
+                    <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/archive"><div class="home-nav-card-title">Archivio motori</div><p class="home-nav-card-desc mb-0">Storico motori consegnati.</p></a></div>
+                </c:if>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/customer/list"><div class="home-nav-card-title">Clienti</div><p class="home-nav-card-desc mb-0">Rubrica e anagrafiche clienti.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/hydraulic-test/list"><div class="home-nav-card-title">Prove idrauliche</div><p class="home-nav-card-desc mb-0">Video e schede test.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/warehouse/list"><div class="home-nav-card-title">Magazzino</div><p class="home-nav-card-desc mb-0">Articoli, quantità e giacenze.</p></a></div>

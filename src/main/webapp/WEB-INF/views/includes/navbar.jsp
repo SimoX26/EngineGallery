@@ -6,6 +6,7 @@
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
 <c:set var="canViewStatistics" value="${loggedRole == 'ADMIN' || loggedRole == 'INSPECTOR'}" />
 <c:set var="canViewMaintenance" value="${loggedRole == 'ADMIN'}" />
+<c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
 
 <style>
     body:not(.login-page) {
@@ -68,13 +69,15 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link
-                       ${fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/engine/archive">
-                        Archivio motori
-                    </a>
-                </li>
+                <c:if test="${canViewEngineArchive}">
+                    <li class="nav-item">
+                        <a class="nav-link
+                           ${fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
+                           href="<%= request.getContextPath() %>/engine/archive">
+                            Archivio motori
+                        </a>
+                    </li>
+                </c:if>
 
                 <li class="nav-item nav-group-start">
                     <a class="nav-link

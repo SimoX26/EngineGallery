@@ -4,6 +4,8 @@ import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
 import it.SimoSW.model.Engine;
 import it.SimoSW.model.EngineStatus;
+import it.SimoSW.model.User;
+import it.SimoSW.model.UserRole;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
@@ -34,6 +36,10 @@ public class EngineListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         boolean archiveMode = "/engine/archive".equals(request.getServletPath());
+        if (archiveMode && !isAdmin(request)) {
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
 
         String engineCode = safeTrim(request.getParameter("engineCode"));
         String statusParam = safeTrim(request.getParameter("status"));
@@ -133,6 +139,13 @@ public class EngineListServlet extends HttpServlet {
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    private static boolean isAdmin(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        User loggedUser = session != null ? (User) session.getAttribute("loggedUser") : null;
+        UserRole role = loggedUser != null ? loggedUser.getRole() : null;
+        return role == UserRole.ADMIN;
     }
 
     private static boolean matchesKeyword(Engine engine, String customerName, String keyword) {
