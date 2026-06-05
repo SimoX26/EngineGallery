@@ -2,7 +2,7 @@
     <string name="app_name">RML</string>
     <string name="file_picker_title">Seleziona file</string>
     <string name="file_error">Impossibile preparare il file</string>
-    <string name="camera_session_title">Camera - RML</string>
+    <string name="camera_session_title">Fotocamera RML</string>
     <string name="camera_session_capture">Scatta foto</string>
     <string name="camera_session_done">Fatto</string>
     <string name="camera_session_counter">Foto scattate: %1$d</string>

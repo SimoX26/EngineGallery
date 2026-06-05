@@ -44,7 +44,7 @@
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Immagini motore</label>
-                <div class="engine-images-edit-list mb-3" data-image-list>
+                <div class="engine-images-edit-list engine-form-image-previews mb-3" data-image-list>
                     <c:choose>
                         <c:when test="${not empty engineImages}">
                             <c:forEach var="image" items="${engineImages}">
@@ -85,7 +85,7 @@
                         Seleziona immagini
                     </label>
                 </div>
-                <div id="newImagesPreviewList" class="engine-images-edit-list mt-2 d-none"></div>
+                <div id="newImagesPreviewList" class="engine-images-edit-list engine-form-image-previews mt-2 d-none"></div>
             </div>
 
             <div class="mb-3 text-start">

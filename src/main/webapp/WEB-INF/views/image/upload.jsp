@@ -78,7 +78,7 @@
                 </div>
                 <div id="iosCameraFlowWrap" class="mt-2 d-none">
                     <button type="button" id="iosCameraFlowOpenBtn" class="media-action-button">
-                        Camera - RML
+                        Fotocamera RML
                     </button>
                 </div>
                 <input type="file"
@@ -86,7 +86,7 @@
                        class="d-none"
                        accept="image/*"
                        capture="environment">
-                <div id="imagesPreviewList" class="engine-images-edit-list mt-2 d-none"></div>
+                <div id="imagesPreviewList" class="engine-images-edit-list engine-form-image-previews mt-2 d-none"></div>
             </div>
 
             <!-- CLIENTE -->
@@ -229,7 +229,7 @@
             <div class="camera-rml-sheet-wrap">
                 <div class="camera-rml-sheet card-base">
                     <div class="camera-rml-sheet-header">
-                        <strong class="camera-rml-title">Camera - RML</strong>
+                        <strong class="camera-rml-title">Fotocamera RML</strong>
                         <span id="iosCollectorCount" class="camera-rml-counter">0 foto</span>
                     </div>
                     <div class="camera-rml-sheet-body">
