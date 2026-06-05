@@ -58,50 +58,52 @@
             </div>
         </div>
 
-        <div class="page-header-filter">
-            <button class="btn btn-outline-secondary btn-sm"
-                    type="button"
-                    aria-expanded="false"
-                    aria-controls="warehouseFiltersModal"
-                    id="warehouseFiltersToggle">
-                Filtri
-            </button>
-        </div>
-
-        <div class="page-header-actions">
-            <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista magazzino">
-                <button type="button"
-                        id="warehouseViewListBtn"
-                        class="btn btn-outline-secondary engine-view-toggle-btn"
-                        title="Vista lista"
-                        aria-label="Vista lista">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <line x1="5" y1="7" x2="19" y2="7"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <line x1="5" y1="17" x2="19" y2="17"></line>
-                    </svg>
-                    <span class="visually-hidden">Lista</span>
-                </button>
-                <button type="button"
-                        id="warehouseViewGalleryBtn"
-                        class="btn btn-outline-secondary active engine-view-toggle-btn"
-                        title="Vista galleria"
-                        aria-label="Vista galleria">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <rect x="4" y="4" width="7" height="7" rx="1"></rect>
-                        <rect x="13" y="4" width="7" height="7" rx="1"></rect>
-                        <rect x="4" y="13" width="7" height="7" rx="1"></rect>
-                        <rect x="13" y="13" width="7" height="7" rx="1"></rect>
-                    </svg>
-                    <span class="visually-hidden">Galleria</span>
+        <div class="page-header-action-group">
+            <div class="page-header-filter">
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="warehouseFiltersModal"
+                        id="warehouseFiltersToggle">
+                    Filtri
                 </button>
             </div>
-        </div>
 
-        <div class="page-header-actions page-header-actions--add">
-            <a href="<%= request.getContextPath() %>/warehouse/new" class="btn btn-sm btn-add-plus">
-                Aggiungi +
-            </a>
+            <div class="page-header-actions page-header-actions--view">
+                <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista magazzino">
+                    <button type="button"
+                            id="warehouseViewListBtn"
+                            class="btn btn-outline-secondary engine-view-toggle-btn"
+                            title="Vista lista"
+                            aria-label="Vista lista">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <line x1="5" y1="7" x2="19" y2="7"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <line x1="5" y1="17" x2="19" y2="17"></line>
+                        </svg>
+                        <span class="visually-hidden">Lista</span>
+                    </button>
+                    <button type="button"
+                            id="warehouseViewGalleryBtn"
+                            class="btn btn-outline-secondary active engine-view-toggle-btn"
+                            title="Vista galleria"
+                            aria-label="Vista galleria">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="4" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="4" y="13" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="13" width="7" height="7" rx="1"></rect>
+                        </svg>
+                        <span class="visually-hidden">Galleria</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-header-actions page-header-actions--add">
+                <a href="<%= request.getContextPath() %>/warehouse/new" class="btn btn-sm btn-add-plus">
+                    Aggiungi +
+                </a>
+            </div>
         </div>
     </div>
 
