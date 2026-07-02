@@ -158,7 +158,8 @@ public class DashboardController {
         Map<YearMonth, Integer> processingDaysCountByMonth = new HashMap<>();
 
         List<Engine> allEngines = engineDAO.findAll();
-        Map<String, List<StatusTransitionEvent>> transitionsByEngine = loadStatusTransitionsByEngineRef();
+        TransitionHistoryData transitionHistory = loadStatusTransitionsByEngineRef();
+        Map<String, List<StatusTransitionEvent>> transitionsByEngine = transitionHistory.transitionsByEngineRef();
         for (Engine engine : allEngines) {
             YearMonth intakeMonth = YearMonth.from(engine.getIntakeDate());
             if (!intakeMonth.isBefore(firstMonth) && !intakeMonth.isAfter(currentMonth)) {
@@ -194,13 +195,19 @@ public class DashboardController {
             YearMonth ym = firstMonth.plusMonths(i);
             int inserted = insertedByMonth.getOrDefault(ym, 0);
             int delivered = deliveredByMonth.getOrDefault(ym, 0);
-            int avgDays = 0;
+            Integer avgDays = 0;
             int inProgress = 0;
 
             int daysCount = processingDaysCountByMonth.getOrDefault(ym, 0);
             if (daysCount > 0) {
                 double totalDays = processingDaysSumByMonth.getOrDefault(ym, 0D);
                 avgDays = (int) Math.round(totalDays / daysCount);
+            } else if (isMonthNotCalculableDueToMissingHistory(
+                    ym,
+                    allEngines,
+                    transitionHistory.earliestStatusChangeAt()
+            )) {
+                avgDays = null;
             }
 
             LocalDate monthEnd = ym.atEndOfMonth();
@@ -232,7 +239,7 @@ public class DashboardController {
     }
 
     private double calculateAverageWorkInProgressDaysForDeliveredBetween(LocalDate from, LocalDate to) {
-        Map<String, List<StatusTransitionEvent>> transitionsByEngine = loadStatusTransitionsByEngineRef();
+        Map<String, List<StatusTransitionEvent>> transitionsByEngine = loadStatusTransitionsByEngineRef().transitionsByEngineRef();
         double totalDays = 0;
         int countedEngines = 0;
 
@@ -259,12 +266,16 @@ public class DashboardController {
         return countedEngines == 0 ? 0 : totalDays / countedEngines;
     }
 
-    private Map<String, List<StatusTransitionEvent>> loadStatusTransitionsByEngineRef() {
+    private TransitionHistoryData loadStatusTransitionsByEngineRef() {
         Map<String, List<StatusTransitionEvent>> transitionsByEngine = new HashMap<>();
         List<UserActivityLog> logs = userActivityLogDAO.findByEntityTypeAndActionType("MOTOR", "STATUS_CHANGE");
+        LocalDateTime earliestStatusChangeAt = null;
         for (UserActivityLog log : logs) {
             if (log == null || log.getEntityId() == null || log.getEntityId().isBlank() || log.getCreatedAt() == null) {
                 continue;
+            }
+            if (earliestStatusChangeAt == null || log.getCreatedAt().isBefore(earliestStatusChangeAt)) {
+                earliestStatusChangeAt = log.getCreatedAt();
             }
             Optional<EngineStatus> toStatus = extractTargetStatus(log.getDescription());
             if (toStatus.isEmpty()) {
@@ -274,7 +285,32 @@ public class DashboardController {
                     .computeIfAbsent(log.getEntityId(), ignored -> new ArrayList<>())
                     .add(new StatusTransitionEvent(log.getCreatedAt(), toStatus.get()));
         }
-        return transitionsByEngine;
+        return new TransitionHistoryData(transitionsByEngine, earliestStatusChangeAt);
+    }
+
+    private static boolean isMonthNotCalculableDueToMissingHistory(YearMonth month,
+                                                                   List<Engine> engines,
+                                                                   LocalDateTime earliestStatusChangeAt) {
+        if (month == null || engines == null || engines.isEmpty()) {
+            return false;
+        }
+
+        LocalDate monthStart = month.atDay(1);
+        LocalDate monthEnd = month.atEndOfMonth();
+        boolean anyEngineExistedDuringMonth = engines.stream().anyMatch(engine ->
+                !engine.getIntakeDate().isAfter(monthEnd)
+                        && (engine.getDeliveryDate() == null || !engine.getDeliveryDate().isBefore(monthStart))
+        );
+
+        if (!anyEngineExistedDuringMonth) {
+            return false;
+        }
+
+        if (earliestStatusChangeAt == null) {
+            return true;
+        }
+
+        return !earliestStatusChangeAt.isBefore(month.plusMonths(1).atDay(1).atStartOfDay());
     }
 
     private static Optional<Double> calculateWorkInProgressDays(Engine engine, List<StatusTransitionEvent> transitions) {
@@ -419,6 +455,10 @@ public class DashboardController {
     }
 
     private record StatusTransitionEvent(LocalDateTime occurredAt, EngineStatus toStatus) {
+    }
+
+    private record TransitionHistoryData(Map<String, List<StatusTransitionEvent>> transitionsByEngineRef,
+                                         LocalDateTime earliestStatusChangeAt) {
     }
 
     private record WorkInProgressInterval(LocalDateTime startInclusive, LocalDateTime endExclusive) {

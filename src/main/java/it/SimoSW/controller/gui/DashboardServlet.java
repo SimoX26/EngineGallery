@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -43,6 +44,8 @@ public class DashboardServlet extends HttpServlet {
 
         // Recupero dati AGGREGATI
         request.setAttribute("loggedUser", user);
+        request.setAttribute("dashboardGreeting", buildGreeting());
+        request.setAttribute("dashboardUserDisplayName", resolveDisplayName(user));
 
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.from(today);
@@ -69,5 +72,21 @@ public class DashboardServlet extends HttpServlet {
         // Forward alla view
         RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/dashboard.jsp");
         dispatcher.forward(request, response);
+    }
+
+    private static String buildGreeting() {
+        return buildGreeting(LocalTime.now());
+    }
+
+    static String buildGreeting(LocalTime time) {
+        LocalTime safeTime = time != null ? time : LocalTime.now();
+        return safeTime.isBefore(LocalTime.of(16, 0)) ? "Buongiorno" : "Buonasera";
+    }
+
+    private static String resolveDisplayName(User user) {
+        if (user == null || user.getUsername() == null || user.getUsername().isBlank()) {
+            return "";
+        }
+        return user.getUsername();
     }
 }

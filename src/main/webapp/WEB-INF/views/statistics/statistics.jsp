@@ -140,7 +140,12 @@
                                     <td>${row.inserted}</td>
                                     <td>${row.delivered}</td>
                                     <td>${row.inProgress}</td>
-                                    <td>${row.avgDays} gg</td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${row.avgDays != null}">${row.avgDays} gg</c:when>
+                                            <c:otherwise><span class="text-muted">n/d</span></c:otherwise>
+                                        </c:choose>
+                                    </td>
                                 </tr>
                             </c:forEach>
                             <c:if test="${empty monthlyHistory}">
@@ -295,7 +300,7 @@
             <c:forEach var="row" items="${monthlyHistory}" varStatus="status">${row.delivered}${status.last ? '' : ','}</c:forEach>
         ];
         const chartAvgDays = [
-            <c:forEach var="row" items="${monthlyHistory}" varStatus="status">${row.avgDays}${status.last ? '' : ','}</c:forEach>
+            <c:forEach var="row" items="${monthlyHistory}" varStatus="status"><c:choose><c:when test="${row.avgDays != null}">${row.avgDays}</c:when><c:otherwise>null</c:otherwise></c:choose>${status.last ? '' : ','}</c:forEach>
         ];
 
         const statusData = {

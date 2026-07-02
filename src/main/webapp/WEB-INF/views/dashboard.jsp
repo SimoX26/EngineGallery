@@ -26,6 +26,9 @@
     <div class="container">
         <div class="page-header dashboard-crm-header">
             <h1>Home</h1>
+            <p class="mb-1 fw-semibold">
+                <c:out value="${dashboardGreeting}" />, <c:out value="${dashboardUserDisplayName}" />
+            </p>
             <p>Panoramica operativa di ${meseCorrenteLabel}.</p>
         </div>
 

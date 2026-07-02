@@ -181,6 +181,9 @@ public class StatisticsServlet extends HttpServlet {
 
         for (int i = rows.size() - 1; i >= 0 && count < 3; i--) {
             Map<String, Object> row = rows.get(i);
+            if (!(row.get("avgDays") instanceof Number)) {
+                return new Forecast(false, 0, 0, 0);
+            }
             insertedSum += toInt(row.get("inserted"));
             deliveredSum += toInt(row.get("delivered"));
             avgDaysSum += toInt(row.get("avgDays"));

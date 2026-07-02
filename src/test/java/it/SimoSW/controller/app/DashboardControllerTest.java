@@ -316,6 +316,48 @@ class DashboardControllerTest {
         assertEquals(3, monthlyAvgDays(controller, YearMonth.of(2026, 3)));
     }
 
+    @Test
+    void monthWithInsufficientHistoryReturnsNullInsteadOfZero() {
+        DashboardController controller = controllerWith(
+                List.of(deliveredEngine("RML-2026-00022", LocalDate.of(2026, 1, 10), LocalDate.of(2026, 4, 10))),
+                List.of(
+                        statusChange("RML-2026-00022", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 5, 23, 10, 0)),
+                        statusChange("RML-2026-00022", "WORK_IN_PROGRESS -> READY", LocalDateTime.of(2026, 5, 25, 10, 0))
+                )
+        );
+
+        assertEquals(null, monthlyAvgDaysValue(controller, YearMonth.of(2026, 4)));
+    }
+
+    @Test
+    void monthValueRemainsAlignedWithItsMonthKeyWhenHistoryContainsNullAndNumbers() {
+        DashboardController controller = controllerWith(
+                List.of(
+                        deliveredEngine("RML-2026-00023", LocalDate.of(2026, 1, 10), LocalDate.of(2026, 6, 10)),
+                        deliveredEngine("RML-2026-00024", LocalDate.of(2026, 1, 10), LocalDate.of(2026, 6, 10))
+                ),
+                List.of(
+                        statusChange("RML-2026-00023", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 5, 23, 10, 0)),
+                        statusChange("RML-2026-00023", "WORK_IN_PROGRESS -> READY", LocalDateTime.of(2026, 5, 25, 10, 0)),
+                        statusChange("RML-2026-00024", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 6, 1, 0, 0)),
+                        statusChange("RML-2026-00024", "WORK_IN_PROGRESS -> READY", LocalDateTime.of(2026, 6, 4, 0, 0))
+                )
+        );
+
+        List<Map<String, Object>> rows = controller.getStoricoMensileKpi(monthsIncluding(YearMonth.of(2026, 5)));
+        Map<String, Object> mayRow = rows.stream()
+                .filter(row -> "2026-05".equals(row.get("monthKey")))
+                .findFirst()
+                .orElseThrow();
+        Map<String, Object> juneRow = rows.stream()
+                .filter(row -> "2026-06".equals(row.get("monthKey")))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(2, mayRow.get("avgDays"));
+        assertEquals(3, juneRow.get("avgDays"));
+    }
+
     private static DashboardController controllerWith(List<Engine> engines, List<UserActivityLog> logs) {
         return new DashboardController(
                 new FakeEngineDAO(engines),
@@ -334,11 +376,15 @@ class DashboardControllerTest {
     }
 
     private static int monthlyAvgDays(DashboardController controller, YearMonth month) {
-        return ((Number) controller.getStoricoMensileKpi(monthsIncluding(month)).stream()
+        return ((Number) monthlyAvgDaysValue(controller, month)).intValue();
+    }
+
+    private static Object monthlyAvgDaysValue(DashboardController controller, YearMonth month) {
+        return controller.getStoricoMensileKpi(monthsIncluding(month)).stream()
                 .filter(row -> month.toString().equals(row.get("monthKey")))
                 .findFirst()
                 .orElseThrow()
-                .get("avgDays")).intValue();
+                .get("avgDays");
     }
 
     private static Engine deliveredEngine(String ref, LocalDate intakeDate, LocalDate deliveryDate) {
