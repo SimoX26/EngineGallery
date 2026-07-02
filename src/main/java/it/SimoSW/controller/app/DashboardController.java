@@ -169,15 +169,21 @@ public class DashboardController {
                 YearMonth deliveryMonth = YearMonth.from(engine.getDeliveryDate());
                 if (!deliveryMonth.isBefore(firstMonth) && !deliveryMonth.isAfter(currentMonth)) {
                     deliveredByMonth.merge(deliveryMonth, 1, Integer::sum);
-                    Optional<Double> workingDays = calculateWorkInProgressDays(
-                            engine,
-                            transitionsByEngine.getOrDefault(engine.getEngineRef(), List.of())
-                    );
-                    if (workingDays.isPresent()) {
-                        processingDaysSumByMonth.merge(deliveryMonth, workingDays.get(), Double::sum);
-                        processingDaysCountByMonth.merge(deliveryMonth, 1, Integer::sum);
-                    }
                 }
+            }
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        for (YearMonth ym = firstMonth; !ym.isAfter(currentMonth); ym = ym.plusMonths(1)) {
+            MonthlyWorkInProgressAggregate aggregate = calculateMonthlyWorkInProgressAggregate(
+                    ym,
+                    allEngines,
+                    transitionsByEngine,
+                    now
+            );
+            if (aggregate.enginesWithOverlap() > 0) {
+                processingDaysSumByMonth.put(ym, aggregate.totalDays());
+                processingDaysCountByMonth.put(ym, aggregate.enginesWithOverlap());
             }
         }
 
@@ -272,18 +278,97 @@ public class DashboardController {
     }
 
     private static Optional<Double> calculateWorkInProgressDays(Engine engine, List<StatusTransitionEvent> transitions) {
-        if (engine == null || transitions == null || transitions.isEmpty()) {
+        List<WorkInProgressInterval> intervals = buildWorkInProgressIntervals(engine, transitions);
+        if (intervals.isEmpty()) {
             return Optional.empty();
+        }
+
+        Duration totalDuration = Duration.ZERO;
+        boolean completedIntervalFound = false;
+
+        for (WorkInProgressInterval interval : intervals) {
+            if (interval.endExclusive() != null && !interval.endExclusive().isBefore(interval.startInclusive())) {
+                totalDuration = totalDuration.plus(Duration.between(interval.startInclusive(), interval.endExclusive()));
+                completedIntervalFound = true;
+            }
+        }
+
+        if (!completedIntervalFound) {
+            return Optional.empty();
+        }
+
+        return Optional.of(totalDuration.toMillis() / 86_400_000D);
+    }
+
+    private static MonthlyWorkInProgressAggregate calculateMonthlyWorkInProgressAggregate(YearMonth month,
+                                                                                          List<Engine> engines,
+                                                                                          Map<String, List<StatusTransitionEvent>> transitionsByEngine,
+                                                                                          LocalDateTime now) {
+        if (month == null || engines == null || transitionsByEngine == null || now == null) {
+            return new MonthlyWorkInProgressAggregate(0D, 0);
+        }
+
+        LocalDateTime monthStart = month.atDay(1).atStartOfDay();
+        LocalDateTime monthEndExclusive = month.plusMonths(1).atDay(1).atStartOfDay();
+        LocalDateTime openIntervalLimit = YearMonth.from(now).equals(month)
+                ? minDateTime(now, monthEndExclusive)
+                : monthEndExclusive;
+
+        double totalDays = 0D;
+        int enginesWithOverlap = 0;
+
+        for (Engine engine : engines) {
+            double engineDays = calculateOverlappingWorkInProgressDays(
+                    buildWorkInProgressIntervals(engine, transitionsByEngine.getOrDefault(engine.getEngineRef(), List.of())),
+                    monthStart,
+                    monthEndExclusive,
+                    openIntervalLimit
+            );
+            if (engineDays > 0D) {
+                totalDays += engineDays;
+                enginesWithOverlap += 1;
+            }
+        }
+
+        return new MonthlyWorkInProgressAggregate(totalDays, enginesWithOverlap);
+    }
+
+    private static double calculateOverlappingWorkInProgressDays(List<WorkInProgressInterval> intervals,
+                                                                 LocalDateTime periodStartInclusive,
+                                                                 LocalDateTime periodEndExclusive,
+                                                                 LocalDateTime openIntervalLimit) {
+        if (intervals == null || intervals.isEmpty()) {
+            return 0D;
+        }
+
+        Duration totalDuration = Duration.ZERO;
+        for (WorkInProgressInterval interval : intervals) {
+            LocalDateTime intervalEndExclusive = interval.endExclusive() != null ? interval.endExclusive() : openIntervalLimit;
+            if (intervalEndExclusive == null) {
+                continue;
+            }
+            LocalDateTime effectiveStart = maxDateTime(interval.startInclusive(), periodStartInclusive);
+            LocalDateTime effectiveEnd = minDateTime(intervalEndExclusive, periodEndExclusive);
+            if (effectiveEnd.isAfter(effectiveStart)) {
+                totalDuration = totalDuration.plus(Duration.between(effectiveStart, effectiveEnd));
+            }
+        }
+
+        return totalDuration.toMillis() / 86_400_000D;
+    }
+
+    private static List<WorkInProgressInterval> buildWorkInProgressIntervals(Engine engine, List<StatusTransitionEvent> transitions) {
+        if (engine == null || transitions == null || transitions.isEmpty()) {
+            return List.of();
         }
 
         List<StatusTransitionEvent> orderedTransitions = transitions.stream()
                 .sorted(Comparator.comparing(StatusTransitionEvent::occurredAt))
                 .toList();
 
-        Duration totalDuration = Duration.ZERO;
+        List<WorkInProgressInterval> intervals = new ArrayList<>();
         LocalDateTime openIntervalStart = null;
         EngineStatus currentStatus = null;
-        boolean completedIntervalFound = false;
 
         for (StatusTransitionEvent transition : orderedTransitions) {
             EngineStatus nextStatus = transition.toStatus();
@@ -296,19 +381,26 @@ public class DashboardController {
                     openIntervalStart = transition.occurredAt();
                 }
             } else if (openIntervalStart != null && !transition.occurredAt().isBefore(openIntervalStart)) {
-                totalDuration = totalDuration.plus(Duration.between(openIntervalStart, transition.occurredAt()));
+                intervals.add(new WorkInProgressInterval(openIntervalStart, transition.occurredAt()));
                 openIntervalStart = null;
-                completedIntervalFound = true;
             }
 
             currentStatus = nextStatus;
         }
 
-        if (!completedIntervalFound) {
-            return Optional.empty();
+        if (openIntervalStart != null && engine.getStatus() == EngineStatus.WORK_IN_PROGRESS) {
+            intervals.add(new WorkInProgressInterval(openIntervalStart, null));
         }
 
-        return Optional.of(totalDuration.toMillis() / 86_400_000D);
+        return intervals;
+    }
+
+    private static LocalDateTime maxDateTime(LocalDateTime first, LocalDateTime second) {
+        return first.isAfter(second) ? first : second;
+    }
+
+    private static LocalDateTime minDateTime(LocalDateTime first, LocalDateTime second) {
+        return first.isBefore(second) ? first : second;
     }
 
     private static Optional<EngineStatus> extractTargetStatus(String description) {
@@ -327,6 +419,12 @@ public class DashboardController {
     }
 
     private record StatusTransitionEvent(LocalDateTime occurredAt, EngineStatus toStatus) {
+    }
+
+    private record WorkInProgressInterval(LocalDateTime startInclusive, LocalDateTime endExclusive) {
+    }
+
+    private record MonthlyWorkInProgressAggregate(double totalDays, int enginesWithOverlap) {
     }
 
     public List<Map<String, Object>> getRecentUserActions(int limit) {
