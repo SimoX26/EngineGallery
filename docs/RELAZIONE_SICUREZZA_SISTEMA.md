@@ -183,11 +183,11 @@ Supporto configurazione:
 - property/env per URL, user, password DB
 
 Stato attuale:
-- esiste fallback locale hardcoded (`localhost`, `engine_gallery`, `engine123`) per compatibilità sviluppo
+- la configurazione DB deve essere fornita esternamente tramite property/env già previste dal progetto
 
 Impatto sicurezza:
-- in produzione il fallback è sconsigliato
-- raccomandato rendere obbligatoria config esterna in ambiente non-dev
+- l'applicazione non deve usare fallback hardcoded per URL, utente o password
+- l'assenza della configurazione obbligatoria deve bloccare l'inizializzazione
 
 ## 9. Difese XSS lato view
 

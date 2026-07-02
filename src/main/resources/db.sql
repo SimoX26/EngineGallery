@@ -1,16 +1,17 @@
-DROP DATABASE IF EXISTS engine_gallery;
-CREATE DATABASE engine_gallery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Bootstrap schema for new installations only.
+-- Do not use this file to update an existing installation with data already present.
+-- For existing installations, keep the current schema/data and apply only the
+-- required SQL migrations plus secure provisioning of the MySQL application user.
+CREATE DATABASE IF NOT EXISTS engine_gallery CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE engine_gallery;
 
-
-CREATE USER IF NOT EXISTS 'engine_gallery'@'localhost'
-IDENTIFIED BY 'engine123';
-
-
-GRANT ALL PRIVILEGES ON engine_gallery.* TO 'engine_gallery'@'localhost';
-
-FLUSH PRIVILEGES;
+-- Provisioning of the database user is intentionally external to this script.
+-- Run this bootstrap using a MySQL account that already has permission to
+-- create the schema and tables, then configure the application with:
+--   -Denginegallery.db.url / ENGINE_GALLERY_DB_URL
+--   -Denginegallery.db.user / ENGINE_GALLERY_DB_USER
+--   -Denginegallery.db.password / ENGINE_GALLERY_DB_PASSWORD
 
 
 
