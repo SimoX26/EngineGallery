@@ -1,192 +1,92 @@
-## 🏎️ Engine Gallery
+# Engine Gallery
 
-**Engine Gallery** è una web application Java sviluppata con **architettura MVC** che permette di gestire e consultare una galleria strutturata di **motori e relative immagini**, organizzate in cartelle e sottocartelle, tendendo traccia degli stati di lavorazione.
+## Panoramica
 
-Il progetto nasce con l’obiettivo di realizzare una **galleria tecnica accessibile via web**, pensata per officine o archivi industriali, mantenendo una forte separazione tra **logica applicativa, persistenza e presentazione**.
+Engine Gallery e una web application pensata per organizzare le attivita di officina legate a motori, clienti, contenuti tecnici e articoli di magazzino in un unico ambiente operativo. Nel repository e presente anche un wrapper Android che rende disponibile la stessa esperienza in mobilita.
 
+L'applicazione e adatta a contesti in cui ogni motore attraversa diverse fasi di lavorazione e deve rimanere collegato a cliente, immagini, note e materiali di supporto.
 
-#### ✨ Funzionalità principali
+## A Cosa Serve
 
-* Visualizzazione di una **galleria di motori**
-* Organizzazione delle immagini in **cartelle e sottocartelle**
-* Associazione di **metadati** (cliente, codice motore)
-* Gestione dello **stato di lavorazione del motore**
-* Ricerca e filtraggio dei contenuti
-* Interfaccia responsive accessibile da desktop e mobile
+Engine Gallery riunisce informazioni che spesso sono distribuite tra cartelle, messaggi e liste separate. Aiuta a:
 
+- tracciare i motori e il loro stato di avanzamento;
+- collegare ogni lavorazione al cliente corretto;
+- raccogliere immagini e contenuti tecnici in modo ordinato;
+- mantenere uno storico consultabile delle attivita;
+- monitorare articoli di magazzino e relativa documentazione visiva;
+- consultare indicatori sintetici e attivita recenti da una dashboard centrale.
 
-#### 🧱 Architettura e tecnologie
+## Utenti
 
-* **Java + Maven**
-* **Servlet & JSP**
-* **Pattern MVC**
-* **DAO pattern** per l’accesso ai dati
-* Persistenza **database** (con astrazione del layer)
-* **Tomcat**
-* Frontend con **HTML, CSS**
+L'applicazione e rivolta a personale operativo e amministrativo che deve gestire il lavoro quotidiano di officina e i materiali collegati.
 
-L’applicazione è progettata per essere **scalabile, estendibile e manutenibile**, con particolare attenzione alle buone pratiche di ingegneria del software.
+Dal repository emergono due ruoli utente chiaramente riconoscibili:
 
-#### 📱 Versione Android installabile
+- `OPERATOR`, per l'uso operativo standard;
+- `ADMIN`, con accesso a sezioni aggiuntive come statistiche, manutenzione e archivio motori.
 
-Nel repository è presente il progetto Android in:
+## Sezioni Principali
 
-`android-app/`
+## Dashboard
 
-Guida build/install APK:
+La home fornisce una panoramica operativa dell'attivita corrente. Include indicatori sintetici, collegamenti rapidi alle sezioni principali e informazioni recenti su carico di lavoro e attivita.
 
-`android-app/README.md`
+## Clienti
 
-#### 📁 Percorso di salvataggio immagini
+L'area clienti supporta la gestione delle anagrafiche e delle informazioni di contatto o descrittive. I dati cliente sono collegati ai motori e aiutano a organizzare il lavoro per commessa o referente.
 
-Per default le immagini vengono salvate nella cartella:
+## Motori
 
-```
-~/EngineGallery/uploads/engines
-```
+E il nucleo dell'applicazione. I motori possono essere elencati, consultati nel dettaglio, aggiornati e seguiti lungo i diversi stati di lavorazione. Il flusso comprende anche una vista dedicata ai motori pronti e, per gli amministratori, una vista di archivio.
 
-Puoi personalizzare il percorso con:
+Ogni motore puo essere associato a cliente, note, codici identificativi e immagini.
 
-- variabile ambiente `ENGINE_GALLERY_UPLOAD_DIR`
-- system property `enginegallery.upload.dir`
+## Prove Idrauliche
 
-#### 🔐 Configurazione sicurezza/DB
+L'applicazione include una sezione dedicata alle prove idrauliche, con flussi di elenco, dettaglio e inserimento. In quest'area vengono raccolte informazioni di test e relativi contenuti multimediali.
 
-Per avviare l'applicazione ora sono richieste le configurazioni DB via variabili esterne (niente credenziali hardcoded):
+## Magazzino
 
-- `ENGINE_GALLERY_DB_URL` (oppure `-Denginegallery.db.url=...`)
-- `ENGINE_GALLERY_DB_USER` (oppure `-Denginegallery.db.user=...`)
-- `ENGINE_GALLERY_DB_PASSWORD` (oppure `-Denginegallery.db.password=...`)
+La sezione magazzino gestisce articoli, quantita, ubicazioni, note e immagini collegate. Supporta sia la consultazione operativa sia l'aggiornamento delle informazioni di giacenza.
 
-Per firmare in modo sicuro il cookie "remember me" imposta:
+## Altre Aree
 
-- `ENGINE_GALLERY_REMEMBER_SECRET` (oppure `-Denginegallery.remember.secret=...`)
+La navigazione comprende anche:
 
-#### 🛠️ Provisioning database
+- una sezione impostazioni per preferenze di utilizzo;
+- una sezione manutenzione riservata agli amministratori;
+- sezioni placeholder per catalogo e pronta consegna, gia presenti nella struttura applicativa.
 
-Per la rimozione delle credenziali DB hardcoded non serve una migrazione dello schema: schema e dati applicativi non cambiano. Serve invece provisioning sicuro dell'utente MySQL applicativo e configurazione esterna obbligatoria.
+## Flusso di Utilizzo
 
-Nuova installazione:
+Dal codice emerge un modello d'uso centrato su accesso autenticato e navigazione per aree funzionali.
 
-1. Imposta le configurazioni applicative richieste:
-   - `ENGINE_GALLERY_DB_URL`
-   - `ENGINE_GALLERY_DB_USER`
-   - `ENGINE_GALLERY_DB_PASSWORD`
-2. Crea lo schema base con un account MySQL amministrativo o già autorizzato:
+Un flusso tipico prevede:
 
-```bash
-mysql --login-path admin-local < src/main/resources/db.sql
-```
+1. accesso all'applicazione;
+2. consultazione della dashboard per avere una vista d'insieme;
+3. ingresso nelle aree clienti, motori, prove idrauliche o magazzino;
+4. creazione o aggiornamento dei record;
+5. associazione di immagini o contenuti multimediali dove necessario;
+6. consultazione di dettagli, stato di avanzamento e storico operativo.
 
-3. Applica tutte le migrazioni SQL versionate in ordine lessicografico:
+## Interfaccia
 
-```bash
-for f in src/main/resources/migrations/*.sql; do
-  mysql --login-path admin-local < "$f"
-done
-```
+L'interfaccia e composta da pagine server-rendered con navigazione chiara tra le diverse sezioni. Dalle view implementate risultano direttamente verificabili queste caratteristiche:
 
-4. Crea o aggiorna l'utente MySQL dedicato all'applicazione con privilegi minimi:
+- navigazione responsive con gestione dedicata anche in mobilita;
+- dashboard con indicatori e accessi rapidi;
+- schermate di elenco, dettaglio, inserimento, modifica e conferma eliminazione per le entita principali;
+- supporto al caricamento di immagini e altri contenuti multimediali;
+- preferenze di tema chiaro, scuro o automatico;
+- disponibilita di un wrapper Android per l'utilizzo da smartphone.
 
-```bash
-ENGINE_GALLERY_DB_URL='jdbc:mysql://db-host:3306/engine_gallery?serverTimezone=UTC' \
-ENGINE_GALLERY_DB_USER='app_user' \
-ENGINE_GALLERY_DB_PASSWORD='APP_PASSWORD_NON_VERSIONATA' \
-./provision-db-user.sh --mysql-user-host app-host --login-path admin-local
-```
+## Tecnologie
 
-5. Avvia l'applicazione con variabili d'ambiente oppure con property JVM:
+Engine Gallery e realizzata come applicazione web Java basata su Servlet e JSP, con packaging Maven e interfaccia sviluppata con HTML, CSS, JavaScript, Bootstrap e JSTL.  
+Accanto all'applicazione web principale, il repository include un wrapper Android basato su WebView.
 
-```bash
-export ENGINE_GALLERY_DB_URL='jdbc:mysql://db-host:3306/engine_gallery?serverTimezone=UTC'
-export ENGINE_GALLERY_DB_USER='app_user'
-export ENGINE_GALLERY_DB_PASSWORD='APP_PASSWORD_NON_VERSIONATA'
-```
+## Stato Del Progetto
 
-```bash
--Denginegallery.db.url='jdbc:mysql://db-host:3306/engine_gallery?serverTimezone=UTC' \
--Denginegallery.db.user='app_user' \
--Denginegallery.db.password='APP_PASSWORD_NON_VERSIONATA'
-```
-
-Installazione esistente:
-
-1. Non rieseguire `src/main/resources/db.sql` su un database già popolato.
-2. Mantieni schema e dati esistenti; applica solo eventuali migrazioni SQL mancanti.
-3. Crea oppure ruota in modo sicuro l'account MySQL applicativo con `./provision-db-user.sh`.
-4. Aggiorna l'ambiente runtime dell'applicazione con una delle coppie supportate:
-   - `ENGINE_GALLERY_DB_URL` / `-Denginegallery.db.url`
-   - `ENGINE_GALLERY_DB_USER` / `-Denginegallery.db.user`
-   - `ENGINE_GALLERY_DB_PASSWORD` / `-Denginegallery.db.password`
-5. Riavvia l'applicazione e verifica la connessione.
-
-Permessi applicativi assegnati:
-
-- `SELECT`
-- `INSERT`
-- `UPDATE`
-- `DELETE`
-
-Questi permessi vengono concessi solo sul database applicativo estratto da `ENGINE_GALLERY_DB_URL`. Lo script non assegna privilegi globali o amministrativi.
-
-Verifica della connessione:
-
-- senza configurazione obbligatoria l'avvio fallisce con un errore esplicito che indica la property/env mancante;
-- con credenziali errate la connessione JDBC fallisce senza fallback;
-- con credenziali corrette l'applicazione completa l'inizializzazione e risponde normalmente.
-
-Risoluzione problemi operativi:
-
-- errore `Missing required database ... configuration`: valorizza `ENGINE_GALLERY_DB_URL`, `ENGINE_GALLERY_DB_USER`, `ENGINE_GALLERY_DB_PASSWORD` oppure le corrispondenti property JVM;
-- errore di autenticazione MySQL: riesegui `./provision-db-user.sh` con la password corretta e verifica che `--mysql-user-host` corrisponda davvero all'host da cui si collega l'applicazione;
-- errore di permessi insufficienti: verifica che l'utente applicativo sia dedicato all'app e che lo script abbia applicato i grant sul database corretto.
-
-Rotazione o rimozione delle vecchie credenziali prevedibili:
-
-- se mantieni lo stesso username applicativo, ruota la password aggiornando `ENGINE_GALLERY_DB_PASSWORD` e rieseguendo `./provision-db-user.sh`;
-- se passi a un nuovo username dedicato, aggiorna prima la configurazione dell'applicazione, verifica la connessione e solo dopo rimuovi esplicitamente l'account legacy con un comando amministrativo MySQL.
-
-Rollback operativo sicuro:
-
-- ripristina la precedente configurazione esterna solo se ancora nota e controllata;
-- in alternativa crea un nuovo account applicativo dedicato con `./provision-db-user.sh` e aggiorna l'applicazione senza ricreare database o tabelle.
-
-#### 🚀 Deploy remoto
-
-Lo script `./deploy-remoto.sh` continua a costruire e caricare il WAR applicativo, ma ora trasferisce anche i soli artefatti operativi utili all'amministrazione del deploy sicuro DB:
-
-- `target/EngineGallery.war` nella webapps remota;
-- `provision-db-user.sh` nella directory remota `admin/`;
-- `src/main/resources/db.sql` nella directory remota `sql/`;
-- `src/main/resources/migrations/*.sql` nella directory remota `sql/migrations/`.
-
-Percorsi remoti:
-
-- webapp: `--remote-path` oppure default `/opt/tomcat/webapps`
-- artefatti operativi: `--remote-ops-path` oppure default `~/enginegallery-ops`
-- alias compatibile: `--remote-sql-path` punta alla stessa directory operativa
-
-Operazioni automatiche del deploy:
-
-- build Maven del WAR, salvo `--skip-build`;
-- creazione idempotente delle directory remote mancanti;
-- upload del WAR in file temporaneo e sostituzione finale del WAR remoto;
-- backup recuperabile del WAR precedente in `backups/webapps/`;
-- upload di script e SQL con permessi restrittivi;
-- nessuna generazione o sovrascrittura di configurazioni runtime con segreti.
-
-Operazioni che restano manuali:
-
-- configurazione runtime del Tomcat o del servizio applicativo con:
-  - `ENGINE_GALLERY_DB_URL` oppure `-Denginegallery.db.url`
-  - `ENGINE_GALLERY_DB_USER` oppure `-Denginegallery.db.user`
-  - `ENGINE_GALLERY_DB_PASSWORD` oppure `-Denginegallery.db.password`
-- esecuzione di `provision-db-user.sh`;
-- esecuzione di `db.sql` o delle migrazioni SQL;
-- restart del server applicativo, se richiesto dall'ambiente remoto.
-
-Rollback operativo:
-
-- recupera il WAR precedente dalla directory remota `backups/webapps/`;
-- riposizionalo nella webapps remota con lo stesso nome del WAR applicativo;
-- ripristina, se necessario, la configurazione runtime esterna già presente sul server.
+Dal repository emerge un'applicazione strutturata e in evoluzione, con piu aree funzionali gia implementate, una navigazione coerente tra le sezioni e una presenza sia web sia mobile.
