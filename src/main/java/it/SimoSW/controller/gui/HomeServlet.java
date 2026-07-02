@@ -12,8 +12,6 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        // Forward verso la landing page pubblica
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/auth");
     }
 }

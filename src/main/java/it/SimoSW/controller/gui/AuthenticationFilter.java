@@ -53,6 +53,10 @@ public class AuthenticationFilter implements Filter {
                     res.sendRedirect(contextPath + "/dashboard");
                     return;
                 }
+                if (isHomePath(path)) {
+                    req.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(req, res);
+                    return;
+                }
             }
             if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
                 res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");

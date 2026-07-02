@@ -57,8 +57,7 @@ public class LogoutServlet extends HttpServlet {
         clearCookie(response, request, COOKIE_REMEMBER);
         clearCookie(response, request, COOKIE_LAST_PATH);
 
-        // Redirect alla landing page
-        response.sendRedirect(request.getContextPath() + "/home");
+        response.sendRedirect(request.getContextPath() + "/auth");
     }
 
     private void clearCookie(HttpServletResponse response, HttpServletRequest request, String name) {
