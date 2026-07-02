@@ -25,7 +25,8 @@
 
         <activity
             android:name=".CameraSessionActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".MainActivity"

@@ -7,9 +7,14 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.http.Part;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,6 +28,7 @@ public final class ImageOptimizationUtil {
     private static final int MAX_WIDTH = 1920;
     private static final int MAX_HEIGHT = 1920;
     private static final float JPEG_QUALITY = 0.82f;
+    private static final int EXIF_ORIENTATION_TAG = 0x0112;
 
     private ImageOptimizationUtil() {
     }
@@ -32,22 +38,27 @@ public final class ImageOptimizationUtil {
         String submittedName = part.getSubmittedFileName();
         String originalName = submittedName == null ? "image.jpg" : Paths.get(submittedName).getFileName().toString();
         String sanitizedOriginal = sanitizeFilename(originalName);
+        byte[] sourceBytes;
+
+        try (InputStream is = part.getInputStream()) {
+            sourceBytes = is.readAllBytes();
+        }
 
         BufferedImage source;
-        try (InputStream is = part.getInputStream()) {
+        try (ByteArrayInputStream is = new ByteArrayInputStream(sourceBytes)) {
             source = ImageIO.read(is);
         }
 
         if (source == null) {
             String fallbackFilename = UUID.randomUUID() + "_" + sanitizedOriginal;
             Path fallbackDestination = safeResolve(targetDir, fallbackFilename);
-            try (InputStream is = part.getInputStream()) {
-                Files.copy(is, fallbackDestination, StandardCopyOption.REPLACE_EXISTING);
-            }
+            Files.write(fallbackDestination, sourceBytes);
             return fallbackFilename;
         }
 
-        BufferedImage resized = resizeIfNeeded(source, MAX_WIDTH, MAX_HEIGHT);
+        int exifOrientation = readExifOrientation(sourceBytes);
+        BufferedImage oriented = applyExifOrientation(source, exifOrientation);
+        BufferedImage resized = resizeIfNeeded(oriented, MAX_WIDTH, MAX_HEIGHT);
         BufferedImage rgbImage = ensureRgb(resized);
 
         String outputFilename = UUID.randomUUID() + ".jpg";
@@ -108,6 +119,169 @@ public final class ImageOptimizationUtil {
             g2.dispose();
         }
         return rgb;
+    }
+
+    private static BufferedImage applyExifOrientation(BufferedImage source, int orientation) {
+        if (orientation == 1) {
+            return source;
+        }
+
+        int width = source.getWidth();
+        int height = source.getHeight();
+        AffineTransform transform = new AffineTransform();
+        int targetWidth = width;
+        int targetHeight = height;
+
+        switch (orientation) {
+            case 3:
+                transform.translate(width, height);
+                transform.rotate(Math.PI);
+                break;
+            case 6:
+                transform.translate(height, 0);
+                transform.rotate(Math.PI / 2);
+                targetWidth = height;
+                targetHeight = width;
+                break;
+            case 8:
+                transform.translate(0, width);
+                transform.rotate(-Math.PI / 2);
+                targetWidth = height;
+                targetHeight = width;
+                break;
+            default:
+                return source;
+        }
+
+        int imageType = source.getType() == BufferedImage.TYPE_CUSTOM ? BufferedImage.TYPE_INT_ARGB : source.getType();
+        BufferedImage destination = new BufferedImage(targetWidth, targetHeight, imageType);
+        Graphics2D g2 = destination.createGraphics();
+        try {
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2.drawImage(source, new AffineTransformOp(transform, AffineTransformOp.TYPE_BICUBIC), 0, 0);
+        } finally {
+            g2.dispose();
+        }
+        return destination;
+    }
+
+    private static int readExifOrientation(byte[] imageBytes) {
+        if (imageBytes == null || imageBytes.length < 4 || !isJpeg(imageBytes)) {
+            return 1;
+        }
+
+        int offset = 2;
+        while (offset + 4 <= imageBytes.length) {
+            if ((imageBytes[offset] & 0xFF) != 0xFF) {
+                break;
+            }
+
+            int marker = imageBytes[offset + 1] & 0xFF;
+            offset += 2;
+
+            if (marker == 0xD8 || marker == 0x01) {
+                continue;
+            }
+            if (marker == 0xD9 || marker == 0xDA) {
+                break;
+            }
+            if (offset + 2 > imageBytes.length) {
+                break;
+            }
+
+            int segmentLength = readUnsignedShortBigEndian(imageBytes, offset);
+            if (segmentLength < 2 || offset + segmentLength > imageBytes.length) {
+                break;
+            }
+
+            if (marker == 0xE1 && segmentLength >= 8 && hasExifHeader(imageBytes, offset + 2)) {
+                int orientation = parseExifOrientation(imageBytes, offset + 2 + 6, segmentLength - 8);
+                if (orientation == 3 || orientation == 6 || orientation == 8) {
+                    return orientation;
+                }
+                return 1;
+            }
+
+            offset += segmentLength;
+        }
+        return 1;
+    }
+
+    private static int parseExifOrientation(byte[] imageBytes, int tiffStart, int availableLength) {
+        if (availableLength < 8 || tiffStart + 8 > imageBytes.length) {
+            return 1;
+        }
+
+        ByteOrder byteOrder;
+        int byteOrderMarker = readUnsignedShortBigEndian(imageBytes, tiffStart);
+        if (byteOrderMarker == 0x4949) {
+            byteOrder = ByteOrder.LITTLE_ENDIAN;
+        } else if (byteOrderMarker == 0x4D4D) {
+            byteOrder = ByteOrder.BIG_ENDIAN;
+        } else {
+            return 1;
+        }
+
+        int tiffTagMarker = readUnsignedShort(imageBytes, tiffStart + 2, byteOrder);
+        if (tiffTagMarker != 0x002A) {
+            return 1;
+        }
+
+        int ifdOffset = readInt(imageBytes, tiffStart + 4, byteOrder);
+        int ifdStart = tiffStart + ifdOffset;
+        if (ifdOffset < 0 || ifdStart + 2 > imageBytes.length) {
+            return 1;
+        }
+
+        int entryCount = readUnsignedShort(imageBytes, ifdStart, byteOrder);
+        int entryOffset = ifdStart + 2;
+        for (int i = 0; i < entryCount; i++) {
+            int entryStart = entryOffset + i * 12;
+            if (entryStart + 12 > imageBytes.length) {
+                return 1;
+            }
+
+            int tag = readUnsignedShort(imageBytes, entryStart, byteOrder);
+            if (tag != EXIF_ORIENTATION_TAG) {
+                continue;
+            }
+
+            int type = readUnsignedShort(imageBytes, entryStart + 2, byteOrder);
+            int count = readInt(imageBytes, entryStart + 4, byteOrder);
+            if (type != 3 || count < 1) {
+                return 1;
+            }
+
+            return readUnsignedShort(imageBytes, entryStart + 8, byteOrder);
+        }
+        return 1;
+    }
+
+    private static boolean isJpeg(byte[] imageBytes) {
+        return (imageBytes[0] & 0xFF) == 0xFF && (imageBytes[1] & 0xFF) == 0xD8;
+    }
+
+    private static boolean hasExifHeader(byte[] imageBytes, int offset) {
+        return offset + 6 <= imageBytes.length
+                && imageBytes[offset] == 'E'
+                && imageBytes[offset + 1] == 'x'
+                && imageBytes[offset + 2] == 'i'
+                && imageBytes[offset + 3] == 'f'
+                && imageBytes[offset + 4] == 0
+                && imageBytes[offset + 5] == 0;
+    }
+
+    private static int readUnsignedShortBigEndian(byte[] bytes, int offset) {
+        return ((bytes[offset] & 0xFF) << 8) | (bytes[offset + 1] & 0xFF);
+    }
+
+    private static int readUnsignedShort(byte[] bytes, int offset, ByteOrder byteOrder) {
+        return ByteBuffer.wrap(bytes, offset, 2).order(byteOrder).getShort() & 0xFFFF;
+    }
+
+    private static int readInt(byte[] bytes, int offset, ByteOrder byteOrder) {
+        return ByteBuffer.wrap(bytes, offset, 4).order(byteOrder).getInt();
     }
 
     private static void writeJpeg(BufferedImage image, Path destination, float quality) throws IOException {
