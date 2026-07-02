@@ -154,7 +154,7 @@ public class EngineDetailServlet extends HttpServlet {
                     UserActivityActionType.STATUS_CHANGE,
                     UserActivityEntityType.MOTOR,
                     engineRef,
-                    "cambio rapido stato motore " + engineRef + " -> " + newStatus.name()
+                    "cambio stato motore " + engineRef + ": " + currentEngine.getStatus() + " -> " + newStatus.name()
             );
 
             if (backToList) {

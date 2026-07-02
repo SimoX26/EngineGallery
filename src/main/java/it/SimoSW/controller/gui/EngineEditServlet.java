@@ -2,6 +2,7 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.CustomerController;
 import it.SimoSW.controller.app.EngineController;
+import it.SimoSW.model.Engine;
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.util.bean.EngineBean;
 import it.SimoSW.util.bean.EngineDetailBean;
@@ -154,6 +155,8 @@ public class EngineEditServlet extends HttpServlet {
         try {
             Long existingCustomerId = customerController.findCustomerIdByName(customerName);
             Long customerId = customerController.findOrCreateCustomerId(customerName);
+            Engine previousEngine = engineController.findEngineByRef(engineRef)
+                    .orElseThrow(() -> new IllegalStateException("Motore con ref " + engineRef + " non esistente"));
 
             EngineBean bean = new EngineBean();
             bean.setEngineRef(engineRef);
@@ -174,6 +177,16 @@ public class EngineEditServlet extends HttpServlet {
                     engineRef,
                     "modifica motore " + engineRef
             );
+            if (previousEngine.getStatus() != status) {
+                activityAuditLogger.logFromRequest(
+                        request,
+                        UserActivityActionType.STATUS_CHANGE,
+                        UserActivityEntityType.MOTOR,
+                        engineRef,
+                        "cambio stato motore " + engineRef + ": "
+                                + previousEngine.getStatus().name() + " -> " + status.name()
+                );
+            }
             if (existingCustomerId == null) {
                 activityAuditLogger.logFromRequest(
                         request,

@@ -2,6 +2,7 @@ package it.SimoSW.controller.app;
 
 import it.SimoSW.model.EngineStatus;
 import it.SimoSW.model.Image;
+import it.SimoSW.model.UserActivityLog;
 import it.SimoSW.model.User;
 import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.model.WarehouseImage;
@@ -9,10 +10,12 @@ import it.SimoSW.model.dao.CustomerDAO;
 import it.SimoSW.model.dao.EngineDAO;
 import it.SimoSW.model.Engine;
 import it.SimoSW.model.dao.ImageDAO;
+import it.SimoSW.model.dao.UserActivityLogDAO;
 import it.SimoSW.model.dao.UserDAO;
 import it.SimoSW.model.dao.WarehouseItemDAO;
 import it.SimoSW.model.dao.WarehouseImageDAO;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -23,10 +26,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DashboardController {
     private static final LocalDate STATISTICS_START_DATE = LocalDate.of(2026, 1, 1);
+    private static final Pattern STATUS_TRANSITION_PATTERN =
+            Pattern.compile(".*->\\s*([A-Z_]+)\\s*$");
 
     private final EngineDAO engineDAO;
     private final CustomerDAO customerDAO;
@@ -34,19 +42,22 @@ public class DashboardController {
     private final ImageDAO imageDAO;
     private final WarehouseImageDAO warehouseImageDAO;
     private final UserDAO userDAO;
+    private final UserActivityLogDAO userActivityLogDAO;
 
     public DashboardController(EngineDAO engineDAO,
                                CustomerDAO customerDAO,
                                WarehouseItemDAO warehouseItemDAO,
                                ImageDAO imageDAO,
                                WarehouseImageDAO warehouseImageDAO,
-                               UserDAO userDAO) {
+                               UserDAO userDAO,
+                               UserActivityLogDAO userActivityLogDAO) {
         this.engineDAO = engineDAO;
         this.customerDAO = customerDAO;
         this.warehouseItemDAO = warehouseItemDAO;
         this.imageDAO = imageDAO;
         this.warehouseImageDAO = warehouseImageDAO;
         this.userDAO = userDAO;
+        this.userActivityLogDAO = userActivityLogDAO;
     }
 
     /* =========================
@@ -128,7 +139,7 @@ public class DashboardController {
         if (safeFrom.isAfter(to)) {
             return 0;
         }
-        return (int) Math.round(engineDAO.averageProcessingDaysForDeliveredBetween(safeFrom, to));
+        return (int) Math.round(calculateAverageWorkInProgressDaysForDeliveredBetween(safeFrom, to));
     }
 
     public List<Map<String, Object>> getStoricoMensileKpi(int months) {
@@ -143,25 +154,29 @@ public class DashboardController {
 
         Map<YearMonth, Integer> insertedByMonth = new HashMap<>();
         Map<YearMonth, Integer> deliveredByMonth = new HashMap<>();
-        Map<YearMonth, Long> processingDaysSumByMonth = new HashMap<>();
+        Map<YearMonth, Double> processingDaysSumByMonth = new HashMap<>();
         Map<YearMonth, Integer> processingDaysCountByMonth = new HashMap<>();
 
         List<Engine> allEngines = engineDAO.findAll();
+        Map<String, List<StatusTransitionEvent>> transitionsByEngine = loadStatusTransitionsByEngineRef();
         for (Engine engine : allEngines) {
             YearMonth intakeMonth = YearMonth.from(engine.getIntakeDate());
             if (!intakeMonth.isBefore(firstMonth) && !intakeMonth.isAfter(currentMonth)) {
                 insertedByMonth.merge(intakeMonth, 1, Integer::sum);
             }
 
-            if (engine.getStatus() == EngineStatus.DELIVERED
-                    && engine.getDeliveryDate() != null
-                    && !engine.getDeliveryDate().isBefore(engine.getIntakeDate())) {
+            if (engine.getStatus() == EngineStatus.DELIVERED && engine.getDeliveryDate() != null) {
                 YearMonth deliveryMonth = YearMonth.from(engine.getDeliveryDate());
                 if (!deliveryMonth.isBefore(firstMonth) && !deliveryMonth.isAfter(currentMonth)) {
                     deliveredByMonth.merge(deliveryMonth, 1, Integer::sum);
-                    long days = ChronoUnit.DAYS.between(engine.getIntakeDate(), engine.getDeliveryDate());
-                    processingDaysSumByMonth.merge(deliveryMonth, days, Long::sum);
-                    processingDaysCountByMonth.merge(deliveryMonth, 1, Integer::sum);
+                    Optional<Double> workingDays = calculateWorkInProgressDays(
+                            engine,
+                            transitionsByEngine.getOrDefault(engine.getEngineRef(), List.of())
+                    );
+                    if (workingDays.isPresent()) {
+                        processingDaysSumByMonth.merge(deliveryMonth, workingDays.get(), Double::sum);
+                        processingDaysCountByMonth.merge(deliveryMonth, 1, Integer::sum);
+                    }
                 }
             }
         }
@@ -178,8 +193,8 @@ public class DashboardController {
 
             int daysCount = processingDaysCountByMonth.getOrDefault(ym, 0);
             if (daysCount > 0) {
-                long totalDays = processingDaysSumByMonth.getOrDefault(ym, 0L);
-                avgDays = (int) Math.round((double) totalDays / daysCount);
+                double totalDays = processingDaysSumByMonth.getOrDefault(ym, 0D);
+                avgDays = (int) Math.round(totalDays / daysCount);
             }
 
             LocalDate monthEnd = ym.atEndOfMonth();
@@ -208,6 +223,110 @@ public class DashboardController {
         }
 
         return rows;
+    }
+
+    private double calculateAverageWorkInProgressDaysForDeliveredBetween(LocalDate from, LocalDate to) {
+        Map<String, List<StatusTransitionEvent>> transitionsByEngine = loadStatusTransitionsByEngineRef();
+        double totalDays = 0;
+        int countedEngines = 0;
+
+        for (Engine engine : engineDAO.findAll()) {
+            if (engine.getStatus() != EngineStatus.DELIVERED || engine.getDeliveryDate() == null) {
+                continue;
+            }
+            if (engine.getDeliveryDate().isBefore(from) || engine.getDeliveryDate().isAfter(to)) {
+                continue;
+            }
+
+            Optional<Double> workingDays = calculateWorkInProgressDays(
+                    engine,
+                    transitionsByEngine.getOrDefault(engine.getEngineRef(), List.of())
+            );
+            if (workingDays.isEmpty()) {
+                continue;
+            }
+
+            totalDays += workingDays.get();
+            countedEngines += 1;
+        }
+
+        return countedEngines == 0 ? 0 : totalDays / countedEngines;
+    }
+
+    private Map<String, List<StatusTransitionEvent>> loadStatusTransitionsByEngineRef() {
+        Map<String, List<StatusTransitionEvent>> transitionsByEngine = new HashMap<>();
+        List<UserActivityLog> logs = userActivityLogDAO.findByEntityTypeAndActionType("MOTOR", "STATUS_CHANGE");
+        for (UserActivityLog log : logs) {
+            if (log == null || log.getEntityId() == null || log.getEntityId().isBlank() || log.getCreatedAt() == null) {
+                continue;
+            }
+            Optional<EngineStatus> toStatus = extractTargetStatus(log.getDescription());
+            if (toStatus.isEmpty()) {
+                continue;
+            }
+            transitionsByEngine
+                    .computeIfAbsent(log.getEntityId(), ignored -> new ArrayList<>())
+                    .add(new StatusTransitionEvent(log.getCreatedAt(), toStatus.get()));
+        }
+        return transitionsByEngine;
+    }
+
+    private static Optional<Double> calculateWorkInProgressDays(Engine engine, List<StatusTransitionEvent> transitions) {
+        if (engine == null || transitions == null || transitions.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<StatusTransitionEvent> orderedTransitions = transitions.stream()
+                .sorted(Comparator.comparing(StatusTransitionEvent::occurredAt))
+                .toList();
+
+        Duration totalDuration = Duration.ZERO;
+        LocalDateTime openIntervalStart = null;
+        EngineStatus currentStatus = null;
+        boolean completedIntervalFound = false;
+
+        for (StatusTransitionEvent transition : orderedTransitions) {
+            EngineStatus nextStatus = transition.toStatus();
+            if (nextStatus == currentStatus) {
+                continue;
+            }
+
+            if (nextStatus == EngineStatus.WORK_IN_PROGRESS) {
+                if (openIntervalStart == null) {
+                    openIntervalStart = transition.occurredAt();
+                }
+            } else if (openIntervalStart != null && !transition.occurredAt().isBefore(openIntervalStart)) {
+                totalDuration = totalDuration.plus(Duration.between(openIntervalStart, transition.occurredAt()));
+                openIntervalStart = null;
+                completedIntervalFound = true;
+            }
+
+            currentStatus = nextStatus;
+        }
+
+        if (!completedIntervalFound) {
+            return Optional.empty();
+        }
+
+        return Optional.of(totalDuration.toMillis() / 86_400_000D);
+    }
+
+    private static Optional<EngineStatus> extractTargetStatus(String description) {
+        if (description == null || description.isBlank()) {
+            return Optional.empty();
+        }
+        Matcher matcher = STATUS_TRANSITION_PATTERN.matcher(description.trim());
+        if (!matcher.matches()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(EngineStatus.valueOf(matcher.group(1)));
+        } catch (IllegalArgumentException ex) {
+            return Optional.empty();
+        }
+    }
+
+    private record StatusTransitionEvent(LocalDateTime occurredAt, EngineStatus toStatus) {
     }
 
     public List<Map<String, Object>> getRecentUserActions(int limit) {

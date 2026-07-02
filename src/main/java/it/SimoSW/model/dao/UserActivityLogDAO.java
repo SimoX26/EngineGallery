@@ -15,4 +15,6 @@ public interface UserActivityLogDAO {
     List<UserActivityLog> findByDate(LocalDate date, int limit);
 
     List<UserActivityLog> findByUsernameAndDate(String username, LocalDate date, int limit);
+
+    List<UserActivityLog> findByEntityTypeAndActionType(String entityType, String actionType);
 }

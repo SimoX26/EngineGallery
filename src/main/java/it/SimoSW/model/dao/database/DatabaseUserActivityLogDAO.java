@@ -59,6 +59,14 @@ public class DatabaseUserActivityLogDAO implements UserActivityLogDAO {
             LIMIT ?
             """;
 
+    private static final String FIND_BY_ENTITY_TYPE_AND_ACTION_TYPE_SQL = """
+            SELECT id, username, user_role, action_type, entity_type, entity_id, description, created_at
+            FROM user_activity_log
+            WHERE entity_type = ?
+              AND action_type = ?
+            ORDER BY created_at ASC, id ASC
+            """;
+
     @Override
     public void save(UserActivityLog log) {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
@@ -157,6 +165,24 @@ public class DatabaseUserActivityLogDAO implements UserActivityLogDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante il recupero log attività per utente e data", e);
+        }
+        return logs;
+    }
+
+    @Override
+    public List<UserActivityLog> findByEntityTypeAndActionType(String entityType, String actionType) {
+        List<UserActivityLog> logs = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ENTITY_TYPE_AND_ACTION_TYPE_SQL)) {
+            stmt.setString(1, entityType);
+            stmt.setString(2, actionType);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante il recupero log attività per entità e azione", e);
         }
         return logs;
     }

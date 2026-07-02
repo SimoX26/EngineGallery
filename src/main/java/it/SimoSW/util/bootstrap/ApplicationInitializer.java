@@ -49,7 +49,8 @@ public class ApplicationInitializer {
                 warehouseItemDAO,
                 imageDAO,
                 warehouseImageDAO,
-                userDAO
+                userDAO,
+                userActivityLogDAO
         );
 
         this.warehouseController = new WarehouseController(warehouseItemDAO, warehouseImageDAO);

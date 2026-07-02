@@ -276,6 +276,15 @@ public class UploadServlet extends HttpServlet {
                     engineRef,
                     "aggiunta motore " + engineRef
             );
+            if (status == EngineStatus.WORK_IN_PROGRESS) {
+                activityAuditLogger.logFromRequest(
+                        request,
+                        UserActivityActionType.STATUS_CHANGE,
+                        UserActivityEntityType.MOTOR,
+                        engineRef,
+                        "cambio stato motore " + engineRef + ": INITIAL -> " + status.name()
+                );
+            }
             if (existingCustomerId == null) {
                 activityAuditLogger.logFromRequest(
                         request,
