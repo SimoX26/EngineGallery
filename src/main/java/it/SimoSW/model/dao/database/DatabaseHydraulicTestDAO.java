@@ -13,8 +13,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
+    private static final Logger LOGGER = Logger.getLogger(DatabaseHydraulicTestDAO.class.getName());
 
     private static final String INSERT_SQL = """
         INSERT INTO hydraulic_tests
@@ -92,7 +95,7 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                tests.add(mapRow(rs));
+                mapRowSafely(rs).ifPresent(tests::add);
             }
 
         } catch (SQLException e) {
@@ -111,7 +114,7 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapRow(rs));
+                    return mapRowSafely(rs);
                 }
             }
 
@@ -156,7 +159,7 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    tests.add(mapRow(rs));
+                    mapRowSafely(rs).ifPresent(tests::add);
                 }
             }
 
@@ -165,6 +168,16 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
         }
 
         return tests;
+    }
+
+    private Optional<HydraulicTest> mapRowSafely(ResultSet rs) throws SQLException {
+        try {
+            return Optional.of(mapRow(rs));
+        } catch (RuntimeException ex) {
+            long id = safeGetLong(rs, "id");
+            LOGGER.log(Level.WARNING, "Prova idraulica ignorata per dati non validi. ID=" + id, ex);
+            return Optional.empty();
+        }
     }
 
     private HydraulicTest mapRow(ResultSet rs) throws SQLException {
@@ -180,5 +193,13 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
                 rs.getString("notes"),
                 createdAtSql != null ? createdAtSql.toLocalDateTime() : null
         );
+    }
+
+    private static long safeGetLong(ResultSet rs, String column) {
+        try {
+            return rs.getLong(column);
+        } catch (SQLException ex) {
+            return -1L;
+        }
     }
 }

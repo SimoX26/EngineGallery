@@ -30,12 +30,16 @@ public class HydraulicTestListServlet extends HttpServlet {
 
         String keyword = request.getParameter("keyword");
 
-        List<HydraulicTest> hydraulicTests;
-        if (keyword != null && !keyword.isBlank()) {
-            hydraulicTests = hydraulicTestController.searchHydraulicTests(keyword);
-            request.setAttribute("keyword", keyword.trim());
-        } else {
-            hydraulicTests = hydraulicTestController.getAllHydraulicTests();
+        List<HydraulicTest> hydraulicTests = List.of();
+        try {
+            if (keyword != null && !keyword.isBlank()) {
+                hydraulicTests = hydraulicTestController.searchHydraulicTests(keyword);
+                request.setAttribute("keyword", keyword.trim());
+            } else {
+                hydraulicTests = hydraulicTestController.getAllHydraulicTests();
+            }
+        } catch (RuntimeException ex) {
+            request.setAttribute("error", "Errore durante il caricamento delle prove idrauliche.");
         }
 
         request.setAttribute("hydraulicTests", hydraulicTests);
