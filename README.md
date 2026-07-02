@@ -150,3 +150,43 @@ Rollback operativo sicuro:
 
 - ripristina la precedente configurazione esterna solo se ancora nota e controllata;
 - in alternativa crea un nuovo account applicativo dedicato con `./provision-db-user.sh` e aggiorna l'applicazione senza ricreare database o tabelle.
+
+#### 🚀 Deploy remoto
+
+Lo script `./deploy-remoto.sh` continua a costruire e caricare il WAR applicativo, ma ora trasferisce anche i soli artefatti operativi utili all'amministrazione del deploy sicuro DB:
+
+- `target/EngineGallery.war` nella webapps remota;
+- `provision-db-user.sh` nella directory remota `admin/`;
+- `src/main/resources/db.sql` nella directory remota `sql/`;
+- `src/main/resources/migrations/*.sql` nella directory remota `sql/migrations/`.
+
+Percorsi remoti:
+
+- webapp: `--remote-path` oppure default `/opt/tomcat/webapps`
+- artefatti operativi: `--remote-ops-path` oppure default `~/enginegallery-ops`
+- alias compatibile: `--remote-sql-path` punta alla stessa directory operativa
+
+Operazioni automatiche del deploy:
+
+- build Maven del WAR, salvo `--skip-build`;
+- creazione idempotente delle directory remote mancanti;
+- upload del WAR in file temporaneo e sostituzione finale del WAR remoto;
+- backup recuperabile del WAR precedente in `backups/webapps/`;
+- upload di script e SQL con permessi restrittivi;
+- nessuna generazione o sovrascrittura di configurazioni runtime con segreti.
+
+Operazioni che restano manuali:
+
+- configurazione runtime del Tomcat o del servizio applicativo con:
+  - `ENGINE_GALLERY_DB_URL` oppure `-Denginegallery.db.url`
+  - `ENGINE_GALLERY_DB_USER` oppure `-Denginegallery.db.user`
+  - `ENGINE_GALLERY_DB_PASSWORD` oppure `-Denginegallery.db.password`
+- esecuzione di `provision-db-user.sh`;
+- esecuzione di `db.sql` o delle migrazioni SQL;
+- restart del server applicativo, se richiesto dall'ambiente remoto.
+
+Rollback operativo:
+
+- recupera il WAR precedente dalla directory remota `backups/webapps/`;
+- riposizionalo nella webapps remota con lo stesso nome del WAR applicativo;
+- ripristina, se necessario, la configurazione runtime esterna già presente sul server.

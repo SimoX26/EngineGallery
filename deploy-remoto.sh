@@ -4,6 +4,7 @@ set -euo pipefail
 REMOTE_USER_DEFAULT="root"
 REMOTE_HOST_DEFAULT="82.165.20.124"
 REMOTE_WEBAPPS_DEFAULT="/opt/tomcat/webapps"
+REMOTE_OPS_PATH_DEFAULT="~/enginegallery-ops"
 REMOTE_PORT_DEFAULT="22"
 
 usage() {
@@ -15,7 +16,7 @@ Esempi:
   ./deploy-remoto.sh
   ./deploy-remoto.sh --skip-build
   ./deploy-remoto.sh --remote-path ~/webapps
-  ./deploy-remoto.sh --remote-sql-path ~/sql
+  ./deploy-remoto.sh --remote-ops-path ~/enginegallery-ops
 
 Opzioni:
   --skip-build      Salta 'mvn clean package' e usa WAR già presente in target/
@@ -24,13 +25,47 @@ Opzioni:
   --remote-user     Utente SSH remoto (default: root)
   --remote-host     Host SSH remoto (default: 82.165.20.124)
   --remote-path     Cartella remota webapps (default: /opt/tomcat/webapps)
-  --remote-sql-path Cartella remota script SQL (default: ~)
+  --remote-ops-path Cartella remota artefatti operativi (default: ~/enginegallery-ops)
+  --remote-sql-path Alias compatibile di --remote-ops-path
   --help, -h        Mostra questo aiuto
 
 Note:
   - Lo script cerca il WAR in target/ e usa quello più recente.
-  - Upload WAR e SQL via sshpass + scp.
+  - Carica il WAR in webapps e gli artefatti operativi in una directory separata.
+  - Non esegue automaticamente provisioning DB, migrazioni SQL o restart servizi.
 HELP
+}
+
+require_value() {
+  local opt="$1"
+  local val="${2:-}"
+  if [[ -z "$val" || "$val" == --* ]]; then
+    echo "Errore: valore mancante per $opt" >&2
+    usage
+    exit 1
+  fi
+}
+
+squote() {
+  printf "'%s'" "${1//\'/\'\"\'\"\'}"
+}
+
+collect_ops_files() {
+  OPS_FILES=()
+
+  if [[ -f "provision-db-user.sh" ]]; then
+    OPS_FILES+=("admin:provision-db-user.sh")
+  fi
+
+  if [[ -f "src/main/resources/db.sql" ]]; then
+    OPS_FILES+=("sql:src/main/resources/db.sql")
+  fi
+
+  if [[ -d "src/main/resources/migrations" ]]; then
+    while IFS= read -r -d '' migration_file; do
+      OPS_FILES+=("sql:${migration_file}")
+    done < <(find "src/main/resources/migrations" -type f -name "*.sql" -print0 | sort -z)
+  fi
 }
 
 resolve_ipv4() {
@@ -58,7 +93,7 @@ PASSWORD=""
 REMOTE_USER="$REMOTE_USER_DEFAULT"
 REMOTE_HOST="$REMOTE_HOST_DEFAULT"
 REMOTE_PATH="$REMOTE_WEBAPPS_DEFAULT"
-REMOTE_SQL_PATH=""
+REMOTE_OPS_PATH="$REMOTE_OPS_PATH_DEFAULT"
 SKIP_BUILD="false"
 
 while [[ $# -gt 0 ]]; do
@@ -68,27 +103,38 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --port)
-      PORT="${2:-}"
+      require_value "$1" "${2:-}"
+      PORT="$2"
       shift 2
       ;;
     --password)
-      PASSWORD="${2:-}"
+      require_value "$1" "${2:-}"
+      PASSWORD="$2"
       shift 2
       ;;
     --remote-user)
-      REMOTE_USER="${2:-}"
+      require_value "$1" "${2:-}"
+      REMOTE_USER="$2"
       shift 2
       ;;
     --remote-host)
-      REMOTE_HOST="${2:-}"
+      require_value "$1" "${2:-}"
+      REMOTE_HOST="$2"
       shift 2
       ;;
     --remote-path)
-      REMOTE_PATH="${2:-}"
+      require_value "$1" "${2:-}"
+      REMOTE_PATH="$2"
+      shift 2
+      ;;
+    --remote-ops-path)
+      require_value "$1" "${2:-}"
+      REMOTE_OPS_PATH="$2"
       shift 2
       ;;
     --remote-sql-path)
-      REMOTE_SQL_PATH="${2:-}"
+      require_value "$1" "${2:-}"
+      REMOTE_OPS_PATH="$2"
       shift 2
       ;;
     --help|-h)
@@ -118,6 +164,8 @@ if [[ "$SKIP_BUILD" != "true" ]]; then
   mvn clean package
 fi
 
+collect_ops_files
+
 WAR_FILE="$(ls -t target/*.war 2>/dev/null | head -n 1 || true)"
 if [[ -z "$WAR_FILE" ]]; then
   echo "Errore: nessun file WAR trovato in target/." >&2
@@ -126,6 +174,7 @@ fi
 WAR_NAME="$(basename "$WAR_FILE")"
 APP_CONTEXT="${WAR_NAME%.war}"
 TARGET="${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH%/}/"
+TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 
 echo ">> WAR selezionato: $WAR_FILE"
 
@@ -135,41 +184,92 @@ if ! command -v sshpass >/dev/null 2>&1; then
   exit 1
 fi
 
-echo ">> Upload SCP verso: $TARGET"
-sshpass -p "$PASSWORD" scp -P "$PORT" "$WAR_FILE" "$TARGET"
+OPS_BASE_PATH="${REMOTE_OPS_PATH%/}"
+OPS_BASE_PATH_SHELL="${OPS_BASE_PATH/#\~/\$HOME}"
+OPS_ADMIN_DIR="${OPS_BASE_PATH}/admin"
+OPS_SQL_DIR="${OPS_BASE_PATH}/sql"
+OPS_BACKUP_DIR="${OPS_BASE_PATH}/backups"
+OPS_ADMIN_DIR_SHELL="${OPS_ADMIN_DIR/#\~/\$HOME}"
+OPS_SQL_DIR_SHELL="${OPS_SQL_DIR/#\~/\$HOME}"
+OPS_BACKUP_DIR_SHELL="${OPS_BACKUP_DIR/#\~/\$HOME}"
+REMOTE_WAR_TARGET="${REMOTE_PATH%/}/${WAR_NAME}"
+REMOTE_WAR_TARGET_SHELL="${REMOTE_WAR_TARGET/#\~/\$HOME}"
+REMOTE_WAR_TMP="${REMOTE_PATH%/}/.${WAR_NAME}.uploading.${TIMESTAMP}.$$"
+REMOTE_WAR_TMP_SHELL="${REMOTE_WAR_TMP/#\~/\$HOME}"
+REMOTE_WAR_BACKUP="${OPS_BACKUP_DIR%/}/webapps/${WAR_NAME}.${TIMESTAMP}.bak"
+REMOTE_WAR_BACKUP_SHELL="${REMOTE_WAR_BACKUP/#\~/\$HOME}"
 
-SQL_BASE_PATH="${REMOTE_SQL_PATH:-~}"
-SQL_BASE_PATH_SHELL="${SQL_BASE_PATH/#\~/\$HOME}"
-SQL_ROOT="src/main/resources"
-DB_SQL_FILE="${SQL_ROOT}/db.sql"
-MIGRATIONS_DIR="${SQL_ROOT}/migrations"
-SQL_PATHS=()
+echo ">> Preparo cartelle remote applicative e operative"
+sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \
+  ${REMOTE_PATH/#\~/\$HOME} \
+  ${OPS_ADMIN_DIR_SHELL} \
+  ${OPS_SQL_DIR_SHELL}/migrations \
+  ${OPS_BACKUP_DIR_SHELL}/webapps && chmod 0750 \
+  ${OPS_BASE_PATH_SHELL} \
+  ${OPS_ADMIN_DIR_SHELL} \
+  ${OPS_SQL_DIR_SHELL} \
+  ${OPS_SQL_DIR_SHELL}/migrations \
+  ${OPS_BACKUP_DIR_SHELL} \
+  ${OPS_BACKUP_DIR_SHELL}/webapps"
 
-if [[ -f "$DB_SQL_FILE" ]]; then
-  SQL_PATHS+=("$DB_SQL_FILE")
-fi
+echo ">> Upload WAR temporaneo verso: ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_WAR_TMP}"
+sshpass -p "$PASSWORD" scp -P "$PORT" "$WAR_FILE" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_WAR_TMP}"
 
-if [[ -d "$MIGRATIONS_DIR" ]]; then
-  while IFS= read -r -d '' migration_file; do
-    SQL_PATHS+=("$migration_file")
-  done < <(find "$MIGRATIONS_DIR" -type f -name "*.sql" -print0 | sort -z)
-else
-  echo ">> Cartella migrations non trovata: ${MIGRATIONS_DIR} (skip)."
-fi
+echo ">> Installo WAR e conservo backup recuperabile della versione precedente"
+sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "
+  set -euo pipefail
+  if [[ -f ${REMOTE_WAR_TARGET_SHELL} ]]; then
+    cp -p ${REMOTE_WAR_TARGET_SHELL} ${REMOTE_WAR_BACKUP_SHELL}
+  fi
+  chmod 0644 ${REMOTE_WAR_TMP_SHELL}
+  mv -f ${REMOTE_WAR_TMP_SHELL} ${REMOTE_WAR_TARGET_SHELL}
+"
 
-if [[ "${#SQL_PATHS[@]}" -gt 0 ]]; then
-  echo ">> Upload file database in: ${REMOTE_USER}@${REMOTE_HOST}:${SQL_BASE_PATH}"
-  for sql_file in "${SQL_PATHS[@]}"; do
-    rel_path="${sql_file#${SQL_ROOT}/}"
-    remote_dir_shell="${SQL_BASE_PATH_SHELL%/}/$(dirname "$rel_path")"
-    remote_target="${SQL_BASE_PATH%/}/${rel_path}"
+if [[ "${#OPS_FILES[@]}" -gt 0 ]]; then
+  echo ">> Upload artefatti operativi in: ${REMOTE_USER}@${REMOTE_HOST}:${OPS_BASE_PATH}"
+  for entry in "${OPS_FILES[@]}"; do
+    kind="${entry%%:*}"
+    local_path="${entry#*:}"
 
-    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell}"
-    sshpass -p "$PASSWORD" scp -P "$PORT" "$sql_file" "${REMOTE_USER}@${REMOTE_HOST}:${remote_target}"
+    case "$kind" in
+      admin)
+        remote_dir="${OPS_ADMIN_DIR}"
+        remote_dir_shell="${OPS_ADMIN_DIR_SHELL}"
+        remote_mode="0750"
+        ;;
+      sql)
+        if [[ "$local_path" == src/main/resources/migrations/* ]]; then
+          rel_path="${local_path#src/main/resources/}"
+          remote_dir="${OPS_BASE_PATH%/}/sql/$(dirname "$rel_path")"
+          remote_dir_shell="${OPS_BASE_PATH_SHELL%/}/sql/$(dirname "$rel_path")"
+        else
+          remote_dir="${OPS_SQL_DIR}"
+          remote_dir_shell="${OPS_SQL_DIR_SHELL}"
+        fi
+        remote_mode="0640"
+        ;;
+      *)
+        echo "Errore: tipo artefatto non supportato: $kind" >&2
+        exit 1
+        ;;
+    esac
+
+    remote_file="${remote_dir%/}/$(basename "$local_path")"
+    remote_file_shell="${remote_file/#\~/\$HOME}"
+
+    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell} && chmod 0750 ${remote_dir_shell}"
+    sshpass -p "$PASSWORD" scp -P "$PORT" "$local_path" "${REMOTE_USER}@${REMOTE_HOST}:${remote_file}"
+    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod ${remote_mode} ${remote_file_shell}"
   done
 else
-  echo ">> Nessun file database trovato (${DB_SQL_FILE} o ${MIGRATIONS_DIR}/*.sql)."
+  echo ">> Nessun artefatto operativo addizionale trovato."
 fi
+
+echo ">> Artefatti caricati:"
+echo "   - WAR applicativo: ${REMOTE_WAR_TARGET}"
+echo "   - Script amministrativi: ${OPS_ADMIN_DIR}"
+echo "   - SQL e migrazioni: ${OPS_SQL_DIR}"
+echo "   - Backup WAR precedenti: ${OPS_BACKUP_DIR}/webapps"
 
 echo ">> Deploy completato con successo."
 
