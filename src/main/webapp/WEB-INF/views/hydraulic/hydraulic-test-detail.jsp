@@ -13,7 +13,7 @@
     <title>Engine Gallery • Dettaglio prova idraulica</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
 </head>
 <body>
 
@@ -46,8 +46,8 @@
 
         <div class="col-lg-7">
             <h5 class="fw-semibold mb-3">Video prova</h5>
-            <div class="hydraulic-video-wrap rounded overflow-hidden">
-                <video class="hydraulic-video" controls preload="metadata">
+            <div class="hydraulic-video-wrap rounded">
+                <video class="hydraulic-video" controls playsinline preload="metadata">
                     <c:choose>
                         <c:when test="${fn:startsWith(hydraulicTest.videoUrl, 'http://') || fn:startsWith(hydraulicTest.videoUrl, 'https://')}">
                             <source src="${fn:escapeXml(hydraulicTest.videoUrl)}">

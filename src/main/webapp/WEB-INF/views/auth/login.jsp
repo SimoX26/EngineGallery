@@ -18,7 +18,7 @@
           rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
     <script>
         (function () {
             const key = 'enginegallery.theme';

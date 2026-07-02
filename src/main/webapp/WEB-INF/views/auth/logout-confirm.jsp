@@ -11,7 +11,7 @@
     <title>Engine Gallery • Conferma logout</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
 </head>
 <body>
 

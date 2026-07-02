@@ -13,7 +13,7 @@
     <title>Engine Gallery • Prove idrauliche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
 </head>
 
 <body>
@@ -152,7 +152,7 @@
                             <a class="engine-card-link" href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}">
                             <div class="engine-gallery-card h-100">
                                 <div class="hydraulic-video-wrap">
-                                    <video class="hydraulic-video" muted preload="metadata">
+                                    <video class="hydraulic-video" muted playsinline preload="metadata">
                                         <c:choose>
                                             <c:when test="${fn:startsWith(test.videoUrl, 'http://') || fn:startsWith(test.videoUrl, 'https://')}">
                                                 <source src="${fn:escapeXml(test.videoUrl)}">
