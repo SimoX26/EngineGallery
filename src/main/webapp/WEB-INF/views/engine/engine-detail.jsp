@@ -335,8 +335,14 @@
 <body>
 
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<c:url var="engineEditUrl" value="/engine/edit">
+    <c:param name="ref" value="${detail.engine.engineRef}" />
+</c:url>
+<c:url var="engineDeleteUrl" value="/engine/delete">
+    <c:param name="engineRef" value="${detail.engine.engineRef}" />
+</c:url>
 
-<div class="container mt-5 mb-4" id="engineDetailGallery" data-engine-ref="${detail.engine.engineRef}">
+<div class="container mt-5 mb-4" id="engineDetailGallery" data-engine-ref="<c:out value='${detail.engine.engineRef}'/>">
     <c:if test="${updated}">
         <div class="alert alert-success" role="alert">
             Modifiche salvate correttamente.
@@ -365,7 +371,7 @@
                         <path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </button>
-                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}"
+                <a href="<c:out value='${engineEditUrl}'/>"
                    class="share-icon-btn engine-detail-round-btn"
                    aria-label="Modifica motore"
                    title="Modifica motore">
@@ -374,7 +380,7 @@
                         <path d="M13.8 6.2l3.2 3.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
                     </svg>
                 </a>
-                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}"
+                <a href="<c:out value='${engineDeleteUrl}'/>"
                    class="share-icon-btn engine-detail-round-btn engine-detail-round-btn--delete"
                    aria-label="Elimina motore"
                    title="Elimina motore">
@@ -410,16 +416,16 @@
                 </div>
 
                 <div class="engine-detail-list">
-                    <div class="engine-ref-value">${detail.engine.engineRef}</div>
+                    <div class="engine-ref-value"><c:out value="${detail.engine.engineRef}" /></div>
 
                     <div class="engine-tech-row">
                         <span class="engine-tech-key">Codice motore:</span>
-                        <span class="engine-tech-value">${detail.engine.engineCode}</span>
+                        <span class="engine-tech-value"><c:out value="${detail.engine.engineCode}" /></span>
                     </div>
 
                     <div class="engine-tech-row">
                         <span class="engine-tech-key">Cliente:</span>
-                        <span class="engine-tech-value">${detail.engine.customerName}</span>
+                        <span class="engine-tech-value"><c:out value="${detail.engine.customerName}" /></span>
                     </div>
 
                     <div class="engine-tech-row">
@@ -433,8 +439,8 @@
                                     ${st == 'READY' ? 'status-ready' : ''}
                                     ${st == 'DELIVERED' ? 'status-consegnato' : ''}"
                                     data-quick-status-trigger
-                                    data-engine-ref="${detail.engine.engineRef}"
-                                    data-current-status="${st}"
+                                    data-engine-ref="<c:out value='${detail.engine.engineRef}'/>"
+                                    data-current-status="<c:out value='${st}'/>"
                                     aria-expanded="false"
                                     aria-controls="quickStatusModalDetail"
                                     aria-haspopup="dialog"
@@ -444,7 +450,7 @@
                                     <c:when test="${st == 'WORK_IN_PROGRESS'}">In lavorazione</c:when>
                                     <c:when test="${st == 'READY'}">Pronto</c:when>
                                     <c:when test="${st == 'DELIVERED'}">Consegnato</c:when>
-                                    <c:otherwise>${st}</c:otherwise>
+                                    <c:otherwise><c:out value="${st}" /></c:otherwise>
                                 </c:choose>
                             </button>
                         </span>
@@ -473,7 +479,7 @@
 
                     <div class="engine-tech-row engine-tech-row--notes">
                         <span class="engine-tech-key">Note:</span>
-                        <span class="engine-tech-value">${detail.engine.notes}</span>
+                        <span class="engine-tech-value"><c:out value="${detail.engine.notes}" /></span>
                     </div>
                 </div>
             </div>
@@ -487,20 +493,20 @@
                     <div class="carousel-inner">
                         <c:forEach var="image" items="${detail.images}" varStatus="status">
                             <div class="carousel-item ${status.first ? 'active' : ''}">
+                                <c:url var="engineImageUrl" value="/uploads/engines/${detail.engine.engineRef}/${image.filename}" />
                                 <div class="engine-image-lg clickable-image"
                                      role="button"
                                      tabindex="0"
                                      data-index="${status.index}"
-                                     data-image-url="<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}"
-                                     data-filename="${image.filename}"
+                                     data-image-url="<c:out value='${engineImageUrl}'/>"
+                                     data-filename="<c:out value='${image.filename}'/>"
                                      style="height: 420px;
                                             width: 100%;
-                                            background-image: url('<%= request.getContextPath() %>/uploads/engines/${detail.engine.engineRef}/${image.filename}');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-size: contain;
                                             background-color: transparent;
                                             border: none;">
+                                    <img src="<c:out value='${engineImageUrl}'/>"
+                                         alt="Immagine motore"
+                                         style="width: 100%; height: 100%; object-fit: contain; display: block;">
                                 </div>
                             </div>
                         </c:forEach>
@@ -523,11 +529,11 @@
                     Indietro
                 </a>
 
-                <a href="<%= request.getContextPath() %>/engine/edit?ref=${detail.engine.engineRef}" class="btn engine-detail-action-btn engine-detail-action-btn--edit">
+                <a href="<c:out value='${engineEditUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--edit">
                     Modifica
                 </a>
 
-                <a href="<%= request.getContextPath() %>/engine/delete?engineRef=${detail.engine.engineRef}" class="btn engine-detail-action-btn engine-detail-action-btn--delete">
+                <a href="<c:out value='${engineDeleteUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--delete">
                     Elimina
                 </a>
                 <button
@@ -558,7 +564,7 @@
                       action="<%= request.getContextPath() %>/engine/detail"
                       method="post">
                     <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
-                    <input type="hidden" name="ref" value="${detail.engine.engineRef}" data-quick-status-ref>
+                    <input type="hidden" name="ref" value="<c:out value='${detail.engine.engineRef}'/>" data-quick-status-ref>
                     <input type="hidden" name="status" value="" data-quick-status-value>
                     <div class="quick-status-options" role="listbox" aria-label="Seleziona nuovo stato">
                         <button type="button" class="quick-status-option quick-status-option--waiting" data-quick-status-option data-status-value="WAITING">In attesa</button>

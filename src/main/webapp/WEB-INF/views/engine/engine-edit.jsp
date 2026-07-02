@@ -14,8 +14,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=11">
 </head>
+<c:url var="engineDetailUrl" value="/engine/detail">
+    <c:param name="ref" value="${engineRef}" />
+</c:url>
+<c:url var="engineEditActionUrl" value="/engine/edit">
+    <c:param name="ref" value="${engineRef}" />
+</c:url>
 <body data-back-guard-form="1"
-      data-back-guard-fallback="<%= request.getContextPath() %>/engine/detail?ref=${engineRef}">
+      data-back-guard-fallback="<c:out value='${engineDetailUrl}'/>">
 
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
@@ -32,11 +38,11 @@
 
         <c:if test="${not empty error}">
             <div class="alert alert-danger text-start" role="alert">
-                ${error}
+                <c:out value="${error}" />
             </div>
         </c:if>
 
-        <form action="<%= request.getContextPath() %>/engine/edit?ref=${engineRef}"
+        <form action="<c:out value='${engineEditActionUrl}'/>"
               method="post"
               enctype="multipart/form-data"
               class="form-click-guides">
@@ -48,6 +54,7 @@
                     <c:choose>
                         <c:when test="${not empty engineImages}">
                             <c:forEach var="image" items="${engineImages}">
+                                <c:url var="engineEditImageUrl" value="/uploads/engines/${engineRef}/${image.filename}" />
                                 <div class="engine-image-edit-card" data-image-card>
                                     <button type="button"
                                             class="engine-image-delete-btn"
@@ -55,7 +62,7 @@
                                             data-filename="${fn:escapeXml(image.filename)}"
                                             title="Elimina immagine"
                                             aria-label="Elimina immagine">X</button>
-                                    <img src="<%= request.getContextPath() %>/uploads/engines/${engineRef}/${image.filename}"
+                                    <img src="<c:out value='${engineEditImageUrl}'/>"
                                          alt="Immagine motore"
                                          class="engine-image-edit-preview">
                                     <div class="small text-muted mt-1 text-truncate">
@@ -90,7 +97,7 @@
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Riferimento</label>
-                <input type="text" class="form-control" value="${engineRef}" readonly>
+                <input type="text" class="form-control" value="<c:out value='${engineRef}'/>" readonly>
             </div>
 
             <div class="mb-3 text-start">
@@ -98,7 +105,7 @@
                 <input type="text"
                        name="customer"
                        class="form-control"
-                       value="${customer}"
+                       value="<c:out value='${customer}'/>"
                        required>
             </div>
 
@@ -107,7 +114,7 @@
                 <input type="text"
                        name="engineCode"
                        class="form-control"
-                       value="${engineCode}"
+                       value="<c:out value='${engineCode}'/>"
                        required>
             </div>
 
@@ -136,7 +143,7 @@
                 <input type="date"
                        name="intakeDate"
                        class="form-control"
-                       value="${intakeDate}"
+                       value="<c:out value='${intakeDate}'/>"
                        required>
             </div>
 
@@ -145,7 +152,7 @@
                 <input type="date"
                        name="deliveryDate"
                        class="form-control"
-                       value="${deliveryDate}">
+                       value="<c:out value='${deliveryDate}'/>">
                 <div class="small text-muted mt-1">
                     Usata solo se lo stato è "Consegnato".
                 </div>
@@ -155,11 +162,11 @@
                 <label class="form-label fw-semibold">Note</label>
                 <textarea name="note"
                           class="form-control"
-                          rows="3">${note}</textarea>
+                          rows="3"><c:out value="${note}" /></textarea>
             </div>
 
             <div class="d-flex gap-2">
-                <a href="<%= request.getContextPath() %>/engine/detail?ref=${engineRef}" class="btn btn-cancel-action w-50">
+                <a href="<c:out value='${engineDetailUrl}'/>" class="btn btn-cancel-action w-50">
                     Annulla
                 </a>
                 <button type="submit" class="btn btn-save-action w-50">

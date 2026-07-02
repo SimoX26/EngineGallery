@@ -16,6 +16,12 @@
 <body>
 
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<c:url var="customerEditUrl" value="/customer/edit">
+    <c:param name="id" value="${customer.id}" />
+</c:url>
+<c:url var="customerDeleteUrl" value="/customer/delete">
+    <c:param name="id" value="${customer.id}" />
+</c:url>
 
 <div class="container my-4">
     <c:if test="${updated}">
@@ -36,12 +42,12 @@
 
             <dl class="engine-detail-list">
                 <dt>Nome:</dt>
-                <dd>${customer.name}</dd>
+                <dd><c:out value="${customer.name}" default="—" /></dd>
 
                 <dt>Azienda:</dt>
                 <dd>
                     <c:choose>
-                        <c:when test="${not empty customer.companyName}">${customer.companyName}</c:when>
+                        <c:when test="${not empty customer.companyName}"><c:out value="${customer.companyName}" /></c:when>
                         <c:otherwise>—</c:otherwise>
                     </c:choose>
                 </dd>
@@ -49,7 +55,7 @@
                 <dt>Telefono:</dt>
                 <dd>
                     <c:choose>
-                        <c:when test="${not empty customer.phone}">${customer.phone}</c:when>
+                        <c:when test="${not empty customer.phone}"><c:out value="${customer.phone}" /></c:when>
                         <c:otherwise>—</c:otherwise>
                     </c:choose>
                 </dd>
@@ -57,7 +63,7 @@
                 <dt>Email:</dt>
                 <dd>
                     <c:choose>
-                        <c:when test="${not empty customer.email}">${customer.email}</c:when>
+                        <c:when test="${not empty customer.email}"><c:out value="${customer.email}" /></c:when>
                         <c:otherwise>—</c:otherwise>
                     </c:choose>
                 </dd>
@@ -65,7 +71,7 @@
                 <dt>Note:</dt>
                 <dd>
                     <c:choose>
-                        <c:when test="${not empty customer.notes}">${customer.notes}</c:when>
+                        <c:when test="${not empty customer.notes}"><c:out value="${customer.notes}" /></c:when>
                         <c:otherwise>—</c:otherwise>
                     </c:choose>
                 </dd>
@@ -78,13 +84,13 @@
                     Indietro
                 </a>
 
-                <a href="<%= request.getContextPath() %>/customer/edit?id=${customer.id}" class="btn btn-detail-edit px-4">
+                <a href="<c:out value='${customerEditUrl}'/>" class="btn btn-detail-edit px-4">
                     Modifica
                 </a>
 
                 <c:choose>
                     <c:when test="${canDelete}">
-                        <a href="<%= request.getContextPath() %>/customer/delete?id=${customer.id}" class="btn btn-detail-delete px-4">
+                        <a href="<c:out value='${customerDeleteUrl}'/>" class="btn btn-detail-delete px-4">
                             Elimina
                         </a>
                     </c:when>

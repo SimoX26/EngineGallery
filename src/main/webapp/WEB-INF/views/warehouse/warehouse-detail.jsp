@@ -16,6 +16,12 @@
 <body>
 
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<c:url var="warehouseEditUrl" value="/warehouse/edit">
+    <c:param name="id" value="${item.id}" />
+</c:url>
+<c:url var="warehouseDeleteUrl" value="/warehouse/delete">
+    <c:param name="id" value="${item.id}" />
+</c:url>
 
 <div class="container my-4">
     <c:if test="${updated}">
@@ -30,13 +36,13 @@
 
             <dl class="engine-detail-list">
                 <dt>Nome:</dt>
-                <dd>${item.name}</dd>
+                <dd><c:out value="${item.name}" default="—" /></dd>
 
                 <dt>Codice:</dt>
                 <dd><c:out value="${item.sku}" default="—" /></dd>
 
                 <dt>Disponibilita:</dt>
-                <dd>${item.quantity}</dd>
+                <dd><c:out value="${item.quantity}" default="—" /></dd>
 
                 <dt>Ubicazione:</dt>
                 <dd><c:out value="${item.location}" default="—" /></dd>
@@ -51,10 +57,10 @@
                 <a href="<%= request.getContextPath() %>/warehouse/list" class="btn btn-outline-secondary px-4">
                     Indietro
                 </a>
-                <a href="<%= request.getContextPath() %>/warehouse/edit?id=${item.id}" class="btn btn-detail-edit px-4">
+                <a href="<c:out value='${warehouseEditUrl}'/>" class="btn btn-detail-edit px-4">
                     Modifica
                 </a>
-                <a href="<%= request.getContextPath() %>/warehouse/delete?id=${item.id}" class="btn btn-detail-delete px-4">
+                <a href="<c:out value='${warehouseDeleteUrl}'/>" class="btn btn-detail-delete px-4">
                     Elimina
                 </a>
             </div>
