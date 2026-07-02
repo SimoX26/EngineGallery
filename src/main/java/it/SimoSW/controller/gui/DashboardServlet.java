@@ -45,7 +45,7 @@ public class DashboardServlet extends HttpServlet {
         // Recupero dati AGGREGATI
         request.setAttribute("loggedUser", user);
         request.setAttribute("dashboardGreeting", buildGreeting());
-        request.setAttribute("dashboardUserDisplayName", resolveDisplayName(user));
+        request.setAttribute("dashboardUserDisplayName", formatDisplayName(resolveDisplayName(user)));
 
         LocalDate today = LocalDate.now();
         YearMonth currentMonth = YearMonth.from(today);
@@ -88,5 +88,28 @@ public class DashboardServlet extends HttpServlet {
             return "";
         }
         return user.getUsername();
+    }
+
+    static String formatDisplayName(String displayName) {
+        if (displayName == null || displayName.isBlank()) {
+            return "";
+        }
+
+        StringBuilder formatted = new StringBuilder(displayName.length());
+        boolean capitalizeNext = true;
+
+        for (int offset = 0; offset < displayName.length(); ) {
+            int codePoint = displayName.codePointAt(offset);
+            if (Character.isLetter(codePoint)) {
+                formatted.appendCodePoint(capitalizeNext ? Character.toTitleCase(codePoint) : codePoint);
+                capitalizeNext = false;
+            } else {
+                formatted.appendCodePoint(codePoint);
+                capitalizeNext = Character.isWhitespace(codePoint) || codePoint == '-' || codePoint == '\'' || codePoint == '’';
+            }
+            offset += Character.charCount(codePoint);
+        }
+
+        return formatted.toString();
     }
 }

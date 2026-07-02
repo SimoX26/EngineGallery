@@ -28,7 +28,6 @@
             <p class="dashboard-crm-greeting mb-2 fw-bold">
                 <c:out value="${dashboardGreeting}" />, <c:out value="${dashboardUserDisplayName}" />
             </p>
-            <h1>Home</h1>
             <p>Panoramica di ${meseCorrenteLabel}.</p>
         </div>
 
