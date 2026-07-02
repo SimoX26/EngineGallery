@@ -25,11 +25,11 @@
 
     <div class="container">
         <div class="page-header dashboard-crm-header">
-            <h1>Home</h1>
-            <p class="mb-1 fw-semibold">
+            <p class="dashboard-crm-greeting mb-2 fw-bold">
                 <c:out value="${dashboardGreeting}" />, <c:out value="${dashboardUserDisplayName}" />
             </p>
-            <p>Panoramica operativa di ${meseCorrenteLabel}.</p>
+            <h1>Home</h1>
+            <p>Panoramica di ${meseCorrenteLabel}.</p>
         </div>
 
         <div class="row g-3 g-lg-4 mb-4 dashboard-kpi-grid">
@@ -76,7 +76,7 @@
 
         <div class="home-nav-section mt-4 mb-4">
             <div class="dashboard-section-head mb-3">
-                <h5 class="mb-0 fw-semibold">Operatività rapida</h5>
+                <h5 class="mb-0 fw-semibold">Funzioni rapide</h5>
             </div>
             <div class="row g-3">
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/engine/list"><div class="home-nav-card-title">Motori</div><p class="home-nav-card-desc mb-0">Gestione motori in lavorazione.</p></a></div>

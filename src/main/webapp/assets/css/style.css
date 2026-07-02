@@ -664,6 +664,14 @@ body:not(.login-page) {
     margin-bottom: 1.25rem;
 }
 
+.dashboard-crm-page .dashboard-crm-greeting {
+    color: var(--text-main);
+    font-size: clamp(1.9rem, 4vw, 3.1rem);
+    line-height: 1.08;
+    margin-bottom: 0.4rem;
+    overflow-wrap: anywhere;
+}
+
 .dashboard-crm-page .dashboard-crm-header p {
     max-width: 680px;
 }
@@ -2392,6 +2400,12 @@ body.modal-open {
     .page-header,
     .page-header p {
         text-align: left;
+    }
+
+    .dashboard-crm-page .dashboard-crm-greeting {
+        font-size: clamp(1.65rem, 8vw, 2.2rem);
+        line-height: 1.12;
+        margin-bottom: 0.3rem;
     }
 
     .page-header-with-search {
