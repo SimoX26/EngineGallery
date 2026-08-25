@@ -24,6 +24,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +37,9 @@ import java.util.concurrent.TimeUnit;
 public class HydraulicTestCreateServlet extends HttpServlet {
     private static final long FFMPEG_TIMEOUT_SECONDS = 600;
     private static final long MIN_COMPRESSIBLE_BYTES = 1024L * 1024L; // 1MB
+    private static final Set<String> VIDEO_EXTENSIONS = Set.of(
+            ".mp4", ".mov", ".m4v", ".webm", ".avi", ".mkv", ".3gp", ".mpeg", ".mpg"
+    );
 
     private HydraulicTestController hydraulicTestController;
     private UserActivityAuditLogger activityAuditLogger;
@@ -67,7 +71,15 @@ public class HydraulicTestCreateServlet extends HttpServlet {
         String engineCode = request.getParameter("engineCode");
         String testDate = request.getParameter("testDate");
         String notes = request.getParameter("notes");
-        Part videoPart = request.getPart("videoFile");
+        Part videoPart;
+        try {
+            videoPart = request.getPart("videoFile");
+        } catch (IllegalStateException ex) {
+            request.setAttribute("error", "Il video supera il limite massimo consentito di 500 MB.");
+            request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
+                    .forward(request, response);
+            return;
+        }
 
         request.setAttribute("customerName", customerName);
         request.setAttribute("engineCode", engineCode);
@@ -86,8 +98,14 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     .forward(request, response);
             return;
         }
+        String submittedName = videoPart.getSubmittedFileName();
+        String originalFilename = submittedName != null
+                ? Paths.get(submittedName).getFileName().toString()
+                : "video.mp4";
+        String sanitizedOriginal = sanitizeFilename(originalFilename);
+        String inputExtension = extensionOf(sanitizedOriginal);
         String contentType = videoPart.getContentType();
-        if (contentType == null || !contentType.startsWith("video/")) {
+        if (!isVideo(contentType, inputExtension)) {
             request.setAttribute("error", "Il file caricato non è un video.");
             request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
                     .forward(request, response);
@@ -102,13 +120,6 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     .forward(request, response);
             return;
         }
-
-        String submittedName = videoPart.getSubmittedFileName();
-        String originalFilename = submittedName != null
-                ? Paths.get(submittedName).getFileName().toString()
-                : "video.mp4";
-        String sanitizedOriginal = sanitizeFilename(originalFilename);
-        String inputExtension = extensionOf(sanitizedOriginal);
 
         Path hydraulicUploadBase = UploadPathResolver.resolveHydraulicUploadBase(getServletContext());
         Files.createDirectories(hydraulicUploadBase);
@@ -263,5 +274,10 @@ public class HydraulicTestCreateServlet extends HttpServlet {
             return ".tmp";
         }
         return ext;
+    }
+
+    private boolean isVideo(String contentType, String extension) {
+        return (contentType != null && contentType.toLowerCase(Locale.ROOT).startsWith("video/"))
+                || VIDEO_EXTENSIONS.contains(extension);
     }
 }

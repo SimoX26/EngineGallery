@@ -93,6 +93,14 @@
 
         let currentObjectUrl = null;
 
+        const isVideoFile = (file) => {
+            if (!file) {
+                return false;
+            }
+            return (file.type && file.type.startsWith('video/'))
+                || /\.(mp4|mov|m4v|webm|avi|mkv|3gp|mpeg|mpg)$/i.test(file.name || '');
+        };
+
         const setStatus = (message, type) => {
             status.classList.remove('d-none', 'text-muted', 'text-success', 'text-danger', 'text-warning');
             status.textContent = message || '';
@@ -111,7 +119,7 @@
         };
 
         const showPreviewFile = (file) => {
-            if (!file || !file.type || !file.type.startsWith('video/')) {
+            if (!isVideoFile(file)) {
                 cleanupPreviewObjectUrl();
                 preview.pause();
                 preview.removeAttribute('src');
@@ -133,7 +141,7 @@
             const file = input.files && input.files.length > 0 ? input.files[0] : null;
             showPreviewFile(file);
 
-            if (!file || !file.type || !file.type.startsWith('video/')) {
+            if (!isVideoFile(file)) {
                 return;
             }
         });
