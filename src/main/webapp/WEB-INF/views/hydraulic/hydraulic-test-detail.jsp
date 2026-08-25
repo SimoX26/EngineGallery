@@ -13,7 +13,7 @@
     <title>Engine Gallery • Dettaglio prova idraulica</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=13">
 </head>
 <body>
 
@@ -61,9 +61,9 @@
             </div>
         </div>
 
-        <div class="row mt-3">
-            <div class="col-12 d-flex justify-content-center">
-                <a href="<%= request.getContextPath() %>/hydraulic-test/list" class="btn btn-outline-secondary px-4">
+        <div class="row mt-4">
+            <div class="col-12 detail-actions engine-detail-actions-toolbar d-flex flex-wrap justify-content-center">
+                <a href="<%= request.getContextPath() %>/hydraulic-test/list" class="btn engine-detail-action-btn engine-detail-action-btn--back">
                     Indietro
                 </a>
             </div>

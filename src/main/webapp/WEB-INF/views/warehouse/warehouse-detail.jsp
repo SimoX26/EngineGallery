@@ -11,7 +11,7 @@
     <title>Engine Gallery • Dettaglio Articolo</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=13">
 </head>
 <body>
 
@@ -53,14 +53,14 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-12 detail-actions d-flex flex-wrap justify-content-center gap-2 gap-md-3">
-                <a href="<%= request.getContextPath() %>/warehouse/list" class="btn btn-outline-secondary px-4">
+            <div class="col-12 detail-actions engine-detail-actions-toolbar d-flex flex-wrap justify-content-center">
+                <a href="<%= request.getContextPath() %>/warehouse/list" class="btn engine-detail-action-btn engine-detail-action-btn--back">
                     Indietro
                 </a>
-                <a href="<c:out value='${warehouseEditUrl}'/>" class="btn btn-detail-edit px-4">
+                <a href="<c:out value='${warehouseEditUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--edit">
                     Modifica
                 </a>
-                <a href="<c:out value='${warehouseDeleteUrl}'/>" class="btn btn-detail-delete px-4">
+                <a href="<c:out value='${warehouseDeleteUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--delete">
                     Elimina
                 </a>
             </div>

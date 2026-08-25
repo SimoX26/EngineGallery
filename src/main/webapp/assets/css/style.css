@@ -1972,6 +1972,55 @@ body.kanban-dragging {
     min-width: 140px;
 }
 
+.engine-detail-actions-toolbar {
+    gap: 0.7rem !important;
+    align-items: center;
+}
+
+.engine-detail-action-btn {
+    min-width: 148px;
+    height: 44px;
+    padding: 0 1.05rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-width: 1px;
+    transition: all 0.2s ease;
+}
+
+.engine-detail-action-btn.engine-detail-action-btn--back,
+.engine-detail-action-btn.engine-detail-action-btn--edit {
+    color: #ffffff;
+    background-color: var(--bg-dark);
+    border-color: var(--bg-dark);
+}
+
+.engine-detail-action-btn.engine-detail-action-btn--back:hover,
+.engine-detail-action-btn.engine-detail-action-btn--back:focus-visible,
+.engine-detail-action-btn.engine-detail-action-btn--edit:hover,
+.engine-detail-action-btn.engine-detail-action-btn--edit:focus-visible {
+    color: #ffffff;
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.engine-detail-action-btn.engine-detail-action-btn--delete {
+    color: var(--action-danger-text);
+    background-color: var(--action-danger-bg);
+    border-color: var(--action-danger-border);
+}
+
+.engine-detail-action-btn.engine-detail-action-btn--delete:hover,
+.engine-detail-action-btn.engine-detail-action-btn--delete:focus-visible {
+    color: var(--action-danger-text);
+    background-color: var(--action-danger-hover);
+    border-color: var(--action-danger-border-hover);
+}
+
 @media (max-width: 576px) {
     .detail-actions {
         gap: 0.6rem !important;
