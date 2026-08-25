@@ -31,6 +31,14 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
         ORDER BY test_date DESC, id DESC
     """;
 
+    private static final String UPDATE_SQL = """
+        UPDATE hydraulic_tests
+        SET customer_name = ?, engine_code = ?, test_date = ?, notes = ?
+        WHERE id = ?
+    """;
+
+    private static final String DELETE_SQL = "DELETE FROM hydraulic_tests WHERE id = ?";
+
     private static final String FIND_BY_ID_SQL = """
         SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at
         FROM hydraulic_tests
@@ -84,6 +92,34 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
         }
 
         throw new RuntimeException("ID generato non disponibile dopo il salvataggio della prova idraulica");
+    }
+
+    @Override
+    public void update(HydraulicTest hydraulicTest) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+            stmt.setString(1, hydraulicTest.getCustomerName());
+            stmt.setString(2, hydraulicTest.getEngineCode());
+            stmt.setDate(3, Date.valueOf(hydraulicTest.getTestDate()));
+            stmt.setString(4, hydraulicTest.getNotes());
+            stmt.setLong(5, hydraulicTest.getId());
+            if (stmt.executeUpdate() == 0) {
+                throw new IllegalStateException("Prova idraulica non trovata");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante la modifica della prova idraulica", e);
+        }
+    }
+
+    @Override
+    public boolean delete(long id) {
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
+            stmt.setLong(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore durante l'eliminazione della prova idraulica", e);
+        }
     }
 
     @Override

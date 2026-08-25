@@ -69,11 +69,43 @@ public class HydraulicTestController {
         return hydraulicTestDAO.findById(id);
     }
 
+    public void updateHydraulicTest(long id,
+                                    String customerName,
+                                    String engineCode,
+                                    String testDate,
+                                    String notes) {
+        HydraulicTest existing = findHydraulicTestById(id)
+                .orElseThrow(() -> new IllegalStateException("Prova idraulica non trovata"));
+        hydraulicTestDAO.update(new HydraulicTest(
+                existing.getId(),
+                normalizeRequired(customerName, "Nome cliente obbligatorio"),
+                normalizeRequired(engineCode, "Codice motore obbligatorio"),
+                existing.getVideoUrl(),
+                LocalDate.parse(normalizeRequired(testDate, "Data prova obbligatoria")),
+                normalizeOptional(notes),
+                existing.getCreatedAt()
+        ));
+    }
+
+    public void deleteHydraulicTest(long id) {
+        if (id <= 0 || !hydraulicTestDAO.delete(id)) {
+            throw new IllegalStateException("Prova idraulica non trovata");
+        }
+    }
+
     private static String normalizeOptional(String value) {
         if (value == null) {
             return null;
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static String normalizeRequired(String value, String errorMessage) {
+        String normalized = normalizeOptional(value);
+        if (normalized == null) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return normalized;
     }
 }

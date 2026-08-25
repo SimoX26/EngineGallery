@@ -10,6 +10,10 @@ public interface HydraulicTestDAO {
 
     HydraulicTest save(HydraulicTest hydraulicTest);
 
+    void update(HydraulicTest hydraulicTest);
+
+    boolean delete(long id);
+
     Optional<HydraulicTest> findById(long id);
 
     List<HydraulicTest> findAll();

@@ -1972,6 +1972,18 @@ body.kanban-dragging {
     min-width: 140px;
 }
 
+.detail-mobile-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; }
+.detail-mobile-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+.detail-round-btn { width: 44px; height: 44px; margin: 0; padding: 0; border-radius: 50%; border: 1.5px solid rgba(148, 163, 184, .35); background: var(--primary); color: #f8fafc; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(2, 6, 23, .35); transition: transform .2s ease, background-color .2s ease, border-color .2s ease; flex: 0 0 auto; }
+.detail-round-btn:hover, .detail-round-btn:focus-visible { background: #374151; border-color: #e5e7eb; color: #fff; transform: scale(1.05); }
+.detail-round-btn--delete { background: var(--action-danger-bg); border-color: var(--action-danger-border); }
+.detail-round-btn--delete:hover, .detail-round-btn--delete:focus-visible { background: var(--action-danger-hover); border-color: var(--action-danger-border-hover); }
+.detail-round-btn--share { background: var(--action-share-bg); border-color: var(--action-share-border); }
+.detail-round-btn--share:hover, .detail-round-btn--share:focus-visible { background: var(--action-share-hover); border-color: var(--action-share-border-hover); }
+.detail-round-btn svg { display: block; width: 18px; height: 18px; }
+@media (max-width: 768px) { .detail-has-mobile-actions .detail-actions { display: none !important; } .detail-round-btn { width: 40px; height: 40px; } .detail-round-btn svg { width: 17px; height: 17px; } }
+@media (min-width: 769px) { .detail-mobile-actions { display: none; } }
+
 .engine-detail-actions-toolbar {
     gap: 0.7rem !important;
     align-items: center;
@@ -2019,6 +2031,19 @@ body.kanban-dragging {
     color: var(--action-danger-text);
     background-color: var(--action-danger-hover);
     border-color: var(--action-danger-border-hover);
+}
+
+.engine-detail-action-btn.engine-detail-action-btn--share {
+    color: var(--action-share-text);
+    background: var(--action-share-bg);
+    border-color: var(--action-share-border);
+}
+
+.engine-detail-action-btn.engine-detail-action-btn--share:hover,
+.engine-detail-action-btn.engine-detail-action-btn--share:focus-visible {
+    color: var(--action-share-text);
+    background: var(--action-share-hover);
+    border-color: var(--action-share-border-hover);
 }
 
 @media (max-width: 576px) {
