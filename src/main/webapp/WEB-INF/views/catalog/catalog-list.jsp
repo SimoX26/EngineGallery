@@ -12,7 +12,7 @@
     <title>Engine Gallery • Catalogo</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=13">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=14">
 </head>
 <body>
 
@@ -35,9 +35,12 @@
                        id="catalogKeywordSearch"
                        class="form-control"
                        placeholder="cerca...">
-                <div class="mb-3">
-                    <a href="/catalog/add" class="btn btn-primary">Aggiungi</a>
-                </div>
+            </div>
+
+            <div class="page-header-actions page-header-actions--add">
+                <a href="<%= request.getContextPath() %>/catalog/add" class="btn btn-sm btn-add-plus">
+                    Aggiungi +
+                </a>
             </div>
         </div>
 
