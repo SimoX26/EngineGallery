@@ -9,6 +9,10 @@ public class Engine {
 
     private static final DateTimeFormatter CREATED_AT_FORMATTER =
             DateTimeFormatter.ofPattern("dd / MM / yyyy · HH:mm");
+    private static final DateTimeFormatter CREATED_AT_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd / MM / yyyy");
+    private static final DateTimeFormatter CREATED_AT_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm");
 
     /* =========================
        Identità tecnica (DB)
@@ -153,6 +157,14 @@ public class Engine {
 
     public String getCreatedAtLabel() {
         return createdAt != null ? CREATED_AT_FORMATTER.format(createdAt) : "";
+    }
+
+    public String getCreatedAtDateLabel() {
+        return createdAt != null ? CREATED_AT_DATE_FORMATTER.format(createdAt) : "";
+    }
+
+    public String getCreatedAtTimeLabel() {
+        return createdAt != null ? CREATED_AT_TIME_FORMATTER.format(createdAt) : "";
     }
 
     /* =========================

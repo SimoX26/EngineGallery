@@ -189,15 +189,23 @@
                         <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
                         <div class="engine-list-row__main record-card__title"><c:out value="${engine.engineCode}" /></div>
                         <div class="engine-list-row__sub record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
-                        <div class="record-card__audit">
-                            <span class="record-card__audit-dot" aria-hidden="true"></span>
-                            <span class="record-card__audit-copy">
-                                <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
-                            </span>
-                        </div>
                     </div>
                     </a>
-                    <time class="record-list-card__timestamp"><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></time>
+                    <time class="record-list-card__timestamp">
+                        <c:choose>
+                            <c:when test="${not empty engine.createdAt}">
+                                <span><c:out value="${engine.createdAtDateLabel}" /></span>
+                                <span><c:out value="${engine.createdAtTimeLabel}" /></span>
+                            </c:when>
+                            <c:otherwise>Data e ora non disponibili</c:otherwise>
+                        </c:choose>
+                    </time>
+                    <div class="record-card__audit record-list-card__operator">
+                        <span class="record-card__audit-dot" aria-hidden="true"></span>
+                        <span class="record-card__audit-copy">
+                            <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
+                        </span>
+                    </div>
                     <button type="button"
                             class="badge-status quick-status-trigger
                             ${st == 'WAITING' ? 'status-stoccato' : ''}

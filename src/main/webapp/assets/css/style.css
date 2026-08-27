@@ -3210,12 +3210,37 @@ body.modal-open {
 
 .record-list-card__timestamp {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     color: var(--text-muted);
     font-size: 0.8rem;
     line-height: 1.35;
     text-align: right;
     overflow-wrap: break-word;
     word-break: normal;
+}
+
+.record-list-card--actionable > .record-list-card__operator {
+    grid-column: 1;
+    min-width: 0;
+}
+
+.record-list-card--actionable > .record-list-card__operator .record-card__audit-copy {
+    display: block;
+    overflow: hidden;
+}
+
+.record-list-card--actionable > .record-list-card__operator .record-card__audit-copy > span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.record-list-card--actionable > .badge-status {
+    grid-column: 3;
+    grid-row: 1;
 }
 
 .engine-kanban-card {
@@ -3302,12 +3327,24 @@ body.modal-open {
 
     .record-list-card--actionable > .badge-status {
         grid-column: 1;
+        grid-row: auto;
         margin-left: calc(62px + 0.7rem);
     }
 
     .record-list-card--actionable > .record-list-card__timestamp {
         justify-self: end;
         text-align: right;
+    }
+
+    .record-list-card--actionable > .record-list-card__operator,
+    .record-list-card--actionable > .badge-status {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .record-list-card--actionable > .badge-status {
+        justify-self: stretch;
+        white-space: nowrap;
     }
 
     .record-card__footer {

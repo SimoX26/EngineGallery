@@ -29,7 +29,9 @@ class RecordCreationMetadataTest {
 
         assertAll(
                 () -> assertEquals("simone", engine.getCreatedBy()),
-                () -> assertEquals("27 / 08 / 2026 · 09:05", engine.getCreatedAtLabel())
+                () -> assertEquals("27 / 08 / 2026 · 09:05", engine.getCreatedAtLabel()),
+                () -> assertEquals("27 / 08 / 2026", engine.getCreatedAtDateLabel()),
+                () -> assertEquals("09:05", engine.getCreatedAtTimeLabel())
         );
     }
 
