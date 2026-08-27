@@ -189,19 +189,15 @@
                         <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
                         <div class="engine-list-row__main record-card__title"><c:out value="${engine.engineCode}" /></div>
                         <div class="engine-list-row__sub record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
-                        <div class="record-card__facts">
-                            <fmt:parseDate value="${engine.intakeDate}" pattern="yyyy-MM-dd" var="engineListIntakeDateParsed" />
-                            <span class="record-card__fact"><strong>Ingresso</strong> <fmt:formatDate value="${engineListIntakeDateParsed}" pattern="dd / MM / yyyy" /></span>
-                        </div>
                         <div class="record-card__audit">
                             <span class="record-card__audit-dot" aria-hidden="true"></span>
                             <span class="record-card__audit-copy">
                                 <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
-                                <span><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></span>
                             </span>
                         </div>
                     </div>
                     </a>
+                    <time class="record-list-card__timestamp"><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></time>
                     <button type="button"
                             class="badge-status quick-status-trigger
                             ${st == 'WAITING' ? 'status-stoccato' : ''}
