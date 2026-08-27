@@ -632,6 +632,36 @@ body:not(.login-page) {
     color: var(--text-main);
 }
 
+.catalog-table {
+    min-width: 760px;
+}
+
+.catalog-sortable-header,
+.catalog-table-row {
+    cursor: pointer;
+}
+
+.catalog-sortable-header {
+    white-space: nowrap;
+    user-select: none;
+}
+
+.catalog-sortable-header [data-sort-indicator] {
+    display: inline-block;
+    min-width: 1em;
+}
+
+.catalog-sortable-header:focus-visible,
+.catalog-table-row:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+.catalog-detail-link {
+    color: inherit;
+    font-weight: 600;
+}
+
 .home-nav-card {
     display: block;
     height: 100%;

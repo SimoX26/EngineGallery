@@ -18,6 +18,7 @@ public class ApplicationInitializer {
     private final WarehouseController warehouseController;
     private final HydraulicTestController hydraulicTestController;
     private final UserActivityLogController userActivityLogController;
+    private final CatalogController catalogController;
 
     private final EngineRefGenerator engineRefGenerator;
 
@@ -32,6 +33,7 @@ public class ApplicationInitializer {
         WarehouseImageDAO warehouseImageDAO = new DatabaseWarehouseImageDAO();
         HydraulicTestDAO hydraulicTestDAO = new DatabaseHydraulicTestDAO();
         UserActivityLogDAO userActivityLogDAO = new DatabaseUserActivityLogDAO();
+        CatalogItemDAO catalogItemDAO = new DatabaseCatalogItemDAO();
 
         engineRefGenerator = new EngineRefGenerator(engineDAO);
 
@@ -56,6 +58,7 @@ public class ApplicationInitializer {
         this.warehouseController = new WarehouseController(warehouseItemDAO, warehouseImageDAO);
         this.hydraulicTestController = new HydraulicTestController(hydraulicTestDAO);
         this.userActivityLogController = new UserActivityLogController(userActivityLogDAO);
+        this.catalogController = new CatalogController(catalogItemDAO);
 
     }
 
@@ -85,5 +88,9 @@ public class ApplicationInitializer {
 
     public UserActivityLogController getUserActivityLogController() {
         return userActivityLogController;
+    }
+
+    public CatalogController getCatalogController() {
+        return catalogController;
     }
 }

@@ -56,7 +56,7 @@ La navigazione comprende anche:
 
 - una sezione impostazioni per preferenze di utilizzo;
 - una sezione manutenzione riservata agli amministratori;
-- sezioni placeholder per catalogo e pronta consegna, gia presenti nella struttura applicativa.
+- una sezione catalogo consultabile e una sezione placeholder per pronta consegna, gia presenti nella struttura applicativa.
 
 ## Flusso di Utilizzo
 

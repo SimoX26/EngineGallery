@@ -85,6 +85,7 @@
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/customer/list"><div class="home-nav-card-title">Clienti</div><p class="home-nav-card-desc mb-0">Rubrica e anagrafiche clienti.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/hydraulic-test/list"><div class="home-nav-card-title">Prove idrauliche</div><p class="home-nav-card-desc mb-0">Video e schede test.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/warehouse/list"><div class="home-nav-card-title">Magazzino</div><p class="home-nav-card-desc mb-0">Articoli, quantità e giacenze.</p></a></div>
+                <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/catalog"><div class="home-nav-card-title">Catalogo</div><p class="home-nav-card-desc mb-0">Schede tecniche motori a catalogo.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/ready-delivery"><div class="home-nav-card-title">Pronta Consegna</div><p class="home-nav-card-desc mb-0">Sezione pronta consegna.</p></a></div>
             </div>
         </div>
