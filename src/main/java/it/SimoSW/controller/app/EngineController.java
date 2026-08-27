@@ -190,7 +190,8 @@ public class EngineController {
                     bean.getCustomerId(),
                     LocalDate.parse(bean.getIntakeDate()),
                     status,
-                    bean.getNotes()
+                    bean.getNotes(),
+                    bean.getCreatedBy()
                 );
 
         if (status == EngineStatus.DELIVERED) {
@@ -243,12 +244,16 @@ public class EngineController {
         LocalDate intakeDate = LocalDate.parse(bean.getIntakeDate());
 
         Engine engine = new Engine(
+                existing.getId(),
                 bean.getEngineRef(),
                 bean.getEngineCode(),
                 bean.getCustomerId(),
                 intakeDate,
                 status,
-                bean.getNotes()
+                null,
+                bean.getNotes(),
+                existing.getCreatedAt(),
+                existing.getCreatedBy()
         );
 
         if (status == EngineStatus.DELIVERED) {
@@ -258,7 +263,6 @@ public class EngineController {
             engine.deliver(deliveryDate);
         }
 
-        engine.setId(existing.getId());
         return engineDAO.update(engine);
     }
 

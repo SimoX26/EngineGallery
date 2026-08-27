@@ -256,6 +256,7 @@ public class UploadServlet extends HttpServlet {
             engineBean.setNotes(note);
             engineBean.setStatus(status.name());
             engineBean.setIntakeDate(LocalDate.now().toString());
+            engineBean.setCreatedBy(resolveLoggedUsername(request));
 
             try {
                 engineController.createEngine(engineBean);
@@ -321,6 +322,16 @@ public class UploadServlet extends HttpServlet {
 
     private void populateCustomerOptions(HttpServletRequest request) {
         request.setAttribute("customers", customerController.getAllCustomers());
+    }
+
+    private static String resolveLoggedUsername(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        Object value = session != null ? session.getAttribute("loggedUser") : null;
+        if (!(value instanceof it.SimoSW.model.User)) {
+            return null;
+        }
+        String username = ((it.SimoSW.model.User) value).getUsername();
+        return username == null || username.isBlank() ? null : username.trim();
     }
 
     private static final class PendingImage {

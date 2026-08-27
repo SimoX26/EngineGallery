@@ -66,6 +66,7 @@ class DatabaseHydraulicTestDAOTest {
         assertEquals(1, tests.size());
         assertEquals(1L, tests.get(0).getId());
         assertEquals("Cliente valido", tests.get(0).getCustomerName());
+        assertEquals("simone", tests.get(0).getCreatedBy());
     }
 
     @Test
@@ -257,6 +258,7 @@ class DatabaseHydraulicTestDAOTest {
             row.put("test_date", testDate);
             row.put("notes", notes);
             row.put("created_at", LocalDateTime.of(2026, 6, 1, 10, 0));
+            row.put("created_by", "simone");
             return row;
         }
     }

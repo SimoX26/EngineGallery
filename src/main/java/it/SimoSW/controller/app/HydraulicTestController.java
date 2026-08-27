@@ -37,7 +37,8 @@ public class HydraulicTestController {
                                              String engineCode,
                                              String videoUrl,
                                              String testDate,
-                                             String notes) {
+                                             String notes,
+                                             String createdBy) {
         if (customerName == null || customerName.isBlank()) {
             throw new IllegalArgumentException("Nome cliente obbligatorio");
         }
@@ -56,7 +57,8 @@ public class HydraulicTestController {
                 engineCode.trim(),
                 videoUrl.trim(),
                 LocalDate.parse(testDate.trim()),
-                normalizeOptional(notes)
+                normalizeOptional(notes),
+                normalizeOptional(createdBy)
         );
 
         return hydraulicTestDAO.save(hydraulicTest);
@@ -83,7 +85,8 @@ public class HydraulicTestController {
                 existing.getVideoUrl(),
                 LocalDate.parse(normalizeRequired(testDate, "Data prova obbligatoria")),
                 normalizeOptional(notes),
-                existing.getCreatedAt()
+                existing.getCreatedAt(),
+                existing.getCreatedBy()
         ));
     }
 

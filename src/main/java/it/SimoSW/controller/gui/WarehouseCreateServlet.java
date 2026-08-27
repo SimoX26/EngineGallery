@@ -3,6 +3,7 @@ package it.SimoSW.controller.gui;
 import it.SimoSW.controller.app.WarehouseController;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
+import it.SimoSW.model.User;
 import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.audit.UserActivityAuditLogger;
@@ -15,6 +16,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,7 +63,8 @@ public class WarehouseCreateServlet extends HttpServlet {
 
         try {
             Integer quantity = parseQuantity(quantityParam);
-            Long id = warehouseController.createItem(name, sku, quantity, location, notes);
+            Long id = warehouseController.createItem(
+                    name, sku, quantity, location, notes, resolveLoggedUsername(request));
             applyImageAdditions(request, id);
             activityAuditLogger.logFromRequest(
                     request,
@@ -111,6 +114,16 @@ public class WarehouseCreateServlet extends HttpServlet {
 
     private static String safeTrim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private static String resolveLoggedUsername(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        Object value = session != null ? session.getAttribute("loggedUser") : null;
+        if (!(value instanceof User)) {
+            return null;
+        }
+        String username = ((User) value).getUsername();
+        return username == null || username.isBlank() ? null : username.trim();
     }
 
     private void applyImageAdditions(HttpServletRequest request, Long itemId) throws IOException, ServletException {

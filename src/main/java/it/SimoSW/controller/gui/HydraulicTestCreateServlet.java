@@ -4,6 +4,7 @@ import it.SimoSW.controller.app.HydraulicTestController;
 import it.SimoSW.model.HydraulicTest;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
+import it.SimoSW.model.User;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
@@ -15,6 +16,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -168,7 +170,8 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     engineCode,
                     finalFilename,
                     testDate,
-                    notes
+                    notes,
+                    resolveLoggedUsername(request)
             );
             activityAuditLogger.logFromRequest(
                     request,
@@ -193,6 +196,16 @@ public class HydraulicTestCreateServlet extends HttpServlet {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private static String resolveLoggedUsername(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        Object value = session != null ? session.getAttribute("loggedUser") : null;
+        if (!(value instanceof User)) {
+            return null;
+        }
+        String username = ((User) value).getUsername();
+        return username == null || username.isBlank() ? null : username.trim();
     }
 
     private boolean compressVideo(Path inputFile, Path outputFile) {

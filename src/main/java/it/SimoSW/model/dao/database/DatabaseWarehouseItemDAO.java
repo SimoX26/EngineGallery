@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,16 +15,16 @@ import java.util.Optional;
 public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
 
     private static final String FIND_ALL_SQL =
-            "SELECT id, name, sku, quantity, location, notes FROM warehouse_items ORDER BY name";
+            "SELECT id, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items ORDER BY name";
 
     private static final String FIND_LATEST_SQL =
-            "SELECT id, name, sku, quantity, location, notes FROM warehouse_items ORDER BY id DESC LIMIT ?";
+            "SELECT id, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items ORDER BY id DESC LIMIT ?";
 
     private static final String FIND_BY_ID_SQL =
-            "SELECT id, name, sku, quantity, location, notes FROM warehouse_items WHERE id = ?";
+            "SELECT id, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items WHERE id = ?";
 
     private static final String INSERT_SQL =
-            "INSERT INTO warehouse_items (name, sku, quantity, location, notes) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO warehouse_items (name, sku, quantity, location, notes, created_by) VALUES (?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_SQL =
             "UPDATE warehouse_items SET name = ?, sku = ?, quantity = ?, location = ?, notes = ? WHERE id = ?";
@@ -116,6 +117,7 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
             stmt.setInt(3, item.getQuantity());
             stmt.setString(4, item.getLocation());
             stmt.setString(5, item.getNotes());
+            stmt.setString(6, item.getCreatedBy());
 
             stmt.executeUpdate();
 
@@ -218,13 +220,16 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
     }
 
     private WarehouseItem mapRow(ResultSet rs) throws SQLException {
+        Timestamp createdAt = rs.getTimestamp("created_at");
         return new WarehouseItem(
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getString("sku"),
                 rs.getInt("quantity"),
                 rs.getString("location"),
-                rs.getString("notes")
+                rs.getString("notes"),
+                createdAt != null ? createdAt.toLocalDateTime() : null,
+                rs.getString("created_by")
         );
     }
 }

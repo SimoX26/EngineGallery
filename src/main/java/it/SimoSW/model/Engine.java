@@ -1,9 +1,14 @@
 package it.SimoSW.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Engine {
+
+    private static final DateTimeFormatter CREATED_AT_FORMATTER =
+            DateTimeFormatter.ofPattern("dd / MM / yyyy · HH:mm");
 
     /* =========================
        Identità tecnica (DB)
@@ -32,6 +37,8 @@ public class Engine {
        Altri dati
        ========================= */
     private String notes;
+    private LocalDateTime createdAt;
+    private String createdBy;
 
     /* =========================
        Costruttore per NUOVO Engine
@@ -44,6 +51,18 @@ public class Engine {
             EngineStatus status,
             String notes
     ) {
+        this(engineRef, engineCode, customerId, intakeDate, status, notes, null);
+    }
+
+    public Engine(
+            String engineRef,
+            String engineCode,
+            long customerId,
+            LocalDate intakeDate,
+            EngineStatus status,
+            String notes,
+            String createdBy
+    ) {
         this.engineRef = Objects.requireNonNull(engineRef);
         this.engineCode = Objects.requireNonNull(engineCode);
         this.customerId = customerId;
@@ -51,6 +70,8 @@ public class Engine {
         this.status = Objects.requireNonNull(status);
         this.notes = notes;
         this.deliveryDate = null;
+        this.createdAt = null;
+        this.createdBy = normalizeOptional(createdBy);
     }
 
     /* =========================
@@ -66,9 +87,25 @@ public class Engine {
             LocalDate deliveryDate,
             String notes
     ) {
-        this(engineRef, engineCode, customerId, intakeDate, status, notes);
+        this(id, engineRef, engineCode, customerId, intakeDate, status, deliveryDate, notes, null, null);
+    }
+
+    public Engine(
+            long id,
+            String engineRef,
+            String engineCode,
+            long customerId,
+            LocalDate intakeDate,
+            EngineStatus status,
+            LocalDate deliveryDate,
+            String notes,
+            LocalDateTime createdAt,
+            String createdBy
+    ) {
+        this(engineRef, engineCode, customerId, intakeDate, status, notes, createdBy);
         this.id = id;
         this.deliveryDate = deliveryDate;
+        this.createdAt = createdAt;
     }
 
     /* =========================
@@ -104,6 +141,18 @@ public class Engine {
 
     public String getNotes() {
         return notes;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getCreatedAtLabel() {
+        return createdAt != null ? CREATED_AT_FORMATTER.format(createdAt) : "";
     }
 
     /* =========================
@@ -164,5 +213,13 @@ public class Engine {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    private static String normalizeOptional(String value) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 }

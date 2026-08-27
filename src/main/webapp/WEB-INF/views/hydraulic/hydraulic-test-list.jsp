@@ -13,7 +13,7 @@
     <title>Engine Gallery • Prove idrauliche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=14">
 </head>
 
 <body>
@@ -119,38 +119,42 @@
             <c:when test="${not empty hydraulicTests}">
                 <div id="hydraulicListView" class="engine-list-view d-none">
                     <c:forEach var="test" items="${hydraulicTests}">
-                        <a class="engine-list-row hydraulic-list-row-item"
+                        <a class="engine-list-row record-list-card hydraulic-list-row-item"
                            href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}"
-                           data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${test.testDate}">
-                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                           data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${fn:escapeXml(test.createdBy)} ${fn:escapeXml(test.createdAtLabel)} ${test.testDate}">
+                            <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
                                 <span class="engine-image-empty-label">VIDEO</span>
                             </div>
-                            <div class="engine-list-row__body">
-                                <div class="engine-list-row__main">
-                                    <c:out value="${test.engineCode}" default="—" /> - <c:out value="${test.customerName}" default="Cliente non disponibile" />
-                                </div>
-                                <div class="engine-list-row__sub">
-                                    Data prova:
+                            <div class="engine-list-row__body record-list-card__content">
+                                <div class="record-card__eyebrow">Prova idraulica</div>
+                                <div class="engine-list-row__main record-card__title"><c:out value="${test.engineCode}" default="Codice non disponibile" /></div>
+                                <div class="engine-list-row__sub record-card__subtitle"><c:out value="${test.customerName}" default="Cliente non disponibile" /></div>
+                                <div class="record-card__facts">
                                     <fmt:parseDate value="${test.testDate}" pattern="yyyy-MM-dd" var="hydraulicTestDateListParsed" />
-                                    <fmt:formatDate value="${hydraulicTestDateListParsed}" pattern="dd / MM / yyyy" />
+                                    <span class="record-card__fact"><strong>Data prova</strong> <fmt:formatDate value="${hydraulicTestDateListParsed}" pattern="dd / MM / yyyy" /></span>
                                 </div>
                                 <c:if test="${not empty test.notes}">
-                                    <div class="engine-list-row__meta">
-                                        <span><c:out value="${test.notes}" /></span>
-                                    </div>
+                                    <div class="record-card__summary"><c:out value="${test.notes}" /></div>
                                 </c:if>
+                                <div class="record-card__audit">
+                                    <span class="record-card__audit-dot" aria-hidden="true"></span>
+                                    <span class="record-card__audit-copy">
+                                        <span>Inserito da <strong><c:out value="${test.createdBy}" default="Utente non disponibile" /></strong></span>
+                                        <span><c:out value="${test.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                                    </span>
+                                </div>
                             </div>
                             <span class="badge-status status-stoccato">Test</span>
                         </a>
                     </c:forEach>
                 </div>
 
-                <div class="row g-4" id="hydraulicGalleryGrid">
+                <div class="record-gallery-grid" id="hydraulicGalleryGrid">
                     <c:forEach var="test" items="${hydraulicTests}">
-                        <div class="col-xl-3 col-lg-4 col-md-6 hydraulic-card-col"
-                             data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${test.testDate}">
+                        <div class="hydraulic-card-col"
+                             data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${fn:escapeXml(test.createdBy)} ${fn:escapeXml(test.createdAtLabel)} ${test.testDate}">
                             <a class="engine-card-link" href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}">
-                            <div class="engine-gallery-card h-100">
+                            <article class="engine-gallery-card record-gallery-card">
                                 <div class="hydraulic-video-wrap">
                                     <video class="hydraulic-video" muted playsinline preload="metadata">
                                         <c:choose>
@@ -165,23 +169,29 @@
                                     </video>
                                 </div>
 
-                                <div class="engine-body">
-                                    <div class="engine-code">
-                                        <c:out value="${test.engineCode}" default="—" /> -
-                                        <c:out value="${test.customerName}" default="Cliente non disponibile" />
-                                    </div>
-                                    <div class="engine-client">
-                                        Data prova:
+                                <div class="engine-body record-card__body">
+                                    <div class="record-card__eyebrow">Prova idraulica</div>
+                                    <div class="engine-code record-card__title"><c:out value="${test.engineCode}" default="Codice non disponibile" /></div>
+                                    <div class="engine-client record-card__subtitle"><c:out value="${test.customerName}" default="Cliente non disponibile" /></div>
+                                    <div class="record-card__facts">
                                         <fmt:parseDate value="${test.testDate}" pattern="yyyy-MM-dd" var="hydraulicTestDateParsed" />
-                                        <fmt:formatDate value="${hydraulicTestDateParsed}" pattern="dd / MM / yyyy" />
+                                        <span class="record-card__fact"><strong>Data prova</strong> <fmt:formatDate value="${hydraulicTestDateParsed}" pattern="dd / MM / yyyy" /></span>
                                     </div>
                                     <c:if test="${not empty test.notes}">
-                                        <div class="hydraulic-notes mt-2">
-                                            <c:out value="${test.notes}" />
-                                        </div>
+                                        <div class="hydraulic-notes record-card__summary"><c:out value="${test.notes}" /></div>
                                     </c:if>
                                 </div>
-                            </div>
+                                <div class="record-card__footer">
+                                    <div class="record-card__audit">
+                                        <span class="record-card__audit-dot" aria-hidden="true"></span>
+                                        <span class="record-card__audit-copy">
+                                            <span>Inserito da <strong><c:out value="${test.createdBy}" default="Utente non disponibile" /></strong></span>
+                                            <span><c:out value="${test.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                                        </span>
+                                    </div>
+                                    <span class="badge-status status-stoccato">Test</span>
+                                </div>
+                            </article>
                             </a>
                         </div>
                     </c:forEach>

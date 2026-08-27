@@ -16,12 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
-    <style>
-        .engine-card-link-main {
-            height: auto;
-        }
-    </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=14">
 </head>
 
 <body>
@@ -174,30 +169,39 @@
                 <c:set var="statusSearchLabel"
                        value="${st == 'WAITING' ? 'in attesa' : st == 'WORK_IN_PROGRESS' ? 'in lavorazione' : st == 'READY' ? 'pronto' : st == 'DELIVERED' ? 'consegnato' : st}" />
                 <c:set var="coverFilename" value="${coverImages[engine.id]}" />
-                <a class="engine-list-row"
-                   href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
-                   data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${st} ${statusSearchLabel}">
+                <article class="engine-list-row record-list-card record-list-card--actionable"
+                         data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)} ${st} ${statusSearchLabel}">
+                    <a class="record-list-card__main"
+                       href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                     <c:choose>
                         <c:when test="${not empty coverFilename}">
-                            <div class="engine-image"
+                            <div class="engine-image record-list-card__media"
                                  style="background-image: url('<%= request.getContextPath() %>/uploads/engines/${engine.engineRef}/${coverFilename}');">
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+                            <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
                                 <span class="engine-image-empty-label">Nessuna immagine</span>
                             </div>
                         </c:otherwise>
                     </c:choose>
-                    <div class="engine-list-row__body">
-                        <div class="engine-list-row__main">${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" /></div>
-                        <div class="engine-list-row__sub">${engine.engineRef}</div>
-                        <div class="engine-list-row__meta">
-                            <span class="engine-list-row__intake-label">Ingresso:</span>
+                    <div class="engine-list-row__body record-list-card__content">
+                        <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
+                        <div class="engine-list-row__main record-card__title"><c:out value="${engine.engineCode}" /></div>
+                        <div class="engine-list-row__sub record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
+                        <div class="record-card__facts">
                             <fmt:parseDate value="${engine.intakeDate}" pattern="yyyy-MM-dd" var="engineListIntakeDateParsed" />
-                            <span class="engine-list-row__intake-value"><fmt:formatDate value="${engineListIntakeDateParsed}" pattern="dd / MM / yyyy" /></span>
+                            <span class="record-card__fact"><strong>Ingresso</strong> <fmt:formatDate value="${engineListIntakeDateParsed}" pattern="dd / MM / yyyy" /></span>
+                        </div>
+                        <div class="record-card__audit">
+                            <span class="record-card__audit-dot" aria-hidden="true"></span>
+                            <span class="record-card__audit-copy">
+                                <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
+                                <span><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                            </span>
                         </div>
                     </div>
+                    </a>
                     <button type="button"
                             class="badge-status quick-status-trigger
                             ${st == 'WAITING' ? 'status-stoccato' : ''}
@@ -220,19 +224,19 @@
                             <c:otherwise>${st}</c:otherwise>
                         </c:choose>
                     </button>
-                </a>
+                </article>
             </c:forEach>
         </div>
 
-        <div class="row g-4" id="engineGalleryGrid">
+        <div class="record-gallery-grid" id="engineGalleryGrid">
 
             <c:forEach var="engine" items="${engines}">
                 <c:set var="st" value="${engine.status}" />
                 <c:set var="statusSearchLabel"
                        value="${st == 'WAITING' ? 'in attesa' : st == 'WORK_IN_PROGRESS' ? 'in lavorazione' : st == 'READY' ? 'pronto' : st == 'DELIVERED' ? 'consegnato' : st}" />
-                <div class="col-xl-3 col-lg-4 col-md-6 engine-card-col"
-                     data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${st} ${statusSearchLabel}">
-                    <div class="engine-gallery-card">
+                <div class="engine-card-col"
+                     data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)} ${st} ${statusSearchLabel}">
+                    <div class="engine-gallery-card record-gallery-card">
                         <a class="engine-card-link engine-card-link-main" href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}">
                             <c:set var="coverFilename" value="${coverImages[engine.id]}" />
                             <c:choose>
@@ -248,19 +252,26 @@
                                 </c:otherwise>
                             </c:choose>
 
-                            <div class="engine-body pb-2">
-                                <div class="engine-code">
-                                    ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
-                                </div>
-
-                                <div class="engine-client">
-                                    ${engine.engineRef}
+                            <div class="engine-body record-card__body">
+                                <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
+                                <div class="engine-code record-card__title"><c:out value="${engine.engineCode}" /></div>
+                                <div class="engine-client record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
+                                <div class="record-card__facts">
+                                    <fmt:parseDate value="${engine.intakeDate}" pattern="yyyy-MM-dd" var="engineGalleryIntakeDateParsed" />
+                                    <span class="record-card__fact"><strong>Ingresso</strong> <fmt:formatDate value="${engineGalleryIntakeDateParsed}" pattern="dd / MM / yyyy" /></span>
                                 </div>
                             </div>
                         </a>
 
-                        <div class="engine-body pt-0">
-                            <div class="engine-footer">
+                        <div class="record-card__footer">
+                            <div class="record-card__audit">
+                                <span class="record-card__audit-dot" aria-hidden="true"></span>
+                                <span class="record-card__audit-copy">
+                                    <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
+                                    <span><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                                </span>
+                            </div>
+                            <div class="record-card__actions">
                                 <button type="button"
                                         class="badge-status quick-status-trigger
                                         ${st == 'WAITING' ? 'status-stoccato' : ''}
@@ -291,7 +302,6 @@
                                     Consegnato il <fmt:formatDate value="${engineCardDeliveryDateParsed}" pattern="dd / MM / yyyy" />
                                 </div>
                             </c:if>
-
                         </div>
                     </div>
 
@@ -315,8 +325,8 @@
                                        href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
                                        data-engine-ref="${engine.engineRef}"
                                        data-current-status="WAITING"
-                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)}"
-                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} WAITING in attesa">
+                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)}"
+                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)} WAITING in attesa">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -330,11 +340,17 @@
                                             </c:otherwise>
                                         </c:choose>
                                         <div class="engine-kanban-card__body">
-                                            <div class="engine-code">
-                                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
+                                            <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
+                                            <div class="engine-code record-card__title"><c:out value="${engine.engineCode}" /></div>
+                                            <div class="engine-client record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
+                                            <div class="record-card__audit record-card__audit--compact">
+                                                <span class="record-card__audit-dot" aria-hidden="true"></span>
+                                                <span class="record-card__audit-copy">
+                                                    <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
+                                                    <span><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                                                </span>
                                             </div>
-                                            <div class="engine-client">${engine.engineRef}</div>
-                                            <div class="mt-2">
+                                            <div class="record-card__actions">
                                                 <span class="badge-status status-stoccato">In attesa</span>
                                             </div>
                                         </div>
@@ -356,8 +372,8 @@
                                        href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
                                        data-engine-ref="${engine.engineRef}"
                                        data-current-status="WORK_IN_PROGRESS"
-                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)}"
-                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} WORK_IN_PROGRESS in lavorazione">
+                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)}"
+                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)} WORK_IN_PROGRESS in lavorazione">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -371,11 +387,17 @@
                                             </c:otherwise>
                                         </c:choose>
                                         <div class="engine-kanban-card__body">
-                                            <div class="engine-code">
-                                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
+                                            <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
+                                            <div class="engine-code record-card__title"><c:out value="${engine.engineCode}" /></div>
+                                            <div class="engine-client record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
+                                            <div class="record-card__audit record-card__audit--compact">
+                                                <span class="record-card__audit-dot" aria-hidden="true"></span>
+                                                <span class="record-card__audit-copy">
+                                                    <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
+                                                    <span><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                                                </span>
                                             </div>
-                                            <div class="engine-client">${engine.engineRef}</div>
-                                            <div class="mt-2">
+                                            <div class="record-card__actions">
                                                 <span class="badge-status status-lavorazione">In lavorazione</span>
                                             </div>
                                         </div>
@@ -397,8 +419,8 @@
                                        href="${pageContext.request.contextPath}/engine/detail?ref=${engine.engineRef}"
                                        data-engine-ref="${engine.engineRef}"
                                        data-current-status="READY"
-                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)}"
-                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} READY pronto">
+                                       data-search-base="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)}"
+                                       data-search="${fn:escapeXml(engine.engineCode)} ${fn:escapeXml(engine.engineRef)} ${fn:escapeXml(customerNames[engine.customerId])} ${fn:escapeXml(engine.notes)} ${fn:escapeXml(engine.createdBy)} ${fn:escapeXml(engine.createdAtLabel)} READY pronto">
                                         <c:choose>
                                             <c:when test="${not empty coverFilename}">
                                                 <div class="engine-image"
@@ -412,11 +434,17 @@
                                             </c:otherwise>
                                         </c:choose>
                                         <div class="engine-kanban-card__body">
-                                            <div class="engine-code">
-                                                ${engine.engineCode} - <c:out value="${customerNames[engine.customerId]}" default="—" />
+                                            <div class="record-card__eyebrow"><c:out value="${engine.engineRef}" /></div>
+                                            <div class="engine-code record-card__title"><c:out value="${engine.engineCode}" /></div>
+                                            <div class="engine-client record-card__subtitle"><c:out value="${customerNames[engine.customerId]}" default="Cliente non disponibile" /></div>
+                                            <div class="record-card__audit record-card__audit--compact">
+                                                <span class="record-card__audit-dot" aria-hidden="true"></span>
+                                                <span class="record-card__audit-copy">
+                                                    <span>Inserito da <strong><c:out value="${engine.createdBy}" default="Utente non disponibile" /></strong></span>
+                                                    <span><c:out value="${engine.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                                                </span>
                                             </div>
-                                            <div class="engine-client">${engine.engineRef}</div>
-                                            <div class="mt-2">
+                                            <div class="record-card__actions">
                                                 <span class="badge-status status-ready">Pronto</span>
                                             </div>
                                         </div>

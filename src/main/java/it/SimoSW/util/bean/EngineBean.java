@@ -11,6 +11,7 @@ public class EngineBean {
     private String intakeDate;
     private String deliveryDate;
     private String notes;
+    private String createdBy;
 
     public EngineBean() {}
 
@@ -50,6 +51,10 @@ public class EngineBean {
         return notes;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
     /* =========================
        Setter
        ========================= */
@@ -84,5 +89,9 @@ public class EngineBean {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

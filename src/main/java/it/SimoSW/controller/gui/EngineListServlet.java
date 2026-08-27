@@ -167,7 +167,9 @@ public class EngineListServlet extends HttpServlet {
                 safeValue(customerName),
                 safeValue(engine.getStatus().name()),
                 statusLabel,
-                safeValue(engine.getNotes())
+                safeValue(engine.getNotes()),
+                safeValue(engine.getCreatedBy()),
+                safeValue(engine.getCreatedAtLabel())
         );
 
         return normalizeText(haystack).contains(normalizedKeyword);

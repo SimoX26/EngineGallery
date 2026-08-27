@@ -2891,3 +2891,451 @@ body.modal-open {
         min-width: 720px;
     }
 }
+
+/* =====================
+   RECORD CARDS
+   Layout condiviso: motori, magazzino e prove idrauliche
+   ===================== */
+.record-gallery-grid,
+#engineGalleryGrid.record-gallery-grid,
+#hydraulicGalleryGrid.record-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: clamp(0.9rem, 2vw, 1.35rem);
+    width: 100%;
+}
+
+.record-gallery-grid > *,
+#engineGalleryGrid.record-gallery-grid > * {
+    min-width: 0;
+    width: auto;
+    max-width: none;
+    padding: 0;
+}
+
+.record-gallery-card {
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.record-gallery-card:hover,
+.customer-card-link:focus-visible .record-gallery-card,
+.engine-card-link:focus-visible .record-gallery-card {
+    transform: translateY(-2px);
+    border-color: rgba(79, 143, 179, 0.55);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.record-gallery-card .engine-card-link-main {
+    height: auto;
+}
+
+.record-card__body {
+    min-width: 0;
+    padding: clamp(0.9rem, 2.2vw, 1.15rem);
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.38rem;
+    text-align: left;
+}
+
+.record-card__eyebrow {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 750;
+    line-height: 1.25;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.record-card__title,
+.engine-code.record-card__title,
+.engine-list-row__main.record-card__title,
+.engine-kanban-card__body .engine-code.record-card__title {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 1.06rem;
+    font-weight: 750;
+    line-height: 1.28;
+    text-align: left;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    display: block;
+    -webkit-line-clamp: unset;
+}
+
+.record-card__subtitle,
+.engine-client.record-card__subtitle,
+.engine-list-row__sub.record-card__subtitle,
+.engine-kanban-card__body .engine-client.record-card__subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 550;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+}
+
+.record-card__facts {
+    min-width: 0;
+    margin-top: 0.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.55rem;
+}
+
+.record-card__fact {
+    min-width: 0;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.3rem 0.55rem;
+    color: var(--text-muted);
+    background: var(--bg-main);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.record-card__fact strong {
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.record-card__summary {
+    margin-top: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.record-card__footer {
+    min-width: 0;
+    margin-top: auto;
+    padding: 0.8rem clamp(0.9rem, 2.2vw, 1.15rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem;
+    border-top: 1px solid var(--border-soft);
+    background: rgba(107, 114, 128, 0.035);
+}
+
+.record-card__audit {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    text-align: left;
+}
+
+.record-card__audit-dot {
+    width: 0.48rem;
+    height: 0.48rem;
+    margin-top: 0.24rem;
+    flex: 0 0 0.48rem;
+    border-radius: 50%;
+    background: var(--action-share-bg);
+    box-shadow: 0 0 0 3px rgba(79, 143, 179, 0.14);
+}
+
+.record-card__audit-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.08rem;
+    overflow-wrap: anywhere;
+}
+
+.record-card__audit-copy strong {
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.record-card__actions {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+}
+
+.record-card__footer .badge-status,
+.record-list-card > .badge-status,
+.record-card__actions .badge-status {
+    max-width: 100%;
+    min-height: 1.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.7rem;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+}
+
+.record-card__visual {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.record-card__visual--warehouse {
+    color: var(--status-waiting-text);
+    background:
+        radial-gradient(circle at 80% 15%, rgba(79, 143, 179, 0.28), transparent 34%),
+        linear-gradient(145deg, var(--status-waiting-bg), var(--bg-main));
+}
+
+.record-card__visual--warehouse span {
+    width: 3.4rem;
+    height: 3.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--status-waiting-border);
+    border-radius: 1rem;
+    background: var(--bg-card);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    box-shadow: var(--shadow-soft);
+}
+
+.record-list-card,
+.engine-list-row.record-list-card {
+    min-width: 0;
+    min-height: 108px;
+    padding: clamp(0.65rem, 1.8vw, 0.9rem);
+    display: grid;
+    grid-template-columns: clamp(68px, 8vw, 86px) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1.1rem);
+    border-radius: var(--radius-lg);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.record-list-card:hover,
+.record-list-card:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(79, 143, 179, 0.55);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.11);
+}
+
+.record-list-card__media,
+.record-list-card .record-list-card__media {
+    width: clamp(68px, 8vw, 86px);
+    height: clamp(68px, 8vw, 86px);
+    min-width: 0;
+    min-height: 0;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: 1 / 1;
+    align-self: start;
+    border-radius: var(--radius-md);
+}
+
+.record-list-card__content,
+.engine-list-row__body.record-list-card__content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.24rem;
+}
+
+.record-list-card .record-card__facts {
+    margin-top: 0.18rem;
+}
+
+.record-list-card .record-card__audit {
+    margin-top: 0.35rem;
+}
+
+.record-list-card--actionable {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.record-list-card__main {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: clamp(68px, 8vw, 86px) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1.1rem);
+    color: inherit;
+    text-decoration: none;
+}
+
+.record-list-card__main:hover,
+.record-list-card__main:focus,
+.record-list-card__main:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+.engine-kanban-card {
+    min-height: 0;
+    max-height: none;
+    padding: 0.7rem;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: start;
+    gap: 0.7rem;
+    border-radius: var(--radius-lg);
+}
+
+.engine-kanban-card .engine-image,
+.engine-kanban-card .engine-image-empty {
+    width: 64px;
+    height: 64px;
+    min-width: 0;
+    min-height: 0;
+    max-width: none;
+    max-height: none;
+    border-radius: var(--radius-md);
+}
+
+.engine-kanban-card__body {
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 0.28rem;
+}
+
+.engine-kanban-card .record-card__audit--compact {
+    margin-top: 0.25rem;
+    font-size: 0.7rem;
+}
+
+.engine-kanban-card .record-card__actions {
+    margin-top: 0.35rem;
+    justify-content: flex-start;
+}
+
+.hydraulic-video-wrap {
+    border-bottom: 1px solid var(--border-soft);
+}
+
+@media (max-width: 768px) {
+    .record-gallery-grid,
+    #engineGalleryGrid.record-gallery-grid,
+    #hydraulicGalleryGrid.record-gallery-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+    }
+
+    .record-list-card,
+    .engine-list-row.record-list-card {
+        min-height: 0;
+        grid-template-columns: 62px minmax(0, 1fr);
+        align-items: start;
+        gap: 0.7rem;
+        padding: 0.7rem;
+    }
+
+    .record-list-card__media,
+    .record-list-card .record-list-card__media {
+        width: 62px;
+        height: 62px;
+    }
+
+    .record-list-card > .badge-status {
+        grid-column: 2;
+        grid-row: auto;
+        justify-self: start;
+        margin-top: 0.15rem;
+    }
+
+    .record-list-card--actionable {
+        grid-template-columns: 1fr;
+    }
+
+    .record-list-card__main {
+        grid-template-columns: 62px minmax(0, 1fr);
+        align-items: start;
+        gap: 0.7rem;
+    }
+
+    .record-list-card--actionable > .badge-status {
+        grid-column: 1;
+        margin-left: calc(62px + 0.7rem);
+    }
+
+    .record-card__footer {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .record-card__actions,
+    .record-card__footer > .badge-status {
+        justify-content: flex-start;
+        justify-self: start;
+    }
+
+    .engine-kanban-col {
+        max-height: calc(100dvh - 190px);
+    }
+}
+
+@media (max-width: 380px) {
+    .record-list-card,
+    .engine-list-row.record-list-card {
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 0.6rem;
+    }
+
+    .record-list-card__media,
+    .record-list-card .record-list-card__media {
+        width: 52px;
+        height: 52px;
+    }
+
+    .record-list-card__main {
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 0.6rem;
+    }
+
+    .record-list-card--actionable > .badge-status {
+        margin-left: calc(52px + 0.6rem);
+    }
+
+    .record-card__fact {
+        width: 100%;
+        border-radius: var(--radius-md);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .record-gallery-card,
+    .record-list-card {
+        transition: none;
+    }
+}

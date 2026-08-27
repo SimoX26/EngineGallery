@@ -18,8 +18,8 @@ public class DatabaseEngineDAO implements EngineDAO {
 
     private static final String INSERT_SQL = """
         INSERT INTO engines
-        (engine_ref, engine_code, customer_id, status, intake_date, delivery_date, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (engine_ref, engine_code, customer_id, status, intake_date, delivery_date, notes, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """;
 
     private static final String UPDATE_SQL = """
@@ -59,6 +59,7 @@ public class DatabaseEngineDAO implements EngineDAO {
            OR e.notes LIKE ?
            OR c.name LIKE ?
            OR c.company_name LIKE ?
+           OR e.created_by LIKE ?
     """;
 
     private static final String COUNT_BY_STATUS_SQL =
@@ -148,6 +149,7 @@ public class DatabaseEngineDAO implements EngineDAO {
             }
 
             stmt.setString(7, engine.getNotes());
+            stmt.setString(8, engine.getCreatedBy());
 
             stmt.executeUpdate();
 
@@ -256,7 +258,7 @@ public class DatabaseEngineDAO implements EngineDAO {
     public List<Engine> search(String keyword) {
         String k = "%" + keyword + "%";
         return findList(SEARCH_SQL, ps -> {
-            for (int i = 1; i <= 5; i++) {
+            for (int i = 1; i <= 6; i++) {
                 ps.setString(i, k);
             }
         });
@@ -398,6 +400,7 @@ public class DatabaseEngineDAO implements EngineDAO {
     private Engine mapRow(ResultSet rs) throws SQLException {
         Date delivery = rs.getDate("delivery_date");
         LocalDate deliveryDate = (delivery != null) ? delivery.toLocalDate() : null;
+        Timestamp createdAt = rs.getTimestamp("created_at");
 
         return new Engine(
                 rs.getLong("id"),
@@ -407,7 +410,9 @@ public class DatabaseEngineDAO implements EngineDAO {
                 rs.getDate("intake_date").toLocalDate(),
                 EngineStatus.valueOf(rs.getString("status")),
                 deliveryDate,
-                rs.getString("notes")
+                rs.getString("notes"),
+                createdAt != null ? createdAt.toLocalDateTime() : null,
+                rs.getString("created_by")
         );
     }
 

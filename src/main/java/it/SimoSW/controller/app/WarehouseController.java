@@ -33,7 +33,8 @@ public class WarehouseController {
                            String sku,
                            Integer quantity,
                            String location,
-                           String notes) {
+                           String notes,
+                           String createdBy) {
 
         String normalizedName = normalizeRequired(name, "Nome articolo obbligatorio");
         int normalizedQuantity = normalizeQuantity(quantity);
@@ -43,7 +44,8 @@ public class WarehouseController {
                 normalizeOptional(sku),
                 normalizedQuantity,
                 normalizeOptional(location),
-                normalizeOptional(notes)
+                normalizeOptional(notes),
+                normalizeOptional(createdBy)
         );
 
         return warehouseItemDAO.save(item);

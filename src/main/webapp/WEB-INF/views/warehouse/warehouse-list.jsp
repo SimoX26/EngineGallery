@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=14">
 </head>
 
 <body>
@@ -114,19 +114,24 @@
     <div id="warehouseListView" class="engine-list-view d-none">
         <c:forEach var="item" items="${items}">
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
-               class="engine-list-row warehouse-list-row-item"
-               data-search="${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)}">
-                <div class="engine-image engine-image-empty d-flex align-items-center justify-content-center">
+               class="engine-list-row record-list-card warehouse-list-row-item"
+               data-search="${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
+                <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
                     <span class="engine-image-empty-label">MAG</span>
                 </div>
-                <div class="engine-list-row__body">
-                    <div class="engine-list-row__main">${item.name}</div>
-                    <div class="engine-list-row__sub">Codice: <c:out value="${item.sku}" default="—" /></div>
-                    <div class="engine-list-row__meta">
-                        <span class="engine-list-row__intake-label">Qta:</span>
-                        <span>${item.quantity}</span>
-                        <span class="mx-1">•</span>
-                        <span><c:out value="${item.location}" default="—" /></span>
+                <div class="engine-list-row__body record-list-card__content">
+                    <div class="record-card__eyebrow">Codice <c:out value="${item.sku}" default="non disponibile" /></div>
+                    <div class="engine-list-row__main record-card__title"><c:out value="${item.name}" /></div>
+                    <div class="record-card__facts">
+                        <span class="record-card__fact"><strong>Quantità</strong> <c:out value="${item.quantity}" /></span>
+                        <span class="record-card__fact"><strong>Ubicazione</strong> <c:out value="${item.location}" default="Non disponibile" /></span>
+                    </div>
+                    <div class="record-card__audit">
+                        <span class="record-card__audit-dot" aria-hidden="true"></span>
+                        <span class="record-card__audit-copy">
+                            <span>Inserito da <strong><c:out value="${item.createdBy}" default="Utente non disponibile" /></strong></span>
+                            <span><c:out value="${item.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                        </span>
                     </div>
                 </div>
                 <span class="badge-status ${item.quantity <= 0 ? 'status-stoccato' : 'status-ready'}">
@@ -136,31 +141,36 @@
         </c:forEach>
     </div>
 
-    <div class="customer-list" id="warehouseGalleryView">
+    <div class="record-gallery-grid" id="warehouseGalleryView">
         <c:forEach var="item" items="${items}">
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="customer-card-link warehouse-card-item"
-               data-search="${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)}">
-                <div class="card-base customer-card">
-                    <div class="customer-row">
-                        <div class="customer-field">
-                            <div class="customer-main">${item.name}</div>
-                            <div class="customer-meta">
-                                Codice: <c:out value="${item.sku}" default="—" />
-                            </div>
-                        </div>
-
-                        <div class="customer-field">
-                            <div class="customer-meta">Disponibilita</div>
-                            <div>${item.quantity}</div>
-                        </div>
-
-                        <div class="customer-field">
-                            <div class="customer-meta">Ubicazione</div>
-                            <div><c:out value="${item.location}" default="—" /></div>
+               data-search="${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
+                <article class="record-gallery-card">
+                    <div class="record-card__visual record-card__visual--warehouse" aria-hidden="true">
+                        <span>MAG</span>
+                    </div>
+                    <div class="record-card__body">
+                        <div class="record-card__eyebrow">Codice <c:out value="${item.sku}" default="non disponibile" /></div>
+                        <div class="record-card__title"><c:out value="${item.name}" /></div>
+                        <div class="record-card__facts">
+                            <span class="record-card__fact"><strong>Quantità</strong> <c:out value="${item.quantity}" /></span>
+                            <span class="record-card__fact"><strong>Ubicazione</strong> <c:out value="${item.location}" default="Non disponibile" /></span>
                         </div>
                     </div>
-                </div>
+                    <div class="record-card__footer">
+                        <div class="record-card__audit">
+                            <span class="record-card__audit-dot" aria-hidden="true"></span>
+                            <span class="record-card__audit-copy">
+                                <span>Inserito da <strong><c:out value="${item.createdBy}" default="Utente non disponibile" /></strong></span>
+                                <span><c:out value="${item.createdAtLabel}" default="Data e ora non disponibili" /></span>
+                            </span>
+                        </div>
+                        <span class="badge-status ${item.quantity <= 0 ? 'status-stoccato' : 'status-ready'}">
+                            ${item.quantity <= 0 ? 'Esaurito' : 'Disponibile'}
+                        </span>
+                    </div>
+                </article>
             </a>
         </c:forEach>
     </div>

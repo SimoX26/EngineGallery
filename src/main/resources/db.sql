@@ -53,6 +53,8 @@ CREATE TABLE engines (
     intake_date DATE NOT NULL,
     delivery_date DATE DEFAULT NULL,
     notes TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(100),
 
     CONSTRAINT fk_engine_customer
         FOREIGN KEY (customer_id)
@@ -69,7 +71,8 @@ CREATE TABLE hydraulic_tests (
     video_url VARCHAR(500) NOT NULL,
     test_date DATE NOT NULL,
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(100)
 );
 
 CREATE TABLE images (
@@ -96,7 +99,9 @@ CREATE TABLE warehouse_items (
     sku VARCHAR(80),
     quantity INT NOT NULL DEFAULT 0,
     location VARCHAR(120),
-    notes TEXT
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(100)
 );
 
 CREATE TABLE catalog_items (

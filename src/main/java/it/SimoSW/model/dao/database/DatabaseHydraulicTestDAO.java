@@ -21,12 +21,12 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
 
     private static final String INSERT_SQL = """
         INSERT INTO hydraulic_tests
-        (customer_name, engine_code, video_url, test_date, notes)
-        VALUES (?, ?, ?, ?, ?)
+        (customer_name, engine_code, video_url, test_date, notes, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
     """;
 
     private static final String FIND_ALL_SQL = """
-        SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at
+        SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at, created_by
         FROM hydraulic_tests
         ORDER BY test_date DESC, id DESC
     """;
@@ -40,17 +40,18 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
     private static final String DELETE_SQL = "DELETE FROM hydraulic_tests WHERE id = ?";
 
     private static final String FIND_BY_ID_SQL = """
-        SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at
+        SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at, created_by
         FROM hydraulic_tests
         WHERE id = ?
     """;
 
     private static final String SEARCH_SQL = """
-        SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at
+        SELECT id, customer_name, engine_code, video_url, test_date, notes, created_at, created_by
         FROM hydraulic_tests
         WHERE customer_name LIKE ?
            OR engine_code LIKE ?
            OR notes LIKE ?
+           OR created_by LIKE ?
         ORDER BY test_date DESC, id DESC
     """;
     private static final String COUNT_BY_TEST_DATE_BETWEEN_SQL = """
@@ -69,6 +70,7 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
             stmt.setString(3, hydraulicTest.getVideoUrl());
             stmt.setDate(4, Date.valueOf(hydraulicTest.getTestDate()));
             stmt.setString(5, hydraulicTest.getNotes());
+            stmt.setString(6, hydraulicTest.getCreatedBy());
 
             stmt.executeUpdate();
 
@@ -82,7 +84,8 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
                             hydraulicTest.getVideoUrl(),
                             hydraulicTest.getTestDate(),
                             hydraulicTest.getNotes(),
-                            null
+                            null,
+                            hydraulicTest.getCreatedBy()
                     );
                 }
             }
@@ -192,6 +195,7 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
             stmt.setString(1, wildcardKeyword);
             stmt.setString(2, wildcardKeyword);
             stmt.setString(3, wildcardKeyword);
+            stmt.setString(4, wildcardKeyword);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -227,7 +231,8 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
                 rs.getString("video_url"),
                 testDateSql != null ? testDateSql.toLocalDate() : null,
                 rs.getString("notes"),
-                createdAtSql != null ? createdAtSql.toLocalDateTime() : null
+                createdAtSql != null ? createdAtSql.toLocalDateTime() : null,
+                rs.getString("created_by")
         );
     }
 
