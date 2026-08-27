@@ -35,6 +35,9 @@
                        id="catalogKeywordSearch"
                        class="form-control"
                        placeholder="cerca...">
+                <div class="mb-3">
+                    <a href="/catalog/add" class="btn btn-primary">Aggiungi</a>
+                </div>
             </div>
         </div>
 
