@@ -32,6 +32,7 @@ Opzioni:
 Note:
   - Lo script cerca il WAR in target/ e usa quello più recente.
   - Carica il WAR in webapps e gli artefatti operativi in una directory separata.
+  - Gli artefatti operativi vengono ricaricati solo se il loro contenuto è cambiato.
   - Non esegue automaticamente provisioning DB, migrazioni SQL o restart servizi.
 HELP
 }
@@ -66,6 +67,40 @@ collect_ops_files() {
       OPS_FILES+=("sql:${migration_file}")
     done < <(find "src/main/resources/migrations" -type f -name "*.sql" -print0 | sort -z)
   fi
+}
+
+ops_relative_path() {
+  local kind="$1"
+  local local_path="$2"
+
+  case "$kind" in
+    admin)
+      printf 'admin/%s\n' "$(basename "$local_path")"
+      ;;
+    sql)
+      if [[ "$local_path" == src/main/resources/migrations/* ]]; then
+        printf 'sql/%s\n' "${local_path#src/main/resources/}"
+      else
+        printf 'sql/%s\n' "$(basename "$local_path")"
+      fi
+      ;;
+    *)
+      echo "Errore: tipo artefatto non supportato: $kind" >&2
+      return 1
+      ;;
+  esac
+}
+
+build_ops_manifest() {
+  local entry kind local_path relative_path digest
+
+  for entry in "${OPS_FILES[@]}"; do
+    kind="${entry%%:*}"
+    local_path="${entry#*:}"
+    relative_path="$(ops_relative_path "$kind" "$local_path")"
+    digest="$(sha256sum "$local_path" | awk '{print $1}')"
+    printf '%s  %s\n' "$digest" "$relative_path"
+  done | sort
 }
 
 resolve_ipv4() {
@@ -198,6 +233,18 @@ REMOTE_WAR_TMP="${REMOTE_PATH%/}/.${WAR_NAME}.uploading.${TIMESTAMP}.$$"
 REMOTE_WAR_TMP_SHELL="${REMOTE_WAR_TMP/#\~/\$HOME}"
 REMOTE_WAR_BACKUP="${OPS_BACKUP_DIR%/}/webapps/${WAR_NAME}.${TIMESTAMP}.bak"
 REMOTE_WAR_BACKUP_SHELL="${REMOTE_WAR_BACKUP/#\~/\$HOME}"
+REMOTE_OPS_MANIFEST="${OPS_BASE_PATH%/}/.manifest.sha256"
+REMOTE_OPS_MANIFEST_SHELL="${REMOTE_OPS_MANIFEST/#\~/\$HOME}"
+OPS_MANIFEST_TMP=""
+OPS_UPDATED="false"
+
+cleanup_ops_manifest() {
+  if [[ -n "$OPS_MANIFEST_TMP" && -f "$OPS_MANIFEST_TMP" ]]; then
+    rm -f "$OPS_MANIFEST_TMP"
+  fi
+}
+
+trap cleanup_ops_manifest EXIT
 
 echo ">> Preparo cartelle remote applicative e operative"
 sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \
@@ -226,49 +273,72 @@ sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "
 "
 
 if [[ "${#OPS_FILES[@]}" -gt 0 ]]; then
-  echo ">> Upload artefatti operativi in: ${REMOTE_USER}@${REMOTE_HOST}:${OPS_BASE_PATH}"
-  for entry in "${OPS_FILES[@]}"; do
-    kind="${entry%%:*}"
-    local_path="${entry#*:}"
+  if ! command -v sha256sum >/dev/null 2>&1; then
+    echo "Errore: 'sha256sum' non trovato, impossibile verificare gli artefatti operativi." >&2
+    exit 1
+  fi
 
-    case "$kind" in
-      admin)
-        remote_dir="${OPS_ADMIN_DIR}"
-        remote_dir_shell="${OPS_ADMIN_DIR_SHELL}"
-        remote_mode="0750"
-        ;;
-      sql)
-        if [[ "$local_path" == src/main/resources/migrations/* ]]; then
-          rel_path="${local_path#src/main/resources/}"
-          remote_dir="${OPS_BASE_PATH%/}/sql/$(dirname "$rel_path")"
-          remote_dir_shell="${OPS_BASE_PATH_SHELL%/}/sql/$(dirname "$rel_path")"
-        else
-          remote_dir="${OPS_SQL_DIR}"
-          remote_dir_shell="${OPS_SQL_DIR_SHELL}"
-        fi
-        remote_mode="0640"
-        ;;
-      *)
-        echo "Errore: tipo artefatto non supportato: $kind" >&2
-        exit 1
-        ;;
-    esac
+  LOCAL_OPS_MANIFEST="$(build_ops_manifest)"
+  REMOTE_OPS_MANIFEST_CONTENT="$(sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "if [[ -f ${REMOTE_OPS_MANIFEST_SHELL} ]]; then cat ${REMOTE_OPS_MANIFEST_SHELL}; fi")"
 
-    remote_file="${remote_dir%/}/$(basename "$local_path")"
-    remote_file_shell="${remote_file/#\~/\$HOME}"
+  if [[ "$LOCAL_OPS_MANIFEST" == "$REMOTE_OPS_MANIFEST_CONTENT" ]]; then
+    echo ">> Artefatti operativi invariati: salto il caricamento di ${OPS_BASE_PATH}"
+  else
+    OPS_UPDATED="true"
+    echo ">> Upload artefatti operativi in: ${REMOTE_USER}@${REMOTE_HOST}:${OPS_BASE_PATH}"
+    for entry in "${OPS_FILES[@]}"; do
+      kind="${entry%%:*}"
+      local_path="${entry#*:}"
 
-    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell} && chmod 0750 ${remote_dir_shell}"
-    sshpass -p "$PASSWORD" scp -P "$PORT" "$local_path" "${REMOTE_USER}@${REMOTE_HOST}:${remote_file}"
-    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod ${remote_mode} ${remote_file_shell}"
-  done
+      case "$kind" in
+        admin)
+          remote_dir="${OPS_ADMIN_DIR}"
+          remote_dir_shell="${OPS_ADMIN_DIR_SHELL}"
+          remote_mode="0750"
+          ;;
+        sql)
+          if [[ "$local_path" == src/main/resources/migrations/* ]]; then
+            rel_path="${local_path#src/main/resources/}"
+            remote_dir="${OPS_BASE_PATH%/}/sql/$(dirname "$rel_path")"
+            remote_dir_shell="${OPS_BASE_PATH_SHELL%/}/sql/$(dirname "$rel_path")"
+          else
+            remote_dir="${OPS_SQL_DIR}"
+            remote_dir_shell="${OPS_SQL_DIR_SHELL}"
+          fi
+          remote_mode="0640"
+          ;;
+        *)
+          echo "Errore: tipo artefatto non supportato: $kind" >&2
+          exit 1
+          ;;
+      esac
+
+      remote_file="${remote_dir%/}/$(basename "$local_path")"
+      remote_file_shell="${remote_file/#\~/\$HOME}"
+
+      sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell} && chmod 0750 ${remote_dir_shell}"
+      sshpass -p "$PASSWORD" scp -P "$PORT" "$local_path" "${REMOTE_USER}@${REMOTE_HOST}:${remote_file}"
+      sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod ${remote_mode} ${remote_file_shell}"
+    done
+
+    OPS_MANIFEST_TMP="$(mktemp)"
+    printf '%s\n' "$LOCAL_OPS_MANIFEST" > "$OPS_MANIFEST_TMP"
+    REMOTE_OPS_MANIFEST_TMP="${REMOTE_OPS_MANIFEST}.uploading.$$"
+    REMOTE_OPS_MANIFEST_TMP_SHELL="${REMOTE_OPS_MANIFEST_TMP/#\~/\$HOME}"
+    sshpass -p "$PASSWORD" scp -P "$PORT" "$OPS_MANIFEST_TMP" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_OPS_MANIFEST_TMP}"
+    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod 0640 ${REMOTE_OPS_MANIFEST_TMP_SHELL} && mv -f ${REMOTE_OPS_MANIFEST_TMP_SHELL} ${REMOTE_OPS_MANIFEST_SHELL}"
+  fi
 else
   echo ">> Nessun artefatto operativo addizionale trovato."
 fi
 
 echo ">> Artefatti caricati:"
 echo "   - WAR applicativo: ${REMOTE_WAR_TARGET}"
-echo "   - Script amministrativi: ${OPS_ADMIN_DIR}"
-echo "   - SQL e migrazioni: ${OPS_SQL_DIR}"
+if [[ "$OPS_UPDATED" == "true" ]]; then
+  echo "   - Script amministrativi e SQL: aggiornati in ${OPS_BASE_PATH}"
+else
+  echo "   - Script amministrativi e SQL: invariati in ${OPS_BASE_PATH}"
+fi
 echo "   - Backup WAR precedenti: ${OPS_BACKUP_DIR}/webapps"
 
 echo ">> Deploy completato con successo."
