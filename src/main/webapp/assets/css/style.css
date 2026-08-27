@@ -3397,3 +3397,41 @@ body.modal-open {
         transition: none;
     }
 }
+
+/* Pulsanti circolari dettaglio: palette condivisa con il dettaglio motore. */
+.detail-round-btn:not(.detail-round-btn--delete):not(.detail-round-btn--share) {
+    background: var(--primary);
+    border-color: rgba(148, 163, 184, 0.35);
+    color: #f8fafc;
+}
+
+.detail-round-btn:not(.detail-round-btn--delete):not(.detail-round-btn--share):hover,
+.detail-round-btn:not(.detail-round-btn--delete):not(.detail-round-btn--share):focus-visible {
+    background: #374151;
+    border-color: #e5e7eb;
+    color: #ffffff;
+}
+
+.detail-round-btn.detail-round-btn--delete {
+    background: var(--action-danger-bg);
+    border-color: var(--action-danger-border);
+    color: var(--action-danger-text);
+}
+
+.detail-round-btn.detail-round-btn--delete:hover,
+.detail-round-btn.detail-round-btn--delete:focus-visible {
+    background: var(--action-danger-hover);
+    border-color: var(--action-danger-border-hover);
+}
+
+.detail-round-btn.detail-round-btn--share {
+    background: var(--action-share-bg);
+    border-color: var(--action-share-border);
+    color: var(--action-share-text);
+}
+
+.detail-round-btn.detail-round-btn--share:hover,
+.detail-round-btn.detail-round-btn--share:focus-visible {
+    background: var(--action-share-hover);
+    border-color: var(--action-share-border-hover);
+}
