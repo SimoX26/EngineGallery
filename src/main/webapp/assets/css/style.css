@@ -2939,6 +2939,19 @@ body.modal-open {
     height: auto;
 }
 
+.engine-gallery-card .engine-client.record-card__subtitle,
+.engine-list-row .engine-list-row__sub.record-card__subtitle {
+    font-size: 1.06rem;
+}
+
+.engine-gallery-card .record-card__footer {
+    align-items: flex-start;
+}
+
+.engine-gallery-card .record-card__actions {
+    align-self: flex-start;
+}
+
 .record-card__body {
     min-width: 0;
     padding: clamp(0.9rem, 2.2vw, 1.15rem);
@@ -3188,7 +3201,7 @@ body.modal-open {
 }
 
 .record-list-card--actionable {
-    grid-template-columns: minmax(0, 1fr) minmax(0, max-content) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .record-list-card__main {
@@ -3239,7 +3252,7 @@ body.modal-open {
 }
 
 .record-list-card--actionable > .badge-status {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1;
 }
 
