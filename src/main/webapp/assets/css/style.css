@@ -2959,6 +2959,22 @@ body.modal-open {
     white-space: nowrap;
 }
 
+#hydraulicGalleryGrid .engine-client.record-card__subtitle {
+    font-size: 1.06rem;
+}
+
+#hydraulicGalleryGrid .record-card__footer,
+#warehouseGalleryView .record-gallery-card .record-card__footer {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: flex-start;
+}
+
+#hydraulicGalleryGrid .record-card__footer > .badge-status,
+#warehouseGalleryView .record-gallery-card .record-card__footer > .badge-status {
+    justify-self: end;
+    white-space: nowrap;
+}
+
 .engine-list-row .engine-list-row__main.record-card__title,
 .engine-list-row .engine-list-row__sub.record-card__subtitle {
     width: 100%;
