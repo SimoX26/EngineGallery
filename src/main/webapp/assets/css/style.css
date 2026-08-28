@@ -2945,11 +2945,26 @@ body.modal-open {
 }
 
 .engine-gallery-card .record-card__footer {
+    grid-template-columns: minmax(0, 1fr) max-content;
     align-items: flex-start;
 }
 
 .engine-gallery-card .record-card__actions {
     align-self: flex-start;
+    justify-self: end;
+    flex-wrap: nowrap;
+}
+
+.engine-gallery-card .record-card__actions .badge-status {
+    white-space: nowrap;
+}
+
+.engine-list-row .engine-list-row__main.record-card__title,
+.engine-list-row .engine-list-row__sub.record-card__subtitle {
+    width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
 }
 
 .record-card__body {
@@ -3358,6 +3373,12 @@ body.modal-open {
     .record-list-card--actionable > .badge-status {
         justify-self: stretch;
         white-space: nowrap;
+    }
+
+    .engine-list-row.record-list-card--actionable > .badge-status {
+        width: auto;
+        margin: 0.15rem 0 0;
+        justify-self: end;
     }
 
     .record-card__footer {
