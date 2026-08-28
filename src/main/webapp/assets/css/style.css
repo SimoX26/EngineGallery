@@ -2975,14 +2975,6 @@ body.modal-open {
     white-space: nowrap;
 }
 
-.engine-list-row .engine-list-row__main.record-card__title,
-.engine-list-row .engine-list-row__sub.record-card__subtitle {
-    width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    word-break: normal;
-}
-
 .record-card__body {
     min-width: 0;
     padding: clamp(0.9rem, 2.2vw, 1.15rem);
@@ -3287,6 +3279,22 @@ body.modal-open {
     grid-row: 1;
 }
 
+.engine-list-row.record-list-card--actionable {
+    grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.engine-list-row.record-list-card--actionable > .record-list-card__main {
+    grid-template-columns: clamp(68px, 8vw, 86px) minmax(180px, 1fr);
+}
+
+.engine-list-row.record-list-card--actionable .engine-list-row__main.record-card__title,
+.engine-list-row.record-list-card--actionable .engine-list-row__sub.record-card__subtitle {
+    width: 100%;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
 .engine-kanban-card {
     min-height: 0;
     max-height: none;
@@ -3395,6 +3403,10 @@ body.modal-open {
         width: auto;
         margin: 0.15rem 0 0;
         justify-self: end;
+    }
+
+    .engine-list-row.record-list-card--actionable > .record-list-card__main {
+        grid-template-columns: 62px minmax(0, 1fr);
     }
 
     .record-card__footer {
