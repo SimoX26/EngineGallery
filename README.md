@@ -87,6 +87,13 @@ L'interfaccia e composta da pagine server-rendered con navigazione chiara tra le
 Engine Gallery e realizzata come applicazione web Java basata su Servlet e JSP, con packaging Maven e interfaccia sviluppata con HTML, CSS, JavaScript, Bootstrap e JSTL.  
 Accanto all'applicazione web principale, il repository include un wrapper Android basato su WebView.
 
+## Documentazione tecnica
+
+- [Architettura e funzionamento](docs/ARCHITETTURA_E_FUNZIONAMENTO.md): componenti, flussi applicativi, dati, upload, configurazione e struttura del repository.
+- [Applicazione Android](android-app/README.md): configurazione e build del wrapper mobile.
+
+La documentazione descrive lo stato del codice sorgente e non sostituisce un penetration test dell'ambiente distribuito.
+
 ## Stato Del Progetto
 
 Dal repository emerge un'applicazione strutturata e in evoluzione, con piu aree funzionali gia implementate, una navigazione coerente tra le sezioni e una presenza sia web sia mobile.

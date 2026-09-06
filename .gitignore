@@ -38,3 +38,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Documentazione di sicurezza riservata (solo locale)
+/docs/RELAZIONE_SICUREZZA_SISTEMA.md
+/docs/VULNERABILITA_CRITICHE.md
