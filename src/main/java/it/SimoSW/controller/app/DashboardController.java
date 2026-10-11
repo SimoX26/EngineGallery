@@ -255,11 +255,14 @@ public class DashboardController {
                     engine,
                     transitionsByEngine.getOrDefault(engine.getEngineRef(), List.of())
             );
-            if (workingDays.isEmpty()) {
+            double processingDays = workingDays.orElseGet(() ->
+                    (double) ChronoUnit.DAYS.between(engine.getIntakeDate(), engine.getDeliveryDate())
+            );
+            if (processingDays < 0) {
                 continue;
             }
 
-            totalDays += workingDays.get();
+            totalDays += processingDays;
             countedEngines += 1;
         }
 

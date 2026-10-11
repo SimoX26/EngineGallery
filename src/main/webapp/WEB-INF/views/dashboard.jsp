@@ -56,7 +56,7 @@
                 </a>
             </div>
             <div class="col-6 col-lg-2">
-                <a href="<%= request.getContextPath() %>/engine/list?status=DELIVERED" class="kpi-card-link">
+                <a href="<%= request.getContextPath() %>/engine/archive" class="kpi-card-link">
                     <div class="kpi-card dashboard-kpi-card">
                         <div class="kpi-title">Consegnati mese</div>
                         <div class="kpi-value">${motoriConsegnatiMese}</div>

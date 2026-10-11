@@ -76,7 +76,7 @@ class DashboardControllerTest {
     }
 
     @Test
-    void engineNeverEnteredWorkInProgressDoesNotAffectAverage() {
+    void engineWithoutWorkInProgressHistoryUsesIntakeAndDeliveryDates() {
         DashboardController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00004", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 5))),
                 List.of(
@@ -85,7 +85,7 @@ class DashboardControllerTest {
                 )
         );
 
-        assertEquals(0, controller.getTempoMedioLavorazioneNelPeriodo(
+        assertEquals(4, controller.getTempoMedioLavorazioneNelPeriodo(
                 LocalDate.of(2026, 3, 1),
                 LocalDate.of(2026, 3, 31)
         ));
