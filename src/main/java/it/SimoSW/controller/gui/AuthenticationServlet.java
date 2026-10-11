@@ -4,6 +4,7 @@ import it.SimoSW.controller.app.AuthenticationController;
 import it.SimoSW.model.User;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.security.CookieSecurityUtil;
+import it.SimoSW.util.security.LoginRateLimiter;
 import it.SimoSW.util.security.RememberMeTokenUtil;
 
 import javax.servlet.ServletException;
@@ -16,8 +17,10 @@ import java.util.Optional;
 public class AuthenticationServlet extends HttpServlet {
 
     private AuthenticationController authenticationController;
+    private final LoginRateLimiter loginRateLimiter = new LoginRateLimiter();
     private static final String COOKIE_REMEMBER = "remember_user_id";
     private static final int COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+    private static final int HTTP_TOO_MANY_REQUESTS = 429;
 
     @Override
     public void init() {
@@ -61,9 +64,17 @@ public class AuthenticationServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
+        if (!loginRateLimiter.isAllowed(username)) {
+            response.setStatus(HTTP_TOO_MANY_REQUESTS);
+            request.setAttribute("error", "Troppi tentativi di accesso. Riprova tra qualche minuto.");
+            request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
+            return;
+        }
+
         Optional<User> user = authenticationController.login(username, password);
 
         if (user.isPresent()) {
+            loginRateLimiter.reset(username);
             HttpSession previousSession = request.getSession(false);
             if (previousSession != null) {
                 previousSession.invalidate();
@@ -82,6 +93,7 @@ public class AuthenticationServlet extends HttpServlet {
             );
             response.sendRedirect(request.getContextPath() + "/dashboard");
         } else {
+            loginRateLimiter.recordFailure(username);
             // Credenziali errate
             request.setAttribute("error", "Credenziali non valide");
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
