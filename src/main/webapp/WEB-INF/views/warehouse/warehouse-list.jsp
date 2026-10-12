@@ -26,21 +26,15 @@
     <div class="page-header-with-search">
         <div class="page-header d-flex align-items-center gap-2">
             <h1 class="mb-0">Magazzino</h1>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                        type="button"
-                        id="warehouseComponentFilter"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                    ${not empty selectedComponentType ? selectedComponentTypeLabel : 'Tipologia'}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="warehouseComponentFilter">
-                    <li><a class="dropdown-item ${empty selectedComponentType ? 'active' : ''}" href="<%= request.getContextPath() %>/warehouse/list">Tutte le tipologie</a></li>
-                    <c:forEach var="type" items="${componentTypes}">
-                        <li><a class="dropdown-item ${selectedComponentType == type.code ? 'active' : ''}" href="<%= request.getContextPath() %>/warehouse/list?componentType=${type.code}"><c:out value="${type.label}" /></a></li>
-                    </c:forEach>
-                </ul>
-            </div>
+            <select id="warehouseComponentFilter"
+                    class="form-select form-select-sm w-auto"
+                    aria-label="Filtra per tipologia componente"
+                    onchange="window.location.href = this.value">
+                <option value="<%= request.getContextPath() %>/warehouse/list" ${empty selectedComponentType ? 'selected' : ''}>Tutte le tipologie</option>
+                <c:forEach var="type" items="${componentTypes}">
+                    <option value="<%= request.getContextPath() %>/warehouse/list?componentType=${type.code}" ${selectedComponentType == type.code ? 'selected' : ''}><c:out value="${type.label}" /></option>
+                </c:forEach>
+            </select>
         </div>
 
         <div class="search-panel-compact">
