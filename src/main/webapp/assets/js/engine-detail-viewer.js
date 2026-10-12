@@ -6,7 +6,7 @@ const clickableImages = Array.from(document.querySelectorAll('.clickable-image')
 
 const SHARE_LOG_PREFIX = '[engine-share-v2]';
 let shareDelegationInitialized = false;
-const SHARE_MAX_SINGLE_FILE_BYTES = 8 * 1024 * 1024;
+const SHARE_MAX_SINGLE_FILE_BYTES = 100 * 1024 * 1024;
 const SHARE_MODE_CURRENT = 'current-image-only';
 const SHARE_MODE_ALL = 'all-motor-images';
 let activeLightboxIndex = 0;
@@ -195,17 +195,52 @@ function isFileShareSupported(files) {
     }
 }
 
+function downloadShareFiles(files) {
+    files.forEach((file, index) => {
+        window.setTimeout(() => {
+            const objectUrl = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = objectUrl;
+            link.download = file.name;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        }, index * 150);
+    });
+}
+
+function offerDesktopDownload(files) {
+    if (window.AndroidShareBridge || !files.length) {
+        return;
+    }
+    const shouldDownload = window.confirm(
+        'Il browser non supporta la condivisione di immagini come allegati. Vuoi scaricare le immagini per allegarle a Outlook o a un altro programma?'
+    );
+    if (shouldDownload) {
+        downloadShareFiles(files);
+    }
+}
+
 async function shareFilesOnly(files, errorMessage) {
     if (!files || files.length === 0) {
         showShareMessage(errorMessage);
         return;
     }
     if (!isFileShareSupported(files)) {
-        showShareMessage('Condivisione immagini non supportata su questo browser/dispositivo.');
+        offerDesktopDownload(files);
+        if (window.AndroidShareBridge) {
+            showShareMessage('Condivisione immagini non supportata su questo dispositivo.');
+        }
         return;
     }
     try {
-        await navigator.share({ files });
+        await navigator.share({
+            title: document.title,
+            text: 'Immagini condivise da Engine Gallery',
+            files
+        });
     } catch (error) {
         if (error && error.name === 'AbortError') {
             console.info(`${SHARE_LOG_PREFIX} condivisione annullata dall'utente`);
@@ -216,7 +251,10 @@ async function shareFilesOnly(files, errorMessage) {
             message: error?.message,
             stack: error?.stack
         });
-        showShareMessage(errorMessage);
+        offerDesktopDownload(files);
+        if (window.AndroidShareBridge) {
+            showShareMessage(errorMessage);
+        }
     }
 }
 
