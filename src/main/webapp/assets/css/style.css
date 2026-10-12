@@ -3409,6 +3409,19 @@ body.modal-open {
         grid-template-columns: 62px minmax(0, 1fr);
     }
 
+    .engine-list-row:not(.record-list-card) {
+        grid-template-columns: 62px minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .engine-list-row:not(.record-list-card) .badge-status {
+        grid-column: 2;
+        grid-row: auto;
+        justify-self: start;
+        margin-top: 0.15rem;
+        white-space: nowrap;
+    }
+
     .record-card__footer {
         grid-template-columns: 1fr;
         align-items: start;
@@ -3466,9 +3479,41 @@ body.modal-open {
 }
 
 @media (min-width: 992px) {
-    .engine-list-view {
-        max-width: 980px;
+    #engineListView.engine-list-view,
+    #readyListView.engine-list-view {
+        max-width: 860px;
         margin-inline: auto;
+    }
+}
+
+/* Lista motori principale: su mobile la card usa due righe indipendenti.
+   I dati restano accanto alla miniatura, mentre lo stato diventa un'azione
+   larga e leggibile sotto la scheda. */
+@media (max-width: 768px) {
+    #engineListView .engine-list-row.record-list-card--actionable {
+        display: block;
+        padding: 0.8rem;
+    }
+
+    #engineListView .engine-list-row.record-list-card--actionable > .record-list-card__main {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 0.8rem;
+        align-items: center;
+    }
+
+    #engineListView .engine-list-row.record-list-card--actionable .record-list-card__media {
+        width: 72px;
+        height: 72px;
+    }
+
+    #engineListView .engine-list-row.record-list-card--actionable > .badge-status {
+        display: inline-flex;
+        width: 100%;
+        min-height: 2.35rem;
+        margin: 0.8rem 0 0;
+        justify-content: center;
+        white-space: nowrap;
     }
 }
 
