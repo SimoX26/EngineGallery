@@ -19,6 +19,7 @@ public class ApplicationInitializer {
     private final HydraulicTestController hydraulicTestController;
     private final UserActivityLogController userActivityLogController;
     private final CatalogController catalogController;
+    private final AndroidPushService androidPushService;
 
     private final EngineRefGenerator engineRefGenerator;
 
@@ -34,12 +35,14 @@ public class ApplicationInitializer {
         HydraulicTestDAO hydraulicTestDAO = new DatabaseHydraulicTestDAO();
         UserActivityLogDAO userActivityLogDAO = new DatabaseUserActivityLogDAO();
         CatalogItemDAO catalogItemDAO = new DatabaseCatalogItemDAO();
+        androidPushService = new AndroidPushService(new DatabaseAndroidPushTokenDAO());
 
         engineRefGenerator = new EngineRefGenerator(engineDAO);
 
 
         /* ===== Controller ===== */
-        this.engineController = new EngineController(engineDAO, imageDAO, customerDAO, engineRefGenerator);
+        this.engineController = new EngineController(engineDAO, imageDAO, customerDAO,
+                engineRefGenerator, androidPushService);
 
         this.customerController = new CustomerController(customerDAO);
 
@@ -93,4 +96,6 @@ public class ApplicationInitializer {
     public CatalogController getCatalogController() {
         return catalogController;
     }
+
+    public AndroidPushService getAndroidPushService() { return androidPushService; }
 }

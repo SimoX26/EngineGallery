@@ -22,12 +22,19 @@ public class EngineController {
     private final CustomerDAO customerDAO;
 
     private final EngineRefGenerator engineRefGenerator;
+    private final DeliveredEngineNotifier deliveredEngineNotifier;
 
     public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, CustomerDAO customerDAO, EngineRefGenerator engineRefGenerator) {
+        this(engineDAO, imageDAO, customerDAO, engineRefGenerator, engineRef -> {});
+    }
+
+    public EngineController(EngineDAO engineDAO, ImageDAO imageDAO, CustomerDAO customerDAO,
+                            EngineRefGenerator engineRefGenerator, DeliveredEngineNotifier deliveredEngineNotifier) {
         this.engineDAO = engineDAO;
         this.imageDAO = imageDAO;
         this.customerDAO = customerDAO;
         this.engineRefGenerator = engineRefGenerator;
+        this.deliveredEngineNotifier = deliveredEngineNotifier;
     }
 
     /* =========================
@@ -263,7 +270,11 @@ public class EngineController {
             engine.deliver(deliveryDate);
         }
 
-        return engineDAO.update(engine);
+        Engine updated = engineDAO.update(engine);
+        if (existing.getStatus() != EngineStatus.DELIVERED && status == EngineStatus.DELIVERED) {
+            deliveredEngineNotifier.notifyDelivered(updated.getEngineRef());
+        }
+        return updated;
     }
 
 

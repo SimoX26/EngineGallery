@@ -33,6 +33,10 @@ public class ApplicationContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        ApplicationInitializer initializer = (ApplicationInitializer) sce.getServletContext().getAttribute("appInitializer");
+        if (initializer != null) {
+            initializer.getAndroidPushService().close();
+        }
         LOGGER.info("[EngineGallery] Application shutdown completed");
     }
 }

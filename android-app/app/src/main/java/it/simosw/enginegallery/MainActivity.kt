@@ -1,6 +1,10 @@
 package it.simosw.enginegallery
 
 import android.annotation.SuppressLint
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.PackageManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
@@ -24,6 +28,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -35,6 +40,8 @@ import java.util.Base64
 import java.util.concurrent.Executors
 import android.net.http.SslError
 import org.json.JSONArray
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -43,12 +50,20 @@ class MainActivity : AppCompatActivity() {
         private const val PRIMARY_HOST = "rettificamotorilacroce.it"
         private const val WWW_HOST = "www.rettificamotorilacroce.it"
         private const val LEGACY_IP_HOST = "82.165.20.124"
+        const val EXTRA_ENGINE_REF = "engineRef"
     }
 
     private lateinit var webView: WebView
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val ioExecutor = Executors.newSingleThreadExecutor()
+    private var notificationPermissionRequested = false
+    private var pendingPushCsrf: String? = null
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) registerPushToken(pendingPushCsrf)
+            pendingPushCsrf = null
+        }
 
     private val fileChooserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -92,8 +107,12 @@ class MainActivity : AppCompatActivity() {
         applySystemInsets()
         setupWebView()
         setupNavigation()
+        createNotificationChannel()
 
-        if (savedInstanceState != null) {
+        val notificationUrl = notificationEngineUrl(intent)
+        if (notificationUrl != null) {
+            webView.loadUrl(notificationUrl)
+        } else if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState)
         } else {
             val startupUrl = BuildConfig.ENGINE_GALLERY_BASE_URL
@@ -112,6 +131,58 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         webView.saveState(outState)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        notificationEngineUrl(intent)?.let(webView::loadUrl)
+    }
+
+    private fun notificationEngineUrl(intent: Intent?): String? {
+        val engineRef = intent?.getStringExtra(EXTRA_ENGINE_REF) ?: return null
+        if (!engineRef.matches(Regex("RML-[0-9]{4}-[0-9]{5}"))) return null
+        return BuildConfig.ENGINE_GALLERY_BASE_URL.trimEnd('/') + "/engine/detail?ref=$engineRef"
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getSystemService(NotificationManager::class.java).createNotificationChannel(
+                NotificationChannel("delivered_engines", "Motori consegnati", NotificationManager.IMPORTANCE_DEFAULT)
+            )
+        }
+    }
+
+    private fun maybeRegisterNotifications(url: String?) {
+        val appHost = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL).host
+        val pageUri = Uri.parse(url)
+        if (pageUri.scheme != "https" || pageUri.host != appHost || FirebaseApp.getApps(this).isEmpty()) return
+        AndroidPushRegistration.getAdminCsrf { csrf ->
+            if (csrf == null) return@getAdminCsrf
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED) {
+                    if (!notificationPermissionRequested) {
+                        notificationPermissionRequested = true
+                        pendingPushCsrf = csrf
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                    return@runOnUiThread
+                }
+                registerPushToken(csrf)
+            }
+        }
+    }
+
+    private fun registerPushToken(csrf: String?) {
+        if (csrf == null) return
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            AndroidPushRegistration.register(token, csrf)
+        }.addOnFailureListener { ex ->
+            Log.w(TAG, "Token notifiche Android non disponibile", ex)
+        }
     }
 
     private fun applySystemInsets() {
@@ -203,6 +274,7 @@ class MainActivity : AppCompatActivity() {
                 swipeRefresh.isRefreshing = false
                 Log.i(TAG, "Page finished: $url")
                 installShareBridgeScript()
+                maybeRegisterNotifications(url)
             }
 
             override fun onReceivedError(

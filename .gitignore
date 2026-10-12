@@ -1,5 +1,6 @@
 target/
 backups/
+android-app/app/google-services.json
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

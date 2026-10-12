@@ -5,6 +5,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 val engineGalleryBaseUrl = (project.findProperty("ENGINE_GALLERY_BASE_URL") as String?)
     ?: "https://rettificamotorilacroce.it"
 
@@ -57,6 +61,7 @@ android.applicationVariants.configureEach {
 }
 
 dependencies {
+    implementation("com.google.firebase:firebase-messaging:24.1.2")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")

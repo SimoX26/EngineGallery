@@ -42,14 +42,7 @@
             <div class="col-12 col-lg-6">
                 <div class="card-base">
                     <h5 class="fw-semibold mb-3">Notifiche Android</h5>
-
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" role="switch" id="notificationsToggle">
-                        <label class="form-check-label fw-semibold" for="notificationsToggle">Abilita notifiche</label>
-                    </div>
-
-                    <div id="notificationsStatus" class="small text-muted">Stato notifiche: —</div>
-                    <div id="notificationsHint" class="small text-muted mt-2"></div>
+                    <div class="small text-muted">Gli amministratori che usano l'app Android ricevono un avviso quando un motore viene consegnato. Il permesso si gestisce nelle impostazioni Android dell'app.</div>
                 </div>
             </div>
         </div>
@@ -59,14 +52,10 @@
     <script>
         (function () {
             const THEME_KEY = 'enginegallery.theme';
-            const NOTIFY_OPT_OUT_KEY = 'enginegallery.notifications.optOut';
             const root = document.documentElement;
 
             const themeSelect = document.getElementById('themeSelect');
             const themeStatus = document.getElementById('themeStatus');
-            const notificationsToggle = document.getElementById('notificationsToggle');
-            const notificationsStatus = document.getElementById('notificationsStatus');
-            const notificationsHint = document.getElementById('notificationsHint');
 
             function getSavedTheme() {
                 const value = localStorage.getItem(THEME_KEY) || 'auto';
@@ -94,38 +83,6 @@
                 }
             }
 
-            function updateNotificationsUi() {
-                const supported = 'Notification' in window;
-                if (!supported) {
-                    notificationsToggle.checked = false;
-                    notificationsToggle.disabled = true;
-                    notificationsStatus.textContent = 'Stato notifiche: non supportate';
-                    notificationsHint.textContent = 'Browser o dispositivo non compatibile.';
-                    return;
-                }
-
-                const permission = Notification.permission;
-                const userOptOut = localStorage.getItem(NOTIFY_OPT_OUT_KEY) === '1';
-
-                if (permission === 'granted' && !userOptOut) {
-                    notificationsToggle.checked = true;
-                    notificationsStatus.textContent = 'Stato notifiche: abilitate';
-                    notificationsHint.textContent = 'Permesso browser attivo.';
-                    return;
-                }
-
-                if (permission === 'denied') {
-                    notificationsToggle.checked = false;
-                    notificationsStatus.textContent = 'Stato notifiche: permesso negato';
-                    notificationsHint.textContent = 'Riabilita dalle impostazioni del browser.';
-                    return;
-                }
-
-                notificationsToggle.checked = false;
-                notificationsStatus.textContent = 'Stato notifiche: disabilitate';
-                notificationsHint.textContent = 'Attiva lo switch per richiedere il permesso.';
-            }
-
             if (themeSelect) {
                 const savedTheme = getSavedTheme();
                 themeSelect.value = savedTheme;
@@ -148,43 +105,6 @@
                 }
             }
 
-            if (notificationsToggle) {
-                updateNotificationsUi();
-
-                notificationsToggle.addEventListener('change', async function () {
-                    const supported = 'Notification' in window;
-                    if (!supported) {
-                        updateNotificationsUi();
-                        return;
-                    }
-
-                    if (notificationsToggle.checked) {
-                        if (Notification.permission === 'granted') {
-                            localStorage.removeItem(NOTIFY_OPT_OUT_KEY);
-                            updateNotificationsUi();
-                            return;
-                        }
-
-                        if (Notification.permission === 'denied') {
-                            notificationsToggle.checked = false;
-                            updateNotificationsUi();
-                            return;
-                        }
-
-                        const result = await Notification.requestPermission();
-                        if (result === 'granted') {
-                            localStorage.removeItem(NOTIFY_OPT_OUT_KEY);
-                        } else {
-                            notificationsToggle.checked = false;
-                        }
-                        updateNotificationsUi();
-                        return;
-                    }
-
-                    localStorage.setItem(NOTIFY_OPT_OUT_KEY, '1');
-                    updateNotificationsUi();
-                });
-            }
         })();
     </script>
 </div>

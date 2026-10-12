@@ -1,6 +1,8 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.util.security.CookieSecurityUtil;
+import it.SimoSW.model.User;
+import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -51,6 +53,16 @@ public class LogoutServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         if (session != null) {
+            Object loggedUser = session.getAttribute("loggedUser");
+            if (loggedUser instanceof User) {
+                try {
+                    ApplicationInitializer initializer =
+                            (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
+                    initializer.getAndroidPushService().deleteUserTokens(((User) loggedUser).getId());
+                } catch (RuntimeException ex) {
+                    getServletContext().log("Rimozione notifiche Android alla disconnessione fallita", ex);
+                }
+            }
             session.invalidate(); // distrugge completamente la sessione
         }
 

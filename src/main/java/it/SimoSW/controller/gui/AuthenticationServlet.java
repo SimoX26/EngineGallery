@@ -42,6 +42,7 @@ public class AuthenticationServlet extends HttpServlet {
         if ("logout".equals(action)) {
             HttpSession session = request.getSession(false);
             if (session != null) {
+                removePushTokens(session);
                 session.invalidate();
             }
             CookieSecurityUtil.clearCookie(response, request, COOKIE_REMEMBER);
@@ -77,6 +78,7 @@ public class AuthenticationServlet extends HttpServlet {
             loginRateLimiter.reset(username);
             HttpSession previousSession = request.getSession(false);
             if (previousSession != null) {
+                removePushTokens(previousSession);
                 previousSession.invalidate();
             }
             HttpSession session = request.getSession(true);
@@ -97,6 +99,20 @@ public class AuthenticationServlet extends HttpServlet {
             // Credenziali errate
             request.setAttribute("error", "Credenziali non valide");
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
+        }
+    }
+
+    private void removePushTokens(HttpSession session) {
+        Object loggedUser = session.getAttribute("loggedUser");
+        if (!(loggedUser instanceof User)) {
+            return;
+        }
+        try {
+            ApplicationInitializer initializer =
+                    (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
+            initializer.getAndroidPushService().deleteUserTokens(((User) loggedUser).getId());
+        } catch (RuntimeException ex) {
+            getServletContext().log("Rimozione notifiche Android al cambio utente fallita", ex);
         }
     }
 }
