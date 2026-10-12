@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=18">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=20">
 </head>
 
 <body>
@@ -301,6 +301,7 @@
                     <div class="engine-kanban-col">
                         <div class="engine-kanban-col__header engine-kanban-col__header--waiting">
                             <span>In attesa</span>
+                            <span class="engine-kanban-col__count" data-kanban-count aria-label="Motori in attesa">0</span>
                         </div>
                         <div class="engine-kanban-col__body" data-kanban-status="WAITING">
                             <c:forEach var="engine" items="${engines}">
@@ -342,12 +343,14 @@
                                     </a>
                                 </c:if>
                             </c:forEach>
+                            <p class="engine-kanban-empty" aria-live="polite">Trascina qui un motore</p>
                         </div>
                     </div>
 
                     <div class="engine-kanban-col">
                         <div class="engine-kanban-col__header engine-kanban-col__header--working">
                             <span>In lavorazione</span>
+                            <span class="engine-kanban-col__count" data-kanban-count aria-label="Motori in lavorazione">0</span>
                         </div>
                         <div class="engine-kanban-col__body" data-kanban-status="WORK_IN_PROGRESS">
                             <c:forEach var="engine" items="${engines}">
@@ -389,12 +392,14 @@
                                     </a>
                                 </c:if>
                             </c:forEach>
+                            <p class="engine-kanban-empty" aria-live="polite">Trascina qui un motore</p>
                         </div>
                     </div>
 
                     <div class="engine-kanban-col">
                         <div class="engine-kanban-col__header engine-kanban-col__header--ready">
                             <span>Pronto</span>
+                            <span class="engine-kanban-col__count" data-kanban-count aria-label="Motori pronti">0</span>
                         </div>
                         <div class="engine-kanban-col__body" data-kanban-status="READY">
                             <c:forEach var="engine" items="${engines}">
@@ -436,6 +441,7 @@
                                     </a>
                                 </c:if>
                             </c:forEach>
+                            <p class="engine-kanban-empty" aria-live="polite">Trascina qui un motore</p>
                         </div>
                     </div>
                 </div>
@@ -692,6 +698,22 @@
             let pointerSession = null;
             let scrollLockY = null;
 
+            const updateKanbanColumnCounts = () => {
+                kanbanColumns.forEach((column) => {
+                    const count = column.querySelectorAll('.engine-kanban-card').length;
+                    const kanbanColumn = column.closest('.engine-kanban-col');
+                    const countLabel = kanbanColumn ? kanbanColumn.querySelector('[data-kanban-count]') : null;
+                    if (countLabel) {
+                        countLabel.textContent = String(count);
+                    }
+                    if (kanbanColumn) {
+                        kanbanColumn.classList.toggle('engine-kanban-col--empty', count === 0);
+                    }
+                });
+            };
+
+            updateKanbanColumnCounts();
+
             const lockPageScrollForKanbanDrag = () => {
                 if (document.body.classList.contains('kanban-dragging')) {
                     return;
@@ -888,6 +910,7 @@
                     session.card.dataset.currentStatus = destinationStatus;
                     updateKanbanCardBadge(session.card, destinationStatus);
                     updateKanbanCardSearchData(session.card, destinationStatus);
+                    updateKanbanColumnCounts();
                     if (filterController) {
                         filterController.apply();
                     }
@@ -899,6 +922,7 @@
                         session.card.dataset.currentStatus = previousStatus;
                         updateKanbanCardBadge(session.card, previousStatus);
                         updateKanbanCardSearchData(session.card, previousStatus);
+                        updateKanbanColumnCounts();
                         if (filterController) {
                             filterController.apply();
                         }
@@ -967,6 +991,7 @@
                     draggedCard.dataset.currentStatus = destinationStatus;
                     updateKanbanCardBadge(draggedCard, destinationStatus);
                     updateKanbanCardSearchData(draggedCard, destinationStatus);
+                    updateKanbanColumnCounts();
                     if (filterController) {
                         filterController.apply();
                     }
@@ -978,6 +1003,7 @@
                         draggedCard.dataset.currentStatus = previousStatus;
                         updateKanbanCardBadge(draggedCard, previousStatus);
                         updateKanbanCardSearchData(draggedCard, previousStatus);
+                        updateKanbanColumnCounts();
                         if (filterController) {
                             filterController.apply();
                         }
@@ -1014,7 +1040,7 @@
             if (!engineGalleryGrid || !engineListView) {
                 return;
             }
-            const hasKanban = !!engineKanbanBoard && !!engineViewKanbanBtn;
+            const hasKanban = !!engineKanbanBoard && !!engineViewKanbanBtn && canUseKanbanDrag();
             if (!hasKanban && safeMode === 'kanban') {
                 safeMode = 'gallery';
             }
