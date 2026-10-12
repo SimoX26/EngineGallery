@@ -33,7 +33,7 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
 
     private static final String UPDATE_SQL = """
         UPDATE hydraulic_tests
-        SET customer_name = ?, engine_code = ?, test_date = ?, notes = ?
+        SET customer_name = ?, engine_code = ?, video_url = ?, test_date = ?, notes = ?
         WHERE id = ?
     """;
 
@@ -103,9 +103,10 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
              PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
             stmt.setString(1, hydraulicTest.getCustomerName());
             stmt.setString(2, hydraulicTest.getEngineCode());
-            stmt.setDate(3, Date.valueOf(hydraulicTest.getTestDate()));
-            stmt.setString(4, hydraulicTest.getNotes());
-            stmt.setLong(5, hydraulicTest.getId());
+            stmt.setString(3, hydraulicTest.getVideoUrl());
+            stmt.setDate(4, Date.valueOf(hydraulicTest.getTestDate()));
+            stmt.setString(5, hydraulicTest.getNotes());
+            stmt.setLong(6, hydraulicTest.getId());
             if (stmt.executeUpdate() == 0) {
                 throw new IllegalStateException("Prova idraulica non trovata");
             }

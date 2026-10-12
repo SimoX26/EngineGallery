@@ -5,7 +5,7 @@ import it.SimoSW.model.HydraulicTest;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.model.User;
-import it.SimoSW.util.UploadPathResolver;
+import it.SimoSW.util.HydraulicVideoStorage;
 import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.navigation.PostSubmitNavigationGuard;
@@ -19,16 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @WebServlet("/hydraulic-test/new")
 @MultipartConfig(
@@ -37,12 +29,6 @@ import java.util.concurrent.TimeUnit;
         maxRequestSize = 700 * 1024 * 1024
 )
 public class HydraulicTestCreateServlet extends HttpServlet {
-    private static final long FFMPEG_TIMEOUT_SECONDS = 600;
-    private static final long MIN_COMPRESSIBLE_BYTES = 1024L * 1024L; // 1MB
-    private static final Set<String> VIDEO_EXTENSIONS = Set.of(
-            ".mp4", ".mov", ".m4v", ".webm", ".avi", ".mkv", ".3gp", ".mpeg", ".mpg"
-    );
-
     private HydraulicTestController hydraulicTestController;
     private UserActivityAuditLogger activityAuditLogger;
 
@@ -94,26 +80,6 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     .forward(request, response);
             return;
         }
-        if (videoPart == null || videoPart.getSize() <= 0) {
-            request.setAttribute("error", "Carica un video valido.");
-            request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
-                    .forward(request, response);
-            return;
-        }
-        String submittedName = videoPart.getSubmittedFileName();
-        String originalFilename = submittedName != null
-                ? Paths.get(submittedName).getFileName().toString()
-                : "video.mp4";
-        String sanitizedOriginal = sanitizeFilename(originalFilename);
-        String inputExtension = extensionOf(sanitizedOriginal);
-        String contentType = videoPart.getContentType();
-        if (!isVideo(contentType, inputExtension)) {
-            request.setAttribute("error", "Il file caricato non è un video.");
-            request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
-                    .forward(request, response);
-            return;
-        }
-
         try {
             LocalDate.parse(testDate.trim());
         } catch (DateTimeParseException ex) {
@@ -123,45 +89,14 @@ public class HydraulicTestCreateServlet extends HttpServlet {
             return;
         }
 
-        Path hydraulicUploadBase = UploadPathResolver.resolveHydraulicUploadBase(getServletContext());
-        Files.createDirectories(hydraulicUploadBase);
-        Path temporaryUploadedFile = Files.createTempFile("hydraulic-upload-", inputExtension);
-        videoPart.write(temporaryUploadedFile.toString());
-
         String finalFilename;
-        Path destination;
-
-        String compressedFilename = UUID.randomUUID() + ".mp4";
-        Path compressedDestination = hydraulicUploadBase.resolve(compressedFilename).normalize();
-        if (!compressedDestination.startsWith(hydraulicUploadBase)) {
-            Files.deleteIfExists(temporaryUploadedFile);
-            request.setAttribute("error", "Nome file non valido.");
+        try {
+            finalFilename = HydraulicVideoStorage.store(getServletContext(), videoPart);
+        } catch (IllegalArgumentException | IOException ex) {
+            request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
                     .forward(request, response);
             return;
-        }
-
-        boolean compressionSucceeded = false;
-        long uploadedSize = Files.size(temporaryUploadedFile);
-        if (uploadedSize >= MIN_COMPRESSIBLE_BYTES) {
-            compressionSucceeded = compressVideo(temporaryUploadedFile, compressedDestination);
-        }
-
-        if (compressionSucceeded) {
-            finalFilename = compressedFilename;
-            destination = compressedDestination;
-            Files.deleteIfExists(temporaryUploadedFile);
-        } else {
-            finalFilename = UUID.randomUUID() + "_" + sanitizedOriginal;
-            destination = hydraulicUploadBase.resolve(finalFilename).normalize();
-            if (!destination.startsWith(hydraulicUploadBase)) {
-                Files.deleteIfExists(temporaryUploadedFile);
-                request.setAttribute("error", "Nome file non valido.");
-                request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
-                        .forward(request, response);
-                return;
-            }
-            Files.move(temporaryUploadedFile, destination, StandardCopyOption.REPLACE_EXISTING);
         }
 
         try {
@@ -187,7 +122,11 @@ public class HydraulicTestCreateServlet extends HttpServlet {
             );
             response.sendRedirect(request.getContextPath() + "/hydraulic-test/list?lockBack=1");
         } catch (RuntimeException ex) {
-            Files.deleteIfExists(destination);
+            try {
+                HydraulicVideoStorage.deleteIfLocal(getServletContext(), finalFilename);
+            } catch (IOException ignored) {
+                // Il salvataggio DB è già fallito; il messaggio d'errore deve comunque raggiungere l'utente.
+            }
             request.setAttribute("error", "Errore durante il salvataggio della prova idraulica.");
             request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
                     .forward(request, response);
@@ -208,89 +147,4 @@ public class HydraulicTestCreateServlet extends HttpServlet {
         return username == null || username.isBlank() ? null : username.trim();
     }
 
-    private boolean compressVideo(Path inputFile, Path outputFile) {
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                "ffmpeg",
-                "-y",
-                "-i", inputFile.toString(),
-                "-c:v", "libx264",
-                "-preset", "veryfast",
-                "-crf", "28",
-                "-c:a", "aac",
-                "-b:a", "96k",
-                "-movflags", "+faststart",
-                outputFile.toString()
-        );
-        processBuilder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
-        processBuilder.redirectError(ProcessBuilder.Redirect.DISCARD);
-
-        try {
-            Process process = processBuilder.start();
-            boolean finished = process.waitFor(FFMPEG_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                Files.deleteIfExists(outputFile);
-                return false;
-            }
-
-            int exitCode = process.exitValue();
-            if (exitCode != 0 || !Files.exists(outputFile) || Files.size(outputFile) == 0) {
-                Files.deleteIfExists(outputFile);
-                return false;
-            }
-            return true;
-        } catch (IOException e) {
-            try {
-                Files.deleteIfExists(outputFile);
-            } catch (IOException ignored) {
-            }
-            return false;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            try {
-                Files.deleteIfExists(outputFile);
-            } catch (IOException ignored) {
-            }
-            return false;
-        }
-    }
-
-    private String sanitizeFilename(String filename) {
-        String value = (filename == null || filename.isBlank()) ? "video.mp4" : filename;
-        String normalized = Paths.get(value).getFileName().toString().replace(' ', '_');
-        StringBuilder builder = new StringBuilder(normalized.length());
-        for (int i = 0; i < normalized.length(); i++) {
-            char ch = normalized.charAt(i);
-            if (Character.isLetterOrDigit(ch) || ch == '.' || ch == '_' || ch == '-') {
-                builder.append(ch);
-            } else {
-                builder.append('_');
-            }
-        }
-        String sanitized = builder.toString();
-        if (sanitized.isBlank()) {
-            return "video.mp4";
-        }
-        return sanitized;
-    }
-
-    private String extensionOf(String filename) {
-        if (filename == null) {
-            return ".tmp";
-        }
-        int index = filename.lastIndexOf('.');
-        if (index <= 0 || index == filename.length() - 1) {
-            return ".tmp";
-        }
-        String ext = filename.substring(index).toLowerCase(Locale.ROOT);
-        if (ext.length() > 10) {
-            return ".tmp";
-        }
-        return ext;
-    }
-
-    private boolean isVideo(String contentType, String extension) {
-        return (contentType != null && contentType.toLowerCase(Locale.ROOT).startsWith("video/"))
-                || VIDEO_EXTENSIONS.contains(extension);
-    }
 }

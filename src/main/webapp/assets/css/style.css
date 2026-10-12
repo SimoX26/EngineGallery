@@ -3426,6 +3426,10 @@ body.modal-open {
 }
 
 @media (max-width: 380px) {
+    .engine-list-row.record-list-card--actionable {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .record-list-card,
     .engine-list-row.record-list-card {
         grid-template-columns: 52px minmax(0, 1fr);
@@ -3447,9 +3451,24 @@ body.modal-open {
         margin-left: calc(52px + 0.6rem);
     }
 
+    .engine-list-row.record-list-card--actionable > .badge-status {
+        grid-column: 1;
+        width: auto;
+        margin-left: 0;
+        justify-self: end;
+        white-space: nowrap;
+    }
+
     .record-card__fact {
         width: 100%;
         border-radius: var(--radius-md);
+    }
+}
+
+@media (min-width: 992px) {
+    .engine-list-view {
+        max-width: 980px;
+        margin-inline: auto;
     }
 }
 

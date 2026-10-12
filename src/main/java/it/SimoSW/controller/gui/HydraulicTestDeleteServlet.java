@@ -4,6 +4,7 @@ import it.SimoSW.controller.app.HydraulicTestController;
 import it.SimoSW.model.HydraulicTest;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
+import it.SimoSW.util.HydraulicVideoStorage;
 import it.SimoSW.util.audit.UserActivityAuditLogger;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 
@@ -46,6 +47,11 @@ public class HydraulicTestDeleteServlet extends HttpServlet {
             return;
         }
         hydraulicTestController.deleteHydraulicTest(test.get().getId());
+        try {
+            HydraulicVideoStorage.deleteIfLocal(getServletContext(), test.get().getVideoUrl());
+        } catch (IOException ignored) {
+            // La prova è già stata rimossa dal database; un eventuale file residuo non deve annullare l'eliminazione.
+        }
         activityAuditLogger.logFromRequest(request, UserActivityActionType.DELETE,
                 UserActivityEntityType.HYDRAULIC_TEST, String.valueOf(test.get().getId()),
                 "eliminazione prova idraulica " + test.get().getEngineCode());

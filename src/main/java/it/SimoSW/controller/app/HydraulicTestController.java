@@ -76,13 +76,23 @@ public class HydraulicTestController {
                                     String engineCode,
                                     String testDate,
                                     String notes) {
+        updateHydraulicTest(id, customerName, engineCode, testDate, notes, null);
+    }
+
+    public void updateHydraulicTest(long id,
+                                    String customerName,
+                                    String engineCode,
+                                    String testDate,
+                                    String notes,
+                                    String replacementVideoUrl) {
         HydraulicTest existing = findHydraulicTestById(id)
                 .orElseThrow(() -> new IllegalStateException("Prova idraulica non trovata"));
         hydraulicTestDAO.update(new HydraulicTest(
                 existing.getId(),
                 normalizeRequired(customerName, "Nome cliente obbligatorio"),
                 normalizeRequired(engineCode, "Codice motore obbligatorio"),
-                existing.getVideoUrl(),
+                replacementVideoUrl == null ? existing.getVideoUrl()
+                        : normalizeRequired(replacementVideoUrl, "Video prova obbligatorio"),
                 LocalDate.parse(normalizeRequired(testDate, "Data prova obbligatoria")),
                 normalizeOptional(notes),
                 existing.getCreatedAt(),
