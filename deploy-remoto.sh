@@ -184,6 +184,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if ! command -v sshpass >/dev/null 2>&1; then
+  echo "Errore: 'sshpass' non trovato." >&2
+  echo "Installa sshpass per usare il deploy automatico con password." >&2
+  exit 1
+fi
+
 if [[ -z "$PASSWORD" ]]; then
   read -r -s -p "Inserisci password SSH per ${REMOTE_USER}@${REMOTE_HOST}: " PASSWORD
   echo
@@ -193,6 +199,11 @@ if [[ -z "$PASSWORD" ]]; then
   echo "Errore: password SSH non fornita." >&2
   exit 1
 fi
+
+# sshpass legge la password dall'ambiente del proprio processo, evitando che
+# compaia negli argomenti visibili dagli altri processi locali.
+export SSHPASS="$PASSWORD"
+unset PASSWORD
 
 if [[ "$SKIP_BUILD" != "true" ]]; then
   echo ">> Eseguo build Maven: mvn clean package"
@@ -212,12 +223,6 @@ TARGET="${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH%/}/"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 
 echo ">> WAR selezionato: $WAR_FILE"
-
-if ! command -v sshpass >/dev/null 2>&1; then
-  echo "Errore: 'sshpass' non trovato." >&2
-  echo "Installa sshpass per usare il deploy automatico con password." >&2
-  exit 1
-fi
 
 OPS_BASE_PATH="${REMOTE_OPS_PATH%/}"
 OPS_BASE_PATH_SHELL="${OPS_BASE_PATH/#\~/\$HOME}"
@@ -247,7 +252,7 @@ cleanup_ops_manifest() {
 trap cleanup_ops_manifest EXIT
 
 echo ">> Preparo cartelle remote applicative e operative"
-sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \
+sshpass -e ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \
   ${REMOTE_PATH/#\~/\$HOME} \
   ${OPS_ADMIN_DIR_SHELL} \
   ${OPS_SQL_DIR_SHELL}/migrations \
@@ -260,10 +265,10 @@ sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p 
   ${OPS_BACKUP_DIR_SHELL}/webapps"
 
 echo ">> Upload WAR temporaneo verso: ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_WAR_TMP}"
-sshpass -p "$PASSWORD" scp -P "$PORT" "$WAR_FILE" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_WAR_TMP}"
+sshpass -e scp -P "$PORT" "$WAR_FILE" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_WAR_TMP}"
 
 echo ">> Installo WAR e conservo backup recuperabile della versione precedente"
-sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "
+sshpass -e ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "
   set -euo pipefail
   if [[ -f ${REMOTE_WAR_TARGET_SHELL} ]]; then
     cp -p ${REMOTE_WAR_TARGET_SHELL} ${REMOTE_WAR_BACKUP_SHELL}
@@ -279,7 +284,7 @@ if [[ "${#OPS_FILES[@]}" -gt 0 ]]; then
   fi
 
   LOCAL_OPS_MANIFEST="$(build_ops_manifest)"
-  REMOTE_OPS_MANIFEST_CONTENT="$(sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "if [[ -f ${REMOTE_OPS_MANIFEST_SHELL} ]]; then cat ${REMOTE_OPS_MANIFEST_SHELL}; fi")"
+  REMOTE_OPS_MANIFEST_CONTENT="$(sshpass -e ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "if [[ -f ${REMOTE_OPS_MANIFEST_SHELL} ]]; then cat ${REMOTE_OPS_MANIFEST_SHELL}; fi")"
 
   if [[ "$LOCAL_OPS_MANIFEST" == "$REMOTE_OPS_MANIFEST_CONTENT" ]]; then
     echo ">> Artefatti operativi invariati: salto il caricamento di ${OPS_BASE_PATH}"
@@ -316,17 +321,17 @@ if [[ "${#OPS_FILES[@]}" -gt 0 ]]; then
       remote_file="${remote_dir%/}/$(basename "$local_path")"
       remote_file_shell="${remote_file/#\~/\$HOME}"
 
-      sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell} && chmod 0750 ${remote_dir_shell}"
-      sshpass -p "$PASSWORD" scp -P "$PORT" "$local_path" "${REMOTE_USER}@${REMOTE_HOST}:${remote_file}"
-      sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod ${remote_mode} ${remote_file_shell}"
+      sshpass -e ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p ${remote_dir_shell} && chmod 0750 ${remote_dir_shell}"
+      sshpass -e scp -P "$PORT" "$local_path" "${REMOTE_USER}@${REMOTE_HOST}:${remote_file}"
+      sshpass -e ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod ${remote_mode} ${remote_file_shell}"
     done
 
     OPS_MANIFEST_TMP="$(mktemp)"
     printf '%s\n' "$LOCAL_OPS_MANIFEST" > "$OPS_MANIFEST_TMP"
     REMOTE_OPS_MANIFEST_TMP="${REMOTE_OPS_MANIFEST}.uploading.$$"
     REMOTE_OPS_MANIFEST_TMP_SHELL="${REMOTE_OPS_MANIFEST_TMP/#\~/\$HOME}"
-    sshpass -p "$PASSWORD" scp -P "$PORT" "$OPS_MANIFEST_TMP" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_OPS_MANIFEST_TMP}"
-    sshpass -p "$PASSWORD" ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod 0640 ${REMOTE_OPS_MANIFEST_TMP_SHELL} && mv -f ${REMOTE_OPS_MANIFEST_TMP_SHELL} ${REMOTE_OPS_MANIFEST_SHELL}"
+    sshpass -e scp -P "$PORT" "$OPS_MANIFEST_TMP" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_OPS_MANIFEST_TMP}"
+    sshpass -e ssh -p "$PORT" "${REMOTE_USER}@${REMOTE_HOST}" "chmod 0640 ${REMOTE_OPS_MANIFEST_TMP_SHELL} && mv -f ${REMOTE_OPS_MANIFEST_TMP_SHELL} ${REMOTE_OPS_MANIFEST_SHELL}"
   fi
 else
   echo ">> Nessun artefatto operativo addizionale trovato."

@@ -1,6 +1,7 @@
 package it.SimoSW.controller.app;
 
 import it.SimoSW.model.WarehouseItem;
+import it.SimoSW.model.WarehouseComponentType;
 import it.SimoSW.model.WarehouseImage;
 import it.SimoSW.model.dao.WarehouseItemDAO;
 import it.SimoSW.model.dao.WarehouseImageDAO;
@@ -29,7 +30,8 @@ public class WarehouseController {
         return warehouseItemDAO.findById(id);
     }
 
-    public Long createItem(String name,
+    public Long createItem(String componentType,
+                           String name,
                            String sku,
                            Integer quantity,
                            String location,
@@ -38,8 +40,10 @@ public class WarehouseController {
 
         String normalizedName = normalizeRequired(name, "Nome articolo obbligatorio");
         int normalizedQuantity = normalizeQuantity(quantity);
+        WarehouseComponentType normalizedComponentType = normalizeComponentType(componentType);
 
         WarehouseItem item = new WarehouseItem(
+                normalizedComponentType,
                 normalizedName,
                 normalizeOptional(sku),
                 normalizedQuantity,
@@ -52,6 +56,7 @@ public class WarehouseController {
     }
 
     public void updateItem(Long id,
+                           String componentType,
                            String name,
                            String sku,
                            Integer quantity,
@@ -68,14 +73,18 @@ public class WarehouseController {
 
         String normalizedName = normalizeRequired(name, "Nome articolo obbligatorio");
         int normalizedQuantity = normalizeQuantity(quantity);
+        WarehouseComponentType normalizedComponentType = normalizeComponentType(componentType);
 
         WarehouseItem item = new WarehouseItem(
                 id,
+                normalizedComponentType,
                 normalizedName,
                 normalizeOptional(sku),
                 normalizedQuantity,
                 normalizeOptional(location),
-                normalizeOptional(notes)
+                normalizeOptional(notes),
+                null,
+                null
         );
 
         warehouseItemDAO.update(item);
@@ -135,6 +144,15 @@ public class WarehouseController {
             throw new IllegalArgumentException("Quantita non valida");
         }
         return quantity;
+    }
+
+    private static WarehouseComponentType normalizeComponentType(String value) {
+        WarehouseComponentType componentType = WarehouseComponentType.fromValue(value)
+                .orElseThrow(() -> new IllegalArgumentException("Tipologia componente obbligatoria"));
+        if (componentType == WarehouseComponentType.UNCLASSIFIED) {
+            throw new IllegalArgumentException("Seleziona una tipologia componente valida");
+        }
+        return componentType;
     }
 
     private static String normalizeRequired(String value, String errorMessage) {

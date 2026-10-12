@@ -42,6 +42,9 @@
             <h5 class="fw-semibold mb-3">Dettaglio articolo magazzino</h5>
 
             <dl class="engine-detail-list">
+                <dt>Tipologia:</dt>
+                <dd><c:out value="${item.componentType.label}" default="Non classificato" /></dd>
+
                 <dt>Nome:</dt>
                 <dd><c:out value="${item.name}" default="—" /></dd>
 

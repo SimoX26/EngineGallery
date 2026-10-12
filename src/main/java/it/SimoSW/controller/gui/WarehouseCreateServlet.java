@@ -4,6 +4,7 @@ import it.SimoSW.controller.app.WarehouseController;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.model.User;
+import it.SimoSW.model.WarehouseComponentType;
 import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.audit.UserActivityAuditLogger;
@@ -47,24 +48,27 @@ public class WarehouseCreateServlet extends HttpServlet {
         if (PostSubmitNavigationGuard.redirectIfBlocked(request, response, "/warehouse/new")) {
             return;
         }
+        request.setAttribute("componentTypes", selectableComponentTypes());
         request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-new.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        String componentType = request.getParameter("componentType");
         String name = request.getParameter("name");
         String sku = request.getParameter("sku");
         String quantityParam = request.getParameter("quantity");
         String location = request.getParameter("location");
         String notes = request.getParameter("notes");
 
-        bindFormData(request, name, sku, quantityParam, location, notes);
+        bindFormData(request, componentType, name, sku, quantityParam, location, notes);
+        request.setAttribute("componentTypes", selectableComponentTypes());
 
         try {
             Integer quantity = parseQuantity(quantityParam);
             Long id = warehouseController.createItem(
-                    name, sku, quantity, location, notes, resolveLoggedUsername(request));
+                    componentType, name, sku, quantity, location, notes, resolveLoggedUsername(request));
             applyImageAdditions(request, id);
             activityAuditLogger.logFromRequest(
                     request,
@@ -89,16 +93,24 @@ public class WarehouseCreateServlet extends HttpServlet {
     }
 
     private static void bindFormData(HttpServletRequest request,
+                                     String componentType,
                                      String name,
                                      String sku,
                                      String quantity,
                                      String location,
                                      String notes) {
+        request.setAttribute("componentType", safeTrim(componentType));
         request.setAttribute("name", safeTrim(name));
         request.setAttribute("sku", safeTrim(sku));
         request.setAttribute("quantity", safeTrim(quantity));
         request.setAttribute("location", safeTrim(location));
         request.setAttribute("notes", safeTrim(notes));
+    }
+
+    private static WarehouseComponentType[] selectableComponentTypes() {
+        return java.util.Arrays.stream(WarehouseComponentType.values())
+                .filter(type -> type != WarehouseComponentType.UNCLASSIFIED)
+                .toArray(WarehouseComponentType[]::new);
     }
 
     private static Integer parseQuantity(String quantityParam) {

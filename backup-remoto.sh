@@ -4,10 +4,7 @@ set -euo pipefail
 REMOTE_USER_DEFAULT="root"
 REMOTE_HOST_DEFAULT="82.165.20.124"
 REMOTE_PORT_DEFAULT="22"
-DB_NAME_DEFAULT="engine_gallery"
-DB_USER_DEFAULT="root"
 LOCAL_BACKUP_PATH_DEFAULT="backups"
-UPLOAD_ROOT_DEFAULT="/var/lib/EngineGallery/uploads"
 
 usage() {
   cat <<'HELP'
@@ -23,8 +20,8 @@ Opzioni:
   --password           Password SSH (se assente viene chiesta in input nascosto)
   --remote-user        Utente SSH remoto (default: root)
   --remote-host        Host SSH remoto (default: 82.165.20.124)
-  --db-name            Nome database remoto (default da costante script)
-  --db-user            Utente database remoto (default da costante script)
+  --db-name            Nome database remoto (default: configurazione runtime, poi engine_gallery)
+  --db-user            Utente database remoto (default: configurazione runtime, poi root)
   --local-backup-path  Cartella base locale backup (default: backups)
   --help, -h           Mostra questo aiuto
 
@@ -53,8 +50,8 @@ PORT="$REMOTE_PORT_DEFAULT"
 PASSWORD=""
 REMOTE_USER="$REMOTE_USER_DEFAULT"
 REMOTE_HOST="$REMOTE_HOST_DEFAULT"
-DB_NAME="$DB_NAME_DEFAULT"
-DB_USER="$DB_USER_DEFAULT"
+DB_NAME=""
+DB_USER=""
 LOCAL_BACKUP_PATH="$LOCAL_BACKUP_PATH_DEFAULT"
 
 while [[ $# -gt 0 ]]; do
@@ -127,6 +124,11 @@ if [[ -z "$PASSWORD" ]]; then
   exit 1
 fi
 
+# sshpass legge la password dall'ambiente del proprio processo, evitando che
+# compaia negli argomenti visibili dagli altri processi locali.
+export SSHPASS="$PASSWORD"
+unset PASSWORD
+
 TARGET_SSH="${REMOTE_USER}@${REMOTE_HOST}"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 BASE_DIR="${LOCAL_BACKUP_PATH%/}"
@@ -138,7 +140,7 @@ echo ">> Creo struttura backup locale in: ${RUN_DIR}"
 mkdir -p "$RUN_DIR" "$MEDIA_DIR"
 
 echo ">> Rilevo automaticamente upload/media root remoto"
-UPLOAD_ROOT_REMOTE="$(sshpass -p "$PASSWORD" ssh -p "$PORT" "$TARGET_SSH" 'bash -s' <<'REMOTE'
+UPLOAD_ROOT_REMOTE="$(sshpass -e ssh -p "$PORT" "$TARGET_SSH" 'bash -s' <<'REMOTE'
 set -euo pipefail
 
 normalize_root() {
@@ -184,10 +186,10 @@ fi
 
 echo ">> Upload/media root remoto: ${UPLOAD_ROOT_REMOTE}"
 
-sshpass -p "$PASSWORD" ssh -p "$PORT" "$TARGET_SSH" "test -d $(squote "$UPLOAD_ROOT_REMOTE")"
+sshpass -e ssh -p "$PORT" "$TARGET_SSH" "test -d $(squote "$UPLOAD_ROOT_REMOTE")"
 
 echo ">> Eseguo dump database remoto: ${DB_NAME}"
-sshpass -p "$PASSWORD" ssh -p "$PORT" "$TARGET_SSH" \
+sshpass -e ssh -p "$PORT" "$TARGET_SSH" \
   "DB_NAME_OVERRIDE=$(squote "$DB_NAME") DB_USER_OVERRIDE=$(squote "$DB_USER") bash -s" > "$DB_DUMP_FILE" <<'REMOTE'
 set -euo pipefail
 
@@ -243,6 +245,9 @@ if [[ -z "$DB_NAME_EFFECTIVE" ]]; then
 fi
 
 if [[ -z "$DB_USER_EFFECTIVE" ]]; then
+  DB_USER_EFFECTIVE="$DB_USER_FROM_PROP"
+fi
+if [[ -z "$DB_USER_EFFECTIVE" ]]; then
   DB_USER_EFFECTIVE="root"
 fi
 
@@ -285,13 +290,13 @@ echo ">> Dump SQL salvato in: ${DB_DUMP_FILE}"
 echo ">> Copio foto/video (e upload correlati) in: ${MEDIA_DIR}"
 if [[ "$RSYNC_AVAILABLE" == "true" ]]; then
   echo ">> Uso rsync per la copia media"
-  sshpass -p "$PASSWORD" rsync -az \
+  sshpass -e rsync -az \
     -e "ssh -p ${PORT} -o StrictHostKeyChecking=no" \
     "${TARGET_SSH}:${UPLOAD_ROOT_REMOTE%/}/" \
     "${MEDIA_DIR}/"
 else
   echo ">> rsync non disponibile: uso fallback scp -r"
-  sshpass -p "$PASSWORD" scp -P "$PORT" -r \
+  sshpass -e scp -P "$PORT" -r \
     "${TARGET_SSH}:${UPLOAD_ROOT_REMOTE%/}/." \
     "$MEDIA_DIR/"
 fi

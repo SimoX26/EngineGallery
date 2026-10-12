@@ -10,6 +10,7 @@ public class WarehouseItem {
             DateTimeFormatter.ofPattern("dd / MM / yyyy · HH:mm");
 
     private Long id;
+    private final WarehouseComponentType componentType;
     private final String name;
     private final String sku;
     private final int quantity;
@@ -24,7 +25,7 @@ public class WarehouseItem {
                          String location,
                          String notes) {
 
-        this(name, sku, quantity, location, notes, null);
+        this(WarehouseComponentType.UNCLASSIFIED, name, sku, quantity, location, notes, null);
     }
 
     public WarehouseItem(String name,
@@ -34,6 +35,17 @@ public class WarehouseItem {
                          String notes,
                          String createdBy) {
 
+        this(WarehouseComponentType.UNCLASSIFIED, name, sku, quantity, location, notes, createdBy);
+    }
+
+    public WarehouseItem(WarehouseComponentType componentType,
+                         String name,
+                         String sku,
+                         int quantity,
+                         String location,
+                         String notes,
+                         String createdBy) {
+        this.componentType = Objects.requireNonNull(componentType, "La tipologia componente è obbligatoria");
         this.name = Objects.requireNonNull(name, "Il nome articolo è obbligatorio");
         this.sku = sku;
         this.quantity = quantity;
@@ -50,7 +62,7 @@ public class WarehouseItem {
                          String location,
                          String notes) {
 
-        this(id, name, sku, quantity, location, notes, null, null);
+        this(id, WarehouseComponentType.UNCLASSIFIED, name, sku, quantity, location, notes, null, null);
     }
 
     public WarehouseItem(Long id,
@@ -62,6 +74,19 @@ public class WarehouseItem {
                          LocalDateTime createdAt,
                          String createdBy) {
 
+        this(id, WarehouseComponentType.UNCLASSIFIED, name, sku, quantity, location, notes, createdAt, createdBy);
+    }
+
+    public WarehouseItem(Long id,
+                         WarehouseComponentType componentType,
+                         String name,
+                         String sku,
+                         int quantity,
+                         String location,
+                         String notes,
+                         LocalDateTime createdAt,
+                         String createdBy) {
+        this.componentType = Objects.requireNonNull(componentType, "La tipologia componente è obbligatoria");
         this.name = Objects.requireNonNull(name, "Il nome articolo è obbligatorio");
         this.sku = sku;
         this.quantity = quantity;
@@ -74,6 +99,10 @@ public class WarehouseItem {
 
     public Long getId() {
         return id;
+    }
+
+    public WarehouseComponentType getComponentType() {
+        return componentType;
     }
 
     public String getName() {

@@ -23,7 +23,12 @@ ANDROID_URL="$ANDROID_URL_DEFAULT"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --android-url)
-      ANDROID_URL="${2:-}"
+      if [[ -z "${2:-}" || "${2:-}" == --* ]]; then
+        echo "Errore: valore mancante per --android-url" >&2
+        usage
+        exit 1
+      fi
+      ANDROID_URL="$2"
       shift 2
       ;;
     --help|-h)

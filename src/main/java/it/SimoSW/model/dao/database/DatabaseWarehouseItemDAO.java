@@ -15,19 +15,19 @@ import java.util.Optional;
 public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
 
     private static final String FIND_ALL_SQL =
-            "SELECT id, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items ORDER BY name";
+            "SELECT id, component_type, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items ORDER BY name";
 
     private static final String FIND_LATEST_SQL =
-            "SELECT id, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items ORDER BY id DESC LIMIT ?";
+            "SELECT id, component_type, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items ORDER BY id DESC LIMIT ?";
 
     private static final String FIND_BY_ID_SQL =
-            "SELECT id, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items WHERE id = ?";
+            "SELECT id, component_type, name, sku, quantity, location, notes, created_at, created_by FROM warehouse_items WHERE id = ?";
 
     private static final String INSERT_SQL =
-            "INSERT INTO warehouse_items (name, sku, quantity, location, notes, created_by) VALUES (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO warehouse_items (component_type, name, sku, quantity, location, notes, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_SQL =
-            "UPDATE warehouse_items SET name = ?, sku = ?, quantity = ?, location = ?, notes = ? WHERE id = ?";
+            "UPDATE warehouse_items SET component_type = ?, name = ?, sku = ?, quantity = ?, location = ?, notes = ? WHERE id = ?";
 
     private static final String DELETE_SQL =
             "DELETE FROM warehouse_items WHERE id = ?";
@@ -112,12 +112,13 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, item.getName());
-            stmt.setString(2, item.getSku());
-            stmt.setInt(3, item.getQuantity());
-            stmt.setString(4, item.getLocation());
-            stmt.setString(5, item.getNotes());
-            stmt.setString(6, item.getCreatedBy());
+            stmt.setString(1, item.getComponentType().name());
+            stmt.setString(2, item.getName());
+            stmt.setString(3, item.getSku());
+            stmt.setInt(4, item.getQuantity());
+            stmt.setString(5, item.getLocation());
+            stmt.setString(6, item.getNotes());
+            stmt.setString(7, item.getCreatedBy());
 
             stmt.executeUpdate();
 
@@ -140,12 +141,13 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
 
-            stmt.setString(1, item.getName());
-            stmt.setString(2, item.getSku());
-            stmt.setInt(3, item.getQuantity());
-            stmt.setString(4, item.getLocation());
-            stmt.setString(5, item.getNotes());
-            stmt.setLong(6, item.getId());
+            stmt.setString(1, item.getComponentType().name());
+            stmt.setString(2, item.getName());
+            stmt.setString(3, item.getSku());
+            stmt.setInt(4, item.getQuantity());
+            stmt.setString(5, item.getLocation());
+            stmt.setString(6, item.getNotes());
+            stmt.setLong(7, item.getId());
 
             stmt.executeUpdate();
 
@@ -223,6 +225,8 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
         Timestamp createdAt = rs.getTimestamp("created_at");
         return new WarehouseItem(
                 rs.getLong("id"),
+                it.SimoSW.model.WarehouseComponentType.fromValue(rs.getString("component_type"))
+                        .orElse(it.SimoSW.model.WarehouseComponentType.UNCLASSIFIED),
                 rs.getString("name"),
                 rs.getString("sku"),
                 rs.getInt("quantity"),

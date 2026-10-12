@@ -24,8 +24,23 @@
 <div class="container">
 
     <div class="page-header-with-search">
-        <div class="page-header">
-            <h1>Magazzino</h1>
+        <div class="page-header d-flex align-items-center gap-2">
+            <h1 class="mb-0">Magazzino</h1>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                        type="button"
+                        id="warehouseComponentFilter"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    ${not empty selectedComponentType ? selectedComponentTypeLabel : 'Tipologia'}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="warehouseComponentFilter">
+                    <li><a class="dropdown-item ${empty selectedComponentType ? 'active' : ''}" href="<%= request.getContextPath() %>/warehouse/list">Tutte le tipologie</a></li>
+                    <c:forEach var="type" items="${componentTypes}">
+                        <li><a class="dropdown-item ${selectedComponentType == type.code ? 'active' : ''}" href="<%= request.getContextPath() %>/warehouse/list?componentType=${type.code}"><c:out value="${type.label}" /></a></li>
+                    </c:forEach>
+                </ul>
+            </div>
         </div>
 
         <div class="search-panel-compact">
@@ -115,12 +130,12 @@
         <c:forEach var="item" items="${items}">
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="engine-list-row record-list-card warehouse-list-row-item"
-               data-search="${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
+               data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
                 <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
                     <span class="engine-image-empty-label">MAG</span>
                 </div>
                 <div class="engine-list-row__body record-list-card__content">
-                    <div class="record-card__eyebrow">Codice <c:out value="${item.sku}" default="non disponibile" /></div>
+                    <div class="record-card__eyebrow"><c:out value="${item.componentType.label}" /> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
                     <div class="engine-list-row__main record-card__title"><c:out value="${item.name}" /></div>
                     <div class="record-card__facts">
                         <span class="record-card__fact"><strong>Quantità</strong> <c:out value="${item.quantity}" /></span>
@@ -145,13 +160,13 @@
         <c:forEach var="item" items="${items}">
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="customer-card-link warehouse-card-item"
-               data-search="${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
+               data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
                 <article class="record-gallery-card">
                     <div class="record-card__visual record-card__visual--warehouse" aria-hidden="true">
                         <span>MAG</span>
                     </div>
                     <div class="record-card__body">
-                        <div class="record-card__eyebrow">Codice <c:out value="${item.sku}" default="non disponibile" /></div>
+                        <div class="record-card__eyebrow"><c:out value="${item.componentType.label}" /> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
                         <div class="record-card__title"><c:out value="${item.name}" /></div>
                         <div class="record-card__facts">
                             <span class="record-card__fact"><strong>Quantità</strong> <c:out value="${item.quantity}" /></span>

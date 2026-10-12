@@ -2,6 +2,7 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WarehouseController;
 import it.SimoSW.model.WarehouseItem;
+import it.SimoSW.model.WarehouseComponentType;
 import it.SimoSW.model.UserActivityActionType;
 import it.SimoSW.model.UserActivityEntityType;
 import it.SimoSW.util.ImageOptimizationUtil;
@@ -75,6 +76,7 @@ public class WarehouseEditServlet extends HttpServlet {
             return;
         }
 
+        String componentType = request.getParameter("componentType");
         String name = request.getParameter("name");
         String sku = request.getParameter("sku");
         String quantityParam = request.getParameter("quantity");
@@ -82,6 +84,8 @@ public class WarehouseEditServlet extends HttpServlet {
         String notes = request.getParameter("notes");
 
         request.setAttribute("itemId", itemId);
+        request.setAttribute("componentType", safeTrim(componentType));
+        request.setAttribute("componentTypes", WarehouseComponentType.values());
         request.setAttribute("name", safeTrim(name));
         request.setAttribute("sku", safeTrim(sku));
         request.setAttribute("quantity", safeTrim(quantityParam));
@@ -91,7 +95,7 @@ public class WarehouseEditServlet extends HttpServlet {
 
         try {
             Integer quantity = parseQuantity(quantityParam);
-            warehouseController.updateItem(itemId, name, sku, quantity, location, notes);
+            warehouseController.updateItem(itemId, componentType, name, sku, quantity, location, notes);
             applyImageDeletions(request, itemId);
             applyImageAdditions(request, itemId);
             activityAuditLogger.logFromRequest(
@@ -116,6 +120,8 @@ public class WarehouseEditServlet extends HttpServlet {
 
     private static void bindFormData(HttpServletRequest request, WarehouseItem item) {
         request.setAttribute("itemId", item.getId());
+        request.setAttribute("componentType", item.getComponentType().name());
+        request.setAttribute("componentTypes", WarehouseComponentType.values());
         request.setAttribute("name", item.getName());
         request.setAttribute("sku", item.getSku());
         request.setAttribute("quantity", item.getQuantity());

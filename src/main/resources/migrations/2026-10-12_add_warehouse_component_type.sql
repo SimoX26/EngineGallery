@@ -1,0 +1,2 @@
+ALTER TABLE warehouse_items
+    ADD COLUMN component_type VARCHAR(50) NOT NULL DEFAULT 'UNCLASSIFIED' AFTER id;

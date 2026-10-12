@@ -42,6 +42,15 @@
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
             <div class="mb-3 text-start">
+                <label class="form-label fw-semibold" for="warehouseComponentType">Tipologia componente</label>
+                <select id="warehouseComponentType" name="componentType" class="form-select" required>
+                    <c:forEach var="type" items="${componentTypes}">
+                        <option value="${type.code}" ${componentType == type.code ? 'selected' : ''}><c:out value="${type.label}" /></option>
+                    </c:forEach>
+                </select>
+            </div>
+
+            <div class="mb-3 text-start">
                 <label class="form-label fw-semibold">Immagini articolo</label>
                 <div class="engine-images-edit-list mb-3" data-image-list>
                     <c:choose>

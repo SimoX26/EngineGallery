@@ -95,6 +95,7 @@ CREATE TABLE images (
 
 CREATE TABLE warehouse_items (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    component_type VARCHAR(50) NOT NULL DEFAULT 'UNCLASSIFIED',
     name VARCHAR(120) NOT NULL,
     sku VARCHAR(80),
     quantity INT NOT NULL DEFAULT 0,
