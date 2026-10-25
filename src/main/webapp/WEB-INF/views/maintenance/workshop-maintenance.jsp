@@ -9,14 +9,17 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Manutenzione macchinari • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=24">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 <main class="container pb-5 workshop-maintenance-page">
-    <div class="page-header">
-        <h1>Manutenzione macchinari</h1>
-        <p>Attrezzature interne dell'officina</p>
+    <div class="page-header d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+            <h1>Manutenzione macchinari</h1>
+            <p>Attrezzature interne dell'officina</p>
+        </div>
+        <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
     </div>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
 
@@ -32,31 +35,33 @@
             <h2 class="h4 mb-0" id="workshop-machines-title">Macchinari</h2>
             <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/workshop-maintenance?view=new">Aggiungi macchinario +</a>
         </div>
-        <div class="workshop-machine-list">
+        <div class="record-gallery-grid">
             <c:forEach var="machine" items="${machines}">
-                <a class="record-gallery-card record-list-card workshop-machine-card"
+                <a class="record-gallery-card workshop-machine-card"
                    href="${pageContext.request.contextPath}/workshop-maintenance?view=detail&amp;id=${machine.id}">
                     <c:choose>
                         <c:when test="${not empty machine.imageFilename}">
-                            <img class="record-list-card__media workshop-machine-card__image"
+                            <img class="workshop-machine-card__image"
                                  src="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}"
                                  alt="Foto di ${fn:escapeXml(machine.name)}" loading="lazy">
                         </c:when>
-                        <c:otherwise><div class="record-list-card__media workshop-machine-card__empty" aria-hidden="true">Nessuna foto</div></c:otherwise>
+                        <c:otherwise><div class="workshop-machine-card__image workshop-machine-card__empty" aria-hidden="true">Nessuna foto</div></c:otherwise>
                     </c:choose>
-                    <div class="record-list-card__content">
+                    <div class="record-card__body">
                         <span class="record-card__eyebrow">Matricola <c:out value="${machine.serialNumber}"/></span>
                         <span class="record-card__title"><c:out value="${machine.name}"/></span>
                         <span class="record-card__subtitle"><c:out value="${machine.model}"/></span>
                         <span class="record-card__facts">
                             <span class="record-card__fact"><strong>Posizione:</strong> <c:out value="${machine.location}"/></span>
                             <span class="record-card__fact"><strong>Acquistato:</strong> <c:out value="${machine.purchaseDate}" default="Non indicata"/></span>
-                            <span class="record-card__fact"><strong>Ore:</strong> <c:out value="${machine.usageHours}"/></span>
                         </span>
                     </div>
-                    <span class="badge ${machine.status == 'ACTIVE' ? 'text-bg-success' : 'text-bg-secondary'} workshop-machine-card__status">
-                        ${machine.status == 'ACTIVE' ? 'Attivo' : 'Fuori servizio'}
-                    </span>
+                    <div class="record-card__footer">
+                        <span class="small text-muted">Ore di utilizzo: <strong><c:out value="${machine.usageHours}"/></strong></span>
+                        <span class="badge badge-status ${machine.status == 'ACTIVE' ? 'text-bg-success' : 'text-bg-secondary'}">
+                            ${machine.status == 'ACTIVE' ? 'Attivo' : 'Fuori servizio'}
+                        </span>
+                    </div>
                 </a>
             </c:forEach>
             <c:if test="${empty machines && empty error}">
@@ -64,10 +69,6 @@
             </c:if>
         </div>
     </section>
-
-    <div class="mt-4">
-        <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=plans">Piani e scadenzario</a>
-    </div>
 
     <a class="workshop-intervention-fab" href="${pageContext.request.contextPath}/workshop-maintenance?view=intervention">
         <span aria-hidden="true">+</span> Aggiungi intervento

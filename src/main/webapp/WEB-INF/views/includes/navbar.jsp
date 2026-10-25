@@ -6,7 +6,6 @@
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
 <c:set var="canViewStatistics" value="${requestScope.canViewStatistics}" />
 <c:set var="canViewWarehouse" value="${requestScope.canViewWarehouse}" />
-<c:set var="canViewMaintenance" value="${loggedRole == 'ADMIN'}" />
 <c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
 
 <style>
@@ -119,24 +118,14 @@
                         <a class="nav-link
                            ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
                            href="<%= request.getContextPath() %>/statistics">
-                            Statistiche
-                        </a>
-                    </li>
-                </c:if>
-
-                <c:if test="${canViewMaintenance}">
-                    <li class="nav-item">
-                        <a class="nav-link
-                           ${fn:startsWith(servletPath, "/maintenance") ? "active" : ""}"
-                           href="<%= request.getContextPath() %>/maintenance">
-                            Manutenzione
+                            Dati e statistiche
                         </a>
                     </li>
                 </c:if>
 
                 <li class="nav-item">
                     <a class="nav-link ${fn:startsWith(servletPath, '/workshop-maintenance') ? 'active' : ''}"
-                       href="<%= request.getContextPath() %>/workshop-maintenance">Macchinari officina</a>
+                       href="<%= request.getContextPath() %>/workshop-maintenance">Manutenzione macchinari</a>
                 </li>
 
 

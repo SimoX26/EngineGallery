@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="<%= request.getContextPath() %>/assets/ico/ICONA.png">
     <link rel="apple-touch-icon" sizes="180x180" href="${pageContext.request.contextPath}/assets/img/apple-touch-icon.png">
-    <title>Engine Gallery • Statistiche</title>
+    <title>Engine Gallery • Dati e statistiche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
@@ -22,7 +22,7 @@
 
     <div class="container">
         <div class="page-header dashboard-crm-header">
-            <h1>Statistiche</h1>
+            <h1>Dati e statistiche</h1>
             <p>Analisi avanzata officina • periodo corrente ${meseCorrenteLabel}</p>
         </div>
 
