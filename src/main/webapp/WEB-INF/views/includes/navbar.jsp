@@ -18,6 +18,14 @@
             padding-top: 66px;
         }
     }
+
+    @media (min-width: 992px) {
+        .navbar .nav-link.active {
+            background: rgba(79, 143, 179, 0.28);
+            border-radius: 0.65rem;
+            box-shadow: inset 0 -3px 0 var(--action-share-border);
+        }
+    }
 </style>
 
 <nav class="navbar navbar-expand-xxl navbar-dark fixed-top"
@@ -47,7 +55,7 @@
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/dashboard") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/dashboard">
-                        Home
+                        Dashboard
                     </a>
                 </li>
 

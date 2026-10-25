@@ -844,6 +844,10 @@ body:not(.login-page) {
     margin-bottom: 1.25rem;
 }
 
+.dashboard-current-section {
+    display: none;
+}
+
 .dashboard-crm-page .dashboard-crm-greeting {
     color: var(--text-main);
     font-size: clamp(1.9rem, 4vw, 3.1rem);
@@ -874,6 +878,34 @@ body:not(.login-page) {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+}
+
+@media (min-width: 992px) {
+    .dashboard-crm-page .dashboard-crm-header {
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-crm-page .dashboard-current-section {
+        display: inline-block;
+        margin-bottom: 1rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: var(--radius-pill);
+        background: var(--status-delivered-bg);
+        color: var(--status-delivered-text);
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .dashboard-kpi-card {
+        min-height: 140px;
+        padding: 1.5rem 1.75rem;
+    }
+
+    .home-nav-card {
+        min-height: 120px;
+        padding: 1.65rem 1.75rem;
+    }
 }
 
 .dashboard-status-grid {
