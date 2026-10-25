@@ -138,6 +138,7 @@ CREATE TABLE workshop_machines (
     model VARCHAR(120) NOT NULL,
     serial_number VARCHAR(120) NOT NULL UNIQUE,
     location VARCHAR(120) NOT NULL,
+    purchase_date DATE NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     usage_hours INT NOT NULL DEFAULT 0,
     image_filename VARCHAR(255) NULL

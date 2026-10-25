@@ -36,14 +36,32 @@ class WorkshopMaintenanceControllerTest {
                 LocalDate.now().plusDays(1), "Controllo", null, "Mario"));
     }
 
+    @Test
+    void rejectsFuturePurchaseDate() {
+        assertThrows(IllegalArgumentException.class, () -> controller.createMachine("Tornio", "A", "123", "Banco",
+                LocalDate.now().plusDays(1), 0));
+        assertEquals(1, controller.createMachine("Tornio", "A", "123", "Banco", LocalDate.now(), 0));
+    }
+
+    @Test
+    void showsOnlyMachineInterventionsFromLastYear() {
+        LocalDate since = LocalDate.now().minusYears(1);
+        dao.interventions = List.of(
+                new MaintenanceIntervention(1, 1, "Tornio", "ORDINARY", since, "Controllo", null, "Mario"),
+                new MaintenanceIntervention(2, 1, "Tornio", "ORDINARY", since.minusDays(1), "Vecchio", null, "Mario"),
+                new MaintenanceIntervention(3, 2, "Fresa", "ORDINARY", LocalDate.now(), "Altro", null, "Mario"));
+        assertEquals(List.of(1L), controller.getRecentInterventions(1).stream().map(MaintenanceIntervention::getId).toList());
+    }
+
     private static class StubDAO implements WorkshopMaintenanceDAO {
         int savedPlans;
-        public List<WorkshopMachine> findMachines() { return List.of(new WorkshopMachine(1, "Tornio", "A", "123", "Banco", "ACTIVE", 100, null)); }
+        List<MaintenanceIntervention> interventions = List.of();
+        public List<WorkshopMachine> findMachines() { return List.of(new WorkshopMachine(1, "Tornio", "A", "123", "Banco", null, "ACTIVE", 100, null)); }
         public String findMachineImageFilename(long machineId) { return null; }
         public List<MaintenancePlan> findPlans() { return List.of(); }
-        public List<MaintenanceIntervention> findInterventions() { return List.of(); }
-        public long createMachine(String name, String model, String serialNumber, String location, int usageHours) { return 1; }
-        public boolean updateMachine(long id, String name, String model, String serialNumber, String location, String status, int usageHours) { return true; }
+        public List<MaintenanceIntervention> findInterventions() { return interventions; }
+        public long createMachine(String name, String model, String serialNumber, String location, LocalDate purchaseDate, int usageHours) { return 1; }
+        public boolean updateMachine(long id, String name, String model, String serialNumber, String location, LocalDate purchaseDate, String status, int usageHours) { return true; }
         public String updateMachineImage(long machineId, String imageFilename) { return null; }
         public long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours) { savedPlans++; return savedPlans; }
         public void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,

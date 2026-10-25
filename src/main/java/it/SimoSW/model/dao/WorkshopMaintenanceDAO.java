@@ -11,8 +11,9 @@ public interface WorkshopMaintenanceDAO {
     String findMachineImageFilename(long machineId);
     List<MaintenancePlan> findPlans();
     List<MaintenanceIntervention> findInterventions();
-    long createMachine(String name, String model, String serialNumber, String location, int usageHours);
-    boolean updateMachine(long id, String name, String model, String serialNumber, String location, String status, int usageHours);
+    long createMachine(String name, String model, String serialNumber, String location, LocalDate purchaseDate, int usageHours);
+    boolean updateMachine(long id, String name, String model, String serialNumber, String location, LocalDate purchaseDate,
+                          String status, int usageHours);
     String updateMachineImage(long machineId, String imageFilename);
     long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours);
     void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,

@@ -649,6 +649,150 @@ body:not(.login-page) {
     background-color: var(--input-bg-focus);
 }
 
+.workshop-maintenance-page {
+    padding-bottom: 7rem !important;
+}
+
+.workshop-machine-list,
+.workshop-intervention-list {
+    display: grid;
+    gap: 0.9rem;
+    max-width: 1000px;
+}
+
+.workshop-machine-card {
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.workshop-machine-card:hover,
+.workshop-machine-card:focus-visible {
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.workshop-machine-card__image {
+    object-fit: cover;
+}
+
+.workshop-machine-card__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    color: var(--text-muted);
+    border: 1px solid var(--border-soft);
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.workshop-machine-card__status {
+    justify-self: end;
+    white-space: nowrap;
+}
+
+.workshop-form-panel {
+    max-width: 900px;
+}
+
+.workshop-form-preview {
+    display: block;
+    max-width: 180px;
+    max-height: 135px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+}
+
+.workshop-detail-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    object-fit: cover;
+}
+
+.workshop-detail-image.workshop-machine-card__empty {
+    display: flex;
+}
+
+.workshop-detail-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.workshop-detail-facts > div {
+    min-width: 0;
+    padding: 0.75rem 0.9rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+}
+
+.workshop-detail-facts dt {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.workshop-detail-facts dd {
+    margin: 0.2rem 0 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.workshop-intervention-entry p {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.workshop-intervention-fab {
+    position: fixed;
+    right: max(20px, env(safe-area-inset-right));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 1100;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    max-width: calc(100vw - 32px);
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-dark);
+    color: #fff;
+    box-shadow: var(--shadow-strong);
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.workshop-intervention-fab:hover,
+.workshop-intervention-fab:focus-visible {
+    background: var(--primary-hover);
+    color: #fff;
+    text-decoration: none;
+}
+
+.workshop-intervention-fab span {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+@media (max-width: 600px) {
+    .workshop-machine-card.record-list-card {
+        grid-template-columns: 64px minmax(0, 1fr);
+    }
+
+    .workshop-machine-card__status {
+        grid-column: 2;
+        justify-self: start;
+    }
+
+    .workshop-detail-facts {
+        grid-template-columns: 1fr;
+    }
+}
+
 .catalog-table {
     min-width: 760px;
 }

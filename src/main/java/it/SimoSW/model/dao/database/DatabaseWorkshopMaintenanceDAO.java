@@ -28,13 +28,16 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     @Override
     public List<WorkshopMachine> findMachines() {
         List<WorkshopMachine> result = new ArrayList<>();
-        String sql = "SELECT id, name, model, serial_number, location, status, usage_hours, image_filename FROM workshop_machines ORDER BY name, id";
+        String sql = "SELECT id, name, model, serial_number, location, purchase_date, status, usage_hours, image_filename FROM workshop_machines ORDER BY name, id";
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rows = statement.executeQuery()) {
             while (rows.next()) {
+                Date purchaseDate = rows.getDate("purchase_date");
                 result.add(new WorkshopMachine(rows.getLong("id"), rows.getString("name"), rows.getString("model"),
-                        rows.getString("serial_number"), rows.getString("location"), rows.getString("status"), rows.getInt("usage_hours"),
+                        rows.getString("serial_number"), rows.getString("location"),
+                        purchaseDate == null ? null : purchaseDate.toLocalDate(),
+                        rows.getString("status"), rows.getInt("usage_hours"),
                         rows.getString("image_filename")));
             }
         } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento dei macchinari", e); }
@@ -81,12 +84,14 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     }
 
     @Override
-    public long createMachine(String name, String model, String serialNumber, String location, int usageHours) {
-        String sql = "INSERT INTO workshop_machines (name, model, serial_number, location, usage_hours) VALUES (?, ?, ?, ?, ?)";
+    public long createMachine(String name, String model, String serialNumber, String location, LocalDate purchaseDate, int usageHours) {
+        String sql = "INSERT INTO workshop_machines (name, model, serial_number, location, purchase_date, usage_hours) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, name); statement.setString(2, model); statement.setString(3, serialNumber);
-            statement.setString(4, location); statement.setInt(5, usageHours);
+            statement.setString(4, location);
+            if (purchaseDate == null) statement.setNull(5, java.sql.Types.DATE); else statement.setDate(5, Date.valueOf(purchaseDate));
+            statement.setInt(6, usageHours);
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) { if (keys.next()) return keys.getLong(1); }
             throw new IllegalStateException("ID macchinario non disponibile");
@@ -94,12 +99,15 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     }
 
     @Override
-    public boolean updateMachine(long id, String name, String model, String serialNumber, String location, String status, int usageHours) {
-        String sql = "UPDATE workshop_machines SET name=?, model=?, serial_number=?, location=?, status=?, usage_hours=? WHERE id=?";
+    public boolean updateMachine(long id, String name, String model, String serialNumber, String location, LocalDate purchaseDate,
+                                 String status, int usageHours) {
+        String sql = "UPDATE workshop_machines SET name=?, model=?, serial_number=?, location=?, purchase_date=?, status=?, usage_hours=? WHERE id=?";
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, name); statement.setString(2, model); statement.setString(3, serialNumber);
-            statement.setString(4, location); statement.setString(5, status); statement.setInt(6, usageHours); statement.setLong(7, id);
+            statement.setString(4, location);
+            if (purchaseDate == null) statement.setNull(5, java.sql.Types.DATE); else statement.setDate(5, Date.valueOf(purchaseDate));
+            statement.setString(6, status); statement.setInt(7, usageHours); statement.setLong(8, id);
             return statement.executeUpdate() == 1;
         } catch (SQLException e) { throw new IllegalStateException("Errore nell'aggiornamento del macchinario (matricola già presente?)", e); }
     }

@@ -15,24 +15,32 @@ public class WorkshopMaintenanceController {
     public String getMachineImageFilename(long machineId) { return dao.findMachineImageFilename(machineId); }
     public List<MaintenancePlan> getPlans() { return dao.findPlans(); }
     public List<MaintenanceIntervention> getInterventions() { return dao.findInterventions(); }
+    public List<MaintenanceIntervention> getRecentInterventions(long machineId) {
+        LocalDate since = LocalDate.now().minusYears(1);
+        return dao.findInterventions().stream()
+                .filter(item -> item.getMachineId() == machineId && !item.getPerformedOn().isBefore(since)).toList();
+    }
 
     public String updateMachineImage(long machineId, String imageFilename) {
         requireMachine(machineId);
         return dao.updateMachineImage(machineId, required(imageFilename, 255, "Immagine"));
     }
 
-    public long createMachine(String name, String model, String serial, String location, int hours) {
+    public long createMachine(String name, String model, String serial, String location, LocalDate purchaseDate, int hours) {
         validateHours(hours);
+        validatePurchaseDate(purchaseDate);
         return dao.createMachine(required(name, 120, "Nome"), required(model, 120, "Modello"),
-                required(serial, 120, "Matricola"), required(location, 120, "Posizione"), hours);
+                required(serial, 120, "Matricola"), required(location, 120, "Posizione"), purchaseDate, hours);
     }
 
-    public void updateMachine(long id, String name, String model, String serial, String location, String status, int hours) {
+    public void updateMachine(long id, String name, String model, String serial, String location, LocalDate purchaseDate,
+                              String status, int hours) {
         validateHours(hours);
+        validatePurchaseDate(purchaseDate);
         if (!"ACTIVE".equals(status) && !"OUT_OF_SERVICE".equals(status))
             throw new IllegalArgumentException("Stato non valido");
         if (!dao.updateMachine(id, required(name, 120, "Nome"), required(model, 120, "Modello"),
-                required(serial, 120, "Matricola"), required(location, 120, "Posizione"), status, hours))
+                required(serial, 120, "Matricola"), required(location, 120, "Posizione"), purchaseDate, status, hours))
             throw new IllegalArgumentException("Macchinario non trovato");
     }
 
@@ -61,6 +69,11 @@ public class WorkshopMaintenanceController {
 
     private static void validateHours(int hours) {
         if (hours < 0) throw new IllegalArgumentException("Ore di utilizzo non valide");
+    }
+
+    private static void validatePurchaseDate(LocalDate purchaseDate) {
+        if (purchaseDate != null && purchaseDate.isAfter(LocalDate.now()))
+            throw new IllegalArgumentException("Data di acquisto non valida");
     }
 
     private static String required(String value, int max, String label) {
