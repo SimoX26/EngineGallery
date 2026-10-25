@@ -7,6 +7,7 @@ import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import it.SimoSW.util.security.CookieSecurityUtil;
 import it.SimoSW.util.security.CsrfTokenUtil;
 import it.SimoSW.util.security.RememberMeTokenUtil;
+import it.SimoSW.util.security.UserAccessPolicy;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -77,6 +78,14 @@ public class AuthenticationFilter implements Filter {
 
         ensureLoggedUserRole(req);
 
+        User loggedUser = (User) req.getSession(false).getAttribute("loggedUser");
+        req.setAttribute("canViewWarehouse", UserAccessPolicy.canViewWarehouse(loggedUser));
+        req.setAttribute("canViewStatistics", UserAccessPolicy.canViewStatistics(loggedUser));
+        if (UserAccessPolicy.isDeniedPath(loggedUser, req.getServletPath())) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
         if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
             res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
             return;
@@ -87,7 +96,7 @@ public class AuthenticationFilter implements Filter {
 
     private boolean isLoggedIn(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
-        return session != null && session.getAttribute("loggedUser") != null;
+        return session != null && session.getAttribute("loggedUser") instanceof User;
     }
 
     private void ensureLoggedUserRole(HttpServletRequest req) {
