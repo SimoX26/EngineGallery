@@ -749,6 +749,13 @@ body:not(.login-page) {
     padding-bottom: 6rem;
 }
 
+@media (max-width: 768px) {
+    .section-add-page,
+    .workshop-maintenance-page.workshop-has-fab {
+        padding-bottom: calc(11rem + env(safe-area-inset-bottom)) !important;
+    }
+}
+
 .workshop-intervention-fab,
 .section-add-fab {
     position: fixed;

@@ -38,6 +38,10 @@
     .fab-mobile-center {
       display: inline-flex;
     }
+
+    body.has-mobile-fab {
+      padding-bottom: calc(11rem + env(safe-area-inset-bottom));
+    }
   }
 </style>
 
@@ -46,3 +50,4 @@
    title="Aggiungi motore">
     <span aria-hidden="true">+</span> Aggiungi motore
 </a>
+<script>document.body.classList.add('has-mobile-fab');</script>

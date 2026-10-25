@@ -9,11 +9,11 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title><c:out value="${machine.name}"/> • Manutenzione macchinari</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=26">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-<main class="container pb-5 workshop-maintenance-page">
+<main class="container pb-5 workshop-maintenance-page workshop-has-fab">
     <div class="page-header">
         <a class="text-decoration-none" href="${pageContext.request.contextPath}/workshop-maintenance">← Tutti i macchinari</a>
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mt-3">

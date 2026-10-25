@@ -20,59 +20,109 @@
     }
 
     @media (min-width: 992px) {
-        .navbar.navbar-dark .navbar-nav .nav-link.active {
-            background: rgba(79, 143, 179, 0.32);
-            border-radius: 0.65rem;
-            box-shadow: inset 0 -3px 0 var(--action-share-border);
-            font-weight: 700;
+        :root {
+            --desktop-sidebar-width: 252px;
         }
-    }
 
-    @media (min-width: 1400px) {
         body:not(.login-page) {
-            padding-top: 124px;
+            padding-top: 0;
+            padding-left: var(--desktop-sidebar-width);
+        }
+
+        .navbar.navbar-expand-xxl {
+            right: auto !important;
+            width: var(--desktop-sidebar-width) !important;
+            height: 100vh;
+            height: 100dvh;
+            padding: 1rem 0.7rem;
+            align-items: stretch;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            z-index: 1040 !important;
         }
 
         .navbar .container-fluid {
-            display: grid;
-            grid-template-columns: auto minmax(0, 1fr);
-            grid-template-rows: auto auto;
-            gap: 0.35rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            min-height: 100%;
+            padding: 0;
+            gap: 1rem;
         }
 
         .navbar .navbar-brand {
-            grid-column: 1;
-            grid-row: 1;
-            margin-right: 0;
+            align-self: flex-start;
+            margin: 0 0 0.25rem 0.85rem;
+        }
+
+        .navbar .navbar-toggler {
+            display: none;
         }
 
         .navbar .navbar-collapse {
-            display: contents !important;
+            display: flex !important;
+            flex: 1 0 auto;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: none;
         }
 
+        .navbar .navbar-nav,
         .navbar .navbar-nav.me-auto {
-            grid-column: 1 / -1;
-            grid-row: 2;
+            flex: 0 0 auto;
+            flex-direction: column;
+            align-items: stretch;
             width: 100%;
-            margin-right: 0 !important;
-            justify-content: space-between;
-            gap: 0.45rem;
+            margin: 0 !important;
+            gap: 0.2rem;
         }
 
         .navbar .navbar-nav.ms-auto {
-            grid-column: 2;
-            grid-row: 1;
-            justify-content: flex-end;
-            gap: 0.5rem;
+            margin-top: auto !important;
+            padding-top: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .navbar .navbar-nav .nav-item {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
         }
 
         .navbar .nav-group-start {
-            margin-left: 0;
+            margin: 0.4rem 0 0;
+            padding-top: 0;
         }
 
         .navbar .nav-link {
-            min-height: 42px;
-            padding: 0.6rem 0.85rem;
+            display: block;
+            width: 100%;
+            height: auto;
+            min-height: 0;
+            margin: 0;
+            padding: 0.7rem 0.85rem;
+            border-radius: 0.65rem;
+            text-align: left;
+            line-height: 1.25;
+            white-space: normal;
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link:focus-visible {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar.navbar-dark .navbar-nav .nav-link.active {
+            background: rgba(79, 143, 179, 0.32);
+            box-shadow: inset 3px 0 0 var(--action-share-border);
+            font-weight: 700;
         }
     }
 </style>
@@ -118,9 +168,10 @@
 
                 <li class="nav-item nav-group-start">
                     <a class="nav-link
-                       ${fn:startsWith(servletPath, "/engine")
+                       ${(fn:startsWith(servletPath, "/engine")
                         && !fn:startsWith(servletPath, "/engine/ready")
-                        && !fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
+                        && !fn:startsWith(servletPath, "/engine/archive"))
+                        || servletPath == '/upload' ? "active" : ""}"
                        href="<%= request.getContextPath() %>/engine/list">
                         Motori
                     </a>
@@ -156,7 +207,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link
-                       ${fn:startsWith(servletPath, "/ready-delivery") ? "active" : ""}"
+                       ${fn:startsWith(servletPath, "/ready-delivery") || fn:startsWith(servletPath, "/engine/ready") ? "active" : ""}"
                        href="<%= request.getContextPath() %>/ready-delivery">
                         Pronta Consegna
                     </a>
