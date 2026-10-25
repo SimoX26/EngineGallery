@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
 <html lang="it">
@@ -43,6 +44,9 @@
                 <div class="card-base">
                     <h5 class="fw-semibold mb-3">Notifiche Android</h5>
                     <div class="small text-muted">Gli amministratori che usano l'app Android ricevono un avviso quando un motore viene consegnato. Il permesso si gestisce nelle impostazioni Android dell'app.</div>
+                    <c:if test="${sessionScope.loggedUser.role == 'ADMIN'}">
+                        <button id="enableAndroidNotifications" type="button" class="btn btn-primary mt-3 d-none">Attiva notifiche</button>
+                    </c:if>
                 </div>
             </div>
         </div>
@@ -56,6 +60,15 @@
 
             const themeSelect = document.getElementById('themeSelect');
             const themeStatus = document.getElementById('themeStatus');
+            const notificationsButton = document.getElementById('enableAndroidNotifications');
+
+            if (notificationsButton && window.AndroidNotificationBridge
+                    && typeof window.AndroidNotificationBridge.enableNotifications === 'function') {
+                notificationsButton.classList.remove('d-none');
+                notificationsButton.addEventListener('click', function () {
+                    window.AndroidNotificationBridge.enableNotifications();
+                });
+            }
 
             function getSavedTheme() {
                 const value = localStorage.getItem(THEME_KEY) || 'auto';

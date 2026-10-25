@@ -11,6 +11,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
@@ -28,6 +29,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
@@ -50,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         private const val PRIMARY_HOST = "rettificamotorilacroce.it"
         private const val WWW_HOST = "www.rettificamotorilacroce.it"
         private const val LEGACY_IP_HOST = "82.165.20.124"
+        private const val NOTIFICATION_PERMISSION_REQUESTED_KEY = "notificationPermissionRequested"
         const val EXTRA_ENGINE_REF = "engineRef"
     }
 
@@ -58,11 +61,18 @@ class MainActivity : AppCompatActivity() {
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val ioExecutor = Executors.newSingleThreadExecutor()
     private var notificationPermissionRequested = false
+    private var manualNotificationPermissionRequest = false
+    private var awaitingNotificationSettings = false
     private var pendingPushCsrf: String? = null
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) registerPushToken(pendingPushCsrf)
+            if (manualNotificationPermissionRequest) {
+                val message = if (granted) "Permesso notifiche concesso" else "Permesso non concesso. Tocca di nuovo per riprovare"
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
             pendingPushCsrf = null
+            manualNotificationPermissionRequest = false
         }
 
     private val fileChooserLauncher =
@@ -153,27 +163,59 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun maybeRegisterNotifications(url: String?) {
+    private fun maybeRegisterNotifications(url: String?, requestedByUser: Boolean = false) {
         val appHost = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL).host
-        val pageUri = Uri.parse(url)
-        if (pageUri.scheme != "https" || pageUri.host != appHost || FirebaseApp.getApps(this).isEmpty()) return
+        val pageUri = Uri.parse(url ?: return)
+        if (pageUri.scheme != "https" || pageUri.host != appHost) return
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            if (requestedByUser) Toast.makeText(this, "Notifiche non disponibili in questa versione dell'app", Toast.LENGTH_SHORT).show()
+            return
+        }
         AndroidPushRegistration.getAdminCsrf { csrf ->
-            if (csrf == null) return@getAdminCsrf
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
+                if (csrf == null) {
+                    if (requestedByUser) Toast.makeText(this, "Accedi come amministratore per attivare le notifiche", Toast.LENGTH_SHORT).show()
+                    return@runOnUiThread
+                }
                 if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
                         this, Manifest.permission.POST_NOTIFICATIONS
                     ) != PackageManager.PERMISSION_GRANTED) {
-                    if (!notificationPermissionRequested) {
+                    if (pendingPushCsrf != null) return@runOnUiThread
+                    val previouslyRequested = getPreferences(MODE_PRIVATE)
+                        .getBoolean(NOTIFICATION_PERMISSION_REQUESTED_KEY, false)
+                    if (requestedByUser && previouslyRequested &&
+                        !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                        openNotificationSettings()
+                    } else if (!notificationPermissionRequested || requestedByUser) {
                         notificationPermissionRequested = true
+                        manualNotificationPermissionRequest = requestedByUser
                         pendingPushCsrf = csrf
+                        getPreferences(MODE_PRIVATE).edit()
+                            .putBoolean(NOTIFICATION_PERMISSION_REQUESTED_KEY, true).apply()
                         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                     return@runOnUiThread
                 }
+                if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+                    if (requestedByUser) openNotificationSettings()
+                    return@runOnUiThread
+                }
                 registerPushToken(csrf)
+                if (requestedByUser) Toast.makeText(this, "Permesso notifiche già attivo", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun openNotificationSettings() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        }
+        awaitingNotificationSettings = true
+        startActivity(intent)
     }
 
     private fun registerPushToken(csrf: String?) {
@@ -236,6 +278,7 @@ class MainActivity : AppCompatActivity() {
             displayZoomControls = false
         }
         webView.addJavascriptInterface(AndroidShareBridge(), "AndroidShareBridge")
+        webView.addJavascriptInterface(AndroidNotificationBridge(), "AndroidNotificationBridge")
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, true)
@@ -362,6 +405,10 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         webView.onResume()
         webView.resumeTimers()
+        if (awaitingNotificationSettings) {
+            awaitingNotificationSettings = false
+            maybeRegisterNotifications(webView.url)
+        }
     }
 
     override fun onDestroy() {
@@ -440,6 +487,20 @@ class MainActivity : AppCompatActivity() {
             })();
         """.trimIndent()
         webView.evaluateJavascript(script, null)
+    }
+
+    inner class AndroidNotificationBridge {
+        @JavascriptInterface
+        fun enableNotifications() {
+            runOnUiThread {
+                val settingsUri = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL.trimEnd('/') + "/settings")
+                val pageUri = Uri.parse(webView.url ?: return@runOnUiThread)
+                if (pageUri.scheme == "https" && pageUri.host == settingsUri.host &&
+                    pageUri.path == settingsUri.path) {
+                    maybeRegisterNotifications(webView.url, requestedByUser = true)
+                }
+            }
+        }
     }
 
     inner class AndroidShareBridge {
