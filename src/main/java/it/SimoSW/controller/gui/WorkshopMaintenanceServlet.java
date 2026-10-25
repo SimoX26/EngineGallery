@@ -73,13 +73,15 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
-            response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=detail&id=" + machineId + "&saved=1");
+            String destination = "createPlan".equals(action) ? "?view=plans&machineId=" : "?view=detail&id=";
+            response.sendRedirect(request.getContextPath() + "/workshop-maintenance" + destination + machineId + "&saved=1");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             String action = request.getParameter("action");
             request.setAttribute("view", "createMachine".equals(action) ? "new"
                     : "updateMachine".equals(action) ? "edit"
-                    : "recordIntervention".equals(action) ? "intervention" : null);
+                    : "recordIntervention".equals(action) ? "intervention"
+                    : "createPlan".equals(action) ? "new-plan" : null);
             render(request, response);
         }
     }
@@ -127,6 +129,32 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             request.setAttribute("today", LocalDate.now());
             if ("new".equals(view)) {
                 request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-machine-form.jsp").forward(request, response);
+                return;
+            }
+            if ("plans".equals(view) || "new-plan".equals(view)) {
+                List<MaintenancePlan> plans = controller.getPlans();
+                request.setAttribute("plans", plans);
+                request.setAttribute("planCount", plans.size());
+                request.setAttribute("overdueCount", plans.stream().filter(MaintenancePlan::isOverdue).count());
+                request.setAttribute("dueSoonCount", plans.stream().filter(MaintenancePlan::isDueSoon).count());
+                String selected = request.getParameter("machineId");
+                if ("new-plan".equals(view) && blank(selected)) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    return;
+                }
+                if (!blank(selected)) {
+                    long id = Long.parseLong(selected);
+                    WorkshopMachine machine = machines.stream().filter(item -> item.getId() == id).findFirst().orElse(null);
+                    if (machine == null) { response.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
+                    request.setAttribute("selectedMachine", machine);
+                    request.setAttribute("selectedPlans", plans.stream().filter(plan -> plan.getMachineId() == id).toList());
+                    int index = machines.indexOf(machine);
+                    if (index > 0) request.setAttribute("previousMachineId", machines.get(index - 1).getId());
+                    if (index + 1 < machines.size()) request.setAttribute("nextMachineId", machines.get(index + 1).getId());
+                }
+                request.getRequestDispatcher("new-plan".equals(view)
+                        ? "/WEB-INF/views/maintenance/workshop-plan-form.jsp"
+                        : "/WEB-INF/views/maintenance/workshop-plans.jsp").forward(request, response);
                 return;
             }
             if ("detail".equals(view) || "edit".equals(view)) {

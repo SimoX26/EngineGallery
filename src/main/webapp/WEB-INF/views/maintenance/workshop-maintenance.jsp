@@ -66,7 +66,7 @@
     </section>
 
     <div class="mt-4">
-        <button class="btn btn-outline-secondary" type="button" disabled title="Disponibile prossimamente">Piani e scadenzario · Prossimamente</button>
+        <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=plans">Piani e scadenzario</a>
     </div>
 
     <a class="workshop-intervention-fab" href="${pageContext.request.contextPath}/workshop-maintenance?view=intervention">
