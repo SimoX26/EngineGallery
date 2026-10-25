@@ -65,7 +65,7 @@ Le migration sono script SQL manuali: il codice non include un migration runner 
 4. Viene emesso un token remember-me firmato HMAC nel cookie `remember_user_id`.
 5. Alle richieste successive `AuthenticationFilter` accetta la sessione oppure verifica il cookie e ricrea la sessione.
 
-Il filtro lascia pubblici `/`, `/home`, `/auth`, `/index.jsp`, `/logout`, `/assets/*` e `/image/share`. Tutte le altre route richiedono un utente autenticato. I controlli di ruolo sono locali alle funzionalita amministrative: statistiche, manutenzione e archivio motori verificano `ADMIN`; le altre operazioni autenticate sono disponibili anche a `OPERATOR`. Le utenze Maurizio e Manuel non possono accedere a Magazzino e Statistiche, compresi gli URL diretti e le immagini del Magazzino.
+Il filtro lascia pubblici `/`, `/home`, `/auth`, `/index.jsp`, `/logout`, `/assets/*` e `/image/share`. Tutte le altre route richiedono un utente autenticato. I controlli di ruolo sono locali alle funzionalita amministrative: statistiche, manutenzione e archivio motori verificano `ADMIN`; le altre operazioni autenticate sono disponibili anche a `OPERATOR`. Gli utenti `OPERATOR` non possono accedere a Magazzino e Statistiche, compresi gli URL diretti e le immagini del Magazzino.
 
 ### Protezione delle modifiche
 

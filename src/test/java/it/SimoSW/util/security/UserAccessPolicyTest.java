@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserAccessPolicyTest {
     @Test
-    void maurizioAndManuelCannotAccessWarehouseOrStatisticsEvenWithAdminRole() {
-        for (String username : new String[] {"maurizio", "Manuel"}) {
-            User user = new User(username, null, UserRole.ADMIN);
+    void everyOperatorCannotAccessWarehouseOrStatistics() {
+        for (String username : new String[] {"maurizio", "Manuel", "mario"}) {
+            User user = new User(username, null, UserRole.OPERATOR);
             assertFalse(UserAccessPolicy.canViewWarehouse(user));
             assertFalse(UserAccessPolicy.canViewStatistics(user));
             assertTrue(UserAccessPolicy.isDeniedPath(user, "/warehouse/list"));
@@ -22,15 +22,15 @@ class UserAccessPolicyTest {
     }
 
     @Test
-    void otherUsersKeepExistingAccess() {
-        User operator = new User("mario", null, UserRole.OPERATOR);
-        User admin = new User("rml", null, UserRole.ADMIN);
-        assertTrue(UserAccessPolicy.canViewWarehouse(operator));
-        assertFalse(UserAccessPolicy.canViewStatistics(operator));
+    void accessDependsOnRoleRatherThanUsername() {
+        User admin = new User("maurizio", null, UserRole.ADMIN);
         assertTrue(UserAccessPolicy.canViewWarehouse(admin));
         assertTrue(UserAccessPolicy.canViewStatistics(admin));
-        assertFalse(UserAccessPolicy.isDeniedPath(operator, "/warehouse/list"));
+        assertFalse(UserAccessPolicy.isDeniedPath(admin, "/warehouse/list"));
         assertFalse(UserAccessPolicy.isDeniedPath(admin, "/statistics"));
         assertFalse(UserAccessPolicy.isDeniedPath(new User("maurizio", null, UserRole.OPERATOR), "/warehouse-tools"));
+        User inspector = new User("ispettore", null, UserRole.INSPECTOR);
+        assertTrue(UserAccessPolicy.canViewWarehouse(inspector));
+        assertFalse(UserAccessPolicy.canViewStatistics(inspector));
     }
 }

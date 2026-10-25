@@ -7,15 +7,15 @@ public final class UserAccessPolicy {
     private UserAccessPolicy() { }
 
     public static boolean canViewWarehouse(User user) {
-        return user != null && !isRestrictedUser(user);
+        return user != null && user.getRole() != null && user.getRole() != UserRole.OPERATOR;
     }
 
     public static boolean canViewStatistics(User user) {
-        return user != null && user.getRole() == UserRole.ADMIN && !isRestrictedUser(user);
+        return user != null && user.getRole() == UserRole.ADMIN;
     }
 
     public static boolean isDeniedPath(User user, String path) {
-        return isRestrictedUser(user) && (matches(path, "/warehouse")
+        return user != null && user.getRole() == UserRole.OPERATOR && (matches(path, "/warehouse")
                 || matches(path, "/uploads/warehouse")
                 || matches(path, "/statistics"));
     }
@@ -24,9 +24,4 @@ public final class UserAccessPolicy {
         return path != null && (path.equals(base) || path.startsWith(base + "/"));
     }
 
-    private static boolean isRestrictedUser(User user) {
-        if (user == null || user.getUsername() == null) return false;
-        String username = user.getUsername().trim();
-        return "maurizio".equalsIgnoreCase(username) || "manuel".equalsIgnoreCase(username);
-    }
 }
