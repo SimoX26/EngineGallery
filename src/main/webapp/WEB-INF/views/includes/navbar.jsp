@@ -18,6 +18,63 @@
             padding-top: 66px;
         }
     }
+
+    @media (min-width: 992px) {
+        .navbar.navbar-dark .navbar-nav .nav-link.active {
+            background: rgba(79, 143, 179, 0.32);
+            border-radius: 0.65rem;
+            box-shadow: inset 0 -3px 0 var(--action-share-border);
+            font-weight: 700;
+        }
+    }
+
+    @media (min-width: 1400px) {
+        body:not(.login-page) {
+            padding-top: 124px;
+        }
+
+        .navbar .container-fluid {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            gap: 0.35rem 1rem;
+        }
+
+        .navbar .navbar-brand {
+            grid-column: 1;
+            grid-row: 1;
+            margin-right: 0;
+        }
+
+        .navbar .navbar-collapse {
+            display: contents !important;
+        }
+
+        .navbar .navbar-nav.me-auto {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            width: 100%;
+            margin-right: 0 !important;
+            justify-content: space-between;
+            gap: 0.45rem;
+        }
+
+        .navbar .navbar-nav.ms-auto {
+            grid-column: 2;
+            grid-row: 1;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .navbar .nav-group-start {
+            margin-left: 0;
+        }
+
+        .navbar .nav-link {
+            min-height: 42px;
+            padding: 0.6rem 0.85rem;
+        }
+    }
 </style>
 
 <nav class="navbar navbar-expand-xxl navbar-dark fixed-top"
