@@ -79,7 +79,7 @@
                             <div class="modal-footer filters-modal-footer">
                                 <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
                                    id="engineFiltersReset"
-                                   class="btn btn-sm btn-outline-secondary filters-btn-secondary">Reimposta filtri</a>
+                                   class="btn btn-sm btn-outline-secondary filters-btn-secondary">Rimuovi filtri</a>
                                 <button type="submit" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
                             </div>
                         </div>

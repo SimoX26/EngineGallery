@@ -59,7 +59,7 @@
                             <input type="search" id="warehouseFiltersKeywordInput" class="form-control" placeholder="cerca...">
                         </div>
                         <div class="modal-footer filters-modal-footer">
-                            <button type="button" id="warehouseFiltersResetBtn" class="btn btn-sm btn-outline-secondary filters-btn-secondary">Reimposta filtri</button>
+                            <button type="button" id="warehouseFiltersResetBtn" class="btn btn-sm btn-outline-secondary filters-btn-secondary">Rimuovi filtri</button>
                             <button type="button" id="warehouseFiltersApplyBtn" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
                         </div>
                     </div>
