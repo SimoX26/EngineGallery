@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ANDROID_URL_DEFAULT="https://rettificamotorilacroce.it"
+ANDROID_URL_DEFAULT="https://rettificamotorilacroce.it/EngineGallery"
 
 usage() {
   cat <<'HELP'
@@ -10,7 +10,7 @@ Uso:
 
 Esempi:
   ./build-apk.sh
-  ./build-apk.sh --android-url https://rettificamotorilacroce.it
+  ./build-apk.sh --android-url https://rettificamotorilacroce.it/EngineGallery
 
 Opzioni:
   --android-url URL backend da iniettare nella build Android (ENGINE_GALLERY_BASE_URL)

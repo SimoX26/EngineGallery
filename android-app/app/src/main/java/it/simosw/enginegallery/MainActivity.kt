@@ -66,7 +66,12 @@ class MainActivity : AppCompatActivity() {
     private var pendingPushCsrf: String? = null
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) registerPushToken(pendingPushCsrf)
+            if (granted) {
+                if (pendingPushCsrf == null) maybeRegisterNotifications(webView.url)
+                else registerPushToken(pendingPushCsrf)
+            } else {
+                updateNotificationStatus("inactive")
+            }
             if (manualNotificationPermissionRequest) {
                 val message = if (granted) "Permesso notifiche concesso" else "Permesso non concesso. Tocca di nuovo per riprovare"
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -167,7 +172,9 @@ class MainActivity : AppCompatActivity() {
         val appHost = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL).host
         val pageUri = Uri.parse(url ?: return)
         if (pageUri.scheme != "https" || pageUri.host != appHost) return
+        updateNotificationStatus("checking")
         if (FirebaseApp.getApps(this).isEmpty()) {
+            updateNotificationStatus("unavailable")
             if (requestedByUser) Toast.makeText(this, "Notifiche non disponibili in questa versione dell'app", Toast.LENGTH_SHORT).show()
             return
         }
@@ -175,12 +182,14 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (csrf == null) {
+                    updateNotificationStatus("verification_failed")
                     if (requestedByUser) Toast.makeText(this, "Accedi come amministratore per attivare le notifiche", Toast.LENGTH_SHORT).show()
                     return@runOnUiThread
                 }
                 if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
                         this, Manifest.permission.POST_NOTIFICATIONS
                     ) != PackageManager.PERMISSION_GRANTED) {
+                    updateNotificationStatus("inactive")
                     if (pendingPushCsrf != null) return@runOnUiThread
                     val previouslyRequested = getPreferences(MODE_PRIVATE)
                         .getBoolean(NOTIFICATION_PERMISSION_REQUESTED_KEY, false)
@@ -197,7 +206,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     return@runOnUiThread
                 }
-                if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+                if (!canShowDeliveredNotifications()) {
+                    updateNotificationStatus("inactive")
                     if (requestedByUser) openNotificationSettings()
                     return@runOnUiThread
                 }
@@ -218,12 +228,47 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun canShowDeliveredNotifications(): Boolean {
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = getSystemService(NotificationManager::class.java)
+                .getNotificationChannel("delivered_engines")
+            if (channel?.importance == NotificationManager.IMPORTANCE_NONE) return false
+        }
+        return true
+    }
+
     private fun registerPushToken(csrf: String?) {
-        if (csrf == null) return
+        if (csrf == null) {
+            updateNotificationStatus("verification_failed")
+            return
+        }
+        updateNotificationStatus("registering")
         FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-            AndroidPushRegistration.register(token, csrf)
+            AndroidPushRegistration.register(token, csrf) { registered ->
+                updateNotificationStatus(if (registered) "active" else "error")
+            }
         }.addOnFailureListener { ex ->
             Log.w(TAG, "Token notifiche Android non disponibile", ex)
+            updateNotificationStatus("error")
+        }
+    }
+
+    private fun isSettingsPage(url: String?): Boolean {
+        val settingsUri = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL.trimEnd('/') + "/settings")
+        val pageUri = Uri.parse(url ?: return false)
+        return pageUri.scheme == "https" && pageUri.host == settingsUri.host &&
+            pageUri.path == settingsUri.path
+    }
+
+    private fun updateNotificationStatus(status: String) {
+        runOnUiThread {
+            if (!isFinishing && !isDestroyed && isSettingsPage(webView.url)) {
+                webView.evaluateJavascript(
+                    "window.setAndroidNotificationStatus && window.setAndroidNotificationStatus('$status')",
+                    null
+                )
+            }
         }
     }
 
@@ -317,7 +362,7 @@ class MainActivity : AppCompatActivity() {
                 swipeRefresh.isRefreshing = false
                 Log.i(TAG, "Page finished: $url")
                 installShareBridgeScript()
-                maybeRegisterNotifications(url)
+                if (!isSettingsPage(url)) maybeRegisterNotifications(url)
             }
 
             override fun onReceivedError(
@@ -491,12 +536,16 @@ class MainActivity : AppCompatActivity() {
 
     inner class AndroidNotificationBridge {
         @JavascriptInterface
+        fun refreshNotificationStatus() {
+            runOnUiThread {
+                if (isSettingsPage(webView.url)) maybeRegisterNotifications(webView.url)
+            }
+        }
+
+        @JavascriptInterface
         fun enableNotifications() {
             runOnUiThread {
-                val settingsUri = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL.trimEnd('/') + "/settings")
-                val pageUri = Uri.parse(webView.url ?: return@runOnUiThread)
-                if (pageUri.scheme == "https" && pageUri.host == settingsUri.host &&
-                    pageUri.path == settingsUri.path) {
+                if (isSettingsPage(webView.url)) {
                     maybeRegisterNotifications(webView.url, requestedByUser = true)
                 }
             }

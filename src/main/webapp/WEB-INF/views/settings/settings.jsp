@@ -45,6 +45,7 @@
                     <h5 class="fw-semibold mb-3">Notifiche Android</h5>
                     <div class="small text-muted">Gli amministratori che usano l'app Android ricevono un avviso quando un motore viene consegnato. Il permesso si gestisce nelle impostazioni Android dell'app.</div>
                     <c:if test="${sessionScope.loggedUser.role == 'ADMIN'}">
+                        <div id="androidNotificationStatus" class="small mt-3" role="status" aria-live="polite">Stato: verifica in corso…</div>
                         <button id="enableAndroidNotifications" type="button" class="btn btn-primary mt-3 d-none">Attiva notifiche</button>
                     </c:if>
                 </div>
@@ -61,13 +62,37 @@
             const themeSelect = document.getElementById('themeSelect');
             const themeStatus = document.getElementById('themeStatus');
             const notificationsButton = document.getElementById('enableAndroidNotifications');
+            const notificationsStatus = document.getElementById('androidNotificationStatus');
+
+            window.setAndroidNotificationStatus = function (state) {
+                if (!notificationsStatus) return;
+                const messages = {
+                    checking: 'Stato: verifica in corso…',
+                    inactive: 'Stato: notifiche disattivate. Tocca Attiva notifiche.',
+                    registering: 'Stato: permesso concesso. Registro il dispositivo…',
+                    active: 'Stato: notifiche attive su questo dispositivo.',
+                    error: 'Stato: permesso concesso, ma registrazione non riuscita. Riprova.',
+                    unavailable: 'Stato: aggiorna l’app Android per verificare e attivare le notifiche.',
+                    verification_failed: 'Stato: impossibile verificare l’accesso amministratore. Riprova.'
+                };
+                notificationsStatus.textContent = messages[state] || messages.checking;
+                notificationsStatus.classList.toggle('text-success', state === 'active');
+                if (notificationsButton) {
+                    notificationsButton.textContent = state === 'active' ? 'Verifica notifiche' : 'Attiva notifiche';
+                }
+            };
 
             if (notificationsButton && window.AndroidNotificationBridge
-                    && typeof window.AndroidNotificationBridge.enableNotifications === 'function') {
+                    && typeof window.AndroidNotificationBridge.enableNotifications === 'function'
+                    && typeof window.AndroidNotificationBridge.refreshNotificationStatus === 'function') {
                 notificationsButton.classList.remove('d-none');
                 notificationsButton.addEventListener('click', function () {
+                    window.setAndroidNotificationStatus('checking');
                     window.AndroidNotificationBridge.enableNotifications();
                 });
+                window.AndroidNotificationBridge.refreshNotificationStatus();
+            } else {
+                window.setAndroidNotificationStatus('unavailable');
             }
 
             function getSavedTheme() {

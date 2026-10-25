@@ -25,18 +25,27 @@ object AndroidPushRegistration {
         }
     }
 
-    fun register(token: String, csrf: String? = null) {
+    fun register(token: String, csrf: String? = null, onResult: ((Boolean) -> Unit)? = null) {
         executor.execute {
-            try {
+            val registered = try {
                 val endpoint = endpoint()
                 val cookies = CookieManager.getInstance().getCookie(endpoint)
-                if (cookies.isNullOrBlank()) return@execute
-                val tokenCsrf = csrf ?: request("GET", endpoint, cookies, null) ?: return@execute
-                val body = "csrfToken=${encode(tokenCsrf)}&token=${encode(token)}"
-                request("POST", endpoint, cookies, body)
+                if (cookies.isNullOrBlank()) {
+                    false
+                } else {
+                    val tokenCsrf = csrf ?: request("GET", endpoint, cookies, null)
+                    if (tokenCsrf == null) {
+                        false
+                    } else {
+                        val body = "csrfToken=${encode(tokenCsrf)}&token=${encode(token)}"
+                        request("POST", endpoint, cookies, body) == "registered"
+                    }
+                }
             } catch (ex: Exception) {
                 Log.w(TAG, "Registrazione notifiche Android fallita", ex)
+                false
             }
+            onResult?.invoke(registered)
         }
     }
 
@@ -58,14 +67,15 @@ object AndroidPushRegistration {
         }
         return try {
             if (body != null) connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-            if (method == "GET" && connection.responseCode == 200
+            val responseCode = connection.responseCode
+            if (method == "GET" && responseCode == 200
                 && connection.contentType?.startsWith("text/plain") == true) {
                 connection.inputStream.bufferedReader().use { it.readText().takeIf { token -> token.length in 20..100 } }
             } else {
-                if (method == "POST" && connection.responseCode != 204) {
-                    Log.w(TAG, "Registrazione notifiche Android: HTTP ${connection.responseCode}")
+                if (method == "POST" && responseCode != 204) {
+                    Log.w(TAG, "Registrazione notifiche Android: HTTP $responseCode")
                 }
-                null
+                if (method == "POST" && responseCode == 204) "registered" else null
             }
         } finally {
             connection.disconnect()

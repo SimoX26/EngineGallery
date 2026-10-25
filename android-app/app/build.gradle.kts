@@ -10,7 +10,7 @@ if (file("google-services.json").exists()) {
 }
 
 val engineGalleryBaseUrl = (project.findProperty("ENGINE_GALLERY_BASE_URL") as String?)
-    ?: "https://rettificamotorilacroce.it"
+    ?: "https://rettificamotorilacroce.it/EngineGallery"
 
 android {
     namespace = "it.simosw.enginegallery"
