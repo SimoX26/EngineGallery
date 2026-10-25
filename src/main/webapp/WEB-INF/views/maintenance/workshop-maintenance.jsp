@@ -52,7 +52,7 @@
     <section class="card-base mb-4" id="macchinari">
         <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
             <h2 class="h4 mb-0">Anagrafica macchinari</h2>
-            <c:choose><c:when test="${not empty editMachine}"><a class="btn btn-primary" href="${pageContext.request.contextPath}/workshop-maintenance?new=1#machine-form">Aggiungi macchinario</a></c:when><c:otherwise><button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#machine-form" aria-controls="machine-form" aria-expanded="${showMachineForm or param.new == '1'}">Aggiungi macchinario</button></c:otherwise></c:choose>
+            <c:choose><c:when test="${not empty editMachine}"><a class="btn btn-primary" href="${pageContext.request.contextPath}/workshop-maintenance?newMachine=1#machine-form">Aggiungi macchinario</a></c:when><c:otherwise><button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#machine-form" aria-controls="machine-form" aria-expanded="${showMachineForm or param.newMachine == '1'}">Aggiungi macchinario</button></c:otherwise></c:choose>
         </div>
         <div class="table-responsive"><table class="table align-middle">
             <thead><tr><th>Foto</th><th>Nome</th><th>Modello</th><th>Matricola</th><th>Posizione</th><th>Ore</th><th>Stato</th><th></th></tr></thead>
@@ -71,7 +71,7 @@
     </section>
 
     <div class="row g-4 mb-4">
-        <div class="col-lg-6"><div class="collapse ${not empty editMachine or showMachineForm or param.new == '1' ? 'show' : ''}" id="machine-form"><section class="card-base h-100">
+        <div class="col-lg-6"><div class="collapse ${not empty editMachine or showMachineForm or param.newMachine == '1' ? 'show' : ''}" id="machine-form"><section class="card-base h-100">
             <h2 class="h4">${empty editMachine ? 'Nuovo macchinario' : 'Modifica macchinario'}</h2>
             <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/workshop-maintenance">
                 <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
