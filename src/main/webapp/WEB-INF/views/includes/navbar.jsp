@@ -20,6 +20,19 @@
     }
 
     @media (max-width: 991.98px) {
+        html.mobile-nav-open,
+        html.mobile-nav-open body {
+            overflow: hidden !important;
+        }
+
+        html.mobile-nav-open body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 1090;
+            background: rgba(0, 0, 0, 0.35);
+        }
+
         .navbar .navbar-collapse {
             position: absolute;
             top: calc(100% + 0.4rem);
@@ -29,9 +42,12 @@
             max-height: calc(100vh - 80px);
             max-height: calc(100dvh - 80px);
             overflow-y: auto;
+            overscroll-behavior: contain;
             margin: 0;
             padding: 0.65rem;
             text-align: left;
+            background: var(--bg-dark);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
         }
 
         .navbar .navbar-collapse.collapsing {
@@ -161,7 +177,7 @@
         }
     }
 
-    .navbar .navbar-nav .nav-item.nav-statistics {
+    .navbar .navbar-nav .nav-item.nav-archive {
         margin-top: 0.85rem;
         padding-top: 0.85rem;
         border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -218,16 +234,6 @@
                     </a>
                 </li>
 
-                <c:if test="${canViewEngineArchive}">
-                    <li class="nav-item">
-                        <a class="nav-link
-                           ${fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
-                           href="<%= request.getContextPath() %>/engine/archive">
-                            Archivio motori
-                        </a>
-                    </li>
-                </c:if>
-
                 <li class="nav-item nav-group-start">
                     <a class="nav-link
                        ${fn:startsWith(servletPath, "/hydraulic-test") ? "active" : ""}"
@@ -267,8 +273,18 @@
                        href="<%= request.getContextPath() %>/workshop-maintenance">Manutenzione macchinari</a>
                 </li>
 
+                <c:if test="${canViewEngineArchive}">
+                    <li class="nav-item nav-archive">
+                        <a class="nav-link
+                           ${fn:startsWith(servletPath, "/engine/archive") ? "active" : ""}"
+                           href="<%= request.getContextPath() %>/engine/archive">
+                            Archivio motori
+                        </a>
+                    </li>
+                </c:if>
+
                 <c:if test="${canViewStatistics}">
-                    <li class="nav-item nav-statistics">
+                    <li class="nav-item">
                         <a class="nav-link
                            ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
                            href="<%= request.getContextPath() %>/statistics">
@@ -415,19 +431,40 @@
 
             toggler.dataset.initialized = 'true';
             const collapse = window.bootstrap.Collapse.getOrCreateInstance(menu, {toggle: false});
+            const mobileViewport = window.matchMedia('(max-width: 991.98px)');
+            const setScrollLocked = function (open) {
+                document.documentElement.classList.toggle('mobile-nav-open', open && mobileViewport.matches);
+            };
 
             toggler.addEventListener('click', function (event) {
                 event.preventDefault();
                 collapse.toggle();
             });
 
+            menu.addEventListener('show.bs.collapse', function () {
+                setScrollLocked(true);
+            });
+
             menu.addEventListener('shown.bs.collapse', function () {
                 toggler.setAttribute('aria-expanded', 'true');
+                setScrollLocked(true);
+            });
+
+            menu.addEventListener('hide.bs.collapse', function () {
+                setScrollLocked(false);
             });
 
             menu.addEventListener('hidden.bs.collapse', function () {
                 toggler.setAttribute('aria-expanded', 'false');
+                setScrollLocked(false);
             });
+
+            const syncScrollLock = function () {
+                setScrollLocked(menu.classList.contains('show'));
+            };
+            window.addEventListener('resize', syncScrollLock);
+            window.addEventListener('pageshow', syncScrollLock);
+            syncScrollLock();
         }
 
         function initLoadingOverlay() {
