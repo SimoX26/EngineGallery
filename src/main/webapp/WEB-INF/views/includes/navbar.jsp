@@ -131,6 +131,11 @@
                     </li>
                 </c:if>
 
+                <li class="nav-item">
+                    <a class="nav-link ${fn:startsWith(servletPath, '/workshop-maintenance') ? 'active' : ''}"
+                       href="<%= request.getContextPath() %>/workshop-maintenance">Macchinari officina</a>
+                </li>
+
 
             </ul>
 

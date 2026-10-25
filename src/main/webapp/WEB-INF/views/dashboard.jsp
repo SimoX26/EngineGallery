@@ -87,6 +87,7 @@
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/warehouse/list"><div class="home-nav-card-title">Magazzino</div><p class="home-nav-card-desc mb-0">Articoli, quantità e giacenze.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/catalog"><div class="home-nav-card-title">Catalogo</div><p class="home-nav-card-desc mb-0">Schede tecniche motori a catalogo.</p></a></div>
                 <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/ready-delivery"><div class="home-nav-card-title">Pronta Consegna</div><p class="home-nav-card-desc mb-0">Sezione pronta consegna.</p></a></div>
+                <div class="col-lg-4 col-md-6"><a class="home-nav-card card-base" href="<%= request.getContextPath() %>/workshop-maintenance"><div class="home-nav-card-title">Manutenzione macchinari</div><p class="home-nav-card-desc mb-0">Scadenze e interventi delle attrezzature interne.</p></a></div>
             </div>
         </div>
     </div>
