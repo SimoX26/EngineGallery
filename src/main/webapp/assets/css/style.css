@@ -745,7 +745,12 @@ body:not(.login-page) {
     white-space: pre-wrap;
 }
 
-.workshop-intervention-fab {
+.section-add-page {
+    padding-bottom: 6rem;
+}
+
+.workshop-intervention-fab,
+.section-add-fab {
     position: fixed;
     right: max(20px, env(safe-area-inset-right));
     bottom: max(20px, env(safe-area-inset-bottom));
@@ -764,14 +769,21 @@ body:not(.login-page) {
     text-decoration: none;
 }
 
+.section-add-fab {
+    z-index: 1040;
+}
+
 .workshop-intervention-fab:hover,
-.workshop-intervention-fab:focus-visible {
+.workshop-intervention-fab:focus-visible,
+.section-add-fab:hover,
+.section-add-fab:focus-visible {
     background: var(--primary-hover);
     color: #fff;
     text-decoration: none;
 }
 
-.workshop-intervention-fab span {
+.workshop-intervention-fab span,
+.section-add-fab span {
     font-size: 1.3rem;
     line-height: 1;
 }

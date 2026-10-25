@@ -2,45 +2,47 @@
 
 <style>
   .fab-mobile-center {
-    display: none !important;
+    display: none;
+    position: fixed;
+    left: 50%;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 1040;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    max-width: calc(100vw - 32px);
+    padding: 0.8rem 1.2rem;
+    border-radius: 999px;
+    background: #1f2933;
+    color: #fff;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+    transform: translateX(-50%);
   }
 
-@media (min-width: 769px) {
-  .fab-mobile-center {
-    display: none !important;
+  .fab-mobile-center:hover,
+  .fab-mobile-center:focus-visible {
+    background: #374151;
+    color: #fff;
+    text-decoration: none;
   }
-}
 
-@media (max-width: 768px) {
-  .fab-mobile-center {
-    display: flex !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-    bottom: 20px !important;
+  .fab-mobile-center span {
+    font-size: 1.3rem;
+    line-height: 1;
   }
-}
+
+  @media (max-width: 768px) {
+    .fab-mobile-center {
+      display: inline-flex;
+    }
+  }
 </style>
 
 <a href="<%= request.getContextPath() %>/upload"
    class="fab-mobile-center"
-   title="Carica immagine"
-   style="
-     position: fixed !important;
-     right: 24px !important;
-     bottom: 24px !important;
-     width: 64px !important;
-     height: 64px !important;
-     border-radius: 50% !important;
-     align-items: center !important;
-     justify-content: center !important;
-     background: #1f2933 !important;
-     color: #fff !important;
-     font-size: 28px !important;
-     text-decoration: none !important;
-     box-shadow: 0 20px 50px rgba(0,0,0,0.35) !important;
-     z-index: 2147483647 !important;
-     pointer-events: auto !important;
-   ">
-    +
+   title="Aggiungi motore">
+    <span aria-hidden="true">+</span> Aggiungi motore
 </a>

@@ -13,18 +13,16 @@
     <title>Engine Gallery • Prove idrauliche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=15">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=25">
 </head>
 
 <body>
-
-<jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
 <div class="engine-gallery-page">
 
     <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
-    <div class="container">
+    <div class="container section-add-page">
 
         <div class="page-header-with-search">
             <div class="page-header">
@@ -103,11 +101,6 @@
                     </div>
                 </div>
 
-                <div class="page-header-actions page-header-actions--add">
-                    <a class="btn btn-sm btn-add-plus" href="<%= request.getContextPath() %>/hydraulic-test/new">
-                        Aggiungi +
-                    </a>
-                </div>
             </div>
         </div>
 
@@ -203,6 +196,10 @@
         </c:choose>
 
     </div>
+
+    <a class="section-add-fab" href="<%= request.getContextPath() %>/hydraulic-test/new">
+        <span aria-hidden="true">+</span> Aggiungi prova idraulica
+    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="<%= request.getContextPath() %>/assets/js/live-search.js"></script>
