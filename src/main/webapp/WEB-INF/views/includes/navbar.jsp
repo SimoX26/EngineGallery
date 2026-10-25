@@ -21,7 +21,7 @@
 
     @media (min-width: 992px) {
         :root {
-            --desktop-sidebar-width: 252px;
+            --desktop-sidebar-width: 240px;
         }
 
         body:not(.login-page) {
