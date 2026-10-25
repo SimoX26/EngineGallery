@@ -48,28 +48,22 @@
             </div>
 
             <div class="col-6 col-lg-2">
-                <a href="<%= request.getContextPath() %>/engine/list" class="kpi-card-link">
-                    <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">Inseriti mese</div>
-                        <div class="kpi-value">${motoriInseritiMese}</div>
-                    </div>
-                </a>
+                <div class="kpi-card dashboard-kpi-card">
+                    <div class="kpi-title">Inseriti mese</div>
+                    <div class="kpi-value">${motoriInseritiMese}</div>
+                </div>
             </div>
             <div class="col-6 col-lg-2">
-                <a href="<%= request.getContextPath() %>/engine/archive" class="kpi-card-link">
-                    <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">Consegnati mese</div>
-                        <div class="kpi-value">${motoriConsegnatiMese}</div>
-                    </div>
-                </a>
+                <div class="kpi-card dashboard-kpi-card">
+                    <div class="kpi-title">Consegnati mese</div>
+                    <div class="kpi-value">${motoriConsegnatiMese}</div>
+                </div>
             </div>
             <div class="col-12 col-lg-2">
-                <a href="<%= request.getContextPath() %>/engine/list?status=WORK_IN_PROGRESS" class="kpi-card-link">
-                    <div class="kpi-card dashboard-kpi-card">
-                        <div class="kpi-title">In lavorazione</div>
-                        <div class="kpi-value">${workInProgressEngines}</div>
-                    </div>
-                </a>
+                <div class="kpi-card dashboard-kpi-card">
+                    <div class="kpi-title">In lavorazione</div>
+                    <div class="kpi-value">${workInProgressEngines}</div>
+                </div>
             </div>
         </div>
 
