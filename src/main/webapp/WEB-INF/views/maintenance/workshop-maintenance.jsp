@@ -8,11 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Manutenzione macchinari • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=13">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-<main class="container pb-5">
+<main class="container pb-5 workshop-maintenance-page">
     <div class="page-header"><h1>Manutenzione macchinari</h1><p>Attrezzature interne dell'officina</p></div>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${param.saved == '1'}"><div class="alert alert-success" role="status">Dati salvati.</div></c:if>

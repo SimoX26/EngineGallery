@@ -632,6 +632,23 @@ body:not(.login-page) {
     color: var(--text-main);
 }
 
+.workshop-maintenance-page .table {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border-soft);
+}
+
+.workshop-maintenance-page .table > :not(caption) > * > * {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-bottom-color: var(--border-soft);
+    box-shadow: none;
+}
+
+.workshop-maintenance-page .table > thead > tr > th {
+    background-color: var(--input-bg-focus);
+}
+
 .catalog-table {
     min-width: 760px;
 }
