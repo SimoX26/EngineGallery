@@ -1,16 +1,14 @@
 package it.SimoSW.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class MaintenanceIntervention {
     private final long id, machineId;
     private final String machineName, type, description, parts, operator;
     private final LocalDate performedOn;
-    private final BigDecimal cost;
 
     public MaintenanceIntervention(long id, long machineId, String machineName, String type, LocalDate performedOn,
-                                   String description, String parts, BigDecimal cost, String operator) {
+                                   String description, String parts, String operator) {
         this.id = id;
         this.machineId = machineId;
         this.machineName = machineName;
@@ -18,7 +16,6 @@ public class MaintenanceIntervention {
         this.performedOn = performedOn;
         this.description = description;
         this.parts = parts;
-        this.cost = cost;
         this.operator = operator;
     }
 
@@ -29,6 +26,5 @@ public class MaintenanceIntervention {
     public LocalDate getPerformedOn() { return performedOn; }
     public String getDescription() { return description; }
     public String getParts() { return parts; }
-    public BigDecimal getCost() { return cost; }
     public String getOperator() { return operator; }
 }

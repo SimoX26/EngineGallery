@@ -4,7 +4,6 @@ import it.SimoSW.model.MaintenanceIntervention;
 import it.SimoSW.model.MaintenancePlan;
 import it.SimoSW.model.WorkshopMachine;
 import it.SimoSW.model.dao.WorkshopMaintenanceDAO;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,8 +12,14 @@ public class WorkshopMaintenanceController {
 
     public WorkshopMaintenanceController(WorkshopMaintenanceDAO dao) { this.dao = dao; }
     public List<WorkshopMachine> getMachines() { return dao.findMachines(); }
+    public String getMachineImageFilename(long machineId) { return dao.findMachineImageFilename(machineId); }
     public List<MaintenancePlan> getPlans() { return dao.findPlans(); }
     public List<MaintenanceIntervention> getInterventions() { return dao.findInterventions(); }
+
+    public String updateMachineImage(long machineId, String imageFilename) {
+        requireMachine(machineId);
+        return dao.updateMachineImage(machineId, required(imageFilename, 255, "Immagine"));
+    }
 
     public long createMachine(String name, String model, String serial, String location, int hours) {
         validateHours(hours);
@@ -40,15 +45,13 @@ public class WorkshopMaintenanceController {
     }
 
     public void recordIntervention(long machineId, Long planId, String type, LocalDate date,
-                                   String description, String parts, BigDecimal cost, String operator) {
+                                   String description, String parts, String operator) {
         requireMachine(machineId);
         if (!"ORDINARY".equals(type) && !"EXTRAORDINARY".equals(type))
             throw new IllegalArgumentException("Tipo di intervento non valido");
         if (date == null || date.isAfter(LocalDate.now())) throw new IllegalArgumentException("Data intervento non valida");
-        if (cost == null || cost.signum() < 0 || cost.scale() > 2 || cost.precision() - cost.scale() > 10)
-            throw new IllegalArgumentException("Costo non valido");
         dao.recordIntervention(machineId, planId, type, date, required(description, 5000, "Descrizione"),
-                optional(parts, 5000, "Ricambi"), cost, required(operator, 100, "Operatore"));
+                optional(parts, 5000, "Ricambi"), required(operator, 100, "Operatore"));
     }
 
     private void requireMachine(long id) {

@@ -5,7 +5,6 @@ import it.SimoSW.model.MaintenancePlan;
 import it.SimoSW.model.WorkshopMachine;
 import it.SimoSW.model.dao.WorkshopMaintenanceDAO;
 import org.junit.jupiter.api.Test;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,22 +31,22 @@ class WorkshopMaintenanceControllerTest {
     }
 
     @Test
-    void rejectsInvalidCostAndFutureIntervention() {
+    void rejectsFutureIntervention() {
         assertThrows(IllegalArgumentException.class, () -> controller.recordIntervention(1, null, "ORDINARY",
-                LocalDate.now(), "Controllo", null, new BigDecimal("-1"), "Mario"));
-        assertThrows(IllegalArgumentException.class, () -> controller.recordIntervention(1, null, "ORDINARY",
-                LocalDate.now().plusDays(1), "Controllo", null, BigDecimal.ZERO, "Mario"));
+                LocalDate.now().plusDays(1), "Controllo", null, "Mario"));
     }
 
     private static class StubDAO implements WorkshopMaintenanceDAO {
         int savedPlans;
-        public List<WorkshopMachine> findMachines() { return List.of(new WorkshopMachine(1, "Tornio", "A", "123", "Banco", "ACTIVE", 100)); }
+        public List<WorkshopMachine> findMachines() { return List.of(new WorkshopMachine(1, "Tornio", "A", "123", "Banco", "ACTIVE", 100, null)); }
+        public String findMachineImageFilename(long machineId) { return null; }
         public List<MaintenancePlan> findPlans() { return List.of(); }
         public List<MaintenanceIntervention> findInterventions() { return List.of(); }
         public long createMachine(String name, String model, String serialNumber, String location, int usageHours) { return 1; }
         public boolean updateMachine(long id, String name, String model, String serialNumber, String location, String status, int usageHours) { return true; }
+        public String updateMachineImage(long machineId, String imageFilename) { return null; }
         public long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours) { savedPlans++; return savedPlans; }
         public void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,
-                                       String description, String parts, BigDecimal cost, String operator) { }
+                                       String description, String parts, String operator) { }
     }
 }

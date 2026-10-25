@@ -4,20 +4,27 @@ import it.SimoSW.controller.app.WorkshopMaintenanceController;
 import it.SimoSW.model.MaintenancePlan;
 import it.SimoSW.model.User;
 import it.SimoSW.model.WorkshopMachine;
+import it.SimoSW.util.ImageOptimizationUtil;
+import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 @WebServlet("/workshop-maintenance")
+@MultipartConfig(maxFileSize = 10 * 1024 * 1024, maxRequestSize = 11 * 1024 * 1024)
 public class WorkshopMaintenanceServlet extends HttpServlet {
     private WorkshopMaintenanceController controller;
 
@@ -37,12 +44,17 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
         try {
             String action = request.getParameter("action");
             if ("createMachine".equals(action)) {
-                controller.createMachine(request.getParameter("name"), request.getParameter("model"),
+                Part image = checkedImage(request);
+                long id = controller.createMachine(request.getParameter("name"), request.getParameter("model"),
                         request.getParameter("serialNumber"), request.getParameter("location"), integer(request, "usageHours"));
+                if (image != null && !saveImageOrRedirect(request, response, id, image)) return;
             } else if ("updateMachine".equals(action)) {
-                controller.updateMachine(longValue(request, "machineId"), request.getParameter("name"), request.getParameter("model"),
+                Part image = checkedImage(request);
+                long id = longValue(request, "machineId");
+                controller.updateMachine(id, request.getParameter("name"), request.getParameter("model"),
                         request.getParameter("serialNumber"), request.getParameter("location"), request.getParameter("status"),
                         integer(request, "usageHours"));
+                if (image != null && !saveImageOrRedirect(request, response, id, image)) return;
             } else if ("createPlan".equals(action)) {
                 controller.createPlan(longValue(request, "machineId"), request.getParameter("description"),
                         date(request.getParameter("dueDate")), optionalInteger(request, "dueHours"));
@@ -52,7 +64,7 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 if (user == null) { response.sendError(HttpServletResponse.SC_UNAUTHORIZED); return; }
                 controller.recordIntervention(longValue(request, "machineId"), optionalLong(request, "planId"),
                         request.getParameter("type"), date(request.getParameter("performedOn")), request.getParameter("description"),
-                        request.getParameter("parts"), decimal(request.getParameter("cost")), user.getUsername());
+                        request.getParameter("parts"), user.getUsername());
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -60,7 +72,41 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/workshop-maintenance?saved=1");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
+            if ("createMachine".equals(request.getParameter("action")) || "updateMachine".equals(request.getParameter("action")))
+                request.setAttribute("showMachineForm", true);
             render(request, response);
+        }
+    }
+
+    private static Part checkedImage(HttpServletRequest request) throws IOException, ServletException {
+        Part image = request.getPart("image");
+        if (image == null || image.getSize() == 0) return null;
+        if (image.getContentType() == null || !image.getContentType().startsWith("image/"))
+            throw new IllegalArgumentException("Seleziona un file immagine valido");
+        try (java.io.InputStream input = image.getInputStream()) {
+            if (ImageIO.read(input) == null) throw new IllegalArgumentException("Immagine non leggibile");
+        }
+        return image;
+    }
+
+    private boolean saveImageOrRedirect(HttpServletRequest request, HttpServletResponse response, long id, Part image) throws IOException {
+        Path directory = UploadPathResolver.resolveWorkshopMachineUploadBase(getServletContext()).resolve(String.valueOf(id));
+        String filename = null;
+        try {
+            filename = ImageOptimizationUtil.storeOptimizedImage(image, directory);
+            String previous = controller.updateMachineImage(id, filename);
+            if (previous != null && previous.matches("[0-9a-fA-F-]{36}\\.jpg")) {
+                try { Files.deleteIfExists(directory.resolve(previous)); }
+                catch (IOException ignored) { }
+            }
+            return true;
+        } catch (IOException | RuntimeException ex) {
+            if (filename != null) {
+                try { Files.deleteIfExists(directory.resolve(filename)); }
+                catch (IOException ignored) { }
+            }
+            response.sendRedirect(request.getContextPath() + "/workshop-maintenance?edit=" + id + "&imageError=1#machine-form");
+            return false;
         }
     }
 
@@ -77,6 +123,7 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             request.setAttribute("dueSoonCount", plans.stream().filter(MaintenancePlan::isDueSoon).count());
             request.setAttribute("today", LocalDate.now());
             String edit = request.getParameter("edit");
+            if (edit == null && "updateMachine".equals(request.getParameter("action"))) edit = request.getParameter("machineId");
             if (edit != null) {
                 long editId = Long.parseLong(edit);
                 request.setAttribute("editMachine", machines.stream().filter(m -> m.getId() == editId).findFirst().orElse(null));
@@ -115,11 +162,6 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
         if (blank(value)) return null;
         try { return LocalDate.parse(value); }
         catch (DateTimeParseException e) { throw new IllegalArgumentException("Data non valida"); }
-    }
-
-    private static BigDecimal decimal(String value) {
-        try { return new BigDecimal(value); }
-        catch (NumberFormatException | NullPointerException e) { throw new IllegalArgumentException("Costo non valido"); }
     }
 
     private static boolean blank(String value) { return value == null || value.isBlank(); }

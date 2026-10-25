@@ -4,7 +4,6 @@ import it.SimoSW.model.MaintenanceIntervention;
 import it.SimoSW.model.MaintenancePlan;
 import it.SimoSW.model.WorkshopMachine;
 import it.SimoSW.model.dao.WorkshopMaintenanceDAO;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -16,15 +15,27 @@ import java.util.List;
 
 public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     @Override
+    public String findMachineImageFilename(long machineId) {
+        try (Connection connection = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT image_filename FROM workshop_machines WHERE id=?")) {
+            statement.setLong(1, machineId);
+            try (ResultSet rows = statement.executeQuery()) {
+                return rows.next() ? rows.getString(1) : null;
+            }
+        } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento dell'immagine", e); }
+    }
+
+    @Override
     public List<WorkshopMachine> findMachines() {
         List<WorkshopMachine> result = new ArrayList<>();
-        String sql = "SELECT id, name, model, serial_number, location, status, usage_hours FROM workshop_machines ORDER BY name, id";
+        String sql = "SELECT id, name, model, serial_number, location, status, usage_hours, image_filename FROM workshop_machines ORDER BY name, id";
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rows = statement.executeQuery()) {
             while (rows.next()) {
                 result.add(new WorkshopMachine(rows.getLong("id"), rows.getString("name"), rows.getString("model"),
-                        rows.getString("serial_number"), rows.getString("location"), rows.getString("status"), rows.getInt("usage_hours")));
+                        rows.getString("serial_number"), rows.getString("location"), rows.getString("status"), rows.getInt("usage_hours"),
+                        rows.getString("image_filename")));
             }
         } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento dei macchinari", e); }
         return result;
@@ -54,7 +65,7 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     @Override
     public List<MaintenanceIntervention> findInterventions() {
         List<MaintenanceIntervention> result = new ArrayList<>();
-        String sql = "SELECT i.id, i.machine_id, m.name AS machine_name, i.type, i.performed_on, i.description, i.parts, i.cost, i.operator_name "
+        String sql = "SELECT i.id, i.machine_id, m.name AS machine_name, i.type, i.performed_on, i.description, i.parts, i.operator_name "
                 + "FROM workshop_maintenance_interventions i JOIN workshop_machines m ON m.id = i.machine_id "
                 + "ORDER BY i.performed_on DESC, i.id DESC";
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
@@ -63,7 +74,7 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
             while (rows.next()) {
                 result.add(new MaintenanceIntervention(rows.getLong("id"), rows.getLong("machine_id"), rows.getString("machine_name"),
                         rows.getString("type"), rows.getDate("performed_on").toLocalDate(), rows.getString("description"),
-                        rows.getString("parts"), rows.getBigDecimal("cost"), rows.getString("operator_name")));
+                        rows.getString("parts"), rows.getString("operator_name")));
             }
         } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento degli interventi", e); }
         return result;
@@ -94,6 +105,35 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     }
 
     @Override
+    public String updateMachineImage(long machineId, String imageFilename) {
+        try (Connection connection = ConnectionFactory.getInstance().getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                String previous;
+                try (PreparedStatement lock = connection.prepareStatement(
+                        "SELECT image_filename FROM workshop_machines WHERE id=? FOR UPDATE")) {
+                    lock.setLong(1, machineId);
+                    try (ResultSet rows = lock.executeQuery()) {
+                        if (!rows.next()) throw new IllegalArgumentException("Macchinario non trovato");
+                        previous = rows.getString(1);
+                    }
+                }
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE workshop_machines SET image_filename=? WHERE id=?")) {
+                    statement.setString(1, imageFilename);
+                    statement.setLong(2, machineId);
+                    statement.executeUpdate();
+                }
+                connection.commit();
+                return previous;
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) { throw new IllegalStateException("Errore nel salvataggio dell'immagine", e); }
+    }
+
+    @Override
     public long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours) {
         String sql = "INSERT INTO workshop_maintenance_plans (machine_id, description, due_date, due_hours) VALUES (?, ?, ?, ?)";
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
@@ -109,9 +149,9 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
 
     @Override
     public void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,
-                                   String description, String parts, BigDecimal cost, String operator) {
-        String insert = "INSERT INTO workshop_maintenance_interventions (machine_id, plan_id, type, performed_on, description, parts, cost, operator_name) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                                   String description, String parts, String operator) {
+        String insert = "INSERT INTO workshop_maintenance_interventions (machine_id, plan_id, type, performed_on, description, parts, operator_name) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = ConnectionFactory.getInstance().getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -129,7 +169,7 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
                     if (planId == null) statement.setNull(2, java.sql.Types.BIGINT); else statement.setLong(2, planId);
                     statement.setString(3, type); statement.setDate(4, Date.valueOf(performedOn));
                     statement.setString(5, description); statement.setString(6, parts);
-                    statement.setBigDecimal(7, cost); statement.setString(8, operator);
+                    statement.setString(7, operator);
                     statement.executeUpdate();
                 }
                 if (planId != null) {

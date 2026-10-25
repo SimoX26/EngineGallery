@@ -139,7 +139,8 @@ CREATE TABLE workshop_machines (
     serial_number VARCHAR(120) NOT NULL UNIQUE,
     location VARCHAR(120) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-    usage_hours INT NOT NULL DEFAULT 0
+    usage_hours INT NOT NULL DEFAULT 0,
+    image_filename VARCHAR(255) NULL
 );
 
 CREATE TABLE workshop_maintenance_plans (

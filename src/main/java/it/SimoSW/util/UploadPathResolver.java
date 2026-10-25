@@ -34,6 +34,10 @@ public final class UploadPathResolver {
         return resolveUploadRoot(context).resolve("warehouse").normalize();
     }
 
+    public static Path resolveWorkshopMachineUploadBase(ServletContext context) {
+        return resolveUploadRoot(context).resolve("workshop-machines").normalize();
+    }
+
     private static Path resolveUploadRoot(ServletContext context) {
         Path cached = cachedUploadRoot;
         if (cached != null) {
@@ -66,7 +70,8 @@ public final class UploadPathResolver {
                     : "";
             if ("engines".equalsIgnoreCase(lastSegment)
                     || "hydraulic".equalsIgnoreCase(lastSegment)
-                    || "warehouse".equalsIgnoreCase(lastSegment)) {
+                    || "warehouse".equalsIgnoreCase(lastSegment)
+                    || "workshop-machines".equalsIgnoreCase(lastSegment)) {
                 configuredPath = configuredPath.getParent() != null ? configuredPath.getParent() : configuredPath;
             }
             candidates.add(new PathCandidate(configuredPath, "configured"));
