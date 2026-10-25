@@ -125,6 +125,12 @@
             font-weight: 700;
         }
     }
+
+    .navbar .navbar-nav .nav-item.nav-statistics {
+        margin-top: 0.85rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
 </style>
 
 <nav class="navbar navbar-expand-xxl navbar-dark fixed-top"
@@ -221,8 +227,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link ${fn:startsWith(servletPath, '/workshop-maintenance') ? 'active' : ''}"
+                       href="<%= request.getContextPath() %>/workshop-maintenance">Manutenzione macchinari</a>
+                </li>
+
                 <c:if test="${canViewStatistics}">
-                    <li class="nav-item nav-group-start">
+                    <li class="nav-item nav-statistics">
                         <a class="nav-link
                            ${fn:startsWith(servletPath, "/statistics") ? "active" : ""}"
                            href="<%= request.getContextPath() %>/statistics">
@@ -230,12 +241,6 @@
                         </a>
                     </li>
                 </c:if>
-
-                <li class="nav-item">
-                    <a class="nav-link ${fn:startsWith(servletPath, '/workshop-maintenance') ? 'active' : ''}"
-                       href="<%= request.getContextPath() %>/workshop-maintenance">Manutenzione macchinari</a>
-                </li>
-
 
             </ul>
 
