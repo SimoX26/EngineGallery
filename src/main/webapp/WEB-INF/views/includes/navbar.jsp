@@ -19,6 +19,41 @@
         }
     }
 
+    @media (max-width: 991.98px) {
+        .navbar .navbar-collapse {
+            position: absolute;
+            top: calc(100% + 0.4rem);
+            right: 0.75rem;
+            width: 280px;
+            max-width: calc(100vw - 1.5rem);
+            max-height: calc(100vh - 80px);
+            max-height: calc(100dvh - 80px);
+            overflow-y: auto;
+            margin: 0;
+            padding: 0.65rem;
+            text-align: left;
+        }
+
+        .navbar .navbar-collapse.collapsing {
+            overflow: hidden;
+        }
+
+        .navbar .navbar-nav {
+            align-items: stretch;
+        }
+
+        .navbar .navbar-nav .nav-item {
+            display: block;
+            text-align: left;
+        }
+
+        .navbar .nav-link {
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+    }
+
     @media (min-width: 992px) {
         :root {
             --desktop-sidebar-width: 240px;
