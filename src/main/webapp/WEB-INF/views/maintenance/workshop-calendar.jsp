@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Calendario manutenzioni • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=35">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=36">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -49,7 +49,7 @@
         </div>
     </section>
 
-    <section class="mb-4" aria-labelledby="calendar-agenda-title">
+    <section class="workshop-calendar-section mb-4" aria-labelledby="calendar-agenda-title">
         <h2 class="h4 mb-3" id="calendar-agenda-title">Agenda del <time datetime="${selectedDate}"><c:out value="${selectedDayTitle}"/></time></h2>
         <div class="workshop-intervention-list">
             <c:forEach var="plan" items="${selectedPlans}">
@@ -79,7 +79,7 @@
     </section>
 
     <c:if test="${not empty hourPlans}">
-        <section class="mb-4" aria-labelledby="hour-plans-title">
+        <section class="workshop-calendar-section mb-4" aria-labelledby="hour-plans-title">
             <h2 class="h4 mb-3" id="hour-plans-title">Manutenzioni a ore</h2>
             <div class="workshop-intervention-list">
                 <c:forEach var="plan" items="${hourPlans}">

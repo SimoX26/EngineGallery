@@ -882,6 +882,30 @@ body:not(.login-page) {
     }
 }
 
+@media (min-width: 992px) {
+    .workshop-calendar-page > .page-header-with-search,
+    .workshop-calendar-page > .workshop-calendar,
+    .workshop-calendar-page > .workshop-calendar-section {
+        max-width: 720px;
+        margin-inline: auto;
+    }
+
+    .workshop-calendar-page .page-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .workshop-calendar-page .page-header .share-icon-btn {
+        margin-bottom: 0 !important;
+    }
+
+    .workshop-calendar-page .workshop-calendar__day {
+        width: min(48px, 100%);
+        font-size: 1.05rem;
+    }
+}
+
 .workshop-intervention-list {
     display: grid;
     gap: 0.9rem;
