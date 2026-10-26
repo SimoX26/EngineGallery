@@ -36,7 +36,7 @@
             <a href="<%= request.getContextPath() %>/warehouse/list" class="share-icon-btn detail-round-btn" aria-label="Torna alla lista" title="Torna alla lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <a href="<c:out value='${warehouseEditUrl}'/>" class="share-icon-btn detail-round-btn" aria-label="Modifica articolo" title="Modifica articolo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 9.8-9.8-3.2-3.2L5 15.8 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13.8 6.2l3.2 3.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
             <a href="<c:out value='${warehouseDeleteUrl}'/>" class="share-icon-btn detail-round-btn detail-round-btn--delete" aria-label="Elimina articolo" title="Elimina articolo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V5h6v2M8 7l1 12h6l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-            <button type="button" class="share-icon-btn detail-round-btn detail-round-btn--share js-media-share-btn" data-share-source="#warehouseShareMedia" aria-label="Condividi immagini" title="Condividi immagini"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" fill="none" stroke="currentColor" stroke-width="2.25"/></svg></button>
+            <button type="button" class="share-icon-btn detail-round-btn detail-round-btn--share js-media-share-btn" data-share-source="#warehouseShareMedia" data-share-kind="images" aria-label="Condividi immagini" title="Condividi immagini"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" fill="none" stroke="currentColor" stroke-width="2.25"/></svg></button>
         </div></div>
         <div class="engine-detail-section">
             <h5 class="fw-semibold mb-3">Dettaglio articolo magazzino</h5>
@@ -74,13 +74,13 @@
                 <a href="<c:out value='${warehouseDeleteUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--delete">
                     Elimina
                 </a>
-                <button type="button" class="btn engine-detail-action-btn engine-detail-action-btn--share js-media-share-btn" data-share-source="#warehouseShareMedia">Condividi</button>
+                <button type="button" class="btn engine-detail-action-btn engine-detail-action-btn--share js-media-share-btn" data-share-source="#warehouseShareMedia" data-share-kind="images">Condividi</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="<%= request.getContextPath() %>/assets/js/media-share.js"></script>
+<script src="<%= request.getContextPath() %>/assets/js/media-share.js?v=2"></script>
 </body>
 </html>

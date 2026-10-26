@@ -10,8 +10,21 @@
         const button = event.target.closest('.js-media-share-btn');
         if (!button) return;
         event.preventDefault();
+        const urls = urlsFor(button);
+        if (button.dataset.shareKind === 'images'
+            && window.AndroidShareBridge?.shareTechnicalSheet && urls.length) {
+            try {
+                window.AndroidShareBridge.shareTechnicalSheet(
+                    JSON.stringify(urls.map((url) => new URL(url, window.location.href).href)), ''
+                );
+                return;
+            } catch (_error) {
+                alert('Impossibile preparare le immagini per la condivisione.');
+                return;
+            }
+        }
         const files = [];
-        for (const url of urlsFor(button)) {
+        for (const url of urls) {
             try {
                 const response = await fetch(url, {credentials: 'include'});
                 const blob = await response.blob();

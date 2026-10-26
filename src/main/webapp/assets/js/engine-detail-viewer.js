@@ -7,6 +7,7 @@ const clickableImages = Array.from(document.querySelectorAll('.clickable-image')
 const SHARE_LOG_PREFIX = '[engine-share-v2]';
 let shareDelegationInitialized = false;
 const SHARE_MAX_SINGLE_FILE_BYTES = 100 * 1024 * 1024;
+const SHARE_WEB_BATCH_SIZE = 20;
 const SHARE_MODE_CURRENT = 'current-image-only';
 const SHARE_MODE_ALL = 'all-motor-images';
 let activeLightboxIndex = 0;
@@ -78,9 +79,10 @@ function getFileNameFromUrl(url, fallback) {
     }
 }
 
-async function buildShareFiles(imageUrls) {
+async function buildShareFiles(imageUrls, onProgress, isCancelled) {
     const files = [];
     for (let i = 0; i < imageUrls.length; i += 1) {
+        if (isCancelled?.()) break;
         const imageUrl = imageUrls[i];
         try {
             console.info(`${SHARE_LOG_PREFIX} fetch immagine`, { index: i, imageUrl });
@@ -152,6 +154,8 @@ async function buildShareFiles(imageUrls) {
             files.push(file);
         } catch (error) {
             console.error(`${SHARE_LOG_PREFIX} errore durante fetch/conversione file`, { imageUrl, error });
+        } finally {
+            if (onProgress) onProgress(i + 1, imageUrls.length);
         }
     }
 
@@ -274,8 +278,94 @@ async function shareCurrentImageOnly() {
     await shareFilesOnly(files, 'Immagine corrente non condivisibile.');
 }
 
+function createShareStatusPanel() {
+    document.getElementById('engineShareStatusPanel')?.remove();
+    const panel = document.createElement('div');
+    panel.id = 'engineShareStatusPanel';
+    panel.className = 'card-base position-fixed bottom-0 start-50 translate-middle-x shadow-lg text-start';
+    panel.style.cssText = 'z-index: 2000; width: min(440px, calc(100vw - 24px)); margin-bottom: 16px;';
+    panel.setAttribute('role', 'status');
+
+    const message = document.createElement('p');
+    message.className = 'mb-2';
+    message.setAttribute('aria-live', 'polite');
+    const actions = document.createElement('div');
+    actions.className = 'd-flex gap-2 flex-wrap';
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'btn btn-primary d-none';
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn btn-outline-secondary';
+    closeButton.textContent = 'Chiudi';
+    const state = {panel, message, shareButton, cancelled: false};
+    closeButton.addEventListener('click', () => {
+        state.cancelled = true;
+        panel.remove();
+    });
+    actions.append(shareButton, closeButton);
+    panel.append(message, actions);
+    document.body.appendChild(panel);
+    return state;
+}
+
+function offerPreparedImageBatches(files, panel) {
+    let nextIndex = 0;
+    let preferredBatchSize = SHARE_WEB_BATCH_SIZE;
+    const {message, shareButton} = panel;
+    const update = (prefix = '') => {
+        if (nextIndex >= files.length) {
+            message.textContent = 'Tutte le foto sono state passate all’app di condivisione.';
+            shareButton.classList.add('d-none');
+            return;
+        }
+        const last = Math.min(nextIndex + preferredBatchSize, files.length);
+        message.textContent = prefix + `Foto ${nextIndex + 1}–${last} di ${files.length} pronte. Tocca il pulsante per scegliere WhatsApp.`;
+        shareButton.textContent = `Condividi foto ${nextIndex + 1}–${last}`;
+        shareButton.classList.remove('d-none');
+    };
+
+    shareButton.addEventListener('click', () => {
+        let size = Math.min(preferredBatchSize, files.length - nextIndex);
+        let batch = files.slice(nextIndex, nextIndex + size);
+        while (size > 1 && !isFileShareSupported(batch)) {
+            size = Math.floor(size / 2);
+            batch = files.slice(nextIndex, nextIndex + size);
+        }
+        if (!isFileShareSupported(batch)) {
+            message.textContent = 'Questo browser non può condividere le foto come allegati.';
+            shareButton.classList.add('d-none');
+            return;
+        }
+        preferredBatchSize = size;
+        shareButton.disabled = true;
+        let sharing;
+        try {
+            // La chiamata deve partire direttamente dal tocco, prima di qualsiasi await.
+            sharing = navigator.share({files: batch});
+        } catch (error) {
+            sharing = Promise.reject(error);
+        }
+        Promise.resolve(sharing).then(() => {
+            nextIndex += batch.length;
+            update('Gruppo precedente passato all’app. ');
+        }).catch((error) => {
+            if (error?.name !== 'AbortError') {
+                if (batch.length > 1) preferredBatchSize = Math.max(1, Math.floor(batch.length / 2));
+                update('Condivisione non riuscita. Riprova con un gruppo più piccolo. ');
+            }
+        }).finally(() => { shareButton.disabled = false; });
+    });
+    update();
+}
+
 async function shareAllMotorImages(imageUrls) {
+    if (document.getElementById('engineShareStatusPanel')) return;
     const normalizedUrls = normalizeImageUrls(imageUrls);
+    if (!normalizedUrls.length) {
+        showShareMessage('Nessuna immagine disponibile per la condivisione.');
+        return;
+    }
 
     if (window.AndroidShareBridge && typeof window.AndroidShareBridge.shareTechnicalSheet === 'function') {
         try {
@@ -284,11 +374,27 @@ async function shareAllMotorImages(imageUrls) {
             return;
         } catch (error) {
             console.warn(`${SHARE_LOG_PREFIX} Android bridge shareTechnicalSheet errore`, error);
+            showShareMessage('Impossibile avviare la condivisione delle immagini. Riprova.');
+            return;
         }
     }
 
-    const files = await buildShareFiles(normalizedUrls);
-    await shareFilesOnly(files, 'Nessuna immagine condivisibile disponibile.');
+    const panel = createShareStatusPanel();
+    panel.message.textContent = `Preparo 0 di ${normalizedUrls.length} foto…`;
+    const files = await buildShareFiles(normalizedUrls, (done, total) => {
+        panel.message.textContent = `Preparo ${done} di ${total} foto…`;
+    }, () => panel.cancelled);
+    if (panel.cancelled) return;
+    if (files.length !== normalizedUrls.length) {
+        panel.message.textContent = `Preparazione incompleta: ${files.length} foto su ${normalizedUrls.length}. Chiudi e riprova.`;
+        return;
+    }
+    if (typeof navigator.share !== 'function') {
+        panel.remove();
+        offerDesktopDownload(files);
+        return;
+    }
+    offerPreparedImageBatches(files, panel);
 }
 
 function initializeShareDelegation() {
@@ -304,6 +410,8 @@ function initializeShareDelegation() {
         }
 
         event.preventDefault();
+        if (trigger.disabled) return;
+        trigger.disabled = true;
         const shareMode = trigger.getAttribute('data-share-mode') || SHARE_MODE_ALL;
         const imageUrls = readImageUrlsFromButton(trigger);
 
@@ -314,11 +422,15 @@ function initializeShareDelegation() {
             imageUrlsRaw: imageUrls
         });
 
-        if (shareMode === SHARE_MODE_CURRENT) {
-            await shareCurrentImageOnly();
-            return;
+        try {
+            if (shareMode === SHARE_MODE_CURRENT) {
+                await shareCurrentImageOnly();
+                return;
+            }
+            await shareAllMotorImages(imageUrls);
+        } finally {
+            trigger.disabled = false;
         }
-        await shareAllMotorImages(imageUrls);
     });
 }
 

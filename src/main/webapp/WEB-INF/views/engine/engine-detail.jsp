@@ -668,7 +668,7 @@
         contextPath: '<%= request.getContextPath() %>'
     };
 </script>
-<script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js?v=2"></script>
+<script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js?v=3"></script>
 
 </body>
 </html>

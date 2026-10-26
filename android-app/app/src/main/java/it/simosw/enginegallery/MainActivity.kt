@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val ioExecutor = Executors.newSingleThreadExecutor()
+    private var preparingTechnicalShare = false
     private var notificationPermissionRequested = false
     private var manualNotificationPermissionRequest = false
     private var awaitingNotificationSettings = false
@@ -498,6 +500,9 @@ class MainActivity : AppCompatActivity() {
                   }
                   const files = payload.files;
                   if (window.AndroidShareBridge && files && files.length > 0) {
+                    if (files.length > 1) {
+                      return Promise.reject(new Error('La condivisione multipla richiede i collegamenti originali delle immagini'));
+                    }
                     const first = files[0];
                     if (first) {
                       return new Promise((resolve, reject) => {
@@ -646,6 +651,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             runOnUiThread {
+                if (preparingTechnicalShare) {
+                    Toast.makeText(this@MainActivity, "Preparazione immagini già in corso", Toast.LENGTH_SHORT).show()
+                    return@runOnUiThread
+                }
+                preparingTechnicalShare = true
+                Toast.makeText(this@MainActivity, "Preparo ${normalizedUrls.size} immagini…", Toast.LENGTH_LONG).show()
                 val userAgent = webView.settings.userAgentString ?: "Android WebView"
                 val referer = webView.url ?: BuildConfig.ENGINE_GALLERY_BASE_URL
                 val cookiesByUrl = normalizedUrls.associateWith { url ->
@@ -668,14 +679,19 @@ class MainActivity : AppCompatActivity() {
                         sharedFiles.add(sharedFile)
                     }
 
-                    if (sharedFiles.isEmpty()) {
+                    if (sharedFiles.size != normalizedUrls.size) {
+                        sharedFiles.forEach { it.delete() }
                         runOnUiThread {
-                            Toast.makeText(this@MainActivity, "Nessuna immagine condivisibile", Toast.LENGTH_SHORT).show()
+                            preparingTechnicalShare = false
+                            Toast.makeText(this@MainActivity,
+                                "Preparazione incompleta: ${sharedFiles.size} foto su ${normalizedUrls.size}. Riprova.",
+                                Toast.LENGTH_LONG).show()
                         }
                         return@execute
                     }
 
                     runOnUiThread {
+                        preparingTechnicalShare = false
                         openTechnicalSheetShareChooser(sharedFiles)
                     }
                 }
@@ -746,6 +762,8 @@ class MainActivity : AppCompatActivity() {
         cookies: String?
     ): File? {
         var connection: HttpURLConnection? = null
+        var imageFile: File? = null
+        var completed = false
         return try {
             val shareDir = File(cacheDir, "shared").apply { mkdirs() }
             val extension = normalizedUrl.substringAfterLast('.', "jpg")
@@ -754,7 +772,8 @@ class MainActivity : AppCompatActivity() {
                 .lowercase()
                 .ifBlank { "jpg" }
             val safeExtension = if (extension.length in 2..5) extension else "jpg"
-            val imageFile = File.createTempFile("engine_gallery_share_", ".$safeExtension", shareDir)
+            val targetFile = File.createTempFile("engine_gallery_share_", ".$safeExtension", shareDir)
+            imageFile = targetFile
 
             connection = (URL(normalizedUrl).openConnection() as HttpURLConnection).apply {
                 instanceFollowRedirects = true
@@ -781,18 +800,25 @@ class MainActivity : AppCompatActivity() {
                 Log.e(IMAGE_SHARE_TAG, "Errore preparazione immagine: HTTP $code url=$normalizedUrl body=${body.take(200)}")
                 return null
             }
-
             connection.inputStream.use { input ->
-                imageFile.outputStream().use { output ->
+                targetFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
-            imageFile
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(targetFile.absolutePath, bounds)
+            if (targetFile.length() == 0L || bounds.outWidth <= 0 || bounds.outHeight <= 0) {
+                Log.e(IMAGE_SHARE_TAG, "Il file scaricato non è un'immagine valida: $normalizedUrl")
+                return null
+            }
+            completed = true
+            targetFile
         } catch (ex: Exception) {
             Log.e(TAG, "Share download failed for url=$normalizedUrl", ex)
             Log.e(IMAGE_SHARE_TAG, "Errore preparazione immagine", ex)
             null
         } finally {
+            if (!completed) imageFile?.delete()
             try {
                 connection?.disconnect()
             } catch (_: Exception) {
@@ -834,25 +860,31 @@ class MainActivity : AppCompatActivity() {
                 file
             )
         }
+        val sharedClipData = ClipData.newUri(contentResolver, "engine-images", imageUris.first())
+        imageUris.drop(1).forEach { uri -> sharedClipData.addItem(ClipData.Item(uri)) }
 
         val shareIntent = if (imageUris.size == 1) {
             Intent(Intent.ACTION_SEND).apply {
                 type = "image/*"
                 putExtra(Intent.EXTRA_STREAM, imageUris.first())
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                clipData = ClipData.newUri(contentResolver, "engine-image", imageUris.first())
+                clipData = sharedClipData
             }
         } else {
             Intent(Intent.ACTION_SEND_MULTIPLE).apply {
                 type = "image/*"
                 putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(imageUris))
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                clipData = ClipData.newUri(contentResolver, "engine-image", imageUris.first())
+                clipData = sharedClipData
             }
         }
 
         try {
-            startActivity(Intent.createChooser(shareIntent, "Condividi scheda tecnica"))
+            val chooser = Intent.createChooser(shareIntent, "Condividi scheda tecnica").apply {
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                clipData = sharedClipData
+            }
+            startActivity(chooser)
         } catch (_: ActivityNotFoundException) {
             Toast.makeText(this, "Nessuna app disponibile per la condivisione", Toast.LENGTH_SHORT).show()
         }
