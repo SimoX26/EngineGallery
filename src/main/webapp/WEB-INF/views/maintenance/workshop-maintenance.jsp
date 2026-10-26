@@ -9,21 +9,22 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Manutenzione macchinari • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=33">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 <main class="container pb-5 workshop-maintenance-page workshop-has-fab">
-    <div class="page-header d-flex justify-content-between align-items-start gap-3 flex-wrap">
-        <div>
+    <header class="page-header-with-search workshop-maintenance-header">
+        <div class="page-header">
             <h1>Manutenzione macchinari</h1>
             <p>Attrezzature interne dell'officina</p>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="workshop-maintenance-header__actions">
             <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=materials">Magazzino materiali</a>
             <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
+            <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/workshop-maintenance?view=new">Aggiungi macchinario +</a>
         </div>
-    </div>
+    </header>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${param.deleted == '1'}"><div class="alert alert-success" role="status">Macchinario eliminato.</div></c:if>
 
@@ -35,9 +36,8 @@
     </div>
 
     <section aria-labelledby="workshop-machines-title">
-        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-3">
+        <div class="mb-3">
             <h2 class="h4 mb-0" id="workshop-machines-title">Macchinari</h2>
-            <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/workshop-maintenance?view=new">Aggiungi macchinario +</a>
         </div>
         <div class="record-gallery-grid">
             <c:forEach var="machine" items="${machines}">
