@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=26">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=31">
 </head>
 
 <body>
@@ -87,6 +87,7 @@
                 </div>
             </form>
 
+            <div class="page-header-action-group">
             <div class="page-header-filter">
                 <button class="btn btn-outline-secondary btn-sm"
                         type="button"
@@ -139,6 +140,7 @@
                         </button>
                     </c:if>
                 </div>
+            </div>
             </div>
         </div>
 
