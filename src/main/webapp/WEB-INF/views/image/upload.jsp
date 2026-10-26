@@ -165,9 +165,10 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-save-action w-100">
-                Salva
-            </button>
+            <div class="d-flex gap-2">
+                <a href="<%= request.getContextPath() %>/engine/list" class="btn btn-cancel-action w-50">Annulla</a>
+                <button type="submit" class="btn btn-save-action w-50">Salva</button>
+            </div>
 
         </form>
 

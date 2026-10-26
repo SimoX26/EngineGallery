@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=29">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=30">
 </head>
 
 <body>
@@ -23,45 +23,42 @@
 <div class="container section-add-page">
 
     <div class="page-header-with-search">
-        <div class="page-header d-flex align-items-center gap-2">
-            <h1 class="mb-0">Magazzino</h1>
-            <select id="warehouseComponentFilter"
-                    class="form-select form-select-sm w-auto"
-                    aria-label="Filtra per tipologia componente"
-                    onchange="window.location.href = this.value">
-                <option value="<%= request.getContextPath() %>/warehouse/list" ${empty selectedComponentType ? 'selected' : ''}>Tutte le tipologie</option>
-                <c:forEach var="type" items="${componentTypes}">
-                    <option value="<%= request.getContextPath() %>/warehouse/list?componentType=${type.code}" ${selectedComponentType == type.code ? 'selected' : ''}><c:out value="${type.label}" /></option>
-                </c:forEach>
-            </select>
-        </div>
+        <div class="page-header"><h1 class="mb-0">Magazzino</h1></div>
 
         <div class="search-panel-compact">
             <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
             <input type="search"
                    id="warehouseKeywordSearch"
                    class="form-control"
-                   placeholder="cerca...">
+                   placeholder="cerca..."
+                   value="<c:out value='${param.keyword}'/>">
             <div id="warehouseKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                 Nessun articolo corrisponde alla ricerca.
             </div>
 
             <div class="modal fade" id="warehouseFiltersModal" tabindex="-1" aria-labelledby="warehouseFiltersModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
+                    <form class="modal-content" method="get" action="${pageContext.request.contextPath}/warehouse/list">
                         <div class="modal-header">
                             <h5 class="modal-title fw-semibold" id="warehouseFiltersModalLabel">Filtri magazzino</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                         </div>
                         <div class="modal-body">
+                            <label for="warehouseFiltersComponentInput" class="form-label small mb-1">Tipologia componente</label>
+                            <select id="warehouseFiltersComponentInput" name="componentType" class="form-select mb-3">
+                                <option value="" ${empty selectedComponentType ? 'selected' : ''}>Tutte le tipologie</option>
+                                <c:forEach var="type" items="${componentTypes}">
+                                    <option value="${type.code}" ${selectedComponentType == type.code ? 'selected' : ''}><c:out value="${type.label}" /></option>
+                                </c:forEach>
+                            </select>
                             <label for="warehouseFiltersKeywordInput" class="form-label small mb-1">Parola chiave</label>
-                            <input type="search" id="warehouseFiltersKeywordInput" class="form-control" placeholder="cerca...">
+                            <input type="search" id="warehouseFiltersKeywordInput" name="keyword" class="form-control" placeholder="cerca...">
                         </div>
                         <div class="modal-footer filters-modal-footer">
-                            <button type="button" id="warehouseFiltersResetBtn" class="btn btn-sm btn-outline-secondary filters-btn-secondary">Rimuovi filtri</button>
-                            <button type="button" id="warehouseFiltersApplyBtn" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
+                            <button type="button" id="warehouseFiltersResetBtn" class="btn btn-sm filters-btn-secondary">Rimuovi filtri</button>
+                            <button type="submit" class="btn btn-sm filters-btn-primary">Applica filtri</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -218,8 +215,8 @@
     const warehouseFiltersToggle = document.getElementById('warehouseFiltersToggle');
     const warehouseFiltersModalEl = document.getElementById('warehouseFiltersModal');
     const warehouseFiltersModal = bootstrap.Modal.getOrCreateInstance(warehouseFiltersModalEl);
+    const warehouseFiltersComponentInput = document.getElementById('warehouseFiltersComponentInput');
     const warehouseFiltersKeywordInput = document.getElementById('warehouseFiltersKeywordInput');
-    const warehouseFiltersApplyBtn = document.getElementById('warehouseFiltersApplyBtn');
     const warehouseFiltersResetBtn = document.getElementById('warehouseFiltersResetBtn');
 
     const filterController = window.EngineGalleryLiveSearch && searchInput
@@ -235,25 +232,13 @@
         : null;
 
     warehouseFiltersToggle.addEventListener('click', () => {
+        warehouseFiltersComponentInput.value = new URLSearchParams(window.location.search).get('componentType') || '';
         warehouseFiltersKeywordInput.value = searchInput.value;
         warehouseFiltersModal.show();
     });
 
-    warehouseFiltersApplyBtn.addEventListener('click', () => {
-        searchInput.value = warehouseFiltersKeywordInput.value || '';
-        if (filterController) {
-            filterController.apply();
-        }
-        warehouseFiltersModal.hide();
-    });
-
     warehouseFiltersResetBtn.addEventListener('click', () => {
-        warehouseFiltersKeywordInput.value = '';
-        searchInput.value = '';
-        if (filterController) {
-            filterController.apply();
-        }
-        warehouseFiltersModal.hide();
+        window.location.assign(window.location.pathname);
     });
 
     const applyWarehouseViewMode = (mode) => {

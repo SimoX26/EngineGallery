@@ -295,6 +295,10 @@ body:not(.login-page) {
     display: none;
 }
 
+#warehouseFiltersModal .form-label {
+    display: block;
+}
+
 .search-panel-compact .form-control {
     min-height: var(--action-control-height);
 }
@@ -463,6 +467,32 @@ body:not(.login-page) {
     color: var(--text-main);
     border-color: #94a3b8;
     background-color: var(--input-bg-focus);
+}
+
+#warehouseFiltersModal .filters-btn-secondary {
+    color: var(--action-danger-text);
+    border-color: var(--action-danger-border);
+    background-color: var(--action-danger-bg);
+}
+
+#warehouseFiltersModal .filters-btn-secondary:hover,
+#warehouseFiltersModal .filters-btn-secondary:focus-visible {
+    color: var(--action-danger-text);
+    border-color: var(--action-danger-border-hover);
+    background-color: var(--action-danger-hover);
+}
+
+#warehouseFiltersModal .filters-btn-primary {
+    color: var(--action-success-text);
+    border-color: var(--action-success-border);
+    background-color: var(--action-success-bg);
+}
+
+#warehouseFiltersModal .filters-btn-primary:hover,
+#warehouseFiltersModal .filters-btn-primary:focus-visible {
+    color: var(--action-success-text);
+    border-color: var(--action-success-border-hover);
+    background-color: var(--action-success-hover);
 }
 
 @media (min-width: 992px) {
