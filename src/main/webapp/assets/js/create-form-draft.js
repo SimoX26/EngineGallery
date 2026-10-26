@@ -4,7 +4,8 @@
 
     const key = ['create-form-v1', form.dataset.draftUser, form.dataset.draftKey].join(':');
     const fields = Array.from(form.elements).filter((element) =>
-        element.name && !['hidden', 'file', 'submit', 'button'].includes(element.type));
+        element.name && !element.closest('[data-draft-dynamic]')
+        && !['hidden', 'file', 'submit', 'button'].includes(element.type));
     const fileInputs = Array.from(form.querySelectorAll('input[type="file"][name]'));
     const submitButton = form.querySelector('[type="submit"]');
     const notice = document.createElement('div');
@@ -138,6 +139,7 @@
                 fields.forEach((element) => {
                     if (element.tagName === 'SELECT') element.dispatchEvent(new Event('change'));
                 });
+                form.dispatchEvent(new Event('draftrestored'));
             }
             if (savedFiles && typeof DataTransfer !== 'undefined') {
                 fileInputs.forEach((input, index) => {

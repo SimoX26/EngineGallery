@@ -2,17 +2,23 @@ package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WorkshopMaintenanceController;
 import it.SimoSW.model.MaintenancePlan;
+import it.SimoSW.model.MaterialConsumption;
 import it.SimoSW.model.User;
 import it.SimoSW.model.WorkshopMachine;
+import it.SimoSW.model.WorkshopMaterialUse;
 import it.SimoSW.util.ImageOptimizationUtil;
 import it.SimoSW.util.UploadPathResolver;
 import it.SimoSW.util.bootstrap.ApplicationInitializer;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -43,6 +49,24 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             String action = request.getParameter("action");
+            if ("createMaterial".equals(action)) {
+                controller.createMaterial(request.getParameter("name"), request.getParameter("category"),
+                        request.getParameter("unit"), request.getParameter("location"),
+                        decimal(request.getParameter("quantity")), decimal(request.getParameter("minimumQuantity")));
+                response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=materials&saved=1");
+                return;
+            }
+            if ("adjustMaterial".equals(action)) {
+                BigDecimal amount = decimal(request.getParameter("quantity"));
+                if (amount.signum() <= 0) throw new IllegalArgumentException("Quantità da movimentare non valida");
+                String direction = request.getParameter("direction");
+                if (!"IN".equals(direction) && !"OUT".equals(direction))
+                    throw new IllegalArgumentException("Tipo di movimentazione non valido");
+                controller.adjustMaterialStock(longValue(request, "materialId"),
+                        "OUT".equals(direction) ? amount.negate() : amount);
+                response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=materials&saved=1");
+                return;
+            }
             long machineId;
             if ("createMachine".equals(action)) {
                 Part image = checkedImage(request);
@@ -64,7 +88,7 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 machineId = longValue(request, "machineId");
                 controller.recordIntervention(machineId, optionalLong(request, "planId"),
                         request.getParameter("type"), date(request.getParameter("performedOn")), request.getParameter("description"),
-                        request.getParameter("parts"), user.getUsername());
+                        request.getParameter("parts"), user.getUsername(), materialConsumptions(request));
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -73,7 +97,8 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             String action = request.getParameter("action");
-            request.setAttribute("view", "createMachine".equals(action) ? "new"
+            request.setAttribute("view", "createMaterial".equals(action) || "adjustMaterial".equals(action) ? "materials"
+                    : "createMachine".equals(action) ? "new"
                     : "updateMachine".equals(action) ? "edit"
                     : "recordIntervention".equals(action) ? "intervention" : null);
             render(request, response);
@@ -126,6 +151,11 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-calendar.jsp").forward(request, response);
                 return;
             }
+            if ("materials".equals(view)) {
+                request.setAttribute("materials", controller.getMaterials());
+                request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-materials.jsp").forward(request, response);
+                return;
+            }
             List<WorkshopMachine> machines = controller.getMachines();
             request.setAttribute("machines", machines);
             request.setAttribute("today", LocalDate.now());
@@ -146,12 +176,16 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 } else {
                     LocalDate since = LocalDate.now().minusYears(1);
                     request.setAttribute("recentInterventions", controller.getRecentInterventions(id));
+                    Map<Long, List<WorkshopMaterialUse>> uses = controller.getMaterialUses(id).stream()
+                            .collect(Collectors.groupingBy(WorkshopMaterialUse::getInterventionId));
+                    request.setAttribute("materialUses", uses);
                     request.setAttribute("since", since);
                     request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-machine-detail.jsp").forward(request, response);
                 }
                 return;
             }
             if ("intervention".equals(view)) {
+                request.setAttribute("materials", controller.getMaterials());
                 String selected = request.getParameter("machineId");
                 if (!blank(selected)) {
                     long id = Long.parseLong(selected);
@@ -203,4 +237,28 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
     }
 
     private static boolean blank(String value) { return value == null || value.isBlank(); }
+
+    private static BigDecimal decimal(String value) {
+        if (blank(value)) throw new IllegalArgumentException("Quantità obbligatoria");
+        try { return new BigDecimal(value.trim().replace(',', '.')); }
+        catch (NumberFormatException e) { throw new IllegalArgumentException("Quantità non valida"); }
+    }
+
+    private static List<MaterialConsumption> materialConsumptions(HttpServletRequest request) {
+        String[] ids = request.getParameterValues("materialId");
+        String[] quantities = request.getParameterValues("materialQuantity");
+        if (ids == null && quantities == null) return List.of();
+        if (ids == null || quantities == null || ids.length != quantities.length || ids.length > 30)
+            throw new IllegalArgumentException("Selezione materiali non valida");
+        List<MaterialConsumption> result = new ArrayList<>();
+        for (int index = 0; index < ids.length; index++) {
+            if (blank(ids[index]) && blank(quantities[index])) continue;
+            try {
+                result.add(new MaterialConsumption(Long.parseLong(ids[index]), decimal(quantities[index])));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Materiale non valido");
+            }
+        }
+        return result;
+    }
 }

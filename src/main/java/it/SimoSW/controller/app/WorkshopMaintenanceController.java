@@ -2,10 +2,16 @@ package it.SimoSW.controller.app;
 
 import it.SimoSW.model.MaintenanceIntervention;
 import it.SimoSW.model.MaintenancePlan;
+import it.SimoSW.model.MaterialConsumption;
 import it.SimoSW.model.WorkshopMachine;
+import it.SimoSW.model.WorkshopMaterial;
+import it.SimoSW.model.WorkshopMaterialUse;
 import it.SimoSW.model.dao.WorkshopMaintenanceDAO;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WorkshopMaintenanceController {
     private final WorkshopMaintenanceDAO dao;
@@ -15,6 +21,29 @@ public class WorkshopMaintenanceController {
     public String getMachineImageFilename(long machineId) { return dao.findMachineImageFilename(machineId); }
     public List<MaintenancePlan> getPlans() { return dao.findPlans(); }
     public List<MaintenanceIntervention> getInterventions() { return dao.findInterventions(); }
+    public List<WorkshopMaterial> getMaterials() { return dao.findMaterials(); }
+    public List<WorkshopMaterialUse> getMaterialUses(long machineId) { return dao.findMaterialUses(machineId); }
+
+    public long createMaterial(String name, String category, String unit, String location,
+                               BigDecimal quantity, BigDecimal minimumQuantity) {
+        if (category == null || !Set.of("FILTRO", "DETERGENTE", "LUBRIFICANTE", "LIQUIDO", "RICAMBIO", "ALTRO").contains(category))
+            throw new IllegalArgumentException("Categoria materiale non valida");
+        if (unit == null || !Set.of("PZ", "L", "KG", "ML").contains(unit))
+            throw new IllegalArgumentException("Unità di misura non valida");
+        BigDecimal initial = nonNegativeQuantity(quantity, "Giacenza iniziale");
+        BigDecimal minimum = nonNegativeQuantity(minimumQuantity, "Scorta minima");
+        if ("PZ".equals(unit) && (initial.stripTrailingZeros().scale() > 0 || minimum.stripTrailingZeros().scale() > 0))
+            throw new IllegalArgumentException("I pezzi devono avere quantità intere");
+        return dao.createMaterial(required(name, 150, "Nome materiale"), category, unit,
+                optional(location, 120, "Ubicazione"), initial, minimum);
+    }
+
+    public void adjustMaterialStock(long materialId, BigDecimal delta) {
+        if (materialId <= 0) throw new IllegalArgumentException("Materiale non valido");
+        if (delta == null || delta.signum() == 0 || quantityOutOfRange(delta))
+            throw new IllegalArgumentException("Quantità di rettifica non valida");
+        dao.adjustMaterialStock(materialId, delta);
+    }
     public List<MaintenanceIntervention> getRecentInterventions(long machineId) {
         LocalDate since = LocalDate.now().minusYears(1);
         return dao.findInterventions().stream()
@@ -54,12 +83,25 @@ public class WorkshopMaintenanceController {
 
     public void recordIntervention(long machineId, Long planId, String type, LocalDate date,
                                    String description, String parts, String operator) {
+        recordIntervention(machineId, planId, type, date, description, parts, operator, List.of());
+    }
+
+    public void recordIntervention(long machineId, Long planId, String type, LocalDate date,
+                                   String description, String parts, String operator,
+                                   List<MaterialConsumption> materials) {
         requireMachine(machineId);
         if (!"ORDINARY".equals(type) && !"EXTRAORDINARY".equals(type))
             throw new IllegalArgumentException("Tipo di intervento non valido");
         if (date == null || date.isAfter(LocalDate.now())) throw new IllegalArgumentException("Data intervento non valida");
+        if (materials == null || materials.size() > 30) throw new IllegalArgumentException("Troppi materiali selezionati");
+        Set<Long> selected = new HashSet<>();
+        for (MaterialConsumption item : materials) {
+            if (item == null || item.materialId() <= 0 || !selected.add(item.materialId()))
+                throw new IllegalArgumentException("Materiale duplicato o non valido");
+            positiveQuantity(item.quantity(), "Quantità prelevata");
+        }
         dao.recordIntervention(machineId, planId, type, date, required(description, 5000, "Descrizione"),
-                optional(parts, 5000, "Ricambi"), required(operator, 100, "Operatore"));
+                optional(parts, 5000, "Ricambi"), required(operator, 100, "Operatore"), materials);
     }
 
     private void requireMachine(long id) {
@@ -86,5 +128,22 @@ public class WorkshopMaintenanceController {
         String result = value == null ? "" : value.trim();
         if (result.length() > max) throw new IllegalArgumentException(label + " troppo lungo");
         return result.isEmpty() ? null : result;
+    }
+
+    private static BigDecimal nonNegativeQuantity(BigDecimal value, String label) {
+        if (value == null || value.signum() < 0 || quantityOutOfRange(value))
+            throw new IllegalArgumentException(label + " non valida");
+        return value;
+    }
+
+    private static BigDecimal positiveQuantity(BigDecimal value, String label) {
+        if (value == null || value.signum() <= 0 || quantityOutOfRange(value))
+            throw new IllegalArgumentException(label + " non valida");
+        return value;
+    }
+
+    private static boolean quantityOutOfRange(BigDecimal value) {
+        BigDecimal normalized = value.abs().stripTrailingZeros();
+        return normalized.scale() > 3 || normalized.precision() - normalized.scale() > 9;
     }
 }

@@ -63,7 +63,14 @@
                         <span class="badge ${item.type == 'ORDINARY' ? 'text-bg-secondary' : 'text-bg-warning'}">${item.type == 'ORDINARY' ? 'Ordinaria' : 'Straordinaria'}</span>
                     </div>
                     <p class="mb-2"><c:out value="${item.description}"/></p>
-                    <c:if test="${not empty item.parts}"><p class="small mb-2"><strong>Ricambi:</strong> <c:out value="${item.parts}"/></p></c:if>
+                    <c:if test="${not empty item.parts}"><p class="small mb-2"><strong>Note su ricambi/materiali:</strong> <c:out value="${item.parts}"/></p></c:if>
+                    <c:if test="${not empty materialUses[item.id]}">
+                        <div class="small mb-2"><strong>Materiali prelevati:</strong>
+                            <ul class="mb-0"><c:forEach var="use" items="${materialUses[item.id]}">
+                                <li><c:out value="${use.materialName}"/> — <c:out value="${use.quantity}"/> <c:out value="${use.unit}"/></li>
+                            </c:forEach></ul>
+                        </div>
+                    </c:if>
                     <div class="small text-muted">Operatore: <c:out value="${item.operator}"/></div>
                 </article>
             </c:forEach>

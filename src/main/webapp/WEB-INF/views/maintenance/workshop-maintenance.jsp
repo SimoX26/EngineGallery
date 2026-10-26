@@ -19,7 +19,10 @@
             <h1>Manutenzione macchinari</h1>
             <p>Attrezzature interne dell'officina</p>
         </div>
-        <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=materials">Magazzino materiali</a>
+            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
+        </div>
     </div>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
 

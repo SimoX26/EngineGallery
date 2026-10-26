@@ -2,8 +2,12 @@ package it.SimoSW.model.dao.database;
 
 import it.SimoSW.model.MaintenanceIntervention;
 import it.SimoSW.model.MaintenancePlan;
+import it.SimoSW.model.MaterialConsumption;
 import it.SimoSW.model.WorkshopMachine;
+import it.SimoSW.model.WorkshopMaterial;
+import it.SimoSW.model.WorkshopMaterialUse;
 import it.SimoSW.model.dao.WorkshopMaintenanceDAO;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -11,7 +15,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     @Override
@@ -81,6 +88,85 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
             }
         } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento degli interventi", e); }
         return result;
+    }
+
+    @Override
+    public List<WorkshopMaterial> findMaterials() {
+        List<WorkshopMaterial> result = new ArrayList<>();
+        String sql = "SELECT id, name, category, unit, location, quantity, minimum_quantity "
+                + "FROM workshop_materials ORDER BY category, name, id";
+        try (Connection connection = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rows = statement.executeQuery()) {
+            while (rows.next()) {
+                result.add(new WorkshopMaterial(rows.getLong("id"), rows.getString("name"),
+                        rows.getString("category"), rows.getString("unit"), rows.getString("location"),
+                        rows.getBigDecimal("quantity"), rows.getBigDecimal("minimum_quantity")));
+            }
+        } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento dei materiali", e); }
+        return result;
+    }
+
+    @Override
+    public List<WorkshopMaterialUse> findMaterialUses(long machineId) {
+        List<WorkshopMaterialUse> result = new ArrayList<>();
+        String sql = "SELECT u.intervention_id, u.material_name, u.unit, u.quantity "
+                + "FROM workshop_intervention_materials u "
+                + "JOIN workshop_maintenance_interventions i ON i.id=u.intervention_id "
+                + "WHERE i.machine_id=? ORDER BY u.intervention_id DESC, u.material_name";
+        try (Connection connection = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, machineId);
+            try (ResultSet rows = statement.executeQuery()) {
+                while (rows.next()) result.add(new WorkshopMaterialUse(rows.getLong("intervention_id"),
+                        rows.getString("material_name"), rows.getString("unit"), rows.getBigDecimal("quantity")));
+            }
+        } catch (SQLException e) { throw new IllegalStateException("Errore nel caricamento dei prelievi", e); }
+        return result;
+    }
+
+    @Override
+    public long createMaterial(String name, String category, String unit, String location,
+                               BigDecimal quantity, BigDecimal minimumQuantity) {
+        String sql = "INSERT INTO workshop_materials (name, category, unit, location, quantity, minimum_quantity) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection connection = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, name); statement.setString(2, category); statement.setString(3, unit);
+            statement.setString(4, location); statement.setBigDecimal(5, quantity);
+            statement.setBigDecimal(6, minimumQuantity);
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) { if (keys.next()) return keys.getLong(1); }
+            throw new IllegalStateException("ID materiale non disponibile");
+        } catch (SQLException e) { throw new IllegalStateException("Errore nel salvataggio del materiale (nome già presente?)", e); }
+    }
+
+    @Override
+    public void adjustMaterialStock(long materialId, BigDecimal delta) {
+        try (Connection connection = ConnectionFactory.getInstance().getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                String unit;
+                try (PreparedStatement lock = connection.prepareStatement(
+                        "SELECT unit FROM workshop_materials WHERE id=? FOR UPDATE")) {
+                    lock.setLong(1, materialId);
+                    try (ResultSet rows = lock.executeQuery()) {
+                        if (!rows.next()) throw new IllegalArgumentException("Materiale non trovato");
+                        unit = rows.getString(1);
+                    }
+                }
+                if ("PZ".equals(unit) && delta.stripTrailingZeros().scale() > 0)
+                    throw new IllegalArgumentException("I pezzi devono avere quantità intere");
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE workshop_materials SET quantity=quantity+? WHERE id=? AND quantity+? >= 0")) {
+                    statement.setBigDecimal(1, delta); statement.setLong(2, materialId);
+                    statement.setBigDecimal(3, delta);
+                    if (statement.executeUpdate() != 1)
+                        throw new IllegalArgumentException("Giacenza insufficiente");
+                }
+                connection.commit();
+            } catch (SQLException | RuntimeException e) { connection.rollback(); throw e; }
+        } catch (SQLException e) { throw new IllegalStateException("Errore nell'aggiornamento della giacenza", e); }
     }
 
     @Override
@@ -157,7 +243,8 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
 
     @Override
     public void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,
-                                   String description, String parts, String operator) {
+                                   String description, String parts, String operator,
+                                   List<MaterialConsumption> materials) {
         String insert = "INSERT INTO workshop_maintenance_interventions (machine_id, plan_id, type, performed_on, description, parts, operator_name) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = ConnectionFactory.getInstance().getConnection()) {
@@ -172,13 +259,51 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
                         }
                     }
                 }
-                try (PreparedStatement statement = connection.prepareStatement(insert)) {
+                Map<Long, MaterialSnapshot> snapshots = new HashMap<>();
+                List<MaterialConsumption> sortedMaterials = materials.stream()
+                        .sorted(Comparator.comparingLong(MaterialConsumption::materialId)).toList();
+                for (MaterialConsumption material : sortedMaterials) {
+                    try (PreparedStatement lock = connection.prepareStatement(
+                            "SELECT name, unit, quantity FROM workshop_materials WHERE id=? FOR UPDATE")) {
+                        lock.setLong(1, material.materialId());
+                        try (ResultSet rows = lock.executeQuery()) {
+                            if (!rows.next()) throw new IllegalArgumentException("Materiale non trovato");
+                            String unit = rows.getString("unit");
+                            if ("PZ".equals(unit) && material.quantity().stripTrailingZeros().scale() > 0)
+                                throw new IllegalArgumentException("I pezzi devono avere quantità intere");
+                            if (rows.getBigDecimal("quantity").compareTo(material.quantity()) < 0)
+                                throw new IllegalArgumentException("Giacenza insufficiente per " + rows.getString("name"));
+                            snapshots.put(material.materialId(), new MaterialSnapshot(rows.getString("name"), unit));
+                        }
+                    }
+                }
+                long interventionId;
+                try (PreparedStatement statement = connection.prepareStatement(insert, PreparedStatement.RETURN_GENERATED_KEYS)) {
                     statement.setLong(1, machineId);
                     if (planId == null) statement.setNull(2, java.sql.Types.BIGINT); else statement.setLong(2, planId);
                     statement.setString(3, type); statement.setDate(4, Date.valueOf(performedOn));
                     statement.setString(5, description); statement.setString(6, parts);
                     statement.setString(7, operator);
                     statement.executeUpdate();
+                    try (ResultSet keys = statement.getGeneratedKeys()) {
+                        if (!keys.next()) throw new IllegalStateException("ID intervento non disponibile");
+                        interventionId = keys.getLong(1);
+                    }
+                }
+                for (MaterialConsumption material : sortedMaterials) {
+                    MaterialSnapshot snapshot = snapshots.get(material.materialId());
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "INSERT INTO workshop_intervention_materials "
+                                    + "(intervention_id, material_id, material_name, unit, quantity) VALUES (?, ?, ?, ?, ?)")) {
+                        statement.setLong(1, interventionId); statement.setLong(2, material.materialId());
+                        statement.setString(3, snapshot.name()); statement.setString(4, snapshot.unit());
+                        statement.setBigDecimal(5, material.quantity()); statement.executeUpdate();
+                    }
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "UPDATE workshop_materials SET quantity=quantity-? WHERE id=?")) {
+                        statement.setBigDecimal(1, material.quantity()); statement.setLong(2, material.materialId());
+                        statement.executeUpdate();
+                    }
                 }
                 if (planId != null) {
                     try (PreparedStatement statement = connection.prepareStatement(
@@ -192,4 +317,6 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
             }
         } catch (SQLException e) { throw new IllegalStateException("Errore nel salvataggio dell'intervento", e); }
     }
+
+    private record MaterialSnapshot(String name, String unit) { }
 }
