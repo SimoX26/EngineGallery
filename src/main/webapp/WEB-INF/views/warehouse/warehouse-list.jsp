@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=29">
 </head>
 
 <body>
@@ -116,12 +116,22 @@
 
     <div id="warehouseListView" class="engine-list-view d-none">
         <c:forEach var="item" items="${items}">
+            <c:set var="previewFilename" value="${previewImages[item.id]}"/>
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="engine-list-row record-list-card warehouse-list-row-item"
                data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
-                <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
-                    <span class="engine-image-empty-label">MAG</span>
-                </div>
+                <c:choose>
+                    <c:when test="${not empty previewFilename}">
+                        <img class="record-list-card__media warehouse-preview-image warehouse-preview-image--list"
+                             src="${pageContext.request.contextPath}/uploads/warehouse/${item.id}/${fn:escapeXml(previewFilename)}"
+                             alt="Anteprima di ${fn:escapeXml(item.name)}" loading="lazy">
+                    </c:when>
+                    <c:otherwise>
+                        <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
+                            <span class="engine-image-empty-label">MAG</span>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
                 <div class="engine-list-row__body record-list-card__content">
                     <div class="record-card__eyebrow"><c:out value="${item.componentType.label}" /> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
                     <div class="engine-list-row__main record-card__title"><c:out value="${item.name}" /></div>
@@ -146,13 +156,23 @@
 
     <div class="record-gallery-grid" id="warehouseGalleryView">
         <c:forEach var="item" items="${items}">
+            <c:set var="previewFilename" value="${previewImages[item.id]}"/>
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="customer-card-link warehouse-card-item"
                data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
                 <article class="record-gallery-card">
-                    <div class="record-card__visual record-card__visual--warehouse" aria-hidden="true">
-                        <span>MAG</span>
-                    </div>
+                    <c:choose>
+                        <c:when test="${not empty previewFilename}">
+                            <img class="warehouse-preview-image warehouse-preview-image--gallery"
+                                 src="${pageContext.request.contextPath}/uploads/warehouse/${item.id}/${fn:escapeXml(previewFilename)}"
+                                 alt="Anteprima di ${fn:escapeXml(item.name)}" loading="lazy">
+                        </c:when>
+                        <c:otherwise>
+                            <div class="record-card__visual record-card__visual--warehouse" aria-hidden="true">
+                                <span>MAG</span>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                     <div class="record-card__body">
                         <div class="record-card__eyebrow"><c:out value="${item.componentType.label}" /> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
                         <div class="record-card__title"><c:out value="${item.name}" /></div>

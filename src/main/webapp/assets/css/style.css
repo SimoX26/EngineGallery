@@ -3495,6 +3495,22 @@ body.modal-open {
     box-shadow: var(--shadow-soft);
 }
 
+.warehouse-preview-image {
+    display: block;
+    object-fit: cover;
+    background: var(--bg-main);
+}
+
+.warehouse-preview-image--gallery {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.warehouse-preview-image--list {
+    border: 1px solid var(--border-soft);
+}
+
 .record-list-card,
 .engine-list-row.record-list-card {
     min-width: 0;

@@ -7,6 +7,7 @@ import it.SimoSW.model.dao.WarehouseItemDAO;
 import it.SimoSW.model.dao.WarehouseImageDAO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class WarehouseController {
@@ -107,6 +108,10 @@ public class WarehouseController {
             return List.of();
         }
         return warehouseImageDAO.findAllByWarehouseItemId(itemId);
+    }
+
+    public Map<Long, String> getPreviewFilenames() {
+        return warehouseImageDAO.findPreviewFilenames();
     }
 
     public WarehouseImage addImage(Long itemId, String filename) {

@@ -3,6 +3,7 @@ package it.SimoSW.model.dao;
 import it.SimoSW.model.WarehouseImage;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface WarehouseImageDAO {
@@ -14,6 +15,8 @@ public interface WarehouseImageDAO {
     Optional<WarehouseImage> findById(long imageId);
 
     List<WarehouseImage> findAllByWarehouseItemId(long itemId);
+
+    Map<Long, String> findPreviewFilenames();
 
     List<WarehouseImage> findLatest(int limit);
 }

@@ -38,6 +38,7 @@ public class WarehouseListServlet extends HttpServlet {
                         .toList();
             }
             request.setAttribute("items", items);
+            request.setAttribute("previewImages", warehouseController.getPreviewFilenames());
             request.setAttribute("componentTypes", Arrays.stream(WarehouseComponentType.values())
                     .filter(type -> type != WarehouseComponentType.UNCLASSIFIED)
                     .toList());

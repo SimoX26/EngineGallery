@@ -11,7 +11,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class DatabaseWarehouseImageDAO implements WarehouseImageDAO {
@@ -116,6 +118,25 @@ public class DatabaseWarehouseImageDAO implements WarehouseImageDAO {
         }
 
         return images;
+    }
+
+    @Override
+    public Map<Long, String> findPreviewFilenames() {
+        String sql = "SELECT w.id, (SELECT i.filename FROM warehouse_images i "
+                + "WHERE i.warehouse_item_id = w.id ORDER BY i.upload_date DESC, i.id DESC LIMIT 1) AS filename "
+                + "FROM warehouse_items w";
+        Map<Long, String> previews = new HashMap<>();
+        try (Connection conn = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String filename = rs.getString("filename");
+                if (filename != null) previews.put(rs.getLong("id"), filename);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Errore nel recupero anteprime articoli", e);
+        }
+        return previews;
     }
 
     @Override
