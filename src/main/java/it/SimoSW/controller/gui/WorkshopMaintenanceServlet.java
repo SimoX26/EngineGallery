@@ -1,6 +1,7 @@
 package it.SimoSW.controller.gui;
 
 import it.SimoSW.controller.app.WorkshopMaintenanceController;
+import it.SimoSW.model.MaintenanceIntervention;
 import it.SimoSW.model.MaintenancePlan;
 import it.SimoSW.model.MaterialConsumption;
 import it.SimoSW.model.User;
@@ -13,10 +14,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
@@ -67,6 +74,13 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=materials&saved=1");
                 return;
             }
+            if ("createPlan".equals(action)) {
+                LocalDate dueDate = date(request.getParameter("dueDate"));
+                controller.createPlan(longValue(request, "machineId"), request.getParameter("description"), dueDate, null);
+                response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=calendar&month="
+                        + YearMonth.from(dueDate) + "&day=" + dueDate + "&saved=1");
+                return;
+            }
             if ("deleteMachine".equals(action)) {
                 long id = longValue(request, "machineId");
                 String imageFilename = controller.deleteMachine(id);
@@ -111,6 +125,7 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             request.setAttribute("error", ex.getMessage());
             String action = request.getParameter("action");
             request.setAttribute("view", "createMaterial".equals(action) || "adjustMaterial".equals(action) ? "materials"
+                    : "createPlan".equals(action) ? "calendar"
                     : "createMachine".equals(action) ? "new"
                     : "updateMachine".equals(action) ? "edit"
                     : "deleteMachine".equals(action) ? "detail"
@@ -162,7 +177,13 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 return;
             }
             if ("calendar".equals(view)) {
+                prepareCalendar(request);
                 request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-calendar.jsp").forward(request, response);
+                return;
+            }
+            if ("history".equals(view)) {
+                request.setAttribute("interventions", controller.getInterventions());
+                request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-history.jsp").forward(request, response);
                 return;
             }
             if ("materials".equals(view)) {
@@ -200,6 +221,7 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             }
             if ("intervention".equals(view)) {
                 request.setAttribute("materials", controller.getMaterials());
+                request.setAttribute("plans", controller.getPlans().stream().filter(plan -> !plan.isCompleted()).toList());
                 String selected = request.getParameter("machineId");
                 if (!blank(selected)) {
                     long id = Long.parseLong(selected);
@@ -219,12 +241,53 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             request.setAttribute("overdueCount", plans.stream().filter(MaintenancePlan::isOverdue).count());
             request.setAttribute("dueSoonCount", plans.stream().filter(MaintenancePlan::isDueSoon).count());
             request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-maintenance.jsp").forward(request, response);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | DateTimeException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } catch (IllegalStateException e) {
             request.setAttribute("error", "Impossibile caricare la manutenzione. Verifica che la migrazione del database sia stata applicata.");
             request.getRequestDispatcher("/WEB-INF/views/maintenance/workshop-maintenance.jsp").forward(request, response);
         }
+    }
+
+    private void prepareCalendar(HttpServletRequest request) {
+        YearMonth month = blank(request.getParameter("month")) ? YearMonth.now()
+                : YearMonth.parse(request.getParameter("month"));
+        if (month.getYear() < 1900 || month.getYear() > 2100)
+            throw new DateTimeException("Mese non valido");
+        LocalDate selectedDate = blank(request.getParameter("day"))
+                ? (month.equals(YearMonth.now()) ? LocalDate.now() : month.atDay(1))
+                : LocalDate.parse(request.getParameter("day"));
+        if (!YearMonth.from(selectedDate).equals(month))
+            throw new DateTimeException("Giorno non valido");
+
+        List<MaintenancePlan> plans = controller.getPlans();
+        Map<LocalDate, List<MaintenancePlan>> byDate = plans.stream()
+                .filter(plan -> plan.getDueDate() != null)
+                .collect(Collectors.groupingBy(MaintenancePlan::getDueDate));
+        Map<LocalDate, List<MaintenanceIntervention>> interventionsByDate = controller.getInterventions().stream()
+                .collect(Collectors.groupingBy(MaintenanceIntervention::getPerformedOn));
+        LocalDate firstCell = month.atDay(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate lastCell = month.atEndOfMonth().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        List<Map<String, Object>> days = new ArrayList<>();
+        for (LocalDate day = firstCell; !day.isAfter(lastCell); day = day.plusDays(1)) {
+            List<MaintenancePlan> dailyPlans = byDate.getOrDefault(day, List.of());
+            days.add(Map.of("date", day.toString(), "month", YearMonth.from(day).toString(), "number", day.getDayOfMonth(),
+                    "inMonth", YearMonth.from(day).equals(month), "today", day.equals(LocalDate.now()),
+                    "selected", day.equals(selectedDate), "count", dailyPlans.size()
+                            + interventionsByDate.getOrDefault(day, List.of()).size(),
+                    "overdue", dailyPlans.stream().anyMatch(MaintenancePlan::isOverdue)));
+        }
+        request.setAttribute("calendarMonth", month);
+        request.setAttribute("calendarMonthTitle", month.format(DateTimeFormatter.ofPattern("LLLL yyyy", Locale.ITALIAN)));
+        request.setAttribute("previousMonth", month.minusMonths(1));
+        request.setAttribute("nextMonth", month.plusMonths(1));
+        request.setAttribute("selectedDate", selectedDate);
+        request.setAttribute("selectedDayTitle", selectedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ITALIAN)));
+        request.setAttribute("calendarDays", days);
+        request.setAttribute("selectedPlans", byDate.getOrDefault(selectedDate, List.of()));
+        request.setAttribute("selectedInterventions", interventionsByDate.getOrDefault(selectedDate, List.of()));
+        request.setAttribute("hourPlans", plans.stream().filter(plan -> plan.getDueHours() != null && !plan.isCompleted()).toList());
+        request.setAttribute("machines", controller.getMachines());
     }
 
     private static long longValue(HttpServletRequest request, String name) {

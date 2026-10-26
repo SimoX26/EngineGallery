@@ -47,6 +47,18 @@
                     <option value="EXTRAORDINARY" ${chosenType == 'EXTRAORDINARY' ? 'selected' : ''}>Straordinaria</option>
                 </select>
             </div>
+            <div class="col-12" data-draft-dynamic>
+                <label class="form-label fw-semibold" for="intervention-plan">Manutenzione programmata (facoltativa)</label>
+                <select class="form-select" id="intervention-plan" name="planId">
+                    <option value="">Nessuna manutenzione programmata</option>
+                    <c:forEach var="plan" items="${plans}">
+                        <option value="${plan.id}" data-machine-id="${plan.machineId}" ${param.planId == plan.id ? 'selected' : ''}>
+                            <c:out value="${plan.machineName}"/> — <c:out value="${plan.description}"/>
+                            (<c:out value="${not empty plan.dueDate ? plan.dueDate : plan.dueHours}"/>${empty plan.dueDate ? ' ore' : ''})
+                        </option>
+                    </c:forEach>
+                </select>
+            </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold" for="intervention-date">Data dell'intervento</label>
                 <input class="form-control" type="date" id="intervention-date" name="performedOn" max="${today}" required value="<c:out value='${not empty error ? param.performedOn : today}'/>">
@@ -103,6 +115,20 @@
 </main>
 <script>
     (() => {
+        const machineSelect = document.getElementById('intervention-machine');
+        const planSelect = document.getElementById('intervention-plan');
+        const syncPlans = () => {
+            const machineId = machineSelect.value;
+            planSelect.disabled = !machineId;
+            planSelect.querySelectorAll('option[data-machine-id]').forEach((option) => {
+                option.disabled = option.dataset.machineId !== machineId;
+                option.hidden = option.disabled;
+            });
+            if (planSelect.selectedOptions[0]?.disabled) planSelect.value = '';
+        };
+        machineSelect.addEventListener('change', syncPlans);
+        syncPlans();
+
         const form = document.querySelector('form[data-draft-key="workshop-intervention-new"]');
         const rows = document.getElementById('material-usage-rows');
         const draft = document.getElementById('material-usage-draft');

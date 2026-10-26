@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Manutenzione macchinari • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=33">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=34">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -17,10 +17,10 @@
     <header class="page-header-with-search workshop-maintenance-header">
         <div class="page-header">
             <h1>Manutenzione macchinari</h1>
-            <p>Attrezzature interne dell'officina</p>
         </div>
         <div class="workshop-maintenance-header__actions">
             <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=materials">Magazzino materiali</a>
+            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=history">Storico manutenzioni</a>
             <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
             <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/workshop-maintenance?view=new">Aggiungi macchinario +</a>
         </div>
