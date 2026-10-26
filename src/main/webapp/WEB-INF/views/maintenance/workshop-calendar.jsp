@@ -15,11 +15,10 @@
 <main class="container pb-5 workshop-maintenance-page workshop-calendar-page">
     <header class="page-header-with-search workshop-maintenance-header">
         <div class="page-header">
-            <a class="text-decoration-none" href="${pageContext.request.contextPath}/workshop-maintenance">← Manutenzione macchinari</a>
-            <h1 class="mt-2">Calendario manutenzioni</h1>
-        </div>
-        <div class="workshop-maintenance-header__actions">
-            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=history">Storico manutenzioni</a>
+            <a class="share-icon-btn workshop-detail-round-btn mb-3" href="${pageContext.request.contextPath}/workshop-maintenance" aria-label="Torna ai macchinari" title="Torna ai macchinari">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"></path></svg>
+            </a>
+            <h1>Calendario manutenzioni</h1>
         </div>
     </header>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
