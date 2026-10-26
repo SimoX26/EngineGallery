@@ -12,7 +12,8 @@
     <title>Engine Gallery • Dettaglio Articolo</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=14">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=28">
 </head>
 <body>
 
@@ -24,24 +25,29 @@
     <c:param name="id" value="${item.id}" />
 </c:url>
 
-<div class="container my-4 detail-has-mobile-actions">
+<div class="container my-4 detail-has-mobile-actions record-detail-page">
     <c:if test="${updated}">
         <div class="alert alert-success" role="alert">
             Modifiche salvate correttamente.
         </div>
     </c:if>
 
-    <div class="card-base">
+    <div class="card-base record-detail-shell">
         <div class="detail-mobile-actions"><div class="detail-mobile-toolbar">
             <a href="<%= request.getContextPath() %>/warehouse/list" class="share-icon-btn detail-round-btn" aria-label="Torna alla lista" title="Torna alla lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <a href="<c:out value='${warehouseEditUrl}'/>" class="share-icon-btn detail-round-btn" aria-label="Modifica articolo" title="Modifica articolo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 9.8-9.8-3.2-3.2L5 15.8 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13.8 6.2l3.2 3.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
             <a href="<c:out value='${warehouseDeleteUrl}'/>" class="share-icon-btn detail-round-btn detail-round-btn--delete" aria-label="Elimina articolo" title="Elimina articolo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V5h6v2M8 7l1 12h6l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <button type="button" class="share-icon-btn detail-round-btn detail-round-btn--share js-media-share-btn" data-share-source="#warehouseShareMedia" data-share-kind="images" aria-label="Condividi immagini" title="Condividi immagini"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" fill="none" stroke="currentColor" stroke-width="2.25"/></svg></button>
         </div></div>
-        <div class="engine-detail-section">
-            <h5 class="fw-semibold mb-3">Dettaglio articolo magazzino</h5>
+        <header class="record-detail-heading mb-4">
+            <div class="record-detail-kicker">Articolo di magazzino</div>
+            <h1 class="record-detail-title"><c:out value="${item.name}" default="Articolo"/></h1>
+            <p class="record-detail-subtitle mb-0">Codice <c:out value="${item.sku}" default="—"/></p>
+        </header>
+        <div class="engine-detail-section record-detail-panel">
+            <h2 class="mb-3">Dettagli articolo</h2>
 
-            <dl class="engine-detail-list">
+            <dl class="engine-detail-list record-detail-facts mb-0">
                 <dt>Tipologia:</dt>
                 <dd><c:out value="${item.componentType.label}" default="Non classificato" /></dd>
 
@@ -51,17 +57,28 @@
                 <dt>Codice:</dt>
                 <dd><c:out value="${item.sku}" default="—" /></dd>
 
-                <dt>Disponibilita:</dt>
-                <dd><c:out value="${item.quantity}" default="—" /></dd>
+                <dt>Disponibilità:</dt>
+                <dd class="record-detail-quantity"><c:out value="${item.quantity}" default="—" /></dd>
 
                 <dt>Ubicazione:</dt>
                 <dd><c:out value="${item.location}" default="—" /></dd>
 
                 <dt>Note:</dt>
-                <dd><c:out value="${item.notes}" default="—" /></dd>
+                <dd class="record-detail-notes"><c:out value="${item.notes}" default="—" /></dd>
             </dl>
         </div>
         <div id="warehouseShareMedia" class="d-none"><c:forEach var="image" items="${itemImages}"><span data-media-url="<%= request.getContextPath() %>/uploads/warehouse/${item.id}/${fn:escapeXml(image.filename)}"></span></c:forEach></div>
+
+        <c:if test="${not empty itemImages}">
+            <section class="record-detail-panel mt-4" aria-labelledby="warehouse-detail-images-title">
+                <h2 class="mb-3" id="warehouse-detail-images-title">Immagini</h2>
+                <div class="record-detail-image-grid">
+                    <c:forEach var="image" items="${itemImages}">
+                        <img src="${pageContext.request.contextPath}/uploads/warehouse/${item.id}/${fn:escapeXml(image.filename)}" alt="Foto di ${fn:escapeXml(item.name)}" loading="lazy">
+                    </c:forEach>
+                </div>
+            </section>
+        </c:if>
 
         <div class="row mt-4">
             <div class="col-12 detail-actions engine-detail-actions-toolbar d-flex flex-wrap justify-content-center">

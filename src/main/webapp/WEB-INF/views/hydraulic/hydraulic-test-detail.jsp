@@ -13,7 +13,8 @@
     <title>Engine Gallery • Dettaglio prova idraulica</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=14">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=28">
 </head>
 <body>
 
@@ -21,17 +22,23 @@
 <c:url var="hydraulicEditUrl" value="/hydraulic-test/edit"><c:param name="id" value="${hydraulicTest.id}"/></c:url>
 <c:url var="hydraulicDeleteUrl" value="/hydraulic-test/delete"><c:param name="id" value="${hydraulicTest.id}"/></c:url>
 
-<div class="container mt-5 mb-4 detail-has-mobile-actions">
-    <div class="row g-4 card-base">
+<div class="container mt-5 mb-4 detail-has-mobile-actions record-detail-page">
+    <div class="row g-4 card-base record-detail-shell">
         <div class="col-12 detail-mobile-actions"><div class="detail-mobile-toolbar">
             <a href="<%= request.getContextPath() %>/hydraulic-test/list" class="share-icon-btn detail-round-btn" aria-label="Torna alla lista" title="Torna alla lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <a href="<c:out value='${hydraulicEditUrl}'/>" class="share-icon-btn detail-round-btn" aria-label="Modifica prova" title="Modifica prova"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 9.8-9.8-3.2-3.2L5 15.8 4 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13.8 6.2l3.2 3.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
             <a href="<c:out value='${hydraulicDeleteUrl}'/>" class="share-icon-btn detail-round-btn detail-round-btn--delete" aria-label="Elimina prova" title="Elimina prova"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V5h6v2M8 7l1 12h6l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <button type="button" class="share-icon-btn detail-round-btn detail-round-btn--share js-media-share-btn" data-share-source="#hydraulicShareMedia" aria-label="Condividi video" title="Condividi video"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="6" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><circle cx="18" cy="19" r="3" fill="none" stroke="currentColor" stroke-width="2.25"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" fill="none" stroke="currentColor" stroke-width="2.25"/></svg></button>
         </div></div>
+        <header class="col-12 record-detail-heading">
+            <div class="record-detail-kicker">Prova idraulica</div>
+            <h1 class="record-detail-title">Prova n. <c:out value="${hydraulicTest.id}"/></h1>
+            <p class="record-detail-subtitle mb-0"><c:out value="${hydraulicTest.engineCode}" default="Codice motore non indicato"/></p>
+        </header>
         <div class="col-lg-5">
-            <h5 class="fw-semibold mb-3">Dettaglio prova</h5>
-            <dl class="engine-detail-list mb-0">
+            <section class="record-detail-panel">
+            <h2 class="mb-3">Dettaglio prova</h2>
+            <dl class="engine-detail-list record-detail-facts mb-0">
                 <dt>ID prova:</dt>
                 <dd>${hydraulicTest.id}</dd>
 
@@ -48,13 +55,15 @@
                 </dd>
 
                 <dt>Note:</dt>
-                <dd><c:out value="${hydraulicTest.notes}" default="—"/></dd>
+                <dd class="record-detail-notes"><c:out value="${hydraulicTest.notes}" default="—"/></dd>
             </dl>
+            </section>
         </div>
         <div id="hydraulicShareMedia" class="d-none"><c:choose><c:when test="${fn:startsWith(hydraulicTest.videoUrl, 'http://') || fn:startsWith(hydraulicTest.videoUrl, 'https://')}"><span data-media-url="${fn:escapeXml(hydraulicTest.videoUrl)}"></span></c:when><c:otherwise><span data-media-url="${pageContext.request.contextPath}/uploads/hydraulic/${fn:escapeXml(hydraulicTest.videoUrl)}"></span></c:otherwise></c:choose></div>
 
         <div class="col-lg-7">
-            <h5 class="fw-semibold mb-3">Video prova</h5>
+            <section class="record-detail-panel">
+            <h2 class="mb-3">Video prova</h2>
             <div class="hydraulic-video-wrap rounded">
                 <video class="hydraulic-video" controls playsinline preload="metadata">
                     <c:choose>
@@ -68,6 +77,7 @@
                     Il browser non supporta la riproduzione video.
                 </video>
             </div>
+            </section>
         </div>
 
         <div class="row mt-4">

@@ -12,7 +12,8 @@
     <title>RML • Dettaglio Motore</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=14">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=28">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
 
     <style>
@@ -217,27 +218,34 @@
         }
 
         .engine-tech-panel .engine-tech-row {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: minmax(120px, 38%) minmax(0, 1fr);
+            align-items: start;
+            gap: 12px;
+            padding: 0.8rem 0;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border-soft);
             min-width: 0;
         }
 
         .engine-tech-panel .engine-tech-key {
-            font-weight: 700;
-            flex: 0 0 auto;
+            font-size: 0.83rem;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
         .engine-tech-panel .engine-tech-value {
             min-width: 0;
-            flex: 1 1 auto;
             overflow-wrap: anywhere;
-            font-weight: 400;
+            font-weight: 600;
         }
 
         .engine-tech-panel .engine-tech-row:not(.engine-tech-row--notes) .engine-tech-value {
-            white-space: nowrap;
+            white-space: normal;
+        }
+
+        .engine-tech-panel .engine-tech-row--notes .engine-tech-value {
+            white-space: pre-wrap;
         }
 
         .engine-tech-panel .engine-tech-value .badge-status {
@@ -289,10 +297,8 @@
             }
 
             .engine-tech-panel .engine-tech-row {
-                align-items: flex-start;
-                flex-wrap: wrap;
-                gap: 4px 6px;
-                margin-bottom: 10px;
+                grid-template-columns: 1fr;
+                gap: 3px;
             }
 
             .engine-tech-panel .engine-tech-row:not(.engine-tech-row--notes) .engine-tech-value {
@@ -342,7 +348,7 @@
     <c:param name="engineRef" value="${detail.engine.engineRef}" />
 </c:url>
 
-<div class="container mt-5 mb-4" id="engineDetailGallery" data-engine-ref="<c:out value='${detail.engine.engineRef}'/>">
+<div class="container mt-5 mb-4 record-detail-page" id="engineDetailGallery" data-engine-ref="<c:out value='${detail.engine.engineRef}'/>">
     <c:if test="${updated}">
         <div class="alert alert-success" role="alert">
             Modifiche salvate correttamente.
@@ -358,7 +364,7 @@
             <c:out value="${param.statusUpdateError}" />
         </div>
     </c:if>
-    <div class="row engine-detail-layout card-base">
+    <div class="row engine-detail-layout card-base record-detail-shell">
         <div class="col-12 engine-detail-top-actions">
             <div class="engine-detail-top-toolbar">
                 <button
@@ -409,15 +415,19 @@
             </div>
         </div>
 
+        <header class="col-12 record-detail-heading">
+            <div class="record-detail-kicker">Scheda motore</div>
+            <h1 class="record-detail-title"><c:out value="${detail.engine.engineRef}" /></h1>
+            <p class="record-detail-subtitle mb-0"><c:out value="${detail.engine.engineCode}" /> · <c:out value="${detail.engine.customerName}" /></p>
+        </header>
+
         <div class="col-lg-5">
-            <div class="engine-detail-section engine-tech-panel">
+            <div class="engine-detail-section engine-tech-panel record-detail-panel">
                 <div class="engine-detail-header mb-3">
-                    <h5 class="fw-semibold mb-0">Dati tecnici</h5>
+                    <h2 class="mb-0">Dati tecnici</h2>
                 </div>
 
                 <div class="engine-detail-list">
-                    <div class="engine-ref-value"><c:out value="${detail.engine.engineRef}" /></div>
-
                     <div class="engine-tech-row">
                         <span class="engine-tech-key">Codice motore:</span>
                         <span class="engine-tech-value"><c:out value="${detail.engine.engineCode}" /></span>
@@ -486,8 +496,8 @@
         </div>
 
         <div class="col-lg-7">
-            <div class="engine-detail-section engine-detail-media-panel">
-                <h5 class="fw-semibold mb-3">Immagini</h5>
+            <div class="engine-detail-section engine-detail-media-panel record-detail-panel">
+                <h2 class="mb-3">Immagini</h2>
 
                 <div id="engineCarousel" class="carousel slide" data-bs-ride="false">
                     <div class="carousel-inner">
@@ -500,8 +510,7 @@
                                      data-index="${status.index}"
                                      data-image-url="<c:out value='${engineImageUrl}'/>"
                                      data-filename="<c:out value='${image.filename}'/>"
-                                     style="height: 420px;
-                                            width: 100%;
+                                     style="width: 100%;
                                             background-color: transparent;
                                             border: none;">
                                     <img src="<c:out value='${engineImageUrl}'/>"
