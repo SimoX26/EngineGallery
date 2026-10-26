@@ -39,68 +39,36 @@
                 <div id="hydraulicKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
                     Nessuna prova idraulica corrisponde alla ricerca.
                 </div>
-
-                <div class="modal fade filters-modal" id="hydraulicFiltersModal" tabindex="-1" aria-labelledby="hydraulicFiltersModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title fw-semibold" id="hydraulicFiltersModalLabel">Filtri prove idrauliche</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-                            </div>
-                            <div class="modal-body">
-                                <label for="hydraulicFiltersKeywordInput" class="form-label small mb-1">Parola chiave</label>
-                                <input type="search" id="hydraulicFiltersKeywordInput" class="form-control" placeholder="cerca...">
-                            </div>
-                            <div class="modal-footer filters-modal-footer">
-                                <button type="button" id="hydraulicFiltersResetBtn" class="btn btn-sm filters-btn-secondary">Rimuovi filtri</button>
-                                <button type="button" id="hydraulicFiltersApplyBtn" class="btn btn-sm filters-btn-primary">Applica filtri</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <div class="page-header-action-group">
-                <div class="page-header-filter">
-                    <button class="btn btn-outline-secondary btn-sm"
-                            type="button"
-                            aria-expanded="false"
-                            aria-controls="hydraulicFiltersModal"
-                            id="hydraulicFiltersToggle">
-                        Filtri
+            <div class="page-header-actions page-header-actions--view">
+                <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista prove idrauliche">
+                    <button type="button"
+                            id="hydraulicViewListBtn"
+                            class="btn btn-outline-secondary engine-view-toggle-btn"
+                            title="Vista lista"
+                            aria-label="Vista lista">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <line x1="5" y1="7" x2="19" y2="7"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <line x1="5" y1="17" x2="19" y2="17"></line>
+                        </svg>
+                        <span class="visually-hidden">Lista</span>
+                    </button>
+                    <button type="button"
+                            id="hydraulicViewGalleryBtn"
+                            class="btn btn-outline-secondary active engine-view-toggle-btn"
+                            title="Vista galleria"
+                            aria-label="Vista galleria">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="4" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="4" y="13" width="7" height="7" rx="1"></rect>
+                            <rect x="13" y="13" width="7" height="7" rx="1"></rect>
+                        </svg>
+                        <span class="visually-hidden">Galleria</span>
                     </button>
                 </div>
-
-                <div class="page-header-actions page-header-actions--view">
-                    <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista prove idrauliche">
-                        <button type="button"
-                                id="hydraulicViewListBtn"
-                                class="btn btn-outline-secondary engine-view-toggle-btn"
-                                title="Vista lista"
-                                aria-label="Vista lista">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <line x1="5" y1="7" x2="19" y2="7"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                <line x1="5" y1="17" x2="19" y2="17"></line>
-                            </svg>
-                            <span class="visually-hidden">Lista</span>
-                        </button>
-                        <button type="button"
-                                id="hydraulicViewGalleryBtn"
-                                class="btn btn-outline-secondary active engine-view-toggle-btn"
-                                title="Vista galleria"
-                                aria-label="Vista galleria">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <rect x="4" y="4" width="7" height="7" rx="1"></rect>
-                                <rect x="13" y="4" width="7" height="7" rx="1"></rect>
-                                <rect x="4" y="13" width="7" height="7" rx="1"></rect>
-                                <rect x="13" y="13" width="7" height="7" rx="1"></rect>
-                            </svg>
-                            <span class="visually-hidden">Galleria</span>
-                        </button>
-                    </div>
-                </div>
-
             </div>
         </div>
 
@@ -213,13 +181,6 @@
         const hydraulicListView = document.getElementById('hydraulicListView');
         const hydraulicGalleryView = document.getElementById('hydraulicGalleryGrid');
         const hydraulicViewStorageKey = 'hydraulic.viewMode';
-        const hydraulicFiltersToggle = document.getElementById('hydraulicFiltersToggle');
-        const hydraulicFiltersModalEl = document.getElementById('hydraulicFiltersModal');
-        const hydraulicFiltersModal = bootstrap.Modal.getOrCreateInstance(hydraulicFiltersModalEl);
-        const hydraulicFiltersKeywordInput = document.getElementById('hydraulicFiltersKeywordInput');
-        const hydraulicFiltersApplyBtn = document.getElementById('hydraulicFiltersApplyBtn');
-        const hydraulicFiltersResetBtn = document.getElementById('hydraulicFiltersResetBtn');
-
         const filterController = window.EngineGalleryLiveSearch && searchInput
             ? window.EngineGalleryLiveSearch.init({
                 input: searchInput,
@@ -232,27 +193,6 @@
             })
             : null;
 
-        hydraulicFiltersToggle.addEventListener('click', () => {
-            hydraulicFiltersKeywordInput.value = searchInput.value;
-            hydraulicFiltersModal.show();
-        });
-
-        hydraulicFiltersApplyBtn.addEventListener('click', () => {
-            searchInput.value = hydraulicFiltersKeywordInput.value || '';
-            if (filterController) {
-                filterController.apply();
-            }
-            hydraulicFiltersModal.hide();
-        });
-
-        hydraulicFiltersResetBtn.addEventListener('click', () => {
-            hydraulicFiltersKeywordInput.value = '';
-            searchInput.value = '';
-            if (filterController) {
-                filterController.apply();
-            }
-            hydraulicFiltersModal.hide();
-        });
         const applyHydraulicViewMode = (mode) => {
             const safeMode = mode === 'list' ? 'list' : 'gallery';
             hydraulicListView.classList.toggle('d-none', safeMode !== 'list');
