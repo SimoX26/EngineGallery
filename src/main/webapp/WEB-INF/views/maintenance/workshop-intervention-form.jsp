@@ -21,7 +21,11 @@
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${empty machines}"><div class="alert alert-info">Aggiungi prima un macchinario. <a href="${pageContext.request.contextPath}/workshop-maintenance?view=new">Aggiungi macchinario</a></div></c:if>
     <section class="card-base workshop-form-panel">
-        <form method="post" action="${pageContext.request.contextPath}/workshop-maintenance" class="row g-3">
+        <form method="post" action="${pageContext.request.contextPath}/workshop-maintenance" class="row g-3"
+              data-draft-key="workshop-intervention-new"
+              data-draft-user="${sessionScope.loggedUser.id}"
+              data-draft-success="${pageContext.request.contextPath}/workshop-maintenance"
+              data-draft-success-param="saved">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
             <input type="hidden" name="action" value="recordIntervention">
             <div class="col-md-6">
@@ -62,5 +66,6 @@
         </form>
     </section>
 </main>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=1"></script>
 </body>
 </html>

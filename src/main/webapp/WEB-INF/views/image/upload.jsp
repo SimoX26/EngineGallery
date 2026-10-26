@@ -45,6 +45,10 @@
               class="form-click-guides"
               action="<%= request.getContextPath() %>/upload"
               method="post"
+              data-draft-key="engine-new"
+              data-draft-user="${sessionScope.loggedUser.id}"
+              data-draft-success="<%= request.getContextPath() %>/dashboard"
+              data-draft-success-param="lockBack"
               enctype="multipart/form-data">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
@@ -312,6 +316,7 @@
         imagesInput.files = nextFiles;
         accumulatedSelectedFiles = Array.from(imagesInput.files || []);
         renderSelectedImagesPreview(imagesInput, imagesPreviewList);
+        document.getElementById('uploadForm').dispatchEvent(new Event('draftchange'));
     }
 
     function hideCustomerSuggestions() {
@@ -396,6 +401,7 @@
                 input.files = transfer.files;
                 accumulatedSelectedFiles = Array.from(input.files || []);
                 renderSelectedImagesPreview(input, container);
+                document.getElementById('uploadForm').dispatchEvent(new Event('draftchange'));
             });
 
             const img = document.createElement('img');
@@ -465,6 +471,7 @@
             if (onlyImages.length > 0) {
                 iosSessionCapturedFiles = mergeFilesDedup(iosSessionCapturedFiles, onlyImages);
                 renderIosCollectorPreview();
+                commitIosCollectorToMainInput();
             }
             iosCameraCaptureInput.value = '';
         });
@@ -524,4 +531,5 @@
         updateDot();
     })();
 </script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=1"></script>
 </html>

@@ -30,6 +30,10 @@
         <form action="<%= request.getContextPath() %>/hydraulic-test/new"
               method="post"
               enctype="multipart/form-data"
+              data-draft-key="hydraulic-test-new"
+              data-draft-user="${sessionScope.loggedUser.id}"
+              data-draft-success="<%= request.getContextPath() %>/hydraulic-test/list"
+              data-draft-success-param="lockBack"
               class="form-click-guides">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
             <div class="mb-3">
@@ -149,6 +153,7 @@
         window.addEventListener('pagehide', cleanupPreviewObjectUrl);
     })();
 </script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

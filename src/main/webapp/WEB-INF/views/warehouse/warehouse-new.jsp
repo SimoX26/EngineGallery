@@ -37,6 +37,10 @@
         <form action="<%= request.getContextPath() %>/warehouse/new"
               method="post"
               enctype="multipart/form-data"
+              data-draft-key="warehouse-new"
+              data-draft-user="${sessionScope.loggedUser.id}"
+              data-draft-success="<%= request.getContextPath() %>/warehouse/detail"
+              data-draft-success-param="lockBack"
               class="form-click-guides">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
@@ -173,6 +177,7 @@
                     });
                     input.files = transfer.files;
                     renderPreview();
+                    input.dispatchEvent(new Event('change'));
                 });
 
                 const img = document.createElement('img');
@@ -198,6 +203,7 @@
         input.addEventListener('change', renderPreview);
     })();
 </script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=1"></script>
 
 </body>
 </html>

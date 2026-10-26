@@ -22,7 +22,11 @@
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${param.imageError == '1'}"><div class="alert alert-warning" role="alert">Macchinario salvato, ma l'immagine non è stata caricata. Riprova.</div></c:if>
     <section class="card-base workshop-form-panel">
-        <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/workshop-maintenance" class="row g-3">
+        <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/workshop-maintenance" class="row g-3"
+              data-draft-key="${empty machine ? 'workshop-machine-new' : ''}"
+              data-draft-user="${sessionScope.loggedUser.id}"
+              data-draft-success="${pageContext.request.contextPath}/workshop-maintenance"
+              data-draft-success-param="saved">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
             <input type="hidden" name="action" value="${empty machine ? 'createMachine' : 'updateMachine'}">
             <c:if test="${not empty machine}"><input type="hidden" name="machineId" value="${machine.id}"></c:if>
@@ -80,5 +84,6 @@
         </form>
     </section>
 </main>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=1"></script>
 </body>
 </html>
