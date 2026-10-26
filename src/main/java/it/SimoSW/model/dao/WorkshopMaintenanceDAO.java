@@ -23,6 +23,7 @@ public interface WorkshopMaintenanceDAO {
     long createMachine(String name, String model, String serialNumber, String location, LocalDate purchaseDate, int usageHours);
     boolean updateMachine(long id, String name, String model, String serialNumber, String location, LocalDate purchaseDate,
                           String status, int usageHours);
+    boolean deleteMachine(long id);
     String updateMachineImage(long machineId, String imageFilename);
     long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours);
     void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,

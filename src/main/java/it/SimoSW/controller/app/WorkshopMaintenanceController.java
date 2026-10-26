@@ -73,6 +73,13 @@ public class WorkshopMaintenanceController {
             throw new IllegalArgumentException("Macchinario non trovato");
     }
 
+    public String deleteMachine(long id) {
+        requireMachine(id);
+        String imageFilename = dao.findMachineImageFilename(id);
+        if (!dao.deleteMachine(id)) throw new IllegalArgumentException("Macchinario non trovato");
+        return imageFilename;
+    }
+
     public void createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours) {
         requireMachine(machineId);
         if ((dueDate == null) == (dueHours == null))

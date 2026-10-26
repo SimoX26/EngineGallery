@@ -199,6 +199,19 @@ public class DatabaseWorkshopMaintenanceDAO implements WorkshopMaintenanceDAO {
     }
 
     @Override
+    public boolean deleteMachine(long id) {
+        try (Connection connection = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement("DELETE FROM workshop_machines WHERE id=?")) {
+            statement.setLong(1, id);
+            return statement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            if (e.getSQLState() != null && e.getSQLState().startsWith("23"))
+                throw new IllegalArgumentException("Impossibile eliminare il macchinario: sono presenti piani o interventi di manutenzione.", e);
+            throw new IllegalStateException("Errore nell'eliminazione del macchinario", e);
+        }
+    }
+
+    @Override
     public String updateMachineImage(long machineId, String imageFilename) {
         try (Connection connection = ConnectionFactory.getInstance().getConnection()) {
             connection.setAutoCommit(false);

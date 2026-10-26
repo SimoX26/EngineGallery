@@ -25,6 +25,7 @@
         </div>
     </div>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
+    <c:if test="${param.deleted == '1'}"><div class="alert alert-success" role="status">Macchinario eliminato.</div></c:if>
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3"><div class="card-base h-100"><div class="kpi-title">Macchinari</div><div class="kpi-value"><c:out value="${machineCount}" default="—"/></div></div></div>

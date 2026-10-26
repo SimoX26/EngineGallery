@@ -710,6 +710,56 @@ body:not(.login-page) {
     object-fit: cover;
 }
 
+.workshop-detail-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.workshop-detail-toolbar form {
+    margin: 0;
+}
+
+.share-icon-btn.workshop-detail-round-btn {
+    flex: 0 0 auto;
+    background: var(--primary);
+    color: #fff;
+}
+
+.share-icon-btn.workshop-detail-round-btn:hover,
+.share-icon-btn.workshop-detail-round-btn:focus-visible {
+    background: var(--primary-hover);
+    color: #fff;
+}
+
+.share-icon-btn.workshop-detail-round-btn--delete {
+    background: var(--action-danger-bg);
+    border-color: var(--action-danger-border);
+}
+
+.share-icon-btn.workshop-detail-round-btn--delete:hover,
+.share-icon-btn.workshop-detail-round-btn--delete:focus-visible {
+    background: var(--action-danger-hover);
+    border-color: var(--action-danger-border-hover);
+}
+
+.share-icon-btn.workshop-detail-round-btn--share {
+    background: var(--action-share-bg);
+    border-color: var(--action-share-border);
+}
+
+.share-icon-btn.workshop-detail-round-btn--share:hover,
+.share-icon-btn.workshop-detail-round-btn--share:focus-visible {
+    background: var(--action-share-hover);
+    border-color: var(--action-share-border-hover);
+}
+
+.workshop-detail-round-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .workshop-detail-image.workshop-machine-card__empty {
     display: flex;
 }

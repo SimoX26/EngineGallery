@@ -67,6 +67,19 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=materials&saved=1");
                 return;
             }
+            if ("deleteMachine".equals(action)) {
+                long id = longValue(request, "machineId");
+                String imageFilename = controller.deleteMachine(id);
+                if (imageFilename != null && imageFilename.matches("[0-9a-fA-F-]{36}\\.jpg")) {
+                    try {
+                        Path directory = UploadPathResolver.resolveWorkshopMachineUploadBase(getServletContext()).resolve(String.valueOf(id));
+                        Files.deleteIfExists(directory.resolve(imageFilename));
+                        Files.deleteIfExists(directory);
+                    } catch (IOException | IllegalStateException ignored) { }
+                }
+                response.sendRedirect(request.getContextPath() + "/workshop-maintenance?deleted=1");
+                return;
+            }
             long machineId;
             if ("createMachine".equals(action)) {
                 Part image = checkedImage(request);
@@ -100,6 +113,7 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
             request.setAttribute("view", "createMaterial".equals(action) || "adjustMaterial".equals(action) ? "materials"
                     : "createMachine".equals(action) ? "new"
                     : "updateMachine".equals(action) ? "edit"
+                    : "deleteMachine".equals(action) ? "detail"
                     : "recordIntervention".equals(action) ? "intervention" : null);
             render(request, response);
         }

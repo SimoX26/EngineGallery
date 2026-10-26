@@ -82,13 +82,22 @@ class WorkshopMaintenanceControllerTest {
         assertEquals(new BigDecimal("0.250"), dao.savedConsumption.get(0).quantity());
     }
 
+    @Test
+    void deletesExistingMachineAndReturnsItsImageForCleanup() {
+        assertThrows(IllegalArgumentException.class, () -> controller.deleteMachine(2));
+        assertFalse(dao.machineDeleted);
+        assertEquals("machine.jpg", controller.deleteMachine(1));
+        assertTrue(dao.machineDeleted);
+    }
+
     private static class StubDAO implements WorkshopMaintenanceDAO {
         int savedPlans;
         int savedMaterials;
         List<MaterialConsumption> savedConsumption = List.of();
         List<MaintenanceIntervention> interventions = List.of();
+        boolean machineDeleted;
         public List<WorkshopMachine> findMachines() { return List.of(new WorkshopMachine(1, "Tornio", "A", "123", "Banco", null, "ACTIVE", 100, null)); }
-        public String findMachineImageFilename(long machineId) { return null; }
+        public String findMachineImageFilename(long machineId) { return "machine.jpg"; }
         public List<MaintenancePlan> findPlans() { return List.of(); }
         public List<MaintenanceIntervention> findInterventions() { return interventions; }
         public List<WorkshopMaterial> findMaterials() { return List.of(); }
@@ -98,6 +107,7 @@ class WorkshopMaintenanceControllerTest {
         public void adjustMaterialStock(long materialId, BigDecimal delta) { }
         public long createMachine(String name, String model, String serialNumber, String location, LocalDate purchaseDate, int usageHours) { return 1; }
         public boolean updateMachine(long id, String name, String model, String serialNumber, String location, LocalDate purchaseDate, String status, int usageHours) { return true; }
+        public boolean deleteMachine(long id) { machineDeleted = true; return true; }
         public String updateMachineImage(long machineId, String imageFilename) { return null; }
         public long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours) { savedPlans++; return savedPlans; }
         public void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,

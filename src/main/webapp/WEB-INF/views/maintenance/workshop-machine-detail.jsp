@@ -9,26 +9,46 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title><c:out value="${machine.name}"/> • Manutenzione macchinari</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=27">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-<main class="container pb-5 workshop-maintenance-page workshop-has-fab">
-    <div class="page-header">
-        <a class="text-decoration-none" href="${pageContext.request.contextPath}/workshop-maintenance">← Tutti i macchinari</a>
-        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mt-3">
-            <div><h1 class="mb-1"><c:out value="${machine.name}"/></h1><p class="mb-0">Anagrafica macchinario</p></div>
-            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=edit&amp;id=${machine.id}">Modifica macchinario</a>
-        </div>
-    </div>
+<main class="container pt-4 pb-5 workshop-maintenance-page workshop-has-fab">
     <c:if test="${param.saved == '1'}"><div class="alert alert-success" role="status">Dati salvati.</div></c:if>
+    <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
 
     <section class="card-base mb-4" aria-label="Anagrafica del macchinario">
+        <div class="workshop-detail-toolbar mb-4" aria-label="Azioni macchinario">
+            <a class="share-icon-btn workshop-detail-round-btn" href="${pageContext.request.contextPath}/workshop-maintenance" aria-label="Torna ai macchinari" title="Torna ai macchinari">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"></path></svg>
+            </a>
+            <a class="share-icon-btn workshop-detail-round-btn" href="${pageContext.request.contextPath}/workshop-maintenance?view=edit&amp;id=${machine.id}" aria-label="Modifica macchinario" title="Modifica macchinario">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 9.8-9.8-3.2-3.2L5 15.8 4 20z"></path><path d="M13.8 6.2l3.2 3.2"></path></svg>
+            </a>
+            <form method="post" action="${pageContext.request.contextPath}/workshop-maintenance" onsubmit="return confirm('Eliminare questo macchinario? L’operazione non può essere annullata.');">
+                <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+                <input type="hidden" name="action" value="deleteMachine">
+                <input type="hidden" name="machineId" value="${machine.id}">
+                <button class="share-icon-btn workshop-detail-round-btn workshop-detail-round-btn--delete" type="submit" aria-label="Elimina macchinario" title="Elimina macchinario">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14"></path><path d="M9 7V5h6v2"></path><path d="M8 7l1 12h6l1-12"></path></svg>
+                </button>
+            </form>
+            <button class="share-icon-btn workshop-detail-round-btn workshop-detail-round-btn--share js-media-share-btn" type="button"
+                    data-share-source="#workshop-machine-image" data-share-kind="images"
+                    aria-label="Condividi foto del macchinario" title="${empty machine.imageFilename ? 'Nessuna foto da condividere' : 'Condividi foto del macchinario'}"
+                    ${empty machine.imageFilename ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"></path></svg>
+            </button>
+        </div>
+        <div class="mb-4">
+            <h1 class="mb-1"><c:out value="${machine.name}"/></h1>
+            <p class="mb-0 text-muted">Anagrafica macchinario</p>
+        </div>
         <div class="row g-4 align-items-start">
-            <div class="col-md-5 col-lg-4">
+            <div class="col-md-5 col-lg-4" id="workshop-machine-image">
                 <c:choose>
                     <c:when test="${not empty machine.imageFilename}">
-                        <img class="workshop-detail-image" src="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}" alt="Foto di ${fn:escapeXml(machine.name)}">
+                        <img class="workshop-detail-image" src="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}" data-media-url="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}" alt="Foto di ${fn:escapeXml(machine.name)}">
                     </c:when>
                     <c:otherwise><div class="workshop-detail-image workshop-machine-card__empty" aria-hidden="true">Nessuna foto</div></c:otherwise>
                 </c:choose>
@@ -82,5 +102,6 @@
         <span aria-hidden="true">+</span> Aggiungi intervento
     </a>
 </main>
+<script src="${pageContext.request.contextPath}/assets/js/media-share.js?v=2"></script>
 </body>
 </html>
