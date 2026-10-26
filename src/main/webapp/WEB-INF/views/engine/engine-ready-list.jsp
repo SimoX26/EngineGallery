@@ -14,7 +14,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=32">
 </head>
 
 <body>
@@ -45,7 +45,7 @@
                     Nessun motore corrisponde alla ricerca.
                 </div>
 
-                <div class="modal fade" id="readyFiltersModal" tabindex="-1" aria-labelledby="readyFiltersModalLabel" aria-hidden="true">
+                <div class="modal fade filters-modal" id="readyFiltersModal" tabindex="-1" aria-labelledby="readyFiltersModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -57,8 +57,8 @@
                                 <input type="search" id="readyFiltersKeywordInput" class="form-control" placeholder="cerca...">
                             </div>
                             <div class="modal-footer filters-modal-footer">
-                                <button type="button" id="readyFiltersResetBtn" class="btn btn-sm btn-outline-secondary filters-btn-secondary">Rimuovi filtri</button>
-                                <button type="button" id="readyFiltersApplyBtn" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
+                                <button type="button" id="readyFiltersResetBtn" class="btn btn-sm filters-btn-secondary">Rimuovi filtri</button>
+                                <button type="button" id="readyFiltersApplyBtn" class="btn btn-sm filters-btn-primary">Applica filtri</button>
                             </div>
                         </div>
                     </div>

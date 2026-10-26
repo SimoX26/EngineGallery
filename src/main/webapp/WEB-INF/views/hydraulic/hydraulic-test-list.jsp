@@ -13,7 +13,7 @@
     <title>Engine Gallery • Prove idrauliche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=32">
 </head>
 
 <body>
@@ -40,7 +40,7 @@
                     Nessuna prova idraulica corrisponde alla ricerca.
                 </div>
 
-                <div class="modal fade" id="hydraulicFiltersModal" tabindex="-1" aria-labelledby="hydraulicFiltersModalLabel" aria-hidden="true">
+                <div class="modal fade filters-modal" id="hydraulicFiltersModal" tabindex="-1" aria-labelledby="hydraulicFiltersModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -52,8 +52,8 @@
                                 <input type="search" id="hydraulicFiltersKeywordInput" class="form-control" placeholder="cerca...">
                             </div>
                             <div class="modal-footer filters-modal-footer">
-                                <button type="button" id="hydraulicFiltersResetBtn" class="btn btn-sm btn-outline-secondary filters-btn-secondary">Rimuovi filtri</button>
-                                <button type="button" id="hydraulicFiltersApplyBtn" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
+                                <button type="button" id="hydraulicFiltersResetBtn" class="btn btn-sm filters-btn-secondary">Rimuovi filtri</button>
+                                <button type="button" id="hydraulicFiltersApplyBtn" class="btn btn-sm filters-btn-primary">Applica filtri</button>
                             </div>
                         </div>
                     </div>

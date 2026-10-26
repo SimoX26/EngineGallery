@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=32">
 </head>
 
 <body>
@@ -41,7 +41,7 @@
                        value="<c:out value='${filterKeyword}' />"
                        class="form-control"
                        placeholder="cerca...">
-                <div class="modal fade" id="engineFiltersModal" tabindex="-1" aria-labelledby="engineFiltersModalLabel" aria-hidden="true">
+                <div class="modal fade filters-modal" id="engineFiltersModal" tabindex="-1" aria-labelledby="engineFiltersModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -79,8 +79,8 @@
                             <div class="modal-footer filters-modal-footer">
                                 <a href="${pageContext.request.contextPath}${archiveMode ? '/engine/archive' : '/engine/list'}"
                                    id="engineFiltersReset"
-                                   class="btn btn-sm btn-outline-secondary filters-btn-secondary">Rimuovi filtri</a>
-                                <button type="submit" class="btn btn-sm btn-engine filters-btn-primary">Applica filtri</button>
+                                   class="btn btn-sm filters-btn-secondary">Rimuovi filtri</a>
+                                <button type="submit" class="btn btn-sm filters-btn-primary">Applica filtri</button>
                             </div>
                         </div>
                     </div>

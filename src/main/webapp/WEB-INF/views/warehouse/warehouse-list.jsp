@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=32">
 </head>
 
 <body>
@@ -36,23 +36,22 @@
                 Nessun articolo corrisponde alla ricerca.
             </div>
 
-            <div class="modal fade" id="warehouseFiltersModal" tabindex="-1" aria-labelledby="warehouseFiltersModalLabel" aria-hidden="true">
+            <div class="modal fade filters-modal" id="warehouseFiltersModal" tabindex="-1" aria-labelledby="warehouseFiltersModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <form class="modal-content" method="get" action="${pageContext.request.contextPath}/warehouse/list">
+                        <input type="hidden" id="warehouseFiltersKeywordInput" name="keyword" value="<c:out value='${param.keyword}'/>">
                         <div class="modal-header">
                             <h5 class="modal-title fw-semibold" id="warehouseFiltersModalLabel">Filtri magazzino</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                         </div>
                         <div class="modal-body">
                             <label for="warehouseFiltersComponentInput" class="form-label small mb-1">Tipologia componente</label>
-                            <select id="warehouseFiltersComponentInput" name="componentType" class="form-select mb-3">
+                            <select id="warehouseFiltersComponentInput" name="componentType" class="form-select">
                                 <option value="" ${empty selectedComponentType ? 'selected' : ''}>Tutte le tipologie</option>
                                 <c:forEach var="type" items="${componentTypes}">
                                     <option value="${type.code}" ${selectedComponentType == type.code ? 'selected' : ''}><c:out value="${type.label}" /></option>
                                 </c:forEach>
                             </select>
-                            <label for="warehouseFiltersKeywordInput" class="form-label small mb-1">Parola chiave</label>
-                            <input type="search" id="warehouseFiltersKeywordInput" name="keyword" class="form-control" placeholder="cerca...">
                         </div>
                         <div class="modal-footer filters-modal-footer">
                             <button type="button" id="warehouseFiltersResetBtn" class="btn btn-sm filters-btn-secondary">Rimuovi filtri</button>
