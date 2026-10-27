@@ -78,8 +78,8 @@
             </div>
 
             <div class="d-flex gap-2">
-                <a class="btn btn-cancel-action" href="<%= request.getContextPath() %>/hydraulic-test/list">Annulla</a>
-                <button type="submit" class="btn btn-save-action">Salva</button>
+                <a class="btn btn-cancel-action w-50" href="<%= request.getContextPath() %>/hydraulic-test/list">Annulla</a>
+                <button type="submit" class="btn btn-save-action w-50">Salva</button>
             </div>
         </form>
     </div>

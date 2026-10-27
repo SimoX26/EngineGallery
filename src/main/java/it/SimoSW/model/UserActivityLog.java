@@ -133,6 +133,9 @@ public class UserActivityLog {
         if ("DELETE".equals(actionType) && "CUSTOMER".equals(entityType)) {
             return "eliminazione cliente";
         }
+        if ("CREATE".equals(actionType) && "READY_DELIVERY_ENGINE".equals(entityType)) {
+            return "aggiunta motore pronta consegna";
+        }
         return actionType != null ? actionType : "";
     }
 
@@ -148,6 +151,9 @@ public class UserActivityLog {
         }
         if ("WAREHOUSE_ITEM".equals(entityType)) {
             return "Articolo magazzino";
+        }
+        if ("READY_DELIVERY_ENGINE".equals(entityType)) {
+            return "Motore pronta consegna";
         }
         return entityType != null ? entityType : "";
     }

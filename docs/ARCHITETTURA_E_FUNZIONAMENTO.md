@@ -81,11 +81,11 @@ Le prove idrauliche gestiscono dati di test e un video. In creazione il video e 
 
 ### Magazzino e catalogo
 
-Il magazzino consente CRUD di articoli e immagini associate. Il catalogo e al momento consultivo e legge le schede tecniche da `catalog_items`. La pagina pronta consegna e un placeholder, distinto dalla vista dei motori pronti.
+Il magazzino consente CRUD di articoli e immagini associate. Il catalogo e al momento consultivo e legge le schede tecniche da `catalog_items`. La pronta consegna conserva motori disponibili in `ready_delivery_engines`, con codice, modello, quantità, note e una foto facoltativa, separati dai motori dei clienti con stato pronto.
 
 ### Upload e filesystem
 
-`UploadPathResolver` sceglie una root scrivibile, privilegiando la configurazione esplicita e usando fallback locali se necessario. Sotto la root crea directory separate per motori, prove idrauliche e magazzino. Le servlet di download normalizzano i path e verificano che rimangano nella directory prevista.
+`UploadPathResolver` sceglie una root scrivibile, privilegiando la configurazione esplicita e usando fallback locali se necessario. Sotto la root crea directory separate per motori, prove idrauliche, magazzino e pronta consegna. Le servlet di download normalizzano i path e verificano che rimangano nella directory prevista.
 
 Le immagini decodificabili vengono orientate, ridimensionate e convertite in JPEG da `ImageOptimizationUtil`. Se `ImageIO` non decodifica il contenuto, il file viene conservato con nome normalizzato: questo comportamento e rilevante per la sicurezza.
 

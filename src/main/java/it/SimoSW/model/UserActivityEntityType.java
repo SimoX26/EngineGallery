@@ -4,5 +4,6 @@ public enum UserActivityEntityType {
     MOTOR,
     HYDRAULIC_TEST,
     CUSTOMER,
-    WAREHOUSE_ITEM
+    WAREHOUSE_ITEM,
+    READY_DELIVERY_ENGINE
 }

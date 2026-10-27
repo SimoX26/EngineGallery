@@ -17,7 +17,7 @@
 
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
 
-<div class="container-fluid d-flex align-items-center justify-content-center"
+<div class="container-fluid d-flex align-items-center justify-content-center py-4"
      style="min-height: calc(100vh - 70px);">
 
     <div class="card-base" style="max-width: 560px; width: 100%;">

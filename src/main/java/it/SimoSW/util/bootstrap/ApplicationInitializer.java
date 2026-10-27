@@ -21,6 +21,7 @@ public class ApplicationInitializer {
     private final CatalogController catalogController;
     private final WorkshopMaintenanceController workshopMaintenanceController;
     private final VehicleController vehicleController;
+    private final ReadyDeliveryController readyDeliveryController;
     private final AndroidPushService androidPushService;
 
     private final EngineRefGenerator engineRefGenerator;
@@ -39,6 +40,7 @@ public class ApplicationInitializer {
         CatalogItemDAO catalogItemDAO = new DatabaseCatalogItemDAO();
         WorkshopMaintenanceDAO workshopMaintenanceDAO = new DatabaseWorkshopMaintenanceDAO();
         VehicleDAO vehicleDAO = new DatabaseVehicleDAO();
+        ReadyDeliveryDAO readyDeliveryDAO = new DatabaseReadyDeliveryDAO();
         androidPushService = new AndroidPushService(new DatabaseAndroidPushTokenDAO());
 
         engineRefGenerator = new EngineRefGenerator(engineDAO);
@@ -68,6 +70,7 @@ public class ApplicationInitializer {
         this.catalogController = new CatalogController(catalogItemDAO);
         this.workshopMaintenanceController = new WorkshopMaintenanceController(workshopMaintenanceDAO);
         this.vehicleController = new VehicleController(vehicleDAO);
+        this.readyDeliveryController = new ReadyDeliveryController(readyDeliveryDAO);
 
     }
 
@@ -105,6 +108,7 @@ public class ApplicationInitializer {
 
     public WorkshopMaintenanceController getWorkshopMaintenanceController() { return workshopMaintenanceController; }
     public VehicleController getVehicleController() { return vehicleController; }
+    public ReadyDeliveryController getReadyDeliveryController() { return readyDeliveryController; }
 
     public AndroidPushService getAndroidPushService() { return androidPushService; }
 }
