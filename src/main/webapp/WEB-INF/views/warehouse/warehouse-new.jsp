@@ -203,7 +203,7 @@
         input.addEventListener('change', renderPreview);
     })();
 </script>
-<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=1"></script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=4"></script>
 
 </body>
 </html>

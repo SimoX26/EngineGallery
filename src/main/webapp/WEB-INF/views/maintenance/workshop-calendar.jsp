@@ -150,7 +150,7 @@
 <c:if test="${not empty error}">
     <script>bootstrap.Modal.getOrCreateInstance(document.getElementById('programPlanModal')).show();</script>
 </c:if>
-<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=2"></script>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=4"></script>
 <script>
     document.querySelector('.workshop-calendar-fab').addEventListener('click', (event) => {
         const dateInput = document.getElementById('plan-date');

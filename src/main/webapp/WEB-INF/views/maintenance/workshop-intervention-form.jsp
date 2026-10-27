@@ -186,6 +186,6 @@
         restoreRows();
     })();
 </script>
-<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=2"></script>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=4"></script>
 </body>
 </html>

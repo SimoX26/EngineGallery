@@ -84,6 +84,6 @@
         </form>
     </section>
 </main>
-<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=1"></script>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=4"></script>
 </body>
 </html>

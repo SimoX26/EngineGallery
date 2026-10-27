@@ -4,6 +4,7 @@
     form.dataset.noLoadingOverlay = 'true';
 
     const key = ['create-form-v1', form.dataset.draftUser, form.dataset.draftKey].join(':');
+    const consumedKey = key + ':consumed';
     const fields = Array.from(form.elements).filter((element) =>
         element.name && !element.closest('[data-draft-dynamic]')
         && !['hidden', 'file', 'submit', 'button'].includes(element.type));
@@ -73,11 +74,14 @@
     }
 
     let submitAttempted = false;
+    let consumed = false;
     function saveFields() {
+        if (consumed) return Promise.resolve();
         return put('fields', {values: fieldValues(), attempted: submitAttempted, savedAt: Date.now()});
     }
 
     function saveFiles() {
+        if (consumed) return Promise.resolve();
         const entries = fileInputs.map((input) => ({
             files: Array.from(input.files || []).map((file) => ({
                 blob: file, name: file.name, type: file.type, lastModified: file.lastModified
@@ -100,7 +104,9 @@
     }
 
     function queue(work) {
-        pending = pending.then(work).then(() => {
+        pending = pending.then(() => {
+            if (!consumed) return work();
+        }).then(() => {
             draftSaveFailed = false;
         }).catch(() => {
             draftSaveFailed = true;
@@ -135,9 +141,18 @@
     async function restore() {
         let savedFiles;
         try {
+            if (localStorage.getItem(consumedKey) === '1') {
+                try {
+                    await withTimeout(Promise.all([remove('fields'), remove('files')]), 3000);
+                    localStorage.removeItem(consumedKey);
+                } catch (error) {
+                    show('La bozza già utilizzata non è ancora stata eliminata dal dispositivo. Ricarica la pagina per riprovare.', 'warning');
+                    return false;
+                }
+            }
             const savedFields = await read('fields');
             savedFiles = await read('files');
-            if (!savedFields && !savedFiles) return;
+            if (!savedFields && !savedFiles) return true;
             submitAttempted = !!savedFields?.attempted;
             if (savedFields && savedFields.values.length === fields.length) {
                 fields.forEach((element, index) => {
@@ -166,7 +181,7 @@
             } else if (savedFiles && savedFiles.some((entry) => entry.files.length)) {
                 show('Il browser non può ripristinare automaticamente i file. Scaricali e selezionali di nuovo prima di salvare.', 'warning');
                 offerDownloads(savedFiles);
-                return;
+                return true;
             }
             show(savedFields?.attempted
                 ? 'Bozza ripristinata. Se avevi già premuto Salva, verifica che il record non sia stato creato prima di riprovare.'
@@ -175,10 +190,12 @@
             show('Il ripristino della bozza non è disponibile su questo dispositivo.', 'warning');
             offerDownloads(savedFiles);
         }
+        return true;
     }
 
     let submitting = false;
-    restore().then(() => {
+    restore().then((ready) => {
+        if (!ready) return;
         form.addEventListener('input', (event) => {
             if (event.target.type !== 'file') scheduleFields();
         });
@@ -225,10 +242,17 @@
                     && (!form.dataset.draftSuccessParam
                         || target.searchParams.get(form.dataset.draftSuccessParam) === '1');
                 if (successfulRedirect) {
+                    consumed = true;
+                    try {
+                        localStorage.setItem(consumedKey, '1');
+                    } catch (error) {
+                        // La cancellazione immediata resta possibile anche senza storage locale.
+                    }
                     try {
                         await withTimeout(Promise.all([remove('fields'), remove('files')]), 3000);
+                        localStorage.removeItem(consumedKey);
                     } catch (error) {
-                        // Il record è stato salvato: prosegui anche se il browser non cancella la bozza.
+                        // Il record è stato salvato: se il segno locale esiste, la cancellazione sarà ritentata.
                     }
                     navigating = true;
                     window.location.assign(response.url);
