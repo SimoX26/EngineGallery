@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Nuovo motore pronta consegna • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=36">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=37">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -40,8 +40,12 @@
             </div>
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold" for="ready-engine-image">Foto del motore (facoltativa)</label>
-                <input class="form-control" type="file" accept="image/*" id="ready-engine-image" name="image">
+                <div class="file-input-wrap">
+                    <input class="file-input-native" type="file" accept="image/*" id="ready-engine-image" name="image">
+                    <label for="ready-engine-image" class="file-input-visual file-input-visual-label media-action-button mb-0">Seleziona immagine</label>
+                </div>
                 <div class="form-text">Massimo 10 MB.</div>
+                <div id="ready-engine-image-name" class="small text-muted mt-2 d-none"></div>
                 <img id="ready-engine-preview" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del motore">
             </div>
             <div class="mb-4 text-start">
@@ -59,11 +63,14 @@
     (() => {
         const form = document.querySelector('form[data-draft-key="ready-delivery-new"]');
         const input = document.getElementById('ready-engine-image');
+        const name = document.getElementById('ready-engine-image-name');
         const preview = document.getElementById('ready-engine-preview');
         let objectUrl;
         const updatePreview = () => {
             if (objectUrl) URL.revokeObjectURL(objectUrl);
             const file = input.files && input.files[0];
+            name.textContent = file ? file.name : '';
+            name.classList.toggle('d-none', !file);
             objectUrl = file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
             preview.classList.toggle('d-none', !objectUrl);
             if (objectUrl) preview.src = objectUrl;

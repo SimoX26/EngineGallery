@@ -11,7 +11,7 @@
     <title>Modifica articolo magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=37">
 </head>
 <body data-back-guard-form="1"
       data-back-guard-fallback="<%= request.getContextPath() %>/warehouse/detail?id=${itemId}">
@@ -89,7 +89,7 @@
                            class="file-input-native"
                            accept="image/*"
                            multiple>
-                    <label for="newImagesInput" class="file-input-visual file-input-visual-label mb-0">
+                    <label for="newImagesInput" class="file-input-visual file-input-visual-label media-action-button mb-0">
                         Seleziona immagini
                     </label>
                 </div>

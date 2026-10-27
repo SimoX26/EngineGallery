@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>${empty machine ? 'Nuovo macchinario' : 'Modifica macchinario'} • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=22">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=37">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -68,9 +68,15 @@
             </c:if>
             <div class="col-12">
                 <label class="form-label fw-semibold" for="machine-image">Foto del macchinario</label>
-                <input class="form-control" type="file" accept="image/*" id="machine-image" name="image">
+                <div class="file-input-wrap">
+                    <input class="file-input-native" type="file" accept="image/*" id="machine-image" name="image">
+                    <label for="machine-image" class="file-input-visual file-input-visual-label media-action-button mb-0">Seleziona immagine</label>
+                </div>
                 <div class="form-text">Facoltativa, massimo 10 MB. Una nuova foto sostituisce quella attuale.</div>
+                <div id="machine-image-name" class="small text-muted mt-2 d-none"></div>
+                <img id="machine-image-preview" class="workshop-form-preview mt-2 d-none" alt="Anteprima della nuova foto del macchinario">
                 <c:if test="${not empty machine.imageFilename}">
+                    <div class="form-text mt-3">Foto attuale</div>
                     <img class="workshop-form-preview mt-3" src="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}" alt="Foto attuale di ${fn:escapeXml(machine.name)}">
                 </c:if>
             </div>
@@ -84,6 +90,26 @@
         </form>
     </section>
 </main>
+<script>
+    (() => {
+        const input = document.getElementById('machine-image');
+        const name = document.getElementById('machine-image-name');
+        const preview = document.getElementById('machine-image-preview');
+        let objectUrl;
+        const updatePreview = () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            const file = input.files && input.files[0];
+            name.textContent = file ? file.name : '';
+            name.classList.toggle('d-none', !file);
+            objectUrl = file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+            preview.classList.toggle('d-none', !objectUrl);
+            if (objectUrl) preview.src = objectUrl;
+            else preview.removeAttribute('src');
+        };
+        input.addEventListener('change', updatePreview);
+        input.form.addEventListener('draftrestored', updatePreview);
+    })();
+</script>
 <script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=5"></script>
 </body>
 </html>
