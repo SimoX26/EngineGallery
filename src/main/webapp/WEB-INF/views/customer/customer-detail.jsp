@@ -79,23 +79,23 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-12 detail-actions d-flex flex-wrap justify-content-center gap-2 gap-md-3">
-                <a href="<%= request.getContextPath() %>/customer/list" class="btn btn-outline-secondary px-4">
+            <div class="col-12 detail-actions engine-detail-actions-toolbar d-flex flex-wrap justify-content-center">
+                <a href="<%= request.getContextPath() %>/customer/list" class="btn engine-detail-action-btn engine-detail-action-btn--back">
                     Indietro
                 </a>
 
-                <a href="<c:out value='${customerEditUrl}'/>" class="btn btn-detail-edit px-4">
+                <a href="<c:out value='${customerEditUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--edit">
                     Modifica
                 </a>
 
                 <c:choose>
                     <c:when test="${canDelete}">
-                        <a href="<c:out value='${customerDeleteUrl}'/>" class="btn btn-detail-delete px-4">
+                        <a href="<c:out value='${customerDeleteUrl}'/>" class="btn engine-detail-action-btn engine-detail-action-btn--delete">
                             Elimina
                         </a>
                     </c:when>
                     <c:otherwise>
-                        <button class="btn btn-detail-delete px-4" disabled
+                        <button class="btn engine-detail-action-btn engine-detail-action-btn--delete" disabled
                                 title="Cliente associato a motori esistenti">
                             Elimina
                         </button>

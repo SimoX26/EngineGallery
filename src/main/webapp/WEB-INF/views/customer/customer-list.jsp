@@ -128,9 +128,9 @@
                 </dl>
             </div>
             <div class="modal-footer justify-content-center justify-content-md-end gap-2">
-                <a id="customerOverlayEditLink" href="#" class="btn btn-detail-edit px-4">Modifica</a>
-                <a id="customerOverlayDeleteLink" href="#" class="btn btn-detail-delete px-4">Elimina</a>
-                <a id="customerOverlayDetailLink" href="#" class="btn btn-outline-secondary px-4">Apri pagina</a>
+                <a id="customerOverlayEditLink" href="#" class="btn engine-detail-action-btn engine-detail-action-btn--edit">Modifica</a>
+                <a id="customerOverlayDeleteLink" href="#" class="btn engine-detail-action-btn engine-detail-action-btn--delete">Elimina</a>
+                <a id="customerOverlayDetailLink" href="#" class="btn engine-detail-action-btn engine-detail-action-btn--back">Apri pagina</a>
             </div>
         </div>
     </div>
@@ -184,9 +184,11 @@
             customerOverlayEmail.textContent = withFallback(card.dataset.customerEmail);
             customerOverlayNotes.textContent = withFallback(card.dataset.customerNotes);
 
-            customerOverlayEditLink.href = `${contextPath}/customer/edit?id=${customerId}`;
-            customerOverlayDeleteLink.href = `${contextPath}/customer/delete?id=${customerId}`;
-            customerOverlayDetailLink.href = `${contextPath}/customer/detail?id=${customerId}`;
+            const customerUrl = contextPath + '/customer/';
+            const customerQuery = '?id=' + encodeURIComponent(customerId);
+            customerOverlayEditLink.href = customerUrl + 'edit' + customerQuery;
+            customerOverlayDeleteLink.href = customerUrl + 'delete' + customerQuery;
+            customerOverlayDetailLink.href = customerUrl + 'detail' + customerQuery;
 
             customerDetailOverlay.show();
         });
