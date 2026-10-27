@@ -20,7 +20,7 @@ public class DatabaseVehicleDAO implements VehicleDAO {
     public List<Vehicle> findAll() {
         List<Vehicle> vehicles = new ArrayList<>();
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT id, plate, make, model, notes FROM vehicles ORDER BY plate");
+             PreparedStatement statement = connection.prepareStatement("SELECT id, plate, make, model, notes, vehicle_photo_filename, registration_photo_filename FROM vehicles ORDER BY plate");
              ResultSet rows = statement.executeQuery()) {
             while (rows.next()) vehicles.add(vehicle(rows));
         } catch (SQLException e) { throw new IllegalStateException("Impossibile caricare i veicoli", e); }
@@ -30,7 +30,7 @@ public class DatabaseVehicleDAO implements VehicleDAO {
     @Override
     public Optional<Vehicle> findById(long id) {
         try (Connection connection = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT id, plate, make, model, notes FROM vehicles WHERE id=?")) {
+             PreparedStatement statement = connection.prepareStatement("SELECT id, plate, make, model, notes, vehicle_photo_filename, registration_photo_filename FROM vehicles WHERE id=?")) {
             statement.setLong(1, id);
             try (ResultSet rows = statement.executeQuery()) {
                 return rows.next() ? Optional.of(vehicle(rows)) : Optional.empty();
@@ -61,6 +61,19 @@ public class DatabaseVehicleDAO implements VehicleDAO {
             statement.setLong(5, id);
             return statement.executeUpdate() > 0;
         } catch (SQLException e) { throw writeError(e); }
+    }
+
+    @Override
+    public void setPhotoFilenames(long id, String vehiclePhotoFilename, String registrationPhotoFilename) {
+        try (Connection connection = ConnectionFactory.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE vehicles SET vehicle_photo_filename=COALESCE(?, vehicle_photo_filename), "
+                             + "registration_photo_filename=COALESCE(?, registration_photo_filename) WHERE id=?")) {
+            statement.setString(1, vehiclePhotoFilename);
+            statement.setString(2, registrationPhotoFilename);
+            statement.setLong(3, id);
+            if (statement.executeUpdate() == 0) throw new IllegalArgumentException("Veicolo non trovato");
+        } catch (SQLException e) { throw new IllegalStateException("Impossibile salvare le foto del veicolo", e); }
     }
 
     @Override
@@ -164,7 +177,8 @@ public class DatabaseVehicleDAO implements VehicleDAO {
 
     private static Vehicle vehicle(ResultSet rows) throws SQLException {
         return new Vehicle(rows.getLong("id"), rows.getString("plate"), rows.getString("make"),
-                rows.getString("model"), rows.getString("notes"));
+                rows.getString("model"), rows.getString("notes"), rows.getString("vehicle_photo_filename"),
+                rows.getString("registration_photo_filename"));
     }
 
     private static VehicleEvent event(ResultSet rows) throws SQLException {

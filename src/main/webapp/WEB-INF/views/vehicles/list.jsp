@@ -12,12 +12,9 @@
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
-<main class="container pb-5 workshop-maintenance-page">
+<main class="container pb-5 workshop-maintenance-page workshop-has-fab">
     <header class="page-header-with-search workshop-maintenance-header">
-        <div class="page-header"><h1>Veicoli</h1><p>Anagrafica, scadenze e manutenzioni.</p></div>
-        <div class="workshop-maintenance-header__actions">
-            <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/vehicles?view=new">Aggiungi veicolo +</a>
-        </div>
+        <div class="page-header"><h1>Veicoli</h1></div>
     </header>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${param.deleted == '1'}"><div class="alert alert-success" role="status">Veicolo eliminato.</div></c:if>
@@ -46,7 +43,6 @@
             </div>
         </c:if>
     </section>
-    <h2 class="h4 mb-3">Anagrafica veicoli</h2>
     <div class="record-gallery-grid">
         <c:forEach var="vehicle" items="${vehicles}">
             <a class="record-gallery-card" href="${pageContext.request.contextPath}/vehicles?view=detail&amp;id=${vehicle.id}">
@@ -58,6 +54,9 @@
         </c:forEach>
         <c:if test="${empty vehicles}"><div class="card-base text-muted">Nessun veicolo registrato. Aggiungi il primo veicolo per iniziare.</div></c:if>
     </div>
+    <a class="section-add-fab" href="${pageContext.request.contextPath}/vehicles?view=new">
+        <span aria-hidden="true">+</span> Aggiungi veicolo
+    </a>
 </main>
 </body>
 </html>

@@ -12,6 +12,7 @@ public interface VehicleDAO {
     Optional<Vehicle> findById(long id);
     long create(String plate, String make, String model, String notes);
     boolean update(long id, String plate, String make, String model, String notes);
+    void setPhotoFilenames(long id, String vehiclePhotoFilename, String registrationPhotoFilename);
     boolean delete(long id);
     List<VehicleEvent> findEvents(long vehicleId);
     List<VehicleReminder> findPendingEvents();

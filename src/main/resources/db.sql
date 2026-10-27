@@ -149,7 +149,9 @@ CREATE TABLE vehicles (
     plate VARCHAR(20) NOT NULL UNIQUE,
     make VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
-    notes TEXT NULL
+    notes TEXT NULL,
+    vehicle_photo_filename VARCHAR(255) NULL,
+    registration_photo_filename VARCHAR(255) NULL
 );
 
 CREATE TABLE vehicle_events (

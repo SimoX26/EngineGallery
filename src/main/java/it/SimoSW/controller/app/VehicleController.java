@@ -34,6 +34,10 @@ public class VehicleController {
         if (id <= 0 || !dao.delete(id)) throw new IllegalArgumentException("Veicolo non trovato");
     }
 
+    public void setPhotoFilenames(long id, String vehiclePhotoFilename, String registrationPhotoFilename) {
+        dao.setPhotoFilenames(id, vehiclePhotoFilename, registrationPhotoFilename);
+    }
+
     public void createEvent(long vehicleId, String type, String title, LocalDate dueDate, LocalDate completedOn, String notes) {
         if (vehicleId <= 0 || dao.findById(vehicleId).isEmpty()) throw new IllegalArgumentException("Veicolo non trovato");
         validateEvent(type, title, dueDate, completedOn, notes);

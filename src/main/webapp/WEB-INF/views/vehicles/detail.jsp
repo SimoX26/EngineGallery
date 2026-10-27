@@ -27,6 +27,14 @@
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${param.saved == '1'}"><div class="alert alert-success" role="status">Modifiche salvate.</div></c:if>
     <c:if test="${not empty vehicle.notes}"><div class="card-base mb-4"><strong>Note sul veicolo</strong><p class="mb-0 mt-2"><c:out value="${vehicle.notes}"/></p></div></c:if>
+    <c:if test="${not empty vehicle.vehiclePhotoFilename or not empty vehicle.registrationPhotoFilename}">
+        <section class="card-base mb-4" aria-label="Foto del veicolo">
+            <div class="row g-3">
+                <c:if test="${not empty vehicle.vehiclePhotoFilename}"><div class="col-12 col-md-6"><h2 class="h6">Foto del veicolo</h2><a href="${pageContext.request.contextPath}/vehicles?view=photo&amp;id=${vehicle.id}&amp;kind=vehicle" target="_blank" rel="noopener"><img class="img-fluid rounded" src="${pageContext.request.contextPath}/vehicles?view=photo&amp;id=${vehicle.id}&amp;kind=vehicle" alt="Foto del veicolo"></a></div></c:if>
+                <c:if test="${not empty vehicle.registrationPhotoFilename}"><div class="col-12 col-md-6"><h2 class="h6">Foto del libretto</h2><a href="${pageContext.request.contextPath}/vehicles?view=photo&amp;id=${vehicle.id}&amp;kind=registration" target="_blank" rel="noopener"><img class="img-fluid rounded" src="${pageContext.request.contextPath}/vehicles?view=photo&amp;id=${vehicle.id}&amp;kind=registration" alt="Foto del libretto"></a></div></c:if>
+            </div>
+        </section>
+    </c:if>
     <section aria-labelledby="vehicle-events-title">
         <h2 class="h4 mb-3" id="vehicle-events-title">Scadenze e manutenzioni</h2>
         <c:if test="${empty events}"><div class="card-base text-muted">Nessuna voce registrata per questo veicolo.</div></c:if>
