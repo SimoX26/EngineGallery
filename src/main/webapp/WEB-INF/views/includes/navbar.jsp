@@ -273,13 +273,6 @@
                        href="<%= request.getContextPath() %>/workshop-maintenance">Manutenzione macchinari</a>
                 </li>
 
-                <c:if test="${loggedRole == 'ADMIN'}">
-                    <li class="nav-item">
-                        <a class="nav-link ${fn:startsWith(servletPath, '/vehicles') ? 'active' : ''}"
-                           href="<%= request.getContextPath() %>/vehicles">Veicoli</a>
-                    </li>
-                </c:if>
-
                 <c:if test="${canViewEngineArchive}">
                     <li class="nav-item nav-archive">
                         <a class="nav-link
@@ -297,6 +290,13 @@
                            href="<%= request.getContextPath() %>/statistics">
                             Dati e statistiche
                         </a>
+                    </li>
+                </c:if>
+
+                <c:if test="${loggedRole == 'ADMIN'}">
+                    <li class="nav-item">
+                        <a class="nav-link ${fn:startsWith(servletPath, '/vehicles') ? 'active' : ''}"
+                           href="<%= request.getContextPath() %>/vehicles">Veicoli</a>
                     </li>
                 </c:if>
 
