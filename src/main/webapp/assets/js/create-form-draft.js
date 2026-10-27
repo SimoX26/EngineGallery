@@ -1,6 +1,7 @@
 (() => {
     const form = document.querySelector('form[data-draft-key]');
     if (!form || !form.dataset.draftKey) return;
+    form.dataset.noLoadingOverlay = 'true';
 
     const key = ['create-form-v1', form.dataset.draftUser, form.dataset.draftKey].join(':');
     const fields = Array.from(form.elements).filter((element) =>
@@ -88,6 +89,16 @@
     let fieldTimer;
     let pending = Promise.resolve();
     let draftSaveFailed = false;
+    function withTimeout(work, milliseconds) {
+        let timer;
+        return Promise.race([
+            work,
+            new Promise((resolve, reject) => {
+                timer = setTimeout(() => reject(new Error('Draft storage timed out')), milliseconds);
+            })
+        ]).finally(() => clearTimeout(timer));
+    }
+
     function queue(work) {
         pending = pending.then(work).then(() => {
             draftSaveFailed = false;
@@ -187,11 +198,13 @@
             if (submitButton) submitButton.disabled = true;
             let backedUp = true;
             try {
-                await pending;
-                if (draftSaveFailed) throw new Error('Draft save failed');
-                submitAttempted = true;
-                await saveFields();
-                await saveFiles();
+                await withTimeout((async () => {
+                    await pending;
+                    if (draftSaveFailed) throw new Error('Draft save failed');
+                    submitAttempted = true;
+                    await saveFields();
+                    await saveFiles();
+                })(), 10000);
             } catch (error) {
                 backedUp = false;
             }
@@ -213,7 +226,7 @@
                         || target.searchParams.get(form.dataset.draftSuccessParam) === '1');
                 if (successfulRedirect) {
                     try {
-                        await Promise.all([remove('fields'), remove('files')]);
+                        await withTimeout(Promise.all([remove('fields'), remove('files')]), 3000);
                     } catch (error) {
                         // Il record è stato salvato: prosegui anche se il browser non cancella la bozza.
                     }

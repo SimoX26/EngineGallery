@@ -532,5 +532,5 @@
         updateDot();
     })();
 </script>
-<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=1"></script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=3"></script>
 </html>
