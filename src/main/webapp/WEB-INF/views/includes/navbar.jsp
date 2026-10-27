@@ -541,6 +541,9 @@
                 if (!link) {
                     return;
                 }
+                if (link.dataset.noLoadingOverlay === 'true') {
+                    return;
+                }
 
                 const href = link.getAttribute('href');
                 if (!href || href.startsWith('#') || href.startsWith('javascript:')) {

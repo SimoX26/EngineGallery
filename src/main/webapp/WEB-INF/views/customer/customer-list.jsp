@@ -62,6 +62,7 @@
         <c:forEach var="customer" items="${customers}">
             <a href="<%= request.getContextPath() %>/customer/detail?id=${customer.id}"
                class="customer-card-link customer-card-item"
+               data-no-loading-overlay="true"
                data-customer-id="${customer.id}"
                data-customer-name="${fn:escapeXml(customer.name)}"
                data-customer-company="${fn:escapeXml(customer.companyName)}"
