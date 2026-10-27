@@ -30,23 +30,25 @@
                 <div class="card-base">
                     <h5 class="fw-semibold mb-3">Tema applicazione</h5>
 
-                    <label class="form-label fw-semibold" for="themeSelect">Tema</label>
-                    <select id="themeSelect" class="form-select">
+                    <select id="themeSelect" class="form-select" aria-label="Tema applicazione">
                         <option value="auto">Automatico (sistema)</option>
                         <option value="light">Chiaro</option>
                         <option value="dark">Scuro</option>
                     </select>
-                    <div id="themeStatus" class="small text-muted mt-2">Tema attuale: —</div>
                 </div>
             </div>
 
             <div class="col-12 col-lg-6">
                 <div class="card-base">
                     <h5 class="fw-semibold mb-3">Notifiche Android</h5>
-                    <div class="small text-muted">Gli amministratori che usano l'app Android ricevono un avviso quando un motore viene consegnato. Il permesso si gestisce nelle impostazioni Android dell'app.</div>
+                    <p class="small text-muted mb-1">Nell'app Android gli amministratori ricevono notifiche per:</p>
+                    <ul class="small text-muted mb-0"><li>la consegna di un motore.</li></ul>
                     <c:if test="${sessionScope.loggedUser.role == 'ADMIN'}">
-                        <div id="androidNotificationStatus" class="small mt-3" role="status" aria-live="polite">Stato: verifica in corso…</div>
-                        <button id="enableAndroidNotifications" type="button" class="btn btn-primary mt-3 d-none">Attiva notifiche</button>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="androidNotificationsToggle" disabled>
+                            <label class="form-check-label" for="androidNotificationsToggle">Attiva notifiche</label>
+                        </div>
+                        <div id="androidNotificationStatus" class="small text-muted mt-2" role="status" aria-live="polite">Verifica in corso…</div>
                     </c:if>
                 </div>
             </div>
@@ -60,35 +62,40 @@
             const root = document.documentElement;
 
             const themeSelect = document.getElementById('themeSelect');
-            const themeStatus = document.getElementById('themeStatus');
-            const notificationsButton = document.getElementById('enableAndroidNotifications');
+            const notificationsToggle = document.getElementById('androidNotificationsToggle');
             const notificationsStatus = document.getElementById('androidNotificationStatus');
 
             window.setAndroidNotificationStatus = function (state) {
                 if (!notificationsStatus) return;
                 const messages = {
-                    checking: 'Stato: verifica in corso…',
-                    inactive: 'Stato: notifiche disattivate. Tocca Attiva notifiche.',
-                    registering: 'Stato: permesso concesso. Registro il dispositivo…',
-                    active: 'Stato: notifiche attive su questo dispositivo.',
-                    error: 'Stato: permesso concesso, ma registrazione non riuscita. Riprova.',
-                    unavailable: 'Stato: aggiorna l’app Android per verificare e attivare le notifiche.',
-                    verification_failed: 'Stato: impossibile verificare l’accesso amministratore. Riprova.'
+                    checking: 'Verifica in corso…',
+                    inactive: 'Notifiche disattivate su questo dispositivo.',
+                    registering: 'Attivazione in corso…',
+                    disabling: 'Disattivazione in corso…',
+                    active: 'Notifiche attive su questo dispositivo.',
+                    error: 'Attivazione non riuscita. Riprova.',
+                    disable_error: 'Disattivazione non riuscita. Riprova.',
+                    unavailable: 'Disponibile nell’app Android aggiornata.',
+                    verification_failed: 'Impossibile verificare l’accesso amministratore. Riprova.'
                 };
                 notificationsStatus.textContent = messages[state] || messages.checking;
                 notificationsStatus.classList.toggle('text-success', state === 'active');
-                if (notificationsButton) {
-                    notificationsButton.textContent = state === 'active' ? 'Verifica notifiche' : 'Attiva notifiche';
+                if (notificationsToggle) {
+                    notificationsToggle.checked = state === 'active' || state === 'disable_error';
+                    notificationsToggle.disabled = state === 'checking' || state === 'registering'
+                        || state === 'disabling' || state === 'unavailable';
                 }
             };
 
-            if (notificationsButton && window.AndroidNotificationBridge
+            if (notificationsToggle && window.AndroidNotificationBridge
                     && typeof window.AndroidNotificationBridge.enableNotifications === 'function'
+                    && typeof window.AndroidNotificationBridge.disableNotifications === 'function'
                     && typeof window.AndroidNotificationBridge.refreshNotificationStatus === 'function') {
-                notificationsButton.classList.remove('d-none');
-                notificationsButton.addEventListener('click', function () {
-                    window.setAndroidNotificationStatus('checking');
-                    window.AndroidNotificationBridge.enableNotifications();
+                notificationsToggle.addEventListener('change', function () {
+                    const enabled = notificationsToggle.checked;
+                    window.setAndroidNotificationStatus(enabled ? 'registering' : 'disabling');
+                    if (enabled) window.AndroidNotificationBridge.enableNotifications();
+                    else window.AndroidNotificationBridge.disableNotifications();
                 });
                 window.AndroidNotificationBridge.refreshNotificationStatus();
             } else {
@@ -115,10 +122,6 @@
                 const appliedTheme = getAppliedTheme(savedTheme);
                 root.setAttribute('data-theme', appliedTheme);
                 root.setAttribute('data-theme-preference', savedTheme);
-                if (themeStatus) {
-                    const map = { auto: 'Automatico', light: 'Chiaro', dark: 'Scuro' };
-                    themeStatus.textContent = 'Tema attuale: ' + map[savedTheme] + ' (' + (appliedTheme === 'dark' ? 'Scuro' : 'Chiaro') + ')';
-                }
             }
 
             if (themeSelect) {

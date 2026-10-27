@@ -12,10 +12,11 @@ import com.google.firebase.messaging.RemoteMessage
 
 class EngineGalleryMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
-        AndroidPushRegistration.register(token)
+        if (notificationsEnabled()) AndroidPushRegistration.register(token)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        if (!notificationsEnabled()) return
         val engineRef = message.data["engineRef"] ?: return
         if (!engineRef.matches(Regex("RML-[0-9]{4}-[0-9]{5}"))) return
         if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return
@@ -43,6 +44,10 @@ class EngineGalleryMessagingService : FirebaseMessagingService() {
             .build()
         NotificationManagerCompat.from(this).notify(engineRef.hashCode(), notification)
     }
+
+    private fun notificationsEnabled(): Boolean =
+        getSharedPreferences(MainActivity.NOTIFICATION_PREFERENCES, MODE_PRIVATE)
+            .getBoolean(MainActivity.NOTIFICATIONS_ENABLED_KEY, true)
 
     companion object {
         private const val CHANNEL_ID = "delivered_engines"

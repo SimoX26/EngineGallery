@@ -54,6 +54,8 @@ class MainActivity : AppCompatActivity() {
         private const val WWW_HOST = "www.rettificamotorilacroce.it"
         private const val LEGACY_IP_HOST = "82.165.20.124"
         private const val NOTIFICATION_PERMISSION_REQUESTED_KEY = "notificationPermissionRequested"
+        const val NOTIFICATION_PREFERENCES = "enginegallery.notifications"
+        const val NOTIFICATIONS_ENABLED_KEY = "enabled"
         const val EXTRA_ENGINE_REF = "engineRef"
     }
 
@@ -174,6 +176,10 @@ class MainActivity : AppCompatActivity() {
         val appHost = Uri.parse(BuildConfig.ENGINE_GALLERY_BASE_URL).host
         val pageUri = Uri.parse(url ?: return)
         if (pageUri.scheme != "https" || pageUri.host != appHost) return
+        if (!notificationsEnabled()) {
+            updateNotificationStatus("inactive")
+            return
+        }
         updateNotificationStatus("checking")
         if (FirebaseApp.getApps(this).isEmpty()) {
             updateNotificationStatus("unavailable")
@@ -247,12 +253,46 @@ class MainActivity : AppCompatActivity() {
         }
         updateNotificationStatus("registering")
         FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            if (!notificationsEnabled()) return@addOnSuccessListener
             AndroidPushRegistration.register(token, csrf) { registered ->
-                updateNotificationStatus(if (registered) "active" else "error")
+                if (notificationsEnabled()) updateNotificationStatus(if (registered) "active" else "error")
             }
         }.addOnFailureListener { ex ->
             Log.w(TAG, "Token notifiche Android non disponibile", ex)
-            updateNotificationStatus("error")
+            if (notificationsEnabled()) updateNotificationStatus("error")
+        }
+    }
+
+    private fun notificationsEnabled(): Boolean =
+        getSharedPreferences(NOTIFICATION_PREFERENCES, MODE_PRIVATE)
+            .getBoolean(NOTIFICATIONS_ENABLED_KEY, true)
+
+    private fun setNotificationsEnabled(enabled: Boolean) {
+        getSharedPreferences(NOTIFICATION_PREFERENCES, MODE_PRIVATE).edit()
+            .putBoolean(NOTIFICATIONS_ENABLED_KEY, enabled).apply()
+    }
+
+    private fun disableNotifications() {
+        setNotificationsEnabled(false)
+        updateNotificationStatus("disabling")
+        AndroidPushRegistration.getAdminCsrf { csrf ->
+            runOnUiThread {
+                if (csrf == null || FirebaseApp.getApps(this).isEmpty()) {
+                    setNotificationsEnabled(true)
+                    updateNotificationStatus("disable_error")
+                    return@runOnUiThread
+                }
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                    AndroidPushRegistration.unregister(token, csrf) { removed ->
+                        if (!removed) setNotificationsEnabled(true)
+                        updateNotificationStatus(if (removed) "inactive" else "disable_error")
+                    }
+                }.addOnFailureListener { ex ->
+                    Log.w(TAG, "Token notifiche Android non disponibile", ex)
+                    setNotificationsEnabled(true)
+                    updateNotificationStatus("disable_error")
+                }
+            }
         }
     }
 
@@ -551,8 +591,16 @@ class MainActivity : AppCompatActivity() {
         fun enableNotifications() {
             runOnUiThread {
                 if (isSettingsPage(webView.url)) {
+                    setNotificationsEnabled(true)
                     maybeRegisterNotifications(webView.url, requestedByUser = true)
                 }
+            }
+        }
+
+        @JavascriptInterface
+        fun disableNotifications() {
+            runOnUiThread {
+                if (isSettingsPage(webView.url)) this@MainActivity.disableNotifications()
             }
         }
     }

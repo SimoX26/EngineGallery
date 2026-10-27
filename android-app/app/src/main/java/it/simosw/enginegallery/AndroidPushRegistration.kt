@@ -49,6 +49,23 @@ object AndroidPushRegistration {
         }
     }
 
+    fun unregister(token: String, csrf: String, onResult: (Boolean) -> Unit) {
+        executor.execute {
+            val removed = try {
+                val endpoint = endpoint()
+                val cookies = CookieManager.getInstance().getCookie(endpoint)
+                if (cookies.isNullOrBlank()) false else {
+                    val body = "csrfToken=${encode(csrf)}&token=${encode(token)}&enabled=false"
+                    request("POST", endpoint, cookies, body) == "registered"
+                }
+            } catch (ex: Exception) {
+                Log.w(TAG, "Disattivazione notifiche Android fallita", ex)
+                false
+            }
+            onResult(removed)
+        }
+    }
+
     private fun endpoint(): String = BuildConfig.ENGINE_GALLERY_BASE_URL.trimEnd('/') + "/android-push/register"
 
     private fun encode(value: String): String = URLEncoder.encode(value, "UTF-8")

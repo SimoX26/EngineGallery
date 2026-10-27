@@ -49,7 +49,7 @@ public class AndroidPushRegistrationServlet extends HttpServlet {
             return;
         }
         try {
-            if (user.getRole() == UserRole.ADMIN) {
+            if (user.getRole() == UserRole.ADMIN && !"false".equals(request.getParameter("enabled"))) {
                 pushService.register(user.getId(), token);
             } else {
                 pushService.deleteToken(token);
