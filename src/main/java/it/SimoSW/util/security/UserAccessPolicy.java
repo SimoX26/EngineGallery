@@ -15,6 +15,7 @@ public final class UserAccessPolicy {
     }
 
     public static boolean isDeniedPath(User user, String path) {
+        if (matches(path, "/vehicles") && (user == null || user.getRole() != UserRole.ADMIN)) return true;
         return user != null && user.getRole() == UserRole.OPERATOR && (matches(path, "/warehouse")
                 || matches(path, "/uploads/warehouse")
                 || matches(path, "/statistics"));

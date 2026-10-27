@@ -33,4 +33,15 @@ class UserAccessPolicyTest {
         assertTrue(UserAccessPolicy.canViewWarehouse(inspector));
         assertFalse(UserAccessPolicy.canViewStatistics(inspector));
     }
+
+    @Test
+    void onlyAdministratorsCanAccessVehicles() {
+        assertFalse(UserAccessPolicy.isDeniedPath(new User("admin", null, UserRole.ADMIN), "/vehicles"));
+        for (UserRole role : new UserRole[] {UserRole.OPERATOR, UserRole.INSPECTOR}) {
+            User user = new User("user", null, role);
+            assertTrue(UserAccessPolicy.isDeniedPath(user, "/vehicles"));
+            assertTrue(UserAccessPolicy.isDeniedPath(user, "/vehicles/1"));
+        }
+        assertFalse(UserAccessPolicy.isDeniedPath(new User("user", null, UserRole.OPERATOR), "/vehicles-old"));
+    }
 }
