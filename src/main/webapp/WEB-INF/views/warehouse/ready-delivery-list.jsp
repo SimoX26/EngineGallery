@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Pronta Consegna • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=36">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -19,7 +19,6 @@
         <div class="search-panel-compact">
             <label for="readyDeliverySearch" class="form-label">Cerca motore</label>
             <input type="search" id="readyDeliverySearch" class="form-control" placeholder="cerca...">
-            <div id="readyDeliveryEmptyState" class="alert alert-light border mt-3 mb-0 d-none">Nessun motore corrisponde alla ricerca.</div>
         </div>
         <div class="page-header-actions page-header-actions--view">
             <div class="btn-group btn-group-sm page-header-view-switch" role="group" aria-label="Cambia vista pronta consegna">
@@ -34,6 +33,7 @@
             </div>
         </div>
     </div>
+    <div id="readyDeliveryEmptyState" class="system-empty-state mb-3 d-none" role="status">Nessun motore corrisponde alla ricerca.</div>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
     <c:if test="${param.saved == '1'}"><div class="alert alert-success" role="status">Motore pronta consegna aggiunto.</div></c:if>
 
@@ -87,7 +87,7 @@
                 </c:forEach>
             </div>
         </c:when>
-        <c:otherwise><div class="card-base text-muted">Nessun motore pronta consegna registrato.</div></c:otherwise>
+        <c:otherwise><div class="system-empty-state" role="status">Nessun motore pronta consegna registrato.</div></c:otherwise>
     </c:choose>
 
     <a class="section-add-fab" href="${pageContext.request.contextPath}/ready-delivery?view=new">

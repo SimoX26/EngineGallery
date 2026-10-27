@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=32">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
 </head>
 
 <body>
@@ -154,11 +154,9 @@
             <div class="alert alert-danger"><c:out value="${param.statusUpdateError}" /></div>
         </c:if>
 
-        <c:if test="${empty engines}">
-            <div id="engineKeywordEmptyState" class="alert alert-light border mt-3 mb-3">
-                Nessun motore corrisponde alla ricerca.
-            </div>
-        </c:if>
+        <div id="engineKeywordEmptyState" class="system-empty-state mt-3 mb-3 ${empty engines ? '' : 'd-none'}" role="status">
+            Nessun motore da mostrare.
+        </div>
 
         <div id="engineListView" class="engine-list-view d-none">
             <c:forEach var="engine" items="${engines}">
@@ -526,6 +524,7 @@
                     { selector: '#engineKanbanBoard .engine-kanban-card' }
                 ],
                 emptyState: '#engineKeywordEmptyState',
+                showEmptyWhenBlank: true,
                 debounceMs: 180
             })
             : null;

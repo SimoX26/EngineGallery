@@ -11,7 +11,7 @@
     <title>Engine Gallery • Dati e statistiche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
 </head>
 <body>
 
@@ -150,7 +150,7 @@
                             </c:forEach>
                             <c:if test="${empty monthlyHistory}">
                                 <tr>
-                                    <td colspan="5" class="text-muted">Nessun dato storico disponibile per il filtro selezionato.</td>
+                                    <td colspan="5"><div class="system-empty-state system-empty-state--compact" role="status">Nessun dato storico disponibile per il filtro selezionato.</div></td>
                                 </tr>
                             </c:if>
                             </tbody>
@@ -277,7 +277,7 @@
                         </c:when>
                         <c:otherwise>
                             <tr>
-                                <td colspan="5" class="text-muted">Nessuna azione registrata negli ultimi 10 giorni.</td>
+                                <td colspan="5"><div class="system-empty-state system-empty-state--compact" role="status">Nessuna azione registrata negli ultimi 10 giorni.</div></td>
                             </tr>
                         </c:otherwise>
                     </c:choose>

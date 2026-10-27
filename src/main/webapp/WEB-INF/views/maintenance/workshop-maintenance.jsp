@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Manutenzione macchinari • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=34">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -69,7 +69,7 @@
                 </a>
             </c:forEach>
             <c:if test="${empty machines && empty error}">
-                <div class="card-base text-muted">Nessun macchinario registrato. Usa “Aggiungi macchinario” per iniziare.</div>
+                <div class="system-empty-state" role="status">Nessun macchinario registrato. Usa “Aggiungi macchinario” per iniziare.</div>
             </c:if>
         </div>
     </section>

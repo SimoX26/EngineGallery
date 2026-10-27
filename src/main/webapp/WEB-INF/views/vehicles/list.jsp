@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Veicoli • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=34">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -20,7 +20,7 @@
     <c:if test="${param.deleted == '1'}"><div class="alert alert-success" role="status">Veicolo eliminato.</div></c:if>
     <section class="mb-4" aria-labelledby="vehicle-reminders-title">
         <h2 class="h4 mb-3" id="vehicle-reminders-title">Da fare</h2>
-        <c:if test="${empty reminders}"><div class="card-base text-muted">Nessuna scadenza o manutenzione aperta.</div></c:if>
+        <c:if test="${empty reminders}"><div class="system-empty-state" role="status">Nessuna scadenza o manutenzione aperta.</div></c:if>
         <c:if test="${not empty reminders}">
             <div class="card-base">
                 <div class="d-grid gap-3">
@@ -52,7 +52,7 @@
                 </div>
             </a>
         </c:forEach>
-        <c:if test="${empty vehicles}"><div class="card-base text-muted">Nessun veicolo registrato. Aggiungi il primo veicolo per iniziare.</div></c:if>
+        <c:if test="${empty vehicles}"><div class="system-empty-state" role="status">Nessun veicolo registrato. Aggiungi il primo veicolo per iniziare.</div></c:if>
     </div>
     <a class="section-add-fab" href="${pageContext.request.contextPath}/vehicles?view=new">
         <span aria-hidden="true">+</span> Aggiungi veicolo

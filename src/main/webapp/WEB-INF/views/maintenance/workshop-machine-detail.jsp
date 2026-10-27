@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title><c:out value="${machine.name}"/> • Manutenzione macchinari</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=27">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -94,7 +94,7 @@
                     <div class="small text-muted">Operatore: <c:out value="${item.operator}"/></div>
                 </article>
             </c:forEach>
-            <c:if test="${empty recentInterventions}"><div class="card-base text-muted">Nessun intervento registrato nell'ultimo anno.</div></c:if>
+            <c:if test="${empty recentInterventions}"><div class="system-empty-state" role="status">Nessun intervento registrato nell'ultimo anno.</div></c:if>
         </div>
     </section>
 

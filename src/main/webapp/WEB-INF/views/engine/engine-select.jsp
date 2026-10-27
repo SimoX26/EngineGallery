@@ -14,7 +14,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
 </head>
 
 <body>
@@ -41,10 +41,11 @@
                        id="engineKeywordSearch"
                        class="form-control"
                        placeholder="cerca...">
-                <div id="engineKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-                    Nessun motore corrisponde alla ricerca.
-                </div>
             </div>
+        </div>
+
+        <div id="engineKeywordEmptyState" class="system-empty-state mb-3 ${empty engines ? '' : 'd-none'}" role="status">
+            Nessun motore da mostrare.
         </div>
 
         <!-- (opzionale) errore -->
@@ -156,6 +157,7 @@
         };
 
         searchInput.addEventListener('input', applyEngineFilter);
+        applyEngineFilter();
     </script>
 
 </div>

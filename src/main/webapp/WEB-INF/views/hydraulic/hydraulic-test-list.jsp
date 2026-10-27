@@ -13,7 +13,7 @@
     <title>Engine Gallery • Prove idrauliche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=32">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
 </head>
 
 <body>
@@ -36,9 +36,6 @@
                        class="form-control"
                        value="${fn:escapeXml(keyword)}"
                        placeholder="cerca...">
-                <div id="hydraulicKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-                    Nessuna prova idraulica corrisponde alla ricerca.
-                </div>
             </div>
 
             <div class="page-header-actions page-header-actions--view">
@@ -71,6 +68,12 @@
                 </div>
             </div>
         </div>
+
+        <c:if test="${not empty hydraulicTests}">
+            <div id="hydraulicKeywordEmptyState" class="system-empty-state mb-3 d-none" role="status">
+                Nessuna prova idraulica corrisponde alla ricerca.
+            </div>
+        </c:if>
 
         <c:if test="${not empty error}">
             <div class="alert alert-warning">${error}</div>
@@ -159,7 +162,7 @@
                 </div>
             </c:when>
             <c:otherwise>
-                <div class="alert alert-light border">Nessuna prova idraulica disponibile.</div>
+                <div class="system-empty-state" role="status">Nessuna prova idraulica disponibile.</div>
             </c:otherwise>
         </c:choose>
 

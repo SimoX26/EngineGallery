@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Magazzino materiali manutenzione • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -127,8 +127,9 @@
                     </div>
                 </div>
             </c:forEach>
-            <c:if test="${empty materials}"><div class="col-12"><div class="card-base text-muted">Nessun materiale registrato. Aggiungi filtri, detergenti o altri materiali per iniziare.</div></div></c:if>
+            <c:if test="${empty materials}"><div class="col-12"><div class="system-empty-state" role="status">Nessun materiale registrato. Aggiungi filtri, detergenti o altri materiali per iniziare.</div></div></c:if>
         </div>
+        <div id="materialsFilteredEmpty" class="system-empty-state mt-3 d-none" role="status">Nessun materiale corrisponde ai filtri.</div>
     </section>
 </main>
 <script>
@@ -140,6 +141,7 @@
         const quantity = document.getElementById('material-quantity');
         const minimum = document.getElementById('material-minimum');
         const entries = Array.from(document.querySelectorAll('.material-entry'));
+        const filteredEmpty = document.getElementById('materialsFilteredEmpty');
         unit.addEventListener('change', () => {
             const step = unit.value === 'PZ' ? '1' : '0.001';
             quantity.step = step;
@@ -148,14 +150,18 @@
         unit.dispatchEvent(new Event('change'));
         const applyFilters = () => {
             const text = search.value.trim().toLocaleLowerCase('it');
+            let visibleCount = 0;
             entries.forEach((entry) => {
                 const matches = (!text || entry.dataset.search.toLocaleLowerCase('it').includes(text))
                     && (!category.value || entry.dataset.category === category.value)
                     && (!low.checked || entry.dataset.low === 'true');
                 entry.classList.toggle('d-none', !matches);
+                if (matches) visibleCount++;
             });
+            filteredEmpty.classList.toggle('d-none', entries.length === 0 || visibleCount > 0);
         };
         [search, category, low].forEach((input) => input.addEventListener('input', applyFilters));
+        applyFilters();
     })();
 </script>
 <script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=5"></script>

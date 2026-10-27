@@ -12,7 +12,7 @@
     <title>Engine Gallery • Catalogo</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
 </head>
 <body>
 
@@ -152,13 +152,13 @@
                     </div>
                 </div>
 
-                <div id="catalogKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
+                <div id="catalogKeywordEmptyState" class="system-empty-state mt-3 mb-0 d-none" role="status">
                     Nessuna voce del catalogo corrisponde alla ricerca.
                 </div>
             </c:when>
             <c:otherwise>
                 <c:if test="${empty error}">
-                    <div class="alert alert-light border">Nessuna voce disponibile nel catalogo.</div>
+                    <div class="system-empty-state" role="status">Nessuna voce disponibile nel catalogo.</div>
                 </c:if>
             </c:otherwise>
         </c:choose>

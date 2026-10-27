@@ -14,7 +14,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"  rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=32">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
 </head>
 
 <body>
@@ -41,10 +41,6 @@
                        id="engineKeywordSearch"
                        class="form-control"
                        placeholder="cerca...">
-                <div id="engineKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-                    Nessun motore corrisponde alla ricerca.
-                </div>
-
                 <div class="modal fade filters-modal" id="readyFiltersModal" tabindex="-1" aria-labelledby="readyFiltersModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -106,6 +102,10 @@
                 </div>
             </div>
             </div>
+        </div>
+
+        <div id="engineKeywordEmptyState" class="system-empty-state mb-3 ${empty engines ? '' : 'd-none'}" role="status">
+            Nessun motore da mostrare.
         </div>
 
         <div id="readyListView" class="engine-list-view d-none">
@@ -246,6 +246,7 @@
                     { elements: listRows }
                 ],
                 emptyState,
+                showEmptyWhenBlank: true,
                 debounceMs: 180
             })
             : null;

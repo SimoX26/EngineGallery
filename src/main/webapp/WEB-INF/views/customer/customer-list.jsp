@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=31">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 
 <body>
@@ -43,10 +43,11 @@
                    id="customerKeywordSearch"
                    class="form-control"
                    placeholder="cerca...">
-            <div id="customerKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-                Nessun cliente corrisponde alla ricerca.
-            </div>
         </div>
+    </div>
+
+    <div id="customerKeywordEmptyState" class="system-empty-state mb-3 ${empty customers ? '' : 'd-none'}" role="status">
+        Nessun cliente da mostrare.
     </div>
 
     <!-- ERROR -->
@@ -160,6 +161,7 @@
             input: searchInput,
             groups: [{ elements: customerCards }],
             emptyState,
+            showEmptyWhenBlank: true,
             debounceMs: 180
         })
         : null;

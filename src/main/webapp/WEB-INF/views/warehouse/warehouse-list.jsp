@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=32">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 
 <body>
@@ -32,10 +32,6 @@
                    class="form-control"
                    placeholder="cerca..."
                    value="<c:out value='${param.keyword}'/>">
-            <div id="warehouseKeywordEmptyState" class="alert alert-light border mt-3 mb-0 d-none">
-                Nessun articolo corrisponde alla ricerca.
-            </div>
-
             <div class="modal fade filters-modal" id="warehouseFiltersModal" tabindex="-1" aria-labelledby="warehouseFiltersModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <form class="modal-content" method="get" action="${pageContext.request.contextPath}/warehouse/list">
@@ -104,6 +100,10 @@
             </div>
 
         </div>
+    </div>
+
+    <div id="warehouseKeywordEmptyState" class="system-empty-state mb-3 ${empty items ? '' : 'd-none'}" role="status">
+        Nessun articolo da mostrare.
     </div>
 
     <c:if test="${not empty error}">
@@ -226,6 +226,7 @@
                 { elements: warehouseListRows }
             ],
             emptyState,
+            showEmptyWhenBlank: true,
             debounceMs: 180
         })
         : null;

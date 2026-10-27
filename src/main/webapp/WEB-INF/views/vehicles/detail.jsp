@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title><c:out value="${vehicle.plate}"/> • Veicoli • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=34">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
@@ -37,7 +37,7 @@
     </c:if>
     <section aria-labelledby="vehicle-events-title">
         <h2 class="h4 mb-3" id="vehicle-events-title">Scadenze e manutenzioni</h2>
-        <c:if test="${empty events}"><div class="card-base text-muted">Nessuna voce registrata per questo veicolo.</div></c:if>
+        <c:if test="${empty events}"><div class="system-empty-state" role="status">Nessuna voce registrata per questo veicolo.</div></c:if>
         <div class="d-grid gap-3">
             <c:forEach var="event" items="${events}">
                 <article class="card-base">
