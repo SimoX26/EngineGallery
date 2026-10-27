@@ -3,8 +3,48 @@
     if (!form || !form.dataset.draftKey) return;
     form.dataset.noLoadingOverlay = 'true';
 
-    const key = ['create-form-v1', form.dataset.draftUser, form.dataset.draftKey].join(':');
-    const consumedKey = key + ':consumed';
+    const baseKey = ['create-form-v1', form.dataset.draftUser, form.dataset.draftKey].join(':');
+    const stateKey = baseKey + ':state';
+    const consumedKey = baseKey + ':consumed';
+    const newDraftKey = () => baseKey + ':' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+    function readState() {
+        try {
+            const state = JSON.parse(localStorage.getItem(stateKey));
+            return {
+                active: typeof state?.active === 'string' && state.active.startsWith(baseKey + ':')
+                    ? state.active : baseKey,
+                pending: Array.isArray(state?.pending)
+                    ? state.pending.filter((entry) => typeof entry === 'string'
+                        && (entry === baseKey || entry.startsWith(baseKey + ':')))
+                    : []
+            };
+        } catch (error) {
+            return {active: baseKey, pending: []};
+        }
+    }
+
+    function writeState(state) {
+        localStorage.setItem(stateKey, JSON.stringify(state));
+    }
+
+    const initialState = readState();
+    try {
+        const legacyConsumed = localStorage.getItem(consumedKey);
+        const oldKey = legacyConsumed === '1' ? baseKey : legacyConsumed;
+        if (oldKey === baseKey || oldKey?.startsWith(baseKey + ':')) {
+            const migratedState = {
+                active: initialState.active === oldKey ? newDraftKey() : initialState.active,
+                pending: [...new Set([...initialState.pending, oldKey])]
+            };
+            writeState(migratedState);
+            Object.assign(initialState, migratedState);
+            localStorage.removeItem(consumedKey);
+        }
+    } catch (error) {
+        // La bozza resta disponibile se lo storage locale non è accessibile.
+    }
+    const key = initialState.active;
     const fields = Array.from(form.elements).filter((element) =>
         element.name && !element.closest('[data-draft-dynamic]')
         && !['hidden', 'file', 'submit', 'button'].includes(element.type));
@@ -53,19 +93,19 @@
     }
 
     let dbPromise = database();
-    function operation(store, method, value) {
+    function operation(store, method, value, draftKey = key) {
         return dbPromise.then((db) => new Promise((resolve, reject) => {
             const transaction = db.transaction(store, 'readwrite');
             const request = method === 'put'
-                ? transaction.objectStore(store).put(value, key)
-                : transaction.objectStore(store)[method](key);
+                ? transaction.objectStore(store).put(value, draftKey)
+                : transaction.objectStore(store)[method](draftKey);
             transaction.oncomplete = () => resolve(request.result);
             transaction.onabort = () => reject(transaction.error);
             transaction.onerror = () => reject(transaction.error);
         }));
     }
     const read = (store) => operation(store, 'get');
-    const remove = (store) => operation(store, 'delete');
+    const remove = (store, draftKey = key) => operation(store, 'delete', undefined, draftKey);
     const put = (store, value) => operation(store, 'put', value);
 
     function fieldValues() {
@@ -101,6 +141,24 @@
                 timer = setTimeout(() => reject(new Error('Draft storage timed out')), milliseconds);
             })
         ]).finally(() => clearTimeout(timer));
+    }
+
+    function deleteDraft(draftKey) {
+        return Promise.all([remove('fields', draftKey), remove('files', draftKey)]);
+    }
+
+    async function cleanupConsumed() {
+        for (const oldKey of readState().pending) {
+            if (oldKey === key) continue;
+            try {
+                await withTimeout(deleteDraft(oldKey), 3000);
+                const state = readState();
+                state.pending = state.pending.filter((entry) => entry !== oldKey);
+                writeState(state);
+            } catch (error) {
+                // La prossima apertura del modulo ritenterà la cancellazione.
+            }
+        }
     }
 
     function queue(work) {
@@ -141,18 +199,9 @@
     async function restore() {
         let savedFiles;
         try {
-            if (localStorage.getItem(consumedKey) === '1') {
-                try {
-                    await withTimeout(Promise.all([remove('fields'), remove('files')]), 3000);
-                    localStorage.removeItem(consumedKey);
-                } catch (error) {
-                    show('La bozza già utilizzata non è ancora stata eliminata dal dispositivo. Ricarica la pagina per riprovare.', 'warning');
-                    return false;
-                }
-            }
             const savedFields = await read('fields');
             savedFiles = await read('files');
-            if (!savedFields && !savedFiles) return true;
+            if (!savedFields && !savedFiles) return;
             submitAttempted = !!savedFields?.attempted;
             if (savedFields && savedFields.values.length === fields.length) {
                 fields.forEach((element, index) => {
@@ -181,7 +230,7 @@
             } else if (savedFiles && savedFiles.some((entry) => entry.files.length)) {
                 show('Il browser non può ripristinare automaticamente i file. Scaricali e selezionali di nuovo prima di salvare.', 'warning');
                 offerDownloads(savedFiles);
-                return true;
+                return;
             }
             show(savedFields?.attempted
                 ? 'Bozza ripristinata. Se avevi già premuto Salva, verifica che il record non sia stato creato prima di riprovare.'
@@ -190,12 +239,11 @@
             show('Il ripristino della bozza non è disponibile su questo dispositivo.', 'warning');
             offerDownloads(savedFiles);
         }
-        return true;
     }
 
     let submitting = false;
-    restore().then((ready) => {
-        if (!ready) return;
+    restore().then(() => {
+        cleanupConsumed();
         form.addEventListener('input', (event) => {
             if (event.target.type !== 'file') scheduleFields();
         });
@@ -237,22 +285,23 @@
                 });
                 const target = new URL(response.url);
                 const success = new URL(form.dataset.draftSuccess, window.location.href);
-                const successfulRedirect = response.ok && response.redirected
-                    && target.origin === success.origin && target.pathname === success.pathname
+                const successfulRedirect = target.origin === success.origin && target.pathname === success.pathname
                     && (!form.dataset.draftSuccessParam
                         || target.searchParams.get(form.dataset.draftSuccessParam) === '1');
                 if (successfulRedirect) {
                     consumed = true;
                     try {
-                        localStorage.setItem(consumedKey, '1');
+                        const state = readState();
+                        if (state.active === key) state.active = newDraftKey();
+                        if (!state.pending.includes(key)) state.pending.push(key);
+                        writeState(state);
                     } catch (error) {
-                        // La cancellazione immediata resta possibile anche senza storage locale.
+                        try { localStorage.setItem(consumedKey, key); } catch (ignored) { }
                     }
                     try {
-                        await withTimeout(Promise.all([remove('fields'), remove('files')]), 3000);
-                        localStorage.removeItem(consumedKey);
+                        await withTimeout(deleteDraft(key), 3000);
                     } catch (error) {
-                        // Il record è stato salvato: se il segno locale esiste, la cancellazione sarà ritentata.
+                        // Il record è stato salvato: la cancellazione sarà ritentata alla prossima apertura.
                     }
                     navigating = true;
                     window.location.assign(response.url);
