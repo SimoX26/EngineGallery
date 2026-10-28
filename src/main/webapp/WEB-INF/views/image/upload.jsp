@@ -17,13 +17,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Stile globale Engine Gallery -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body data-back-guard-form="1"
-      data-back-guard-fallback="<%= request.getContextPath() %>/dashboard?navHome=1">
+      data-back-guard-fallback="<%= request.getContextPath() %>/home?navHome=1">
 
-<!-- Navbar -->
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<!-- Menu di navigazione -->
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
 <!-- CONTENUTO PRINCIPALE -->
 <div class="container-fluid d-flex align-items-center justify-content-center"
@@ -47,7 +47,7 @@
               method="post"
               data-draft-key="engine-new"
               data-draft-user="${sessionScope.loggedUser.id}"
-              data-draft-success="<%= request.getContextPath() %>/dashboard"
+              data-draft-success="<%= request.getContextPath() %>/home"
               data-draft-success-param="lockBack"
               data-draft-require-backup="true"
               enctype="multipart/form-data">

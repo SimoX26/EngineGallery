@@ -8,10 +8,10 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Nuovo motore pronta consegna • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=37">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=39">
 </head>
 <body>
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 <main class="container-fluid d-flex align-items-center justify-content-center py-4" style="min-height: calc(100vh - 70px);">
     <section class="card-base text-center" style="max-width: 560px; width: 100%;">
         <h1 class="h2 mb-3">Nuovo motore pronta consegna</h1>

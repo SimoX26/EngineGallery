@@ -14,7 +14,7 @@ public class ApplicationInitializer {
     private final EngineController engineController;
     private final CustomerController customerController;
     private final AuthenticationController authenticationController;
-    private final DashboardController dashboardController;
+    private final HomeController homeController;
     private final WarehouseController warehouseController;
     private final HydraulicTestController hydraulicTestController;
     private final UserActivityLogController userActivityLogController;
@@ -54,7 +54,7 @@ public class ApplicationInitializer {
 
         this.authenticationController = new AuthenticationController(userDAO);
 
-        this.dashboardController = new DashboardController(
+        this.homeController = new HomeController(
                 engineDAO,
                 customerDAO,
                 warehouseItemDAO,
@@ -86,8 +86,8 @@ public class ApplicationInitializer {
         return authenticationController;
     }
 
-    public DashboardController getDashboardController() {
-        return dashboardController;
+    public HomeController getHomeController() {
+        return homeController;
     }
 
     public WarehouseController getWarehouseController() {

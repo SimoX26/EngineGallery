@@ -184,33 +184,33 @@
     }
 </style>
 
-<nav class="navbar navbar-expand-xxl navbar-dark fixed-top"
+<nav class="nav-menu navbar navbar-expand-xxl navbar-dark fixed-top"
      style="background-color: var(--bg-dark); position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 3000;">
     <div class="container-fluid">
 
         <!-- BRAND -->
         <a class="navbar-brand fw-bold"
-           href="<%= request.getContextPath() %>/dashboard">
+           href="<%= request.getContextPath() %>/home">
             RML
         </a>
 
         <!-- TOGGLER (mobile) -->
-        <button id="engineNavbarToggler" class="navbar-toggler navbar-action-btn" type="button"
-                aria-controls="engineNavbar"
+        <button id="engineNavMenuToggler" class="navbar-toggler nav-menu-action-btn" type="button"
+                aria-controls="engineNavMenu"
                 aria-expanded="false"
                 aria-label="Toggle navigation">
-            <span class="navbar-toggler-label">MENU</span>
+            <span class="nav-menu-toggler-label">MENU</span>
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <!-- LINKS -->
-        <div class="collapse navbar-collapse" id="engineNavbar">
+        <div class="collapse navbar-collapse" id="engineNavMenu">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 <li class="nav-item">
                     <a class="nav-link
-                       ${fn:startsWith(servletPath, "/dashboard") ? "active" : ""}"
-                       href="<%= request.getContextPath() %>/dashboard">
+                       ${fn:startsWith(servletPath, "/home") ? "active" : ""}"
+                       href="<%= request.getContextPath() %>/home">
                         Home
                     </a>
                 </li>
@@ -361,7 +361,7 @@
     (function () {
         const BACK_LOCK_KEY = 'postSubmitBackLock.currentFallback';
         const FINAL_HOME_WALL_KEY = 'postSubmitBackLock.finalHomeWall';
-        const HOME_PATH = '<%= request.getContextPath() %>/dashboard';
+        const HOME_PATH = '<%= request.getContextPath() %>/home';
 
         function cleanUrlWithoutLockBack() {
             const params = new URLSearchParams(window.location.search);
@@ -425,9 +425,9 @@
             });
         }
 
-        function initNavbarToggle() {
-            const toggler = document.getElementById('engineNavbarToggler');
-            const menu = document.getElementById('engineNavbar');
+        function initNavMenuToggle() {
+            const toggler = document.getElementById('engineNavMenuToggler');
+            const menu = document.getElementById('engineNavMenu');
             if (!toggler || !menu || !window.bootstrap || !window.bootstrap.Collapse) {
                 return;
             }
@@ -607,11 +607,11 @@
             const bootstrapScript = document.createElement('script');
             bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
             bootstrapScript.defer = true;
-            bootstrapScript.addEventListener('load', initNavbarToggle);
+            bootstrapScript.addEventListener('load', initNavMenuToggle);
             document.head.appendChild(bootstrapScript);
             return;
         }
 
-        initNavbarToggle();
+        initNavMenuToggle();
     })();
 </script>

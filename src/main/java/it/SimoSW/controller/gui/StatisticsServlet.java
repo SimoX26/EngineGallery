@@ -1,6 +1,6 @@
 package it.SimoSW.controller.gui;
 
-import it.SimoSW.controller.app.DashboardController;
+import it.SimoSW.controller.app.HomeController;
 import it.SimoSW.controller.app.UserActivityLogController;
 import it.SimoSW.model.User;
 import it.SimoSW.model.UserActivityLog;
@@ -28,13 +28,13 @@ public class StatisticsServlet extends HttpServlet {
     private static final LocalDate STATISTICS_START_DATE = LocalDate.of(2026, 1, 1);
     private static final int USER_ACTION_LIMIT = 50;
 
-    private DashboardController dashboardController;
+    private HomeController homeController;
     private UserActivityLogController userActivityLogController;
 
     @Override
     public void init() {
         ApplicationInitializer initializer = (ApplicationInitializer) getServletContext().getAttribute("appInitializer");
-        this.dashboardController = initializer.getDashboardController();
+        this.homeController = initializer.getHomeController();
         this.userActivityLogController = initializer.getUserActivityLogController();
     }
 
@@ -44,7 +44,7 @@ public class StatisticsServlet extends HttpServlet {
         User loggedUser = session != null ? (User) session.getAttribute("loggedUser") : null;
         UserRole role = loggedUser != null ? loggedUser.getRole() : null;
         if (role != UserRole.ADMIN) {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
 
@@ -60,21 +60,21 @@ public class StatisticsServlet extends HttpServlet {
             meseCorrenteLabel = Character.toUpperCase(meseCorrenteLabel.charAt(0)) + meseCorrenteLabel.substring(1);
         }
 
-        int insertedThisMonth = dashboardController.getMotoriInseritiNelPeriodo(effectiveMonthStart, monthEnd);
-        int deliveredThisMonth = dashboardController.getMotoriConsegnatiNelPeriodo(effectiveMonthStart, monthEnd);
-        int inProgressNow = dashboardController.getWorkInProgressEngines();
-        int readyNow = dashboardController.getMotoriByStatus(it.SimoSW.model.EngineStatus.READY);
-        int waitingNow = dashboardController.getMotoriByStatus(it.SimoSW.model.EngineStatus.WAITING);
-        int deliveredNow = dashboardController.getMotoriByStatus(it.SimoSW.model.EngineStatus.DELIVERED);
+        int insertedThisMonth = homeController.getMotoriInseritiNelPeriodo(effectiveMonthStart, monthEnd);
+        int deliveredThisMonth = homeController.getMotoriConsegnatiNelPeriodo(effectiveMonthStart, monthEnd);
+        int inProgressNow = homeController.getWorkInProgressEngines();
+        int readyNow = homeController.getMotoriByStatus(it.SimoSW.model.EngineStatus.READY);
+        int waitingNow = homeController.getMotoriByStatus(it.SimoSW.model.EngineStatus.WAITING);
+        int deliveredNow = homeController.getMotoriByStatus(it.SimoSW.model.EngineStatus.DELIVERED);
         int totalEngines = waitingNow + inProgressNow + readyNow + deliveredNow;
-        int avgDaysThisMonth = dashboardController.getTempoMedioLavorazioneNelPeriodo(effectiveMonthStart, monthEnd);
-        int avgDaysOverall = dashboardController.getTempoMedioLavorazioneNelPeriodo(STATISTICS_START_DATE, today);
+        int avgDaysThisMonth = homeController.getTempoMedioLavorazioneNelPeriodo(effectiveMonthStart, monthEnd);
+        int avgDaysOverall = homeController.getTempoMedioLavorazioneNelPeriodo(STATISTICS_START_DATE, today);
 
         YearMonth startMonth = YearMonth.from(STATISTICS_START_DATE);
         long monthsBetween = ChronoUnit.MONTHS.between(startMonth, currentMonth) + 1;
         int maxHistoryMonths = (int) Math.max(1, monthsBetween);
         int selectedMonths = parseMonths(request.getParameter("months"), Math.min(12, maxHistoryMonths), maxHistoryMonths);
-        List<Map<String, Object>> monthlyHistory = dashboardController.getStoricoMensileKpi(selectedMonths);
+        List<Map<String, Object>> monthlyHistory = homeController.getStoricoMensileKpi(selectedMonths);
         String fromParam = safeTrim(request.getParameter("fromMonth"));
         String toParam = safeTrim(request.getParameter("toMonth"));
         if (!fromParam.isBlank() && !toParam.isBlank()) {

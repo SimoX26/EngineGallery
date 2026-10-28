@@ -315,9 +315,9 @@ public class UploadServlet extends HttpServlet {
         PostSubmitNavigationGuard.blockFormPageOnce(
                 request,
                 "/upload",
-                "/dashboard?lockBack=1&navHome=1"
+                "/home?lockBack=1&navHome=1"
         );
-        String destination = request.getContextPath() + "/dashboard?lockBack=1&navHome=1";
+        String destination = request.getContextPath() + "/home?lockBack=1&navHome=1";
         if ("1".equals(request.getHeader("X-Engine-Gallery-Draft"))) {
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"saved\":true,\"redirect\":\"" + destination + "\"}");

@@ -93,7 +93,7 @@ public class AuthenticationServlet extends HttpServlet {
                     COOKIE_MAX_AGE,
                     true
             );
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            response.sendRedirect(request.getContextPath() + "/home");
         } else {
             loginRateLimiter.recordFailure(username);
             // Credenziali errate

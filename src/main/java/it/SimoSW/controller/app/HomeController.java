@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DashboardController {
+public class HomeController {
     private static final LocalDate STATISTICS_START_DATE = LocalDate.of(2026, 1, 1);
     private static final Pattern STATUS_TRANSITION_PATTERN =
             Pattern.compile(".*->\\s*([A-Z_]+)\\s*$");
@@ -44,7 +44,7 @@ public class DashboardController {
     private final UserDAO userDAO;
     private final UserActivityLogDAO userActivityLogDAO;
 
-    public DashboardController(EngineDAO engineDAO,
+    public HomeController(EngineDAO engineDAO,
                                CustomerDAO customerDAO,
                                WarehouseItemDAO warehouseItemDAO,
                                ImageDAO imageDAO,

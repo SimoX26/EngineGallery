@@ -13,7 +13,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=28">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
 
     <style>
@@ -340,7 +340,7 @@
 
 <body>
 
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 <c:url var="engineEditUrl" value="/engine/edit">
     <c:param name="ref" value="${detail.engine.engineRef}" />
 </c:url>
@@ -677,7 +677,7 @@
         contextPath: '<%= request.getContextPath() %>'
     };
 </script>
-<script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js?v=3"></script>
+<script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js?v=4"></script>
 
 </body>
 </html>

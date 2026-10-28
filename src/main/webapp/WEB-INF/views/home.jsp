@@ -11,7 +11,7 @@
     <title>Engine Gallery • Home</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body>
 
@@ -20,20 +20,20 @@
 
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
-<div class="dashboard-page dashboard-crm-page">
-    <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<div class="home-page home-crm-page">
+    <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
     <div class="container">
-        <div class="page-header dashboard-crm-header">
-            <p class="dashboard-crm-greeting mb-2 fw-bold">
-                <c:out value="${dashboardGreeting}" />, <c:out value="${dashboardUserDisplayName}" />
+        <div class="page-header home-crm-header">
+            <p class="home-crm-greeting mb-2 fw-bold">
+                <c:out value="${homeGreeting}" />, <c:out value="${homeUserDisplayName}" />
             </p>
             <p>Panoramica di ${meseCorrenteLabel}.</p>
         </div>
 
-        <div class="row g-3 g-lg-4 mb-4 dashboard-kpi-grid">
+        <div class="row g-3 g-lg-4 mb-4 home-kpi-grid">
             <div class="col-12 col-lg-6">
-                <div class="kpi-card dashboard-kpi-card dashboard-kpi-card--highlight">
+                <div class="kpi-card home-kpi-card home-kpi-card--highlight">
                     <div class="kpi-title">Tempo medio lavorazione (mese corrente)</div>
                     <c:choose>
                         <c:when test="${tempoMedioDisponibile}">
@@ -48,19 +48,19 @@
             </div>
 
             <div class="col-6 col-lg-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Inseriti mese</div>
                     <div class="kpi-value">${motoriInseritiMese}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Consegnati mese</div>
                     <div class="kpi-value">${motoriConsegnatiMese}</div>
                 </div>
             </div>
             <div class="col-12 col-lg-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">In lavorazione</div>
                     <div class="kpi-value">${workInProgressEngines}</div>
                 </div>
@@ -68,7 +68,7 @@
         </div>
 
         <div class="home-nav-section mt-4 mb-4">
-            <div class="dashboard-section-head mb-3">
+            <div class="home-section-head mb-3">
                 <h5 class="mb-0 fw-semibold">Funzioni rapide</h5>
             </div>
             <div class="row g-3">

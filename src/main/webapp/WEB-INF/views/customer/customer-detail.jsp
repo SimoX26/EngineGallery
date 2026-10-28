@@ -11,11 +11,11 @@
     <title>Engine Gallery • Dettaglio Cliente</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body>
 
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 <c:url var="customerEditUrl" value="/customer/edit">
     <c:param name="id" value="${customer.id}" />
 </c:url>

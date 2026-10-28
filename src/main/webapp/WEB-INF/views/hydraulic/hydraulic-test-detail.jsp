@@ -14,11 +14,11 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=28">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body>
 
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 <c:url var="hydraulicEditUrl" value="/hydraulic-test/edit"><c:param name="id" value="${hydraulicTest.id}"/></c:url>
 <c:url var="hydraulicDeleteUrl" value="/hydraulic-test/delete"><c:param name="id" value="${hydraulicTest.id}"/></c:url>
 

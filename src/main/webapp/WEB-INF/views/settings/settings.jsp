@@ -11,14 +11,14 @@
     <title>Engine Gallery • Impostazioni</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body>
 
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
-<div class="dashboard-page">
-    <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<div class="home-page">
+    <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
     <div class="container">
         <div class="page-header">

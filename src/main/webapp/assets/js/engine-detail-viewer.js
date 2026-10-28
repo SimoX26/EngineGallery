@@ -1,7 +1,7 @@
 import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
 
 const galleryRoot = document.getElementById('engineDetailGallery');
-const navbar = document.querySelector('.navbar');
+const navMenu = document.querySelector('.nav-menu');
 const clickableImages = Array.from(document.querySelectorAll('.clickable-image'));
 
 const SHARE_LOG_PREFIX = '[engine-share-v2]';
@@ -493,15 +493,15 @@ if (!galleryRoot || clickableImages.length === 0) {
     });
 
     lightbox.on('open', () => {
-        if (navbar) {
-            navbar.classList.add('navbar-hidden');
+        if (navMenu) {
+            navMenu.classList.add('nav-menu-hidden');
         }
         activeLightboxIndex = Number(lightbox.pswp?.currIndex || 0);
     });
 
     lightbox.on('close', () => {
-        if (navbar) {
-            navbar.classList.remove('navbar-hidden');
+        if (navMenu) {
+            navMenu.classList.remove('nav-menu-hidden');
         }
     });
 

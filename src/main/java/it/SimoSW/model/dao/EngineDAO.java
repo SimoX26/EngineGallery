@@ -38,7 +38,7 @@ public interface EngineDAO {
     List<Engine> search(String keyword);
 
     /* =========================
-       Dashboard / KPI
+       Home / KPI
        ========================= */
     int countByStatus(EngineStatus status);
     int countByIntakeBetween(LocalDate from, LocalDate to);

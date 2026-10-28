@@ -50,21 +50,23 @@ public class AuthenticationFilter implements Filter {
         if (isPublicPath(path)) {
             if (isHomePath(path) || "/auth".equals(path)) {
                 ensureAutoLogin(req, res);
-                if (isLoggedIn(req)) {
-                    res.sendRedirect(contextPath + "/dashboard");
+                if (isLoggedIn(req) && !"/home".equals(path)) {
+                    res.sendRedirect(contextPath + "/home");
                     return;
                 }
-                if (isHomePath(path)) {
+                if (!isLoggedIn(req) && isHomePath(path)) {
                     req.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(req, res);
                     return;
                 }
             }
-            if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
-                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+            if (!"/home".equals(path)) {
+                if (requiresCsrfValidation(req, path) && !CsrfTokenUtil.isValid(req)) {
+                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                    return;
+                }
+                chain.doFilter(request, response);
                 return;
             }
-            chain.doFilter(request, response);
-            return;
         }
 
         if (!isLoggedIn(req)) {

@@ -11,17 +11,17 @@
     <title>Engine Gallery • Dati e statistiche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=38">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body>
 
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
-<div class="dashboard-page statistics-analytics-page">
-    <jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<div class="home-page statistics-analytics-page">
+    <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
     <div class="container">
-        <div class="page-header dashboard-crm-header">
+        <div class="page-header home-crm-header">
             <h1>Dati e statistiche</h1>
             <p>Analisi avanzata officina • periodo corrente ${meseCorrenteLabel}</p>
         </div>
@@ -52,37 +52,37 @@
 
         <div class="row g-3 g-lg-4 mb-4">
             <div class="col-6 col-xl-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Motori totali</div>
                     <div class="kpi-value">${motoriTotali}</div>
                 </div>
             </div>
             <div class="col-6 col-xl-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Inseriti mese</div>
                     <div class="kpi-value">${motoriInseritiMese}</div>
                 </div>
             </div>
             <div class="col-6 col-xl-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Consegnati mese</div>
                     <div class="kpi-value">${motoriConsegnatiMese}</div>
                 </div>
             </div>
             <div class="col-6 col-xl-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">In lavorazione</div>
                     <div class="kpi-value">${motoriInLavorazione}</div>
                 </div>
             </div>
             <div class="col-6 col-xl-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Pronti</div>
                     <div class="kpi-value">${motoriPronti}</div>
                 </div>
             </div>
             <div class="col-6 col-xl-2">
-                <div class="kpi-card dashboard-kpi-card">
+                <div class="kpi-card home-kpi-card">
                     <div class="kpi-title">Tempo medio mese</div>
                     <div class="kpi-value">${tempoMedioLavorazioneMese} gg</div>
                 </div>
@@ -164,21 +164,21 @@
                     <p class="text-muted mb-3">Metodo: media mobile semplice sugli ultimi 3 mesi del filtro attuale.</p>
                     <c:choose>
                         <c:when test="${forecastHasEnoughData}">
-                            <div class="dashboard-warehouse-metrics">
-                                <div class="dashboard-warehouse-metric">
-                                    <span class="dashboard-warehouse-label">Inseriti stimati</span>
+                            <div class="home-warehouse-metrics">
+                                <div class="home-warehouse-metric">
+                                    <span class="home-warehouse-label">Inseriti stimati</span>
                                     <strong>${forecastInsertedNextMonth}</strong>
                                 </div>
-                                <div class="dashboard-warehouse-metric">
-                                    <span class="dashboard-warehouse-label">Consegnati stimati</span>
+                                <div class="home-warehouse-metric">
+                                    <span class="home-warehouse-label">Consegnati stimati</span>
                                     <strong>${forecastDeliveredNextMonth}</strong>
                                 </div>
-                                <div class="dashboard-warehouse-metric">
-                                    <span class="dashboard-warehouse-label">Tempo medio stimato</span>
+                                <div class="home-warehouse-metric">
+                                    <span class="home-warehouse-label">Tempo medio stimato</span>
                                     <strong>${forecastAvgDaysNextMonth} gg</strong>
                                 </div>
-                                <div class="dashboard-warehouse-metric">
-                                    <span class="dashboard-warehouse-label">Tempo medio complessivo</span>
+                                <div class="home-warehouse-metric">
+                                    <span class="home-warehouse-label">Tempo medio complessivo</span>
                                     <strong>${tempoMedioLavorazione} gg</strong>
                                 </div>
                             </div>

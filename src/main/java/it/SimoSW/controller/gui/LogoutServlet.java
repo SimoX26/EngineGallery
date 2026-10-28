@@ -34,7 +34,7 @@ public class LogoutServlet extends HttpServlet {
             return;
         }
 
-        response.sendRedirect(request.getContextPath() + "/dashboard");
+        response.sendRedirect(request.getContextPath() + "/home");
     }
 
     @Override

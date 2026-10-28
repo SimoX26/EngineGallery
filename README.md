@@ -15,7 +15,7 @@ Engine Gallery riunisce informazioni che spesso sono distribuite tra cartelle, m
 - raccogliere immagini e contenuti tecnici in modo ordinato;
 - mantenere uno storico consultabile delle attivita;
 - monitorare articoli di magazzino e relativa documentazione visiva;
-- consultare indicatori sintetici e attivita recenti da una dashboard centrale.
+- consultare indicatori sintetici e attivita recenti dalla Home.
 
 ## Utenti
 
@@ -28,7 +28,7 @@ Dal repository emergono due ruoli utente chiaramente riconoscibili:
 
 ## Sezioni Principali
 
-## Dashboard
+## Home
 
 La home fornisce una panoramica operativa dell'attivita corrente. Include indicatori sintetici, collegamenti rapidi alle sezioni principali e informazioni recenti su carico di lavoro e attivita.
 
@@ -65,7 +65,7 @@ Dal codice emerge un modello d'uso centrato su accesso autenticato e navigazione
 Un flusso tipico prevede:
 
 1. accesso all'applicazione;
-2. consultazione della dashboard per avere una vista d'insieme;
+2. consultazione della Home per avere una vista d'insieme;
 3. ingresso nelle aree clienti, motori, prove idrauliche o magazzino;
 4. creazione o aggiornamento dei record;
 5. associazione di immagini o contenuti multimediali dove necessario;
@@ -76,7 +76,7 @@ Un flusso tipico prevede:
 L'interfaccia e composta da pagine server-rendered con navigazione chiara tra le diverse sezioni. Dalle view implementate risultano direttamente verificabili queste caratteristiche:
 
 - navigazione responsive con gestione dedicata anche in mobilita;
-- dashboard con indicatori e accessi rapidi;
+- Home con indicatori e accessi rapidi;
 - schermate di elenco, dettaglio, inserimento, modifica e conferma eliminazione per le entita principali;
 - supporto al caricamento di immagini e altri contenuti multimediali;
 - preferenze di tema chiaro, scuro o automatico;

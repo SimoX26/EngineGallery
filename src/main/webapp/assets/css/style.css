@@ -24,7 +24,7 @@
     --action-control-height: 42px;
     --action-control-font-size: 0.95rem;
     --action-control-line-height: 1.25;
-    --navbar-offset: 72px;
+    --nav-menu-offset: 72px;
     --border-soft: #e5e7eb;
     --input-bg: #ffffff;
     --input-bg-focus: #f8fbff;
@@ -178,7 +178,7 @@ textarea::placeholder {
 }
 
 body:not(.login-page) {
-    padding-top: var(--navbar-offset);
+    padding-top: var(--nav-menu-offset);
 }
 
 /* =====================
@@ -1162,11 +1162,11 @@ body:not(.login-page) {
     margin-top: 8px;
 }
 
-.dashboard-crm-page .dashboard-crm-header {
+.home-crm-page .home-crm-header {
     margin-bottom: 1.25rem;
 }
 
-.dashboard-crm-page .dashboard-crm-greeting {
+.home-crm-page .home-crm-greeting {
     color: var(--text-main);
     font-size: clamp(1.9rem, 4vw, 3.1rem);
     line-height: 1.08;
@@ -1174,43 +1174,43 @@ body:not(.login-page) {
     overflow-wrap: anywhere;
 }
 
-.dashboard-crm-page .dashboard-crm-header p {
+.home-crm-page .home-crm-header p {
     max-width: 680px;
 }
 
-.dashboard-kpi-card {
+.home-kpi-card {
     padding: 18px 16px;
 }
 
-.dashboard-kpi-card .kpi-title {
+.home-kpi-card .kpi-title {
     font-size: 0.76rem;
 }
 
-.dashboard-kpi-card .kpi-value {
+.home-kpi-card .kpi-value {
     margin-top: 8px;
     font-size: clamp(1.35rem, 2.2vw, 1.95rem);
 }
 
-.dashboard-section-head {
+.home-section-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
 }
 
-.dashboard-status-grid {
+.home-status-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
 }
 
-.dashboard-status-item {
+.home-status-item {
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
     padding: 12px 13px;
 }
 
-.dashboard-status-top {
+.home-status-top {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1218,13 +1218,13 @@ body:not(.login-page) {
     font-size: 0.88rem;
 }
 
-.dashboard-status-value {
+.home-status-value {
     margin-top: 5px;
     font-size: 1.25rem;
     font-weight: 700;
 }
 
-.dashboard-mini-progress .dashboard-progress-track {
+.home-mini-progress .home-progress-track {
     display: flex;
     height: 9px;
     border-radius: var(--radius-pill);
@@ -1233,29 +1233,29 @@ body:not(.login-page) {
     margin-bottom: 6px;
 }
 
-.dashboard-progress-segment--waiting {
+.home-progress-segment--waiting {
     background-color: var(--status-waiting-border);
 }
 
-.dashboard-progress-segment--working {
+.home-progress-segment--working {
     background-color: var(--status-working-border);
 }
 
-.dashboard-progress-segment--ready {
+.home-progress-segment--ready {
     background-color: var(--status-ready-border);
 }
 
-.dashboard-progress-segment--delivered {
+.home-progress-segment--delivered {
     background-color: var(--status-delivered-border);
 }
 
-.dashboard-warehouse-metrics {
+.home-warehouse-metrics {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
 }
 
-.dashboard-warehouse-metric {
+.home-warehouse-metric {
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
     padding: 12px 13px;
@@ -1264,31 +1264,31 @@ body:not(.login-page) {
     gap: 4px;
 }
 
-.dashboard-warehouse-label {
+.home-warehouse-label {
     color: var(--text-muted);
     font-size: 0.86rem;
 }
 
-.dashboard-warehouse-metric strong {
+.home-warehouse-metric strong {
     font-size: 1.2rem;
 }
 
-.dashboard-recent-list .list-group-item {
+.home-recent-list .list-group-item {
     padding: 0.7rem 0.9rem;
 }
 
 @media (max-width: 991.98px) {
-    .dashboard-status-grid {
+    .home-status-grid {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 767.98px) {
-    .dashboard-kpi-card {
+    .home-kpi-card {
         padding: 15px 13px;
     }
 
-    .dashboard-warehouse-metrics {
+    .home-warehouse-metrics {
         grid-template-columns: 1fr;
     }
 }
@@ -1548,7 +1548,7 @@ body:not(.login-page) {
 
 
 /* =====================
-   NAVBAR
+   NAV MENU
    ===================== */
 .navbar .nav-link {
     font-weight: 500;
@@ -1571,7 +1571,7 @@ body:not(.login-page) {
     z-index: 3000 !important;
 }
 
-.navbar-action-btn {
+.nav-menu-action-btn {
     width: auto;
     max-width: calc(100vw - 1.25rem);
     height: 2.25rem;
@@ -1586,7 +1586,7 @@ body:not(.login-page) {
     flex-shrink: 0;
 }
 
-.navbar-action-btn .navbar-toggler-label {
+.nav-menu-action-btn .nav-menu-toggler-label {
     display: inline-flex;
     align-items: center;
     font-size: 0.72rem;
@@ -1596,7 +1596,7 @@ body:not(.login-page) {
     text-transform: uppercase;
 }
 
-.navbar-action-btn .navbar-toggler-icon {
+.nav-menu-action-btn .navbar-toggler-icon {
     flex: 0 0 auto;
 }
 
@@ -1660,7 +1660,7 @@ body:not(.login-page) {
 }
 
 @media (max-width: 1399.98px) {
-    .navbar-action-btn {
+    .nav-menu-action-btn {
         width: auto;
         max-width: calc(100vw - 1rem);
         height: 2.2rem;
@@ -1668,7 +1668,7 @@ body:not(.login-page) {
         gap: 0.4rem;
     }
 
-    .navbar-action-btn .navbar-toggler-label {
+    .nav-menu-action-btn .nav-menu-toggler-label {
         font-size: 0.68rem;
     }
 
@@ -2278,7 +2278,7 @@ body.kanban-dragging {
     object-fit: contain;
 }
 
-.dashboard-engine-thumb {
+.home-engine-thumb {
     width: 84px;
     height: 64px;
     border-radius: var(--radius-md);
@@ -3027,7 +3027,7 @@ body.modal-open {
     }
 }
 
-.navbar-hidden {
+.nav-menu-hidden {
     visibility: hidden;
 }
 
@@ -3060,7 +3060,7 @@ body.modal-open {
 
 @media (max-width: 768px) {
     :root {
-        --navbar-offset: 66px;
+        --nav-menu-offset: 66px;
     }
 
     body {
@@ -3081,7 +3081,7 @@ body.modal-open {
         text-align: left;
     }
 
-    .dashboard-crm-page .dashboard-crm-greeting {
+    .home-crm-page .home-crm-greeting {
         font-size: clamp(1.65rem, 8vw, 2.2rem);
         line-height: 1.12;
         margin-bottom: 0.3rem;

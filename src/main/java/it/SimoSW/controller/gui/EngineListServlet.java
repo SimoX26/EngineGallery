@@ -37,7 +37,7 @@ public class EngineListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         boolean archiveMode = "/engine/archive".equals(request.getServletPath());
         if (archiveMode && !isAdmin(request)) {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
 

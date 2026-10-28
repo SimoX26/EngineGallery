@@ -9,10 +9,10 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title><c:out value="${machine.name}"/> • Manutenzione macchinari</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=38">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=39">
 </head>
 <body>
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 <main class="container pt-4 pb-5 workshop-maintenance-page workshop-has-fab">
     <c:if test="${param.saved == '1'}"><div class="alert alert-success" role="status">Dati salvati.</div></c:if>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>

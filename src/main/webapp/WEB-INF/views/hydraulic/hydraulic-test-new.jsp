@@ -11,12 +11,12 @@
     <title>Engine Gallery • Nuova prova idraulica</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=12">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
 </head>
 <body data-back-guard-form="1"
       data-back-guard-fallback="<%= request.getContextPath() %>/hydraulic-test/list">
 
-<jsp:include page="/WEB-INF/views/includes/navbar.jsp"/>
+<jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
 <div class="container-fluid d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 70px);">
     <div class="card-base" style="max-width: 620px; width: 100%;">

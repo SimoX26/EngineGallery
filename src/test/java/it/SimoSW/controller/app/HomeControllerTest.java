@@ -24,11 +24,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DashboardControllerTest {
+class HomeControllerTest {
 
     @Test
     void singleCompleteWorkIntervalIsAveragedCorrectly() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00001", LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 5))),
                 List.of(
                         statusChange("RML-2026-00001", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 2, 2, 10, 0)),
@@ -44,7 +44,7 @@ class DashboardControllerTest {
 
     @Test
     void engineStillInProgressIsExcludedFromDeliveredAverage() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(inProgressEngine("RML-2026-00002", LocalDate.of(2026, 2, 1))),
                 List.of(
                         statusChange("RML-2026-00002", "INITIAL -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 2, 1, 9, 0))
@@ -59,7 +59,7 @@ class DashboardControllerTest {
 
     @Test
     void multipleEntriesAndExitsAreSummedPerEngine() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00003", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 10))),
                 List.of(
                         statusChange("RML-2026-00003", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 1, 8, 0)),
@@ -77,7 +77,7 @@ class DashboardControllerTest {
 
     @Test
     void engineWithoutWorkInProgressHistoryUsesIntakeAndDeliveryDates() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00004", LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 5))),
                 List.of(
                         statusChange("RML-2026-00004", "WAITING -> READY", LocalDateTime.of(2026, 3, 2, 8, 0)),
@@ -93,7 +93,7 @@ class DashboardControllerTest {
 
     @Test
     void duplicateAndOutOfOrderTransitionsDoNotDoubleCount() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00005", LocalDate.of(2026, 4, 1), LocalDate.of(2026, 4, 10))),
                 List.of(
                         statusChange("RML-2026-00005", "WORK_IN_PROGRESS -> READY", LocalDateTime.of(2026, 4, 5, 8, 0)),
@@ -110,7 +110,7 @@ class DashboardControllerTest {
 
     @Test
     void intervalCrossingPeriodBoundaryKeepsFullDurationForDeliveredMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00006", LocalDate.of(2026, 2, 20), LocalDate.of(2026, 3, 2))),
                 List.of(
                         statusChange("RML-2026-00006", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 2, 28, 12, 0)),
@@ -126,7 +126,7 @@ class DashboardControllerTest {
 
     @Test
     void multipleEnginesUseAverageOfPerEngineDurations() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(
                         deliveredEngine("RML-2026-00007", LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5)),
                         deliveredEngine("RML-2026-00008", LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 8))
@@ -147,7 +147,7 @@ class DashboardControllerTest {
 
     @Test
     void crossingDayBoundaryUsesTransitionTimestamps() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00009", LocalDate.of(2026, 5, 30), LocalDate.of(2026, 6, 2))),
                 List.of(
                         statusChange("RML-2026-00009", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 5, 31, 23, 0)),
@@ -163,7 +163,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryUsesSameAverageForDeliveryMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00010", LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 5))),
                 List.of(
                         statusChange("RML-2026-00010", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 6, 2, 9, 0)),
@@ -181,7 +181,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryCountsIntervalFullyContainedInPastMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00011", LocalDate.of(2026, 2, 1), LocalDate.of(2026, 4, 10))),
                 List.of(
                         statusChange("RML-2026-00011", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 10, 8, 0)),
@@ -194,7 +194,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryCountsIntervalStartedPreviousMonthAndEndedInSelectedMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00012", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 4, 10))),
                 List.of(
                         statusChange("RML-2026-00012", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 2, 28, 12, 0)),
@@ -207,7 +207,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryCountsIntervalStartedInSelectedMonthAndEndedInNextMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00013", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 4, 10))),
                 List.of(
                         statusChange("RML-2026-00013", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 30, 0, 0)),
@@ -220,7 +220,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryCountsIntervalCoveringEntireMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00014", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1))),
                 List.of(
                         statusChange("RML-2026-00014", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 2, 15, 0, 0)),
@@ -233,7 +233,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryCountsHistoricalIntervalEvenIfEngineIsNoLongerInProgress() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00015", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1))),
                 List.of(
                         statusChange("RML-2026-00015", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 5, 8, 0)),
@@ -247,7 +247,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryLimitsOpenIntervalToEndOfPastMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(inProgressEngine("RML-2026-00016", LocalDate.of(2026, 2, 1))),
                 List.of(
                         statusChange("RML-2026-00016", "INITIAL -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 20, 0, 0))
@@ -259,7 +259,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistorySumsMultipleIntervalsWithinSameMonth() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00017", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1))),
                 List.of(
                         statusChange("RML-2026-00017", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 1, 0, 0)),
@@ -274,7 +274,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryReturnsZeroWhenThereIsNoOverlap() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00018", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1))),
                 List.of(
                         statusChange("RML-2026-00018", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 2, 1, 0, 0)),
@@ -287,7 +287,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryHandlesExactMonthBoundaries() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00019", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1))),
                 List.of(
                         statusChange("RML-2026-00019", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 3, 1, 0, 0)),
@@ -300,7 +300,7 @@ class DashboardControllerTest {
 
     @Test
     void monthlyHistoryAveragesKnownDurationsAcrossMultipleMotors() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(
                         deliveredEngine("RML-2026-00020", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1)),
                         deliveredEngine("RML-2026-00021", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 1))
@@ -318,7 +318,7 @@ class DashboardControllerTest {
 
     @Test
     void monthWithInsufficientHistoryReturnsNullInsteadOfZero() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(deliveredEngine("RML-2026-00022", LocalDate.of(2026, 1, 10), LocalDate.of(2026, 4, 10))),
                 List.of(
                         statusChange("RML-2026-00022", "WAITING -> WORK_IN_PROGRESS", LocalDateTime.of(2026, 5, 23, 10, 0)),
@@ -331,7 +331,7 @@ class DashboardControllerTest {
 
     @Test
     void monthValueRemainsAlignedWithItsMonthKeyWhenHistoryContainsNullAndNumbers() {
-        DashboardController controller = controllerWith(
+        HomeController controller = controllerWith(
                 List.of(
                         deliveredEngine("RML-2026-00023", LocalDate.of(2026, 1, 10), LocalDate.of(2026, 6, 10)),
                         deliveredEngine("RML-2026-00024", LocalDate.of(2026, 1, 10), LocalDate.of(2026, 6, 10))
@@ -358,8 +358,8 @@ class DashboardControllerTest {
         assertEquals(3, juneRow.get("avgDays"));
     }
 
-    private static DashboardController controllerWith(List<Engine> engines, List<UserActivityLog> logs) {
-        return new DashboardController(
+    private static HomeController controllerWith(List<Engine> engines, List<UserActivityLog> logs) {
+        return new HomeController(
                 new FakeEngineDAO(engines),
                 unsupportedDao(CustomerDAO.class),
                 unsupportedDao(WarehouseItemDAO.class),
@@ -375,11 +375,11 @@ class DashboardControllerTest {
         return Math.max(1, (int) (java.time.temporal.ChronoUnit.MONTHS.between(targetMonth, currentMonth) + 1));
     }
 
-    private static int monthlyAvgDays(DashboardController controller, YearMonth month) {
+    private static int monthlyAvgDays(HomeController controller, YearMonth month) {
         return ((Number) monthlyAvgDaysValue(controller, month)).intValue();
     }
 
-    private static Object monthlyAvgDaysValue(DashboardController controller, YearMonth month) {
+    private static Object monthlyAvgDaysValue(HomeController controller, YearMonth month) {
         return controller.getStoricoMensileKpi(monthsIncluding(month)).stream()
                 .filter(row -> month.toString().equals(row.get("monthKey")))
                 .findFirst()
