@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<c:set var="servletPath" value="${pageContext.request.servletPath}" />
+<c:set var="servletPath" value="${not empty requestScope['javax.servlet.forward.servlet_path'] ? requestScope['javax.servlet.forward.servlet_path'] : pageContext.request.servletPath}" />
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
 <c:set var="canViewStatistics" value="${requestScope.canViewStatistics}" />
 <c:set var="canViewWarehouse" value="${requestScope.canViewWarehouse}" />

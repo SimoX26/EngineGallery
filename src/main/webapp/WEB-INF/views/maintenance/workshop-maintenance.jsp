@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/ico/ICONA.png">
     <title>Manutenzione macchinari • Engine Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=39">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=40">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
@@ -19,10 +19,9 @@
             <h1>Manutenzione macchinari</h1>
         </div>
         <div class="workshop-maintenance-header__actions">
-            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=materials">Magazzino materiali</a>
-            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=history">Storico manutenzioni</a>
-            <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
-            <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/workshop-maintenance?view=new">Aggiungi macchinario +</a>
+            <a class="btn workshop-section-link" href="${pageContext.request.contextPath}/workshop-maintenance?view=materials">Magazzino materiali</a>
+            <a class="btn workshop-section-link" href="${pageContext.request.contextPath}/workshop-maintenance?view=history">Storico manutenzioni</a>
+            <a class="btn workshop-section-link" href="${pageContext.request.contextPath}/workshop-maintenance?view=calendar">Calendario manutenzioni</a>
         </div>
     </header>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
@@ -36,8 +35,9 @@
     </div>
 
     <section aria-labelledby="workshop-machines-title">
-        <div class="mb-3">
+        <div class="workshop-machines-heading mb-3">
             <h2 class="h4 mb-0" id="workshop-machines-title">Macchinari</h2>
+            <a class="btn btn-add-plus" href="${pageContext.request.contextPath}/workshop-maintenance?view=new"><span aria-hidden="true">+</span> Aggiungi macchinario</a>
         </div>
         <div class="record-gallery-grid">
             <c:forEach var="machine" items="${machines}">

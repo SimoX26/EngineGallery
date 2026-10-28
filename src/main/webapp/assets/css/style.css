@@ -298,6 +298,32 @@ body:not(.login-page) {
     border-radius: var(--radius-md);
 }
 
+.workshop-maintenance-header__actions .workshop-section-link {
+    background: #1f6ea5;
+    border-color: #1f6ea5;
+    color: #fff;
+    font-weight: 600;
+}
+
+.workshop-maintenance-header__actions .workshop-section-link:hover,
+.workshop-maintenance-header__actions .workshop-section-link:focus-visible {
+    background: #1b608e;
+    border-color: #1b608e;
+    color: #fff;
+}
+
+.workshop-machines-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.workshop-machines-heading .btn-add-plus {
+    white-space: normal;
+    text-align: center;
+}
+
 @media (max-width: 1399.98px) {
     .page-header-with-search.workshop-maintenance-header {
         grid-template-columns: minmax(0, 1fr);
@@ -314,10 +340,6 @@ body:not(.login-page) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: min(100%, 620px);
         justify-self: center;
-    }
-
-    .workshop-maintenance-header__actions .btn-add-plus {
-        grid-column: 1 / -1;
     }
 }
 
