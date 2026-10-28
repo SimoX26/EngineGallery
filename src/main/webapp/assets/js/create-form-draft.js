@@ -273,6 +273,12 @@
             } catch (error) {
                 backedUp = false;
             }
+            if (!backedUp && form.dataset.draftRequireBackup === 'true') {
+                show('Impossibile completare la bozza sul dispositivo, incluse le immagini. Libera spazio e riprova prima di salvare.', 'warning');
+                submitting = false;
+                if (submitButton) submitButton.disabled = false;
+                return;
+            }
             show(backedUp
                 ? 'Salvataggio in corso. Mantieni aperta questa pagina.'
                 : 'Bozza non disponibile su questo dispositivo. Mantieni aperta questa pagina fino alla fine del salvataggio.',
@@ -281,11 +287,16 @@
                 const body = new FormData(form);
                 enabledControls.forEach((element) => { element.disabled = true; });
                 const response = await fetch(form.action, {
-                    method: 'POST', body, credentials: 'same-origin'
+                    method: 'POST', body, credentials: 'same-origin',
+                    headers: {'X-Engine-Gallery-Draft': '1'}
                 });
-                const target = new URL(response.url);
+                const isJson = response.headers.get('Content-Type')?.includes('application/json');
+                const result = isJson && response.ok ? await response.json() : null;
+                const destination = result?.saved === true ? result.redirect : response.url;
+                const target = new URL(destination, window.location.href);
                 const success = new URL(form.dataset.draftSuccess, window.location.href);
-                const successfulRedirect = target.origin === success.origin && target.pathname === success.pathname
+                const successfulRedirect = response.ok && (!isJson || result?.saved === true)
+                    && target.origin === success.origin && target.pathname === success.pathname
                     && (!form.dataset.draftSuccessParam
                         || target.searchParams.get(form.dataset.draftSuccessParam) === '1');
                 if (successfulRedirect) {
@@ -304,7 +315,7 @@
                         // Il record è stato salvato: la cancellazione sarà ritentata alla prossima apertura.
                     }
                     navigating = true;
-                    window.location.assign(response.url);
+                    window.location.assign(target.href);
                     return;
                 }
                 const html = await response.text();

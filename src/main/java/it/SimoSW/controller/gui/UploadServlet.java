@@ -317,7 +317,13 @@ public class UploadServlet extends HttpServlet {
                 "/upload",
                 "/dashboard?lockBack=1&navHome=1"
         );
-        response.sendRedirect(request.getContextPath() + "/dashboard?lockBack=1&navHome=1");
+        String destination = request.getContextPath() + "/dashboard?lockBack=1&navHome=1";
+        if ("1".equals(request.getHeader("X-Engine-Gallery-Draft"))) {
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"saved\":true,\"redirect\":\"" + destination + "\"}");
+        } else {
+            response.sendRedirect(destination);
+        }
     }
 
     private void populateCustomerOptions(HttpServletRequest request) {

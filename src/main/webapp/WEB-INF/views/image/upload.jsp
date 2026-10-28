@@ -49,6 +49,7 @@
               data-draft-user="${sessionScope.loggedUser.id}"
               data-draft-success="<%= request.getContextPath() %>/dashboard"
               data-draft-success-param="lockBack"
+              data-draft-require-backup="true"
               enctype="multipart/form-data">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
 
@@ -532,5 +533,5 @@
         updateDot();
     })();
 </script>
-<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=5"></script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=6"></script>
 </html>
