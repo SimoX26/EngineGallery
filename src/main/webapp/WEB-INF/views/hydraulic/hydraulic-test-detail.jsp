@@ -64,7 +64,7 @@
         <div class="col-lg-7">
             <section class="record-detail-panel">
             <h2 class="mb-3">Video prova</h2>
-            <div id="hydraulicVideoWrap" class="hydraulic-video-wrap rounded">
+            <div class="hydraulic-video-wrap rounded">
                 <video id="hydraulicVideo" class="hydraulic-video" controls playsinline preload="metadata">
                     <c:choose>
                         <c:when test="${fn:startsWith(hydraulicTest.videoUrl, 'http://') || fn:startsWith(hydraulicTest.videoUrl, 'https://')}">
@@ -77,7 +77,6 @@
                     Il browser non supporta la riproduzione video.
                 </video>
             </div>
-            <button id="hydraulicFullscreenBtn" type="button" class="btn btn-outline-primary mt-3">Schermo intero</button>
             </section>
         </div>
 
@@ -98,10 +97,8 @@
 <script src="<%= request.getContextPath() %>/assets/js/media-share.js"></script>
 <script>
     (() => {
-        const button = document.getElementById('hydraulicFullscreenBtn');
         const video = document.getElementById('hydraulicVideo');
-        const wrap = document.getElementById('hydraulicVideoWrap');
-        if (!button || !video || !wrap) return;
+        if (!video) return;
         let previewTime = null;
         const showPreviewFrame = () => {
             if (!video.paused || video.currentTime > 0) return;
@@ -118,24 +115,6 @@
             }
             previewTime = null;
         }, {once: true});
-        button.hidden = !(video.requestFullscreen || video.webkitEnterFullscreen || wrap.requestFullscreen);
-        button.addEventListener('click', () => {
-            const fallback = () => {
-                if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-                else if (wrap.requestFullscreen) wrap.requestFullscreen();
-            };
-            if (/iPhone|iPad|iPod/.test(navigator.userAgent) && video.webkitEnterFullscreen) {
-                video.webkitEnterFullscreen();
-            } else if (video.requestFullscreen) {
-                try {
-                    Promise.resolve(video.requestFullscreen()).catch(fallback);
-                } catch (ignored) {
-                    fallback();
-                }
-            } else {
-                fallback();
-            }
-        });
     })();
 </script>
 </body>
