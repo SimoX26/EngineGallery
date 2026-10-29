@@ -108,6 +108,16 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                         request.getParameter("serialNumber"), request.getParameter("location"),
                         date(request.getParameter("purchaseDate")), request.getParameter("status"), integer(request, "usageHours"));
                 if (image != null && !saveImageOrRedirect(request, response, machineId, image, false)) return;
+                if (image == null && "1".equals(request.getParameter("removeCurrentImage"))) {
+                    String previous = controller.removeMachineImage(machineId);
+                    if (previous != null && previous.matches("[0-9a-fA-F-]{36}\\.jpg")) {
+                        try {
+                            Path directory = UploadPathResolver.resolveWorkshopMachineUploadBase(getServletContext())
+                                    .resolve(String.valueOf(machineId));
+                            Files.deleteIfExists(directory.resolve(previous));
+                        } catch (IOException ignored) { }
+                    }
+                }
             } else if ("recordIntervention".equals(action)) {
                 HttpSession session = request.getSession(false);
                 User user = session == null ? null : (User) session.getAttribute("loggedUser");

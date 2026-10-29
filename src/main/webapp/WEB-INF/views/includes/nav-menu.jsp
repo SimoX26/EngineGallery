@@ -8,6 +8,9 @@
 <c:set var="canViewWarehouse" value="${requestScope.canViewWarehouse}" />
 <c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/form-image-preview.css?v=1">
+<script src="${pageContext.request.contextPath}/assets/js/form-image-preview.js?v=1" defer></script>
+
 <style>
     body:not(.login-page) {
         padding-top: 72px;

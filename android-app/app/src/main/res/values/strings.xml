@@ -7,4 +7,6 @@
     <string name="camera_session_done">Fatto</string>
     <string name="camera_session_counter">Foto scattate: %1$d</string>
     <string name="camera_session_thumbnail_content_desc">Anteprima foto scattata</string>
+    <string name="camera_session_preview_title">Anteprima</string>
+    <string name="camera_session_delete">Elimina</string>
 </resources>

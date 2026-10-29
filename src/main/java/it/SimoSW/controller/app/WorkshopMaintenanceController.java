@@ -55,6 +55,11 @@ public class WorkshopMaintenanceController {
         return dao.updateMachineImage(machineId, required(imageFilename, 255, "Immagine"));
     }
 
+    public String removeMachineImage(long machineId) {
+        requireMachine(machineId);
+        return dao.updateMachineImage(machineId, null);
+    }
+
     public long createMachine(String name, String model, String serial, String location, LocalDate purchaseDate, int hours) {
         validateHours(hours);
         validatePurchaseDate(purchaseDate);

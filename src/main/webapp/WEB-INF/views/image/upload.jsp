@@ -277,17 +277,28 @@
             const card = document.createElement('div');
             card.className = 'engine-image-edit-card';
 
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'engine-image-delete-btn';
+            removeButton.textContent = 'X';
+            removeButton.setAttribute('aria-label', 'Rimuovi immagine selezionata');
+            removeButton.addEventListener('click', () => {
+                iosSessionCapturedFiles = iosSessionCapturedFiles.filter((item) => item !== file);
+                renderIosCollectorPreview();
+            });
+
             const img = document.createElement('img');
             img.className = 'engine-image-edit-preview';
             img.alt = file.name;
             const objectUrl = URL.createObjectURL(file);
             img.src = objectUrl;
-            img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+            img.dataset.previewObjectUrl = objectUrl;
 
             const filename = document.createElement('div');
             filename.className = 'small text-muted mt-1 text-truncate';
             filename.textContent = file.name;
 
+            card.appendChild(removeButton);
             card.appendChild(img);
             card.appendChild(filename);
             list.appendChild(card);
@@ -412,7 +423,7 @@
             img.alt = file.name;
             const objectUrl = URL.createObjectURL(file);
             img.src = objectUrl;
-            img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+            img.dataset.previewObjectUrl = objectUrl;
 
             const filename = document.createElement('div');
             filename.className = 'small text-muted mt-1 text-truncate';

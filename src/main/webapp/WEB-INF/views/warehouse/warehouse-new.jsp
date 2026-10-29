@@ -186,7 +186,7 @@
                 img.alt = file.name;
                 const objectUrl = URL.createObjectURL(file);
                 img.src = objectUrl;
-                img.addEventListener('load', () => URL.revokeObjectURL(objectUrl));
+                img.dataset.previewObjectUrl = objectUrl;
 
                 const filename = document.createElement('div');
                 filename.className = 'small text-muted mt-1 text-truncate';

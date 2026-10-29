@@ -47,7 +47,7 @@
                 </div>
                 <div class="form-text">Massimo 10 MB.</div>
                 <div id="ready-engine-image-name" class="small text-muted mt-2 d-none"></div>
-                <img id="ready-engine-preview" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del motore">
+                <img id="ready-engine-preview" data-preview-input="ready-engine-image" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del motore">
             </div>
             <div class="mb-4 text-start">
                 <label class="form-label fw-semibold" for="ready-engine-notes">Note</label>

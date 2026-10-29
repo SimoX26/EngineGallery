@@ -2,6 +2,9 @@ package it.simosw.enginegallery
 
 import android.content.ClipData
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.app.Dialog
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -134,9 +137,55 @@ class CameraSessionActivity : AppCompatActivity() {
                 scaleType = ImageView.ScaleType.CENTER_CROP
                 setImageURI(uri)
                 contentDescription = getString(R.string.camera_session_thumbnail_content_desc)
+                setOnClickListener { showCapturedPreview(uri) }
             }
             thumbnailStrip.addView(thumb)
         }
+    }
+
+    private fun showCapturedPreview(uri: Uri) {
+        val density = resources.displayMetrics.density
+        val padding = (16 * density).toInt()
+        val dialog = Dialog(this)
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding, padding, padding)
+            setBackgroundColor(Color.WHITE)
+        }
+        val title = TextView(this).apply {
+            text = getString(R.string.camera_session_preview_title)
+            textSize = 20f
+            setTextColor(Color.BLACK)
+        }
+        val image = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                (resources.displayMetrics.heightPixels * 0.65f).toInt()
+            )
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setBackgroundColor(Color.BLACK)
+            setImageURI(uri)
+        }
+        val deleteButton = Button(this).apply {
+            text = getString(R.string.camera_session_delete)
+            setTextColor(Color.WHITE)
+            backgroundTintList = ColorStateList.valueOf(Color.rgb(220, 38, 38))
+            setOnClickListener {
+                capturedUris.remove(uri)
+                try { contentResolver.delete(uri, null, null) } catch (_: Exception) { }
+                renderCapturedPreview()
+                dialog.dismiss()
+            }
+        }
+        panel.addView(title)
+        panel.addView(image)
+        panel.addView(deleteButton)
+        dialog.setContentView(panel)
+        dialog.show()
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.94f).toInt(),
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     private fun createTempImageFile(): File? {

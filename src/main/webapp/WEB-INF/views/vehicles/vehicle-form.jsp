@@ -46,7 +46,7 @@
                 </div>
                 <div class="form-text">Massimo 10 MB.</div>
                 <div id="vehiclePhotoName" class="small text-muted mt-2 d-none"></div>
-                <img id="vehiclePhotoPreview" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del veicolo">
+                <img id="vehiclePhotoPreview" data-preview-input="vehiclePhoto" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del veicolo">
                 <c:if test="${not empty vehicle.vehiclePhotoFilename}"><a class="small" href="${pageContext.request.contextPath}/vehicles?view=photo&amp;id=${vehicle.id}&amp;kind=vehicle" target="_blank" rel="noopener">Vedi foto attuale</a></c:if>
             </div>
             <div class="mb-4 text-start">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="form-text">Massimo 10 MB.</div>
                 <div id="registrationPhotoName" class="small text-muted mt-2 d-none"></div>
-                <img id="registrationPhotoPreview" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del libretto">
+                <img id="registrationPhotoPreview" data-preview-input="registrationPhoto" class="workshop-form-preview mt-2 d-none" alt="Anteprima foto del libretto">
                 <c:if test="${not empty vehicle.registrationPhotoFilename}"><a class="small" href="${pageContext.request.contextPath}/vehicles?view=photo&amp;id=${vehicle.id}&amp;kind=registration" target="_blank" rel="noopener">Vedi foto attuale</a></c:if>
             </div>
             <div class="d-flex gap-2">

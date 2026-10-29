@@ -75,10 +75,14 @@
                 </div>
                 <div class="form-text">Facoltativa, massimo 10 MB. Una nuova foto sostituisce quella attuale.</div>
                 <div id="machine-image-name" class="small text-muted mt-2 d-none"></div>
-                <img id="machine-image-preview" class="workshop-form-preview mt-2 d-none" alt="Anteprima della nuova foto del macchinario">
+                <img id="machine-image-preview" data-preview-input="machine-image" class="workshop-form-preview mt-2 d-none" alt="Anteprima della nuova foto del macchinario">
                 <c:if test="${not empty machine.imageFilename}">
                     <div class="form-text mt-3">Foto attuale</div>
-                    <img class="workshop-form-preview mt-3" src="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}" alt="Foto attuale di ${fn:escapeXml(machine.name)}">
+                    <input type="hidden" name="removeCurrentImage" value="0">
+                    <img class="workshop-form-preview mt-3" data-preview-remove-field="removeCurrentImage"
+                         data-preview-removed-message="machine-image-removal-message"
+                         src="${pageContext.request.contextPath}/uploads/workshop-machines/${machine.id}/${fn:escapeXml(machine.imageFilename)}" alt="Foto attuale di ${fn:escapeXml(machine.name)}">
+                    <div id="machine-image-removal-message" class="small text-danger mt-2 d-none">La foto attuale sarà eliminata al salvataggio.</div>
                 </c:if>
             </div>
             <div class="col-12 d-flex flex-wrap gap-2 align-items-center mt-4">

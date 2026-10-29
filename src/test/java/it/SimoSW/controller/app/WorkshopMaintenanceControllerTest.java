@@ -90,12 +90,20 @@ class WorkshopMaintenanceControllerTest {
         assertTrue(dao.machineDeleted);
     }
 
+    @Test
+    void removesCurrentMachineImageWithoutReplacingIt() {
+        assertThrows(IllegalArgumentException.class, () -> controller.removeMachineImage(2));
+        assertEquals("machine.jpg", controller.removeMachineImage(1));
+        assertNull(dao.updatedImageFilename);
+    }
+
     private static class StubDAO implements WorkshopMaintenanceDAO {
         int savedPlans;
         int savedMaterials;
         List<MaterialConsumption> savedConsumption = List.of();
         List<MaintenanceIntervention> interventions = List.of();
         boolean machineDeleted;
+        String updatedImageFilename = "unchanged";
         public List<WorkshopMachine> findMachines() { return List.of(new WorkshopMachine(1, "Tornio", "A", "123", "Banco", null, "ACTIVE", 100, null)); }
         public String findMachineImageFilename(long machineId) { return "machine.jpg"; }
         public List<MaintenancePlan> findPlans() { return List.of(); }
@@ -108,7 +116,10 @@ class WorkshopMaintenanceControllerTest {
         public long createMachine(String name, String model, String serialNumber, String location, LocalDate purchaseDate, int usageHours) { return 1; }
         public boolean updateMachine(long id, String name, String model, String serialNumber, String location, LocalDate purchaseDate, String status, int usageHours) { return true; }
         public boolean deleteMachine(long id) { machineDeleted = true; return true; }
-        public String updateMachineImage(long machineId, String imageFilename) { return null; }
+        public String updateMachineImage(long machineId, String imageFilename) {
+            updatedImageFilename = imageFilename;
+            return "machine.jpg";
+        }
         public long createPlan(long machineId, String description, LocalDate dueDate, Integer dueHours) { savedPlans++; return savedPlans; }
         public void recordIntervention(long machineId, Long planId, String type, LocalDate performedOn,
                                        String description, String parts, String operator,
