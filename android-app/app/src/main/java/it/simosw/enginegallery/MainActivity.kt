@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
@@ -15,6 +16,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
@@ -27,6 +29,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -34,6 +37,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
@@ -62,6 +66,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private var fullscreenVideoContainer: FrameLayout? = null
+    private var fullscreenVideoCallback: WebChromeClient.CustomViewCallback? = null
     private val ioExecutor = Executors.newSingleThreadExecutor()
     private var preparingTechnicalShare = false
     private var notificationPermissionRequested = false
@@ -336,7 +342,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
+                if (fullscreenVideoContainer != null) {
+                    hideFullscreenVideo()
+                } else if (webView.canGoBack()) {
                     webView.goBack()
                 } else {
                     finish()
@@ -454,6 +462,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowCustomView(view: View, callback: WebChromeClient.CustomViewCallback) {
+                if (fullscreenVideoContainer != null) {
+                    callback.onCustomViewHidden()
+                    return
+                }
+                val container = FrameLayout(this@MainActivity).apply {
+                    setBackgroundColor(Color.BLACK)
+                    addView(view, FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                }
+                (window.decorView as ViewGroup).addView(container, ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                fullscreenVideoContainer = container
+                fullscreenVideoCallback = callback
+                swipeRefresh.isEnabled = false
+                WindowCompat.getInsetsController(window, window.decorView)
+                    .hide(WindowInsetsCompat.Type.systemBars())
+            }
+
+            override fun onHideCustomView() {
+                hideFullscreenVideo()
+            }
+
             override fun onShowFileChooser(
                 webView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>?,
@@ -466,6 +497,18 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
+    }
+
+    private fun hideFullscreenVideo() {
+        val container = fullscreenVideoContainer ?: return
+        fullscreenVideoContainer = null
+        (window.decorView as ViewGroup).removeView(container)
+        container.removeAllViews()
+        swipeRefresh.isEnabled = true
+        WindowCompat.getInsetsController(window, window.decorView)
+            .show(WindowInsetsCompat.Type.systemBars())
+        fullscreenVideoCallback?.onCustomViewHidden()
+        fullscreenVideoCallback = null
     }
 
     private fun upgradeToHttpsIfNeeded(uri: Uri): Uri {
@@ -499,6 +542,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        hideFullscreenVideo()
         ioExecutor.shutdown()
         super.onDestroy()
     }

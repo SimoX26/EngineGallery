@@ -14,7 +14,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=40">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=41">
 </head>
 <body>
 
@@ -118,14 +118,22 @@
             }
             previewTime = null;
         }, {once: true});
-        button.hidden = !(wrap.requestFullscreen || video.requestFullscreen || video.webkitEnterFullscreen);
+        button.hidden = !(video.requestFullscreen || video.webkitEnterFullscreen || wrap.requestFullscreen);
         button.addEventListener('click', () => {
-            if (document.fullscreenEnabled && wrap.requestFullscreen) {
-                wrap.requestFullscreen();
-            } else if (video.webkitEnterFullscreen) {
+            const fallback = () => {
+                if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+                else if (wrap.requestFullscreen) wrap.requestFullscreen();
+            };
+            if (/iPhone|iPad|iPod/.test(navigator.userAgent) && video.webkitEnterFullscreen) {
                 video.webkitEnterFullscreen();
             } else if (video.requestFullscreen) {
-                video.requestFullscreen();
+                try {
+                    Promise.resolve(video.requestFullscreen()).catch(fallback);
+                } catch (ignored) {
+                    fallback();
+                }
+            } else {
+                fallback();
             }
         });
     })();
