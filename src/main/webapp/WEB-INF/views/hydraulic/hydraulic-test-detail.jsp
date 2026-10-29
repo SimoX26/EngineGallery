@@ -14,7 +14,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=40">
 </head>
 <body>
 
@@ -64,8 +64,8 @@
         <div class="col-lg-7">
             <section class="record-detail-panel">
             <h2 class="mb-3">Video prova</h2>
-            <div class="hydraulic-video-wrap rounded">
-                <video class="hydraulic-video" controls playsinline preload="metadata">
+            <div id="hydraulicVideoWrap" class="hydraulic-video-wrap rounded">
+                <video id="hydraulicVideo" class="hydraulic-video" controls playsinline preload="metadata">
                     <c:choose>
                         <c:when test="${fn:startsWith(hydraulicTest.videoUrl, 'http://') || fn:startsWith(hydraulicTest.videoUrl, 'https://')}">
                             <source src="${fn:escapeXml(hydraulicTest.videoUrl)}">
@@ -77,6 +77,7 @@
                     Il browser non supporta la riproduzione video.
                 </video>
             </div>
+            <button id="hydraulicFullscreenBtn" type="button" class="btn btn-outline-primary mt-3">Schermo intero</button>
             </section>
         </div>
 
@@ -95,5 +96,39 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<%= request.getContextPath() %>/assets/js/media-share.js"></script>
+<script>
+    (() => {
+        const button = document.getElementById('hydraulicFullscreenBtn');
+        const video = document.getElementById('hydraulicVideo');
+        const wrap = document.getElementById('hydraulicVideoWrap');
+        if (!button || !video || !wrap) return;
+        let previewTime = null;
+        const showPreviewFrame = () => {
+            if (!video.paused || video.currentTime > 0) return;
+            const seekTo = Number.isFinite(video.duration) && video.duration > 0
+                ? Math.min(1, video.duration / 2) : 1;
+            previewTime = seekTo;
+            try { video.currentTime = seekTo; } catch (ignored) { }
+        };
+        if (video.readyState >= 1) showPreviewFrame();
+        else video.addEventListener('loadedmetadata', showPreviewFrame, {once: true});
+        video.addEventListener('play', () => {
+            if (previewTime !== null && Math.abs(video.currentTime - previewTime) < 0.05) {
+                video.currentTime = 0;
+            }
+            previewTime = null;
+        }, {once: true});
+        button.hidden = !(wrap.requestFullscreen || video.requestFullscreen || video.webkitEnterFullscreen);
+        button.addEventListener('click', () => {
+            if (document.fullscreenEnabled && wrap.requestFullscreen) {
+                wrap.requestFullscreen();
+            } else if (video.webkitEnterFullscreen) {
+                video.webkitEnterFullscreen();
+            } else if (video.requestFullscreen) {
+                video.requestFullscreen();
+            }
+        });
+    })();
+</script>
 </body>
 </html>

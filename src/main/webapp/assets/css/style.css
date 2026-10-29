@@ -2376,6 +2376,7 @@ body.kanban-dragging {
 .hydraulic-video-wrap {
     aspect-ratio: 16 / 9;
     background-color: #0f172a;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2388,6 +2389,39 @@ body.kanban-dragging {
     max-width: 100%;
     object-fit: contain;
     display: block;
+}
+
+.hydraulic-list-preview {
+    position: relative;
+    overflow: hidden;
+    background-color: #0f172a;
+}
+
+.hydraulic-video-preview {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hydraulic-video-badge {
+    position: absolute;
+    left: 0.5rem;
+    bottom: 0.5rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+    background: rgba(15, 23, 42, 0.8);
+    color: #fff;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    pointer-events: none;
+}
+
+.hydraulic-video-wrap:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: auto;
+    border-radius: 0 !important;
 }
 
 .hydraulic-notes {

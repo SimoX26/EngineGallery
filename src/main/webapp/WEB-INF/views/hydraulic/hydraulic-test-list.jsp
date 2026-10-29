@@ -13,7 +13,7 @@
     <title>Engine Gallery • Prove idrauliche</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=39">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/assets/css/style.css?v=40">
 </head>
 
 <body>
@@ -86,8 +86,18 @@
                         <a class="engine-list-row record-list-card hydraulic-list-row-item"
                            href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}"
                            data-search="${fn:escapeXml(test.customerName)} ${fn:escapeXml(test.engineCode)} ${fn:escapeXml(test.notes)} ${fn:escapeXml(test.createdBy)} ${fn:escapeXml(test.createdAtLabel)} ${test.testDate}">
-                            <div class="engine-image engine-image-empty record-list-card__media d-flex align-items-center justify-content-center">
-                                <span class="engine-image-empty-label">VIDEO</span>
+                            <div class="record-list-card__media hydraulic-list-preview">
+                                <video class="hydraulic-video-preview" muted playsinline preload="none">
+                                    <c:choose>
+                                        <c:when test="${fn:startsWith(test.videoUrl, 'http://') || fn:startsWith(test.videoUrl, 'https://')}">
+                                            <source src="${fn:escapeXml(test.videoUrl)}">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <source src="${pageContext.request.contextPath}/uploads/hydraulic/${fn:escapeXml(test.videoUrl)}">
+                                        </c:otherwise>
+                                    </c:choose>
+                                </video>
+                                <span class="hydraulic-video-badge" aria-hidden="true">Video</span>
                             </div>
                             <div class="engine-list-row__body record-list-card__content">
                                 <div class="record-card__eyebrow">Prova idraulica</div>
@@ -120,7 +130,7 @@
                             <a class="engine-card-link" href="${pageContext.request.contextPath}/hydraulic-test/detail?id=${test.id}">
                             <article class="engine-gallery-card record-gallery-card">
                                 <div class="hydraulic-video-wrap">
-                                    <video class="hydraulic-video" muted playsinline preload="metadata">
+                                    <video class="hydraulic-video hydraulic-video-preview" muted playsinline preload="none">
                                         <c:choose>
                                             <c:when test="${fn:startsWith(test.videoUrl, 'http://') || fn:startsWith(test.videoUrl, 'https://')}">
                                                 <source src="${fn:escapeXml(test.videoUrl)}">
@@ -131,6 +141,7 @@
                                         </c:choose>
                                         Il browser non supporta la riproduzione video.
                                     </video>
+                                    <span class="hydraulic-video-badge" aria-hidden="true">Video</span>
                                 </div>
 
                                 <div class="engine-body record-card__body">
@@ -210,6 +221,32 @@
         applyHydraulicViewMode(sessionStorage.getItem(hydraulicViewStorageKey) || 'gallery');
         if (filterController) {
             filterController.apply();
+        }
+
+        const videoPreviews = document.querySelectorAll('.hydraulic-video-preview');
+        const loadVideoPreview = (video) => {
+            if (video.dataset.previewLoaded) return;
+            video.dataset.previewLoaded = '1';
+            video.addEventListener('loadedmetadata', () => {
+                const seekTo = Number.isFinite(video.duration) && video.duration > 0
+                    ? Math.min(1, video.duration / 2) : 1;
+                try { video.currentTime = seekTo; } catch (ignored) { }
+            }, {once: true});
+            video.preload = 'metadata';
+            video.load();
+        };
+        if ('IntersectionObserver' in window) {
+            const previewObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        loadVideoPreview(entry.target);
+                        previewObserver.unobserve(entry.target);
+                    }
+                });
+            });
+            videoPreviews.forEach((video) => previewObserver.observe(video));
+        } else {
+            videoPreviews.forEach(loadVideoPreview);
         }
     </script>
 

@@ -97,6 +97,20 @@
         }
 
         let currentObjectUrl = null;
+        let previewTime = null;
+        preview.addEventListener('loadedmetadata', () => {
+            if (!preview.paused || preview.currentTime > 0) return;
+            const seekTo = Number.isFinite(preview.duration) && preview.duration > 0
+                ? Math.min(1, preview.duration / 2) : 1;
+            previewTime = seekTo;
+            try { preview.currentTime = seekTo; } catch (ignored) { }
+        });
+        preview.addEventListener('play', () => {
+            if (previewTime !== null && Math.abs(preview.currentTime - previewTime) < 0.05) {
+                preview.currentTime = 0;
+            }
+            previewTime = null;
+        });
 
         const isVideoFile = (file) => {
             if (!file) {
@@ -124,6 +138,7 @@
         };
 
         const showPreviewFile = (file) => {
+            previewTime = null;
             if (!isVideoFile(file)) {
                 cleanupPreviewObjectUrl();
                 preview.pause();
