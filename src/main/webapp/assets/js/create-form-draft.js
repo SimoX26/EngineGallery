@@ -45,6 +45,8 @@
         // La bozza resta disponibile se lo storage locale non è accessibile.
     }
     const key = initialState.active;
+    const submissionToken = form.elements.namedItem('submissionToken');
+    if (submissionToken) submissionToken.value = key;
     const fields = Array.from(form.elements).filter((element) =>
         element.name && !element.closest('[data-draft-dynamic]')
         && !['hidden', 'file', 'submit', 'button'].includes(element.type));
@@ -288,7 +290,10 @@
                 enabledControls.forEach((element) => { element.disabled = true; });
                 const response = await fetch(form.action, {
                     method: 'POST', body, credentials: 'same-origin',
-                    headers: {'X-Engine-Gallery-Draft': '1'}
+                    headers: {
+                        'X-Engine-Gallery-Draft': '1',
+                        'X-Engine-Gallery-Submission': key
+                    }
                 });
                 const isJson = response.headers.get('Content-Type')?.includes('application/json');
                 const result = isJson && response.ok ? await response.json() : null;

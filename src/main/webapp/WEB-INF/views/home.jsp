@@ -24,6 +24,9 @@
     <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
     <div class="container">
+        <c:if test="${param.imageError == '1'}">
+            <div class="alert alert-warning" role="alert">Motore salvato, ma alcune immagini non sono state caricate. Puoi aggiungerle dal dettaglio del motore.</div>
+        </c:if>
         <div class="page-header home-crm-header">
             <p class="home-crm-greeting mb-2 fw-bold">
                 <c:out value="${homeGreeting}" />, <c:out value="${homeUserDisplayName}" />

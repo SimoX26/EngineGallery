@@ -43,6 +43,7 @@
               data-draft-success-param="lockBack"
               class="form-click-guides">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+            <input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>">
 
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold" for="warehouseComponentType">Tipologia componente</label>
@@ -203,7 +204,7 @@
         input.addEventListener('change', renderPreview);
     })();
 </script>
-<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=5"></script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=7"></script>
 
 </body>
 </html>

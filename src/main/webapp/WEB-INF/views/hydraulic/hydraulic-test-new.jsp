@@ -36,6 +36,7 @@
               data-draft-success-param="lockBack"
               class="form-click-guides">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+            <input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>">
             <div class="mb-3">
                 <label class="form-label fw-semibold">Nome cliente</label>
                 <input type="text" name="customerName" class="form-control" value="${customerName}" required>
@@ -153,7 +154,7 @@
         window.addEventListener('pagehide', cleanupPreviewObjectUrl);
     })();
 </script>
-<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=5"></script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=7"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

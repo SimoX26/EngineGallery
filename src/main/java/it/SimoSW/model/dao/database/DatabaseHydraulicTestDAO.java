@@ -62,39 +62,48 @@ public class DatabaseHydraulicTestDAO implements HydraulicTestDAO {
 
     @Override
     public HydraulicTest save(HydraulicTest hydraulicTest) {
-        try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        HydraulicTest saved = null;
+        boolean committed = false;
+        try (Connection conn = ConnectionFactory.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, hydraulicTest.getCustomerName());
-            stmt.setString(2, hydraulicTest.getEngineCode());
-            stmt.setString(3, hydraulicTest.getVideoUrl());
-            stmt.setDate(4, Date.valueOf(hydraulicTest.getTestDate()));
-            stmt.setString(5, hydraulicTest.getNotes());
-            stmt.setString(6, hydraulicTest.getCreatedBy());
+                stmt.setString(1, hydraulicTest.getCustomerName());
+                stmt.setString(2, hydraulicTest.getEngineCode());
+                stmt.setString(3, hydraulicTest.getVideoUrl());
+                stmt.setDate(4, Date.valueOf(hydraulicTest.getTestDate()));
+                stmt.setString(5, hydraulicTest.getNotes());
+                stmt.setString(6, hydraulicTest.getCreatedBy());
 
-            stmt.executeUpdate();
+                stmt.executeUpdate();
 
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    long generatedId = rs.getLong(1);
-                    return new HydraulicTest(
-                            generatedId,
-                            hydraulicTest.getCustomerName(),
-                            hydraulicTest.getEngineCode(),
-                            hydraulicTest.getVideoUrl(),
-                            hydraulicTest.getTestDate(),
-                            hydraulicTest.getNotes(),
-                            null,
-                            hydraulicTest.getCreatedBy()
-                    );
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (!rs.next()) {
+                        throw new SQLException("ID generato non disponibile dopo il salvataggio della prova idraulica");
+                    }
+                    saved = new HydraulicTest(
+                            rs.getLong(1), hydraulicTest.getCustomerName(), hydraulicTest.getEngineCode(),
+                            hydraulicTest.getVideoUrl(), hydraulicTest.getTestDate(), hydraulicTest.getNotes(),
+                            null, hydraulicTest.getCreatedBy());
+                    conn.commit();
+                    committed = true;
+                    return saved;
                 }
+            } catch (SQLException | RuntimeException ex) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackError) {
+                    ex.addSuppressed(rollbackError);
+                }
+                throw ex;
             }
-
         } catch (SQLException e) {
+            if (committed) {
+                LOGGER.log(Level.WARNING, "Connessione chiusa con errore dopo il salvataggio della prova idraulica", e);
+                return saved;
+            }
             throw new RuntimeException("Errore durante il salvataggio della prova idraulica", e);
         }
-
-        throw new RuntimeException("ID generato non disponibile dopo il salvataggio della prova idraulica");
     }
 
     @Override

@@ -100,14 +100,14 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 machineId = controller.createMachine(request.getParameter("name"), request.getParameter("model"),
                         request.getParameter("serialNumber"), request.getParameter("location"),
                         date(request.getParameter("purchaseDate")), integer(request, "usageHours"));
-                if (image != null && !saveImageOrRedirect(request, response, machineId, image)) return;
+                if (image != null && !saveImageOrRedirect(request, response, machineId, image, true)) return;
             } else if ("updateMachine".equals(action)) {
                 Part image = checkedImage(request);
                 machineId = longValue(request, "machineId");
                 controller.updateMachine(machineId, request.getParameter("name"), request.getParameter("model"),
                         request.getParameter("serialNumber"), request.getParameter("location"),
                         date(request.getParameter("purchaseDate")), request.getParameter("status"), integer(request, "usageHours"));
-                if (image != null && !saveImageOrRedirect(request, response, machineId, image)) return;
+                if (image != null && !saveImageOrRedirect(request, response, machineId, image, false)) return;
             } else if ("recordIntervention".equals(action)) {
                 HttpSession session = request.getSession(false);
                 User user = session == null ? null : (User) session.getAttribute("loggedUser");
@@ -145,7 +145,8 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
         return image;
     }
 
-    private boolean saveImageOrRedirect(HttpServletRequest request, HttpServletResponse response, long id, Part image) throws IOException {
+    private boolean saveImageOrRedirect(HttpServletRequest request, HttpServletResponse response,
+                                        long id, Part image, boolean created) throws IOException {
         Path directory = UploadPathResolver.resolveWorkshopMachineUploadBase(getServletContext()).resolve(String.valueOf(id));
         String filename = null;
         try {
@@ -161,7 +162,9 @@ public class WorkshopMaintenanceServlet extends HttpServlet {
                 try { Files.deleteIfExists(directory.resolve(filename)); }
                 catch (IOException ignored) { }
             }
-            response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view=edit&id=" + id + "&imageError=1");
+            response.sendRedirect(request.getContextPath() + "/workshop-maintenance?view="
+                    + (created ? "detail" : "edit") + "&id=" + id + "&imageError=1"
+                    + (created ? "&saved=1" : ""));
             return false;
         }
     }

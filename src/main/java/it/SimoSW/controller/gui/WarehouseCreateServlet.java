@@ -65,31 +65,32 @@ public class WarehouseCreateServlet extends HttpServlet {
         bindFormData(request, componentType, name, sku, quantityParam, location, notes);
         request.setAttribute("componentTypes", selectableComponentTypes());
 
+        Long id;
         try {
             Integer quantity = parseQuantity(quantityParam);
-            Long id = warehouseController.createItem(
+            id = warehouseController.createItem(
                     componentType, name, sku, quantity, location, notes, resolveLoggedUsername(request));
-            applyImageAdditions(request, id);
-            activityAuditLogger.logFromRequest(
-                    request,
-                    UserActivityActionType.CREATE,
-                    UserActivityEntityType.WAREHOUSE_ITEM,
-                    String.valueOf(id),
-                    "aggiunta articolo magazzino " + safeTrim(name)
-            );
-            PostSubmitNavigationGuard.blockFormPageOnce(
-                    request,
-                    "/warehouse/new",
-                    "/warehouse/detail?id=" + id + "&lockBack=1&navHome=1"
-            );
-            response.sendRedirect(request.getContextPath() + "/warehouse/detail?id=" + id + "&lockBack=1&navHome=1");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-new.jsp").forward(request, response);
+            return;
         } catch (RuntimeException ex) {
             request.setAttribute("error", "Errore durante il salvataggio dell'articolo");
             request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-new.jsp").forward(request, response);
+            return;
         }
+        String destination = request.getContextPath() + "/warehouse/detail?id=" + id + "&lockBack=1&navHome=1";
+        response.setHeader("X-Engine-Gallery-Saved-Redirect", destination);
+        activityAuditLogger.logFromRequest(request, UserActivityActionType.CREATE,
+                UserActivityEntityType.WAREHOUSE_ITEM, String.valueOf(id),
+                "aggiunta articolo magazzino " + safeTrim(name));
+        try {
+            applyImageAdditions(request, id);
+        } catch (IOException | ServletException | RuntimeException ex) {
+            destination += "&imageError=1";
+        }
+        PostSubmitNavigationGuard.blockFormPageOnce(request, "/warehouse/new", destination);
+        response.sendRedirect(destination);
     }
 
     private static void bindFormData(HttpServletRequest request,

@@ -99,8 +99,9 @@ public class HydraulicTestCreateServlet extends HttpServlet {
             return;
         }
 
+        HydraulicTest createdTest;
         try {
-            HydraulicTest createdTest = hydraulicTestController.createHydraulicTest(
+            createdTest = hydraulicTestController.createHydraulicTest(
                     customerName,
                     engineCode,
                     finalFilename,
@@ -108,19 +109,6 @@ public class HydraulicTestCreateServlet extends HttpServlet {
                     notes,
                     resolveLoggedUsername(request)
             );
-            activityAuditLogger.logFromRequest(
-                    request,
-                    UserActivityActionType.CREATE,
-                    UserActivityEntityType.HYDRAULIC_TEST,
-                    String.valueOf(createdTest.getId()),
-                    "aggiunta prova idraulica " + engineCode
-            );
-            PostSubmitNavigationGuard.blockFormPageOnce(
-                    request,
-                    "/hydraulic-test/new",
-                    "/hydraulic-test/list?lockBack=1"
-            );
-            response.sendRedirect(request.getContextPath() + "/hydraulic-test/list?lockBack=1");
         } catch (RuntimeException ex) {
             try {
                 HydraulicVideoStorage.deleteIfLocal(getServletContext(), finalFilename);
@@ -130,7 +118,23 @@ public class HydraulicTestCreateServlet extends HttpServlet {
             request.setAttribute("error", "Errore durante il salvataggio della prova idraulica.");
             request.getRequestDispatcher("/WEB-INF/views/hydraulic/hydraulic-test-new.jsp")
                     .forward(request, response);
+            return;
         }
+        String destination = request.getContextPath() + "/hydraulic-test/list?lockBack=1";
+        response.setHeader("X-Engine-Gallery-Saved-Redirect", destination);
+        activityAuditLogger.logFromRequest(
+                request,
+                UserActivityActionType.CREATE,
+                UserActivityEntityType.HYDRAULIC_TEST,
+                String.valueOf(createdTest.getId()),
+                "aggiunta prova idraulica " + engineCode
+        );
+        PostSubmitNavigationGuard.blockFormPageOnce(
+                request,
+                "/hydraulic-test/new",
+                "/hydraulic-test/list?lockBack=1"
+        );
+        response.sendRedirect(destination);
     }
 
     private boolean isBlank(String value) {

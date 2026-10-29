@@ -52,6 +52,7 @@
               data-draft-require-backup="true"
               enctype="multipart/form-data">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+            <input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>">
 
 
             <div class="mb-4 text-start">
@@ -533,5 +534,5 @@
         updateDot();
     })();
 </script>
-<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=6"></script>
+<script src="<%= request.getContextPath() %>/assets/js/create-form-draft.js?v=7"></script>
 </html>

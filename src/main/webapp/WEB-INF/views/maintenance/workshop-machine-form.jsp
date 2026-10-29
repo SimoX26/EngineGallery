@@ -28,6 +28,7 @@
               data-draft-success="${pageContext.request.contextPath}/workshop-maintenance"
               data-draft-success-param="saved">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+            <c:if test="${empty machine}"><input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>"></c:if>
             <input type="hidden" name="action" value="${empty machine ? 'createMachine' : 'updateMachine'}">
             <c:if test="${not empty machine}"><input type="hidden" name="machineId" value="${machine.id}"></c:if>
             <div class="col-md-6">
@@ -110,6 +111,6 @@
         input.form.addEventListener('draftrestored', updatePreview);
     })();
 </script>
-<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=5"></script>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=7"></script>
 </body>
 </html>

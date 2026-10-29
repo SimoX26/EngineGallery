@@ -26,6 +26,9 @@
 </c:url>
 
 <div class="container my-4 detail-has-mobile-actions record-detail-page">
+    <c:if test="${param.imageError == '1'}">
+        <div class="alert alert-warning" role="alert">Articolo salvato, ma alcune immagini non sono state caricate. Puoi aggiungerle da Modifica articolo.</div>
+    </c:if>
     <c:if test="${updated}">
         <div class="alert alert-success" role="alert">
             Modifiche salvate correttamente.

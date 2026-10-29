@@ -22,6 +22,7 @@
         <form method="post" action="${pageContext.request.contextPath}/vehicles" class="row g-3">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
             <input type="hidden" name="action" value="${empty event ? 'createEvent' : 'updateEvent'}">
+            <c:if test="${empty event}"><input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>"></c:if>
             <input type="hidden" name="id" value="${vehicle.id}">
             <c:if test="${not empty event}"><input type="hidden" name="eventId" value="${event.id}"></c:if>
             <c:set var="currentType" value="${not empty error ? param.type : event.type}"/>

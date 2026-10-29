@@ -86,6 +86,12 @@ public class UploadServlet extends HttpServlet {
             doPostSafe(request, response);
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Errore durante il salvataggio upload motore", ex);
+            if (request.getAttribute("createdEngineRef") != null) {
+                String destination = request.getContextPath() + "/home?lockBack=1&navHome=1&imageError=1";
+                response.setHeader("X-Engine-Gallery-Saved-Redirect", destination);
+                response.sendRedirect(destination);
+                return;
+            }
             request.setAttribute("error", "Errore durante il salvataggio. Riprova.");
             request.setAttribute("engineMode", Optional.ofNullable(request.getParameter("engineMode")).orElse("new"));
             request.setAttribute("engineRef", Optional.ofNullable(request.getParameter("engineRef")).orElse(""));
@@ -269,6 +275,7 @@ public class UploadServlet extends HttpServlet {
                 engineRef = retryRef;
             }
             session.removeAttribute(SESSION_PENDING_NEW_ENGINE_REF);
+            request.setAttribute("createdEngineRef", engineRef);
 
             activityAuditLogger.logFromRequest(
                     request,
@@ -319,6 +326,7 @@ public class UploadServlet extends HttpServlet {
         );
         String destination = request.getContextPath() + "/home?lockBack=1&navHome=1";
         if ("1".equals(request.getHeader("X-Engine-Gallery-Draft"))) {
+            response.setHeader("X-Engine-Gallery-Saved-Redirect", destination);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"saved\":true,\"redirect\":\"" + destination + "\"}");
         } else {

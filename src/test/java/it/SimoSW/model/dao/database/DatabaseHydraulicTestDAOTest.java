@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DatabaseHydraulicTestDAOTest {
@@ -42,6 +44,8 @@ class DatabaseHydraulicTestDAOTest {
 
     @AfterEach
     void tearDown() throws Exception {
+        HydraulicTestDriver.generatedKeyAvailable = false;
+        HydraulicTestDriver.failConnectionClose = false;
         System.setProperty(ConnectionFactory.DB_URL_PROP, "jdbc:testdb:hydraulic");
         System.setProperty(ConnectionFactory.DB_USER_PROP, "valid-user");
         System.setProperty(ConnectionFactory.DB_PASSWORD_PROP, "valid-password");
@@ -82,6 +86,38 @@ class DatabaseHydraulicTestDAOTest {
         assertTrue(test.isEmpty());
     }
 
+    @Test
+    void saveRollsBackWhenGeneratedKeyIsUnavailable() throws Exception {
+        System.setProperty(ConnectionFactory.DB_URL_PROP, "jdbc:testdb:hydraulic");
+        System.setProperty(ConnectionFactory.DB_USER_PROP, "valid-user");
+        System.setProperty(ConnectionFactory.DB_PASSWORD_PROP, "valid-password");
+        resetSingleton();
+        HydraulicTestDriver.commits.set(0);
+        HydraulicTestDriver.rollbacks.set(0);
+
+        HydraulicTest test = new HydraulicTest("Cliente", "MTR-001", "video.mp4",
+                LocalDate.of(2026, 10, 29), null, "simone");
+        assertThrows(RuntimeException.class, () -> new DatabaseHydraulicTestDAO().save(test));
+        assertEquals(0, HydraulicTestDriver.commits.get());
+        assertEquals(1, HydraulicTestDriver.rollbacks.get());
+    }
+
+    @Test
+    void saveKeepsSuccessWhenConnectionCloseFailsAfterCommit() throws Exception {
+        System.setProperty(ConnectionFactory.DB_URL_PROP, "jdbc:testdb:hydraulic");
+        System.setProperty(ConnectionFactory.DB_USER_PROP, "valid-user");
+        System.setProperty(ConnectionFactory.DB_PASSWORD_PROP, "valid-password");
+        resetSingleton();
+        HydraulicTestDriver.commits.set(0);
+        HydraulicTestDriver.generatedKeyAvailable = true;
+        HydraulicTestDriver.failConnectionClose = true;
+
+        HydraulicTest test = new HydraulicTest("Cliente", "MTR-001", "video.mp4",
+                LocalDate.of(2026, 10, 29), null, "simone");
+        assertEquals(31L, new DatabaseHydraulicTestDAO().save(test).getId());
+        assertEquals(1, HydraulicTestDriver.commits.get());
+    }
+
     private static void resetSingleton() throws Exception {
         Field instanceField = ConnectionFactory.class.getDeclaredField("instance");
         instanceField.setAccessible(true);
@@ -89,6 +125,10 @@ class DatabaseHydraulicTestDAOTest {
     }
 
     private static final class HydraulicTestDriver implements Driver {
+        private static final AtomicInteger commits = new AtomicInteger();
+        private static final AtomicInteger rollbacks = new AtomicInteger();
+        private static boolean generatedKeyAvailable;
+        private static boolean failConnectionClose;
         private static final List<Map<String, Object>> FIND_ALL_ROWS = List.of(
                 row(1L, "Cliente valido", "MTR-001", "video1.mp4", LocalDate.of(2026, 6, 1), "ok"),
                 row(2L, "Cliente rotto", "MTR-002", "video2.mp4", null, "broken")
@@ -114,7 +154,16 @@ class DatabaseHydraulicTestDAOTest {
                             String sql = String.valueOf(args[0]);
                             return createPreparedStatement(sql);
                         }
+                        if ("commit".equals(name)) {
+                            commits.incrementAndGet();
+                            return null;
+                        }
+                        if ("rollback".equals(name)) {
+                            rollbacks.incrementAndGet();
+                            return null;
+                        }
                         if ("close".equals(name)) {
+                            if (failConnectionClose) throw new SQLException("Close failed after commit");
                             return null;
                         }
                         if ("isClosed".equals(name)) {
@@ -154,6 +203,9 @@ class DatabaseHydraulicTestDAOTest {
                                     : FIND_ALL_ROWS;
                             return createResultSet(rows);
                         }
+                        if ("executeUpdate".equals(name)) return 1;
+                        if ("getGeneratedKeys".equals(name)) return createResultSet(
+                                generatedKeyAvailable ? List.of(Map.of("1", 31L)) : List.of());
                         if ("close".equals(name)) {
                             return null;
                         }

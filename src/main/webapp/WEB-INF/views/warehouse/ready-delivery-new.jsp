@@ -22,6 +22,7 @@
               data-draft-success="${pageContext.request.contextPath}/ready-delivery"
               data-draft-success-param="saved">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+            <input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>">
             <input type="hidden" name="action" value="create">
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold" for="ready-engine-code">Codice motore</label>
@@ -80,6 +81,6 @@
         form.addEventListener('draftrestored', updatePreview);
     })();
 </script>
-<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=5"></script>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=7"></script>
 </body>
 </html>

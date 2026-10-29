@@ -15,6 +15,7 @@
 <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 <main class="container pt-4 pb-5 workshop-maintenance-page workshop-has-fab">
     <c:if test="${param.saved == '1'}"><div class="alert alert-success" role="status">Dati salvati.</div></c:if>
+    <c:if test="${param.imageError == '1'}"><div class="alert alert-warning" role="alert">Macchinario salvato, ma la foto non è stata caricata. Puoi aggiungerla da Modifica.</div></c:if>
     <c:if test="${not empty error}"><div class="alert alert-danger" role="alert"><c:out value="${error}"/></div></c:if>
 
     <section class="card-base mb-4" aria-label="Anagrafica del macchinario">

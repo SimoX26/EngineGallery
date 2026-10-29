@@ -20,6 +20,7 @@
         <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/vehicles" class="form-click-guides">
             <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
             <input type="hidden" name="action" value="${empty vehicle ? 'createVehicle' : 'updateVehicle'}">
+            <c:if test="${empty vehicle}"><input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>"></c:if>
             <c:if test="${not empty vehicle}"><input type="hidden" name="id" value="${vehicle.id}"></c:if>
             <div class="mb-3 text-start">
                 <label class="form-label fw-semibold" for="plate">Targa</label>

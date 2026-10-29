@@ -116,6 +116,7 @@
                       data-draft-success="${pageContext.request.contextPath}/workshop-maintenance"
                       data-draft-success-param="saved">
                     <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
+                    <input type="hidden" name="submissionToken" value="<%= java.util.UUID.randomUUID() %>">
                     <input type="hidden" name="action" value="createPlan">
                     <input type="hidden" name="month" value="${calendarMonth}">
                     <input type="hidden" name="day" value="${selectedDate}">
@@ -150,7 +151,7 @@
 <c:if test="${not empty error}">
     <script>bootstrap.Modal.getOrCreateInstance(document.getElementById('programPlanModal')).show();</script>
 </c:if>
-<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=5"></script>
+<script src="${pageContext.request.contextPath}/assets/js/create-form-draft.js?v=7"></script>
 <script>
     document.querySelector('.workshop-calendar-fab').addEventListener('click', (event) => {
         const dateInput = document.getElementById('plan-date');
