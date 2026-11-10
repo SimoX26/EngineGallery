@@ -188,7 +188,11 @@ echo ">> Upload/media root remoto: ${UPLOAD_ROOT_REMOTE}"
 
 sshpass -e ssh -p "$PORT" "$TARGET_SSH" "test -d $(squote "$UPLOAD_ROOT_REMOTE")"
 
-echo ">> Eseguo dump database remoto: ${DB_NAME}"
+if [[ -n "$DB_NAME" ]]; then
+  echo ">> Eseguo dump database remoto: ${DB_NAME}"
+else
+  echo ">> Eseguo dump database remoto (nome dalla configurazione runtime)"
+fi
 sshpass -e ssh -p "$PORT" "$TARGET_SSH" \
   "DB_NAME_OVERRIDE=$(squote "$DB_NAME") DB_USER_OVERRIDE=$(squote "$DB_USER") bash -s" > "$DB_DUMP_FILE" <<'REMOTE'
 set -euo pipefail
@@ -220,6 +224,27 @@ extract_env() {
   fi
 }
 
+parse_db_name_from_url() {
+  local url="$1"
+  if [[ "$url" != jdbc:mysql://* ]]; then
+    return 1
+  fi
+
+  local host_and_path="${url#jdbc:mysql://}"
+  local host="${host_and_path%%/*}"
+  if [[ -z "$host" || "$host_and_path" == "$host" ]]; then
+    return 1
+  fi
+
+  local name="${host_and_path#*/}"
+  name="${name%%\?*}"
+  if [[ -z "$name" || "$name" == */* ]]; then
+    return 1
+  fi
+
+  printf '%s' "$name"
+}
+
 DB_URL="$(extract_prop 'enginegallery\.db\.url')"
 DB_USER_FROM_PROP="$(extract_prop 'enginegallery\.db\.user')"
 DB_PASS_FROM_PROP="$(extract_prop 'enginegallery\.db\.password')"
@@ -238,7 +263,10 @@ DB_NAME_EFFECTIVE="${DB_NAME_OVERRIDE:-}"
 DB_USER_EFFECTIVE="${DB_USER_OVERRIDE:-}"
 
 if [[ -z "$DB_NAME_EFFECTIVE" && -n "$DB_URL" ]]; then
-  DB_NAME_EFFECTIVE="$(printf '%s' "$DB_URL" | sed -E 's#^[^:]+://[^/]+/([^?]+).*$#\1#')"
+  if ! DB_NAME_EFFECTIVE="$(parse_db_name_from_url "$DB_URL")"; then
+    echo "Errore: URL JDBC MySQL non valido nella configurazione runtime." >&2
+    exit 1
+  fi
 fi
 if [[ -z "$DB_NAME_EFFECTIVE" ]]; then
   DB_NAME_EFFECTIVE="engine_gallery"

@@ -272,10 +272,35 @@ function readCurrentLightboxImageUrl() {
 }
 
 async function shareCurrentImageOnly() {
+    if (document.getElementById('engineShareStatusPanel')) return;
     const currentUrl = readCurrentLightboxImageUrl();
     const normalizedUrls = normalizeImageUrls(currentUrl ? [currentUrl] : []);
+    if (!normalizedUrls.length) {
+        showShareMessage('Immagine corrente non condivisibile.');
+        return;
+    }
+    if (window.AndroidShareBridge) {
+        const files = await buildShareFiles(normalizedUrls);
+        await shareFilesOnly(files, 'Immagine corrente non condivisibile.');
+        return;
+    }
+    const panel = createShareStatusPanel();
+    panel.downloadLink.href = normalizedUrls[0];
+    panel.downloadLink.download = getFileNameFromUrl(normalizedUrls[0], 'immagine-motore.jpg');
+    panel.downloadLink.textContent = 'Scarica foto';
+    panel.downloadLink.classList.remove('d-none');
+    panel.message.textContent = 'Preparo la foto…';
     const files = await buildShareFiles(normalizedUrls);
-    await shareFilesOnly(files, 'Immagine corrente non condivisibile.');
+    if (panel.cancelled) return;
+    if (!files.length) {
+        panel.message.textContent = 'Impossibile preparare la foto per la condivisione. Puoi provare a scaricarla.';
+        return;
+    }
+    if (typeof navigator.share !== 'function') {
+        panel.message.textContent = 'Il browser non supporta la condivisione di foto. Puoi scaricarla e allegarla manualmente.';
+        return;
+    }
+    offerPreparedImageBatches(files, panel);
 }
 
 function createShareStatusPanel() {
@@ -294,16 +319,18 @@ function createShareStatusPanel() {
     const shareButton = document.createElement('button');
     shareButton.type = 'button';
     shareButton.className = 'btn btn-primary d-none';
+    const downloadLink = document.createElement('a');
+    downloadLink.className = 'btn btn-outline-primary d-none';
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'btn btn-outline-secondary';
     closeButton.textContent = 'Chiudi';
-    const state = {panel, message, shareButton, cancelled: false};
+    const state = {panel, message, shareButton, downloadLink, cancelled: false};
     closeButton.addEventListener('click', () => {
         state.cancelled = true;
         panel.remove();
     });
-    actions.append(shareButton, closeButton);
+    actions.append(shareButton, downloadLink, closeButton);
     panel.append(message, actions);
     document.body.appendChild(panel);
     return state;
@@ -315,12 +342,12 @@ function offerPreparedImageBatches(files, panel) {
     const {message, shareButton} = panel;
     const update = (prefix = '') => {
         if (nextIndex >= files.length) {
-            message.textContent = 'Tutte le foto sono state passate all’app di condivisione.';
+            message.textContent = 'Foto passate all’app scelta. Se Outlook non si apre, scaricale e allegale manualmente.';
             shareButton.classList.add('d-none');
             return;
         }
         const last = Math.min(nextIndex + preferredBatchSize, files.length);
-        message.textContent = prefix + `Foto ${nextIndex + 1}–${last} di ${files.length} pronte. Tocca il pulsante per scegliere WhatsApp.`;
+        message.textContent = prefix + `Foto ${nextIndex + 1}–${last} di ${files.length} pronte. Scegli l’app con cui condividerle oppure scaricale.`;
         shareButton.textContent = `Condividi foto ${nextIndex + 1}–${last}`;
         shareButton.classList.remove('d-none');
     };
@@ -333,7 +360,7 @@ function offerPreparedImageBatches(files, panel) {
             batch = files.slice(nextIndex, nextIndex + size);
         }
         if (!isFileShareSupported(batch)) {
-            message.textContent = 'Questo browser non può condividere le foto come allegati.';
+            message.textContent = 'Questo browser non può condividere le foto come allegati. Puoi scaricarle e allegarle manualmente.';
             shareButton.classList.add('d-none');
             return;
         }
@@ -352,14 +379,14 @@ function offerPreparedImageBatches(files, panel) {
         }).catch((error) => {
             if (error?.name !== 'AbortError') {
                 if (batch.length > 1) preferredBatchSize = Math.max(1, Math.floor(batch.length / 2));
-                update('Condivisione non riuscita. Riprova con un gruppo più piccolo. ');
+                update('Condivisione non riuscita. Riprova con un gruppo più piccolo oppure scarica le foto. ');
             }
         }).finally(() => { shareButton.disabled = false; });
     });
     update();
 }
 
-async function shareAllMotorImages(imageUrls) {
+async function shareAllMotorImages(imageUrls, downloadUrl) {
     if (document.getElementById('engineShareStatusPanel')) return;
     const normalizedUrls = normalizeImageUrls(imageUrls);
     if (!normalizedUrls.length) {
@@ -380,18 +407,22 @@ async function shareAllMotorImages(imageUrls) {
     }
 
     const panel = createShareStatusPanel();
+    if (downloadUrl) {
+        panel.downloadLink.href = downloadUrl;
+        panel.downloadLink.textContent = 'Scarica tutte le foto (ZIP)';
+        panel.downloadLink.classList.remove('d-none');
+    }
     panel.message.textContent = `Preparo 0 di ${normalizedUrls.length} foto…`;
     const files = await buildShareFiles(normalizedUrls, (done, total) => {
         panel.message.textContent = `Preparo ${done} di ${total} foto…`;
     }, () => panel.cancelled);
     if (panel.cancelled) return;
     if (files.length !== normalizedUrls.length) {
-        panel.message.textContent = `Preparazione incompleta: ${files.length} foto su ${normalizedUrls.length}. Chiudi e riprova.`;
+        panel.message.textContent = `Preparazione incompleta: ${files.length} foto su ${normalizedUrls.length}. Puoi scaricare lo ZIP o riprovare.`;
         return;
     }
     if (typeof navigator.share !== 'function') {
-        panel.remove();
-        offerDesktopDownload(files);
+        panel.message.textContent = 'Il browser non supporta la condivisione di foto. Scarica lo ZIP per allegarle manualmente.';
         return;
     }
     offerPreparedImageBatches(files, panel);
@@ -427,7 +458,7 @@ function initializeShareDelegation() {
                 await shareCurrentImageOnly();
                 return;
             }
-            await shareAllMotorImages(imageUrls);
+            await shareAllMotorImages(imageUrls, trigger.getAttribute('data-download-url'));
         } finally {
             trigger.disabled = false;
         }

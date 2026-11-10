@@ -396,12 +396,16 @@
                         <path d="M8 7l1 12h6l1-12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
                     </svg>
                 </a>
+                <c:url var="engineImagesDownloadUrl" value="/engine/images/download">
+                    <c:param name="ref" value="${detail.engine.engineRef}" />
+                </c:url>
                 <button
                         type="button"
                         class="share-icon-btn engine-detail-round-btn engine-detail-round-btn--share js-engine-share-btn"
                         aria-label="Condividi scheda tecnica"
                         title="Condividi scheda tecnica"
                         data-share-mode="all-motor-images"
+                        data-download-url="<c:out value='${engineImagesDownloadUrl}'/>"
                         data-share-source="#engineDetailGallery"
                         data-image-selector=".clickable-image">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -551,6 +555,7 @@
                         aria-label="Condividi scheda tecnica"
                         title="Condividi scheda tecnica"
                         data-share-mode="all-motor-images"
+                        data-download-url="<c:out value='${engineImagesDownloadUrl}'/>"
                         data-share-source="#engineDetailGallery"
                         data-image-selector=".clickable-image">
                     Condividi
@@ -677,7 +682,7 @@
         contextPath: '<%= request.getContextPath() %>'
     };
 </script>
-<script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js?v=4"></script>
+<script type="module" src="<%= request.getContextPath() %>/assets/js/engine-detail-viewer.js?v=5"></script>
 
 </body>
 </html>
