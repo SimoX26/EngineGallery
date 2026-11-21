@@ -6,7 +6,7 @@
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
 <c:set var="canViewStatistics" value="${requestScope.canViewStatistics}" />
 <c:set var="canViewWarehouse" value="${requestScope.canViewWarehouse}" />
-<c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
+<c:set var="canViewEngineArchive" value="${sessionScope.loggedUser != null}" />
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/form-image-preview.css?v=1">
 <script src="${pageContext.request.contextPath}/assets/js/form-image-preview.js?v=1" defer></script>

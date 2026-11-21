@@ -16,7 +16,7 @@
 <body>
 
 <c:set var="loggedRole" value="${sessionScope.loggedUser != null ? sessionScope.loggedUser.role : null}" />
-<c:set var="canViewEngineArchive" value="${loggedRole == 'ADMIN'}" />
+<c:set var="canViewEngineArchive" value="${sessionScope.loggedUser != null}" />
 
 <jsp:include page="/WEB-INF/views/includes/FAB.jsp"/>
 
