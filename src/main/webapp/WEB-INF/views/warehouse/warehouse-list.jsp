@@ -268,7 +268,7 @@
             else params.delete('department');
             params.delete('categoryId');
             const query = params.toString();
-            window.location.href = `${window.location.pathname}${query ? `?${query}` : ''}#warehouse-items`;
+            window.location.href = window.location.pathname + (query ? '?' + query : '') + '#warehouse-items';
         });
     });
 
