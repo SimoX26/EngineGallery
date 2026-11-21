@@ -15,7 +15,6 @@ final class WarehouseFormData {
 
     static void bindOptions(HttpServletRequest request, WarehouseController controller) {
         request.setAttribute("categories", controller.getCategories());
-        request.setAttribute("locations", controller.getLocations());
     }
 
     static WarehouseDetails read(HttpServletRequest request) {

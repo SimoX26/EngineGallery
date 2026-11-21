@@ -1,7 +1,6 @@
 package it.SimoSW.model.dao.database;
 
 import it.SimoSW.model.WarehouseCategory;
-import it.SimoSW.model.WarehouseLocation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,16 +32,6 @@ public class DatabaseWarehouseCatalogDAO {
         } catch (SQLException e) { throw new RuntimeException("Errore nel caricamento della categoria", e); }
     }
 
-    public List<WarehouseLocation> locations() {
-        List<WarehouseLocation> result = new ArrayList<>();
-        try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT code FROM warehouse_locations ORDER BY code");
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) result.add(new WarehouseLocation(rs.getString("code")));
-        } catch (SQLException e) { throw new RuntimeException("Errore nel caricamento delle ubicazioni", e); }
-        return result;
-    }
-
     public void addCategory(String department, String name, boolean injectorFields) {
         execute("INSERT INTO warehouse_categories (department, name, injector_fields) VALUES (?, ?, ?)", department, name, injectorFields);
     }
@@ -61,22 +50,6 @@ public class DatabaseWarehouseCatalogDAO {
             }
         } catch (SQLException e) { throw new RuntimeException("Errore nel controllo della categoria", e); }
         execute("DELETE FROM warehouse_categories WHERE id = ?", id);
-    }
-
-    public void addLocation(WarehouseLocation location) {
-        execute("INSERT INTO warehouse_locations (code, shelf, level_code, container_code) VALUES (?, ?, ?, ?)",
-                location.getCode(), "", "", "");
-    }
-
-    public void deleteLocation(String code) {
-        try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement check = conn.prepareStatement("SELECT COUNT(*) FROM warehouse_items WHERE location = ?")) {
-            check.setString(1, code);
-            try (ResultSet rs = check.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) throw new IllegalArgumentException("Ubicazione in uso: sposta prima gli articoli");
-            }
-        } catch (SQLException e) { throw new RuntimeException("Errore nel controllo dell'ubicazione", e); }
-        execute("DELETE FROM warehouse_locations WHERE code = ?", code);
     }
 
     private void execute(String sql, Object... values) {

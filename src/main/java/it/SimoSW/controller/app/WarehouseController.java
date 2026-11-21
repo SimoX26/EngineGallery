@@ -5,7 +5,6 @@ import it.SimoSW.model.WarehouseComponentType;
 import it.SimoSW.model.WarehouseImage;
 import it.SimoSW.model.WarehouseDetails;
 import it.SimoSW.model.WarehouseCategory;
-import it.SimoSW.model.WarehouseLocation;
 import it.SimoSW.model.WarehouseCompatibility;
 import it.SimoSW.model.dao.WarehouseItemDAO;
 import it.SimoSW.model.dao.WarehouseImageDAO;
@@ -31,7 +30,6 @@ public class WarehouseController {
     }
 
     public List<WarehouseCategory> getCategories() { return catalogDAO.categories(); }
-    public List<WarehouseLocation> getLocations() { return catalogDAO.locations(); }
 
     public void addCategory(String department, String name, boolean injectorFields) {
         if (department == null || !Set.of("Alimentazione", "Motori", "Distribuzione", "Altri ricambi").contains(department))
@@ -45,12 +43,6 @@ public class WarehouseController {
     }
 
     public void deleteCategory(Long id) { catalogDAO.deleteCategory(id); }
-
-    public void addLocation(String code) {
-        catalogDAO.addLocation(new WarehouseLocation(limitedRequired(code, 120, "Ubicazione obbligatoria")));
-    }
-
-    public void deleteLocation(String code) { catalogDAO.deleteLocation(limitedRequired(code, 120, "Ubicazione obbligatoria")); }
 
     public List<WarehouseItem> getAllItems() {
         return warehouseItemDAO.findAll();

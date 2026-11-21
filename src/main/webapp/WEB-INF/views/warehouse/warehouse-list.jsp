@@ -70,7 +70,7 @@
                                 <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterSku">Codice ricambio</label><input id="warehouseFilterSku" class="form-control" name="sku" value="<c:out value='${param.sku}'/>"></div>
                                 <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterEngine">Codice motore</label><input id="warehouseFilterEngine" class="form-control" name="engineCode" value="<c:out value='${param.engineCode}'/>"></div>
                                 <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterCondition">Condizione</label><input id="warehouseFilterCondition" class="form-control" name="condition" value="<c:out value='${param.condition}'/>"></div>
-                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterLocation">Ubicazione</label><input id="warehouseFilterLocation" class="form-control" name="location" list="warehouseFilterLocations" value="<c:out value='${param.location}'/>"><datalist id="warehouseFilterLocations"><c:forEach var="loc" items="${locations}"><option value="<c:out value='${loc.code}'/>"></option></c:forEach></datalist></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterLocation">Ubicazione</label><input id="warehouseFilterLocation" class="form-control" name="location" value="<c:out value='${param.location}'/>"></div>
                                 <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterLot">Lotto</label><input id="warehouseFilterLot" class="form-control" name="lotCode" value="<c:out value='${param.lotCode}'/>"></div>
                             </div>
                         </div>
@@ -128,8 +128,8 @@
         </div>
     </div>
 
-    <section class="warehouse-overview" aria-label="Reparti e ubicazioni del magazzino">
-        <nav class="warehouse-overview__grid" aria-label="Reparti e ubicazioni del magazzino">
+    <section class="warehouse-overview" aria-label="Reparti del magazzino">
+        <nav class="warehouse-overview__grid" aria-label="Reparti del magazzino">
             <a class="warehouse-overview__card ${param.department == 'Alimentazione' ? 'is-active' : ''}" href="<c:out value='${warehouseFuelUrl}'/>#warehouse-items" aria-current="${param.department == 'Alimentazione' ? 'page' : 'false'}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M4 9h10M3 21h13M14 7l3 2v7a2 2 0 0 0 4 0v-5l-3-3"/></svg>
                 <span class="warehouse-overview__card-title">Alimentazione</span>
@@ -149,11 +149,6 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5ZM3 7l9 5 9-5M12 12v10"/></svg>
                 <span class="warehouse-overview__card-title">Altri ricambi</span>
                 <span class="warehouse-overview__description">Turbocompressori e componenti vari</span>
-            </a>
-            <a class="warehouse-overview__card warehouse-overview__card--wide" href="#warehouse-locations-title">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-                <span class="warehouse-overview__card-title">Ubicazioni</span>
-                <span class="warehouse-overview__description">Posizioni fisiche del magazzino</span>
             </a>
         </nav>
     </section>
@@ -312,11 +307,11 @@
     applyWarehouseViewMode(sessionStorage.getItem(warehouseViewStorageKey) || 'gallery');
     const warehouseConfig = document.getElementById('warehouse-config');
     const openWarehouseConfig = () => {
-        if (window.location.hash === '#warehouse-config' || window.location.hash === '#warehouse-locations-title') {
+        if (window.location.hash === '#warehouse-config') {
             warehouseConfig.open = true;
         }
     };
-    document.querySelectorAll('a[href="#warehouse-config"], a[href="#warehouse-locations-title"]').forEach(link => {
+    document.querySelectorAll('a[href="#warehouse-config"]').forEach(link => {
         link.addEventListener('click', () => { warehouseConfig.open = true; });
     });
     window.addEventListener('hashchange', openWarehouseConfig);

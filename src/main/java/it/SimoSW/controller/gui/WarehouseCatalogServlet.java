@@ -28,8 +28,6 @@ public class WarehouseCatalogServlet extends HttpServlet {
                     "on".equals(request.getParameter("injectorFields")));
             else if ("renameCategory".equals(action)) controller.renameCategory(parseId(request.getParameter("id")), request.getParameter("name"));
             else if ("deleteCategory".equals(action)) controller.deleteCategory(parseId(request.getParameter("id")));
-            else if ("addLocation".equals(action)) controller.addLocation(request.getParameter("code"));
-            else if ("deleteLocation".equals(action)) controller.deleteLocation(request.getParameter("code"));
             else throw new IllegalArgumentException("Operazione non valida");
             request.getSession().setAttribute("warehouseCatalogMessage", "Configurazione aggiornata.");
         } catch (IllegalArgumentException ex) {

@@ -36,11 +36,7 @@
 </div>
 <div class="mb-3 text-start">
     <label class="form-label fw-semibold" for="warehouseLocation">Ubicazione</label>
-    <input id="warehouseLocation" class="form-control" name="location" list="warehouseLocations" maxlength="120" value="<c:out value='${location}'/>" required>
-    <datalist id="warehouseLocations">
-        <c:forEach var="configuredLocation" items="${locations}"><option value="<c:out value='${configuredLocation.code}'/>"></option></c:forEach>
-    </datalist>
-    <div class="form-text">Configura gli scaffali dalla pagina Magazzino.</div>
+    <input id="warehouseLocation" class="form-control" name="location" maxlength="120" value="<c:out value='${location}'/>" required>
 </div>
 <div class="mb-3 text-start">
     <label class="form-label fw-semibold" for="warehouseLotCode">Lotto di provenienza</label>

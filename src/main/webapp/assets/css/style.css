@@ -3851,8 +3851,7 @@ body.modal-open {
     letter-spacing: -0.025em;
 }
 
-#warehouse-config,
-#warehouse-locations-title {
+#warehouse-config {
     scroll-margin-top: calc(var(--nav-menu-offset) + 1rem);
 }
 
