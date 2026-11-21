@@ -21,14 +21,13 @@
 <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
 <div class="container section-add-page">
-    <c:url var="warehouseAllUrl" value="/warehouse/list"/>
     <c:url var="warehouseFuelUrl" value="/warehouse/list"><c:param name="department" value="Alimentazione"/></c:url>
     <c:url var="warehouseEngineUrl" value="/warehouse/list"><c:param name="department" value="Motori"/></c:url>
     <c:url var="warehouseTimingUrl" value="/warehouse/list"><c:param name="department" value="Distribuzione"/></c:url>
     <c:url var="warehouseOtherUrl" value="/warehouse/list"><c:param name="department" value="Altri ricambi"/></c:url>
 
     <div class="page-header-with-search warehouse-list-header" id="warehouse-items">
-        <div class="page-header"><h2 class="mb-0">Tutti i ricambi</h2></div>
+        <div class="page-header"><h2 class="mb-0">Magazzino</h2></div>
 
         <div class="search-panel-compact">
             <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
@@ -129,15 +128,7 @@
         </div>
     </div>
 
-    <section class="warehouse-overview" aria-labelledby="warehouse-overview-title">
-        <h1 class="warehouse-overview__title" id="warehouse-overview-title">Magazzino</h1>
-        <a class="warehouse-overview__summary ${empty param.department ? 'is-active' : ''}" href="<c:out value='${warehouseAllUrl}'/>#warehouse-items" aria-current="${empty param.department ? 'page' : 'false'}">
-            <span class="warehouse-overview__heading">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                Panoramica generale
-            </span>
-            <span class="warehouse-overview__description">Tutti i ricambi, ricerca globale, disponibilità e lotti</span>
-        </a>
+    <section class="warehouse-overview" aria-label="Reparti e ubicazioni del magazzino">
         <nav class="warehouse-overview__grid" aria-label="Reparti e ubicazioni del magazzino">
             <a class="warehouse-overview__card ${param.department == 'Alimentazione' ? 'is-active' : ''}" href="<c:out value='${warehouseFuelUrl}'/>#warehouse-items" aria-current="${param.department == 'Alimentazione' ? 'page' : 'false'}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M4 9h10M3 21h13M14 7l3 2v7a2 2 0 0 0 4 0v-5l-3-3"/></svg>
@@ -162,7 +153,7 @@
             <a class="warehouse-overview__card warehouse-overview__card--wide" href="#warehouse-locations-title">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
                 <span class="warehouse-overview__card-title">Ubicazioni</span>
-                <span class="warehouse-overview__description">Scaffali, ripiani, contenitori e posizioni fisiche</span>
+                <span class="warehouse-overview__description">Posizioni fisiche del magazzino</span>
             </a>
         </nav>
     </section>

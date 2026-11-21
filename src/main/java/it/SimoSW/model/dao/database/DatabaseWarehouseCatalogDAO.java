@@ -36,9 +36,9 @@ public class DatabaseWarehouseCatalogDAO {
     public List<WarehouseLocation> locations() {
         List<WarehouseLocation> result = new ArrayList<>();
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT shelf, level_code, container_code FROM warehouse_locations ORDER BY code");
+             PreparedStatement stmt = conn.prepareStatement("SELECT code FROM warehouse_locations ORDER BY code");
              ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) result.add(new WarehouseLocation(rs.getString("shelf"), rs.getString("level_code"), rs.getString("container_code")));
+            while (rs.next()) result.add(new WarehouseLocation(rs.getString("code")));
         } catch (SQLException e) { throw new RuntimeException("Errore nel caricamento delle ubicazioni", e); }
         return result;
     }
@@ -65,7 +65,7 @@ public class DatabaseWarehouseCatalogDAO {
 
     public void addLocation(WarehouseLocation location) {
         execute("INSERT INTO warehouse_locations (code, shelf, level_code, container_code) VALUES (?, ?, ?, ?)",
-                location.getCode(), location.getShelf(), location.getLevel(), location.getContainer());
+                location.getCode(), "", "", "");
     }
 
     public void deleteLocation(String code) {

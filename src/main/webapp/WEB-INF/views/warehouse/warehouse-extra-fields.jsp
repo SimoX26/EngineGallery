@@ -35,7 +35,7 @@
     <input id="warehouseCondition" class="form-control" name="condition" maxlength="80" value="<c:out value='${details.condition}'/>" required>
 </div>
 <div class="mb-3 text-start">
-    <label class="form-label fw-semibold" for="warehouseLocation">Ubicazione (scaffale-ripiano-contenitore)</label>
+    <label class="form-label fw-semibold" for="warehouseLocation">Ubicazione</label>
     <input id="warehouseLocation" class="form-control" name="location" list="warehouseLocations" maxlength="120" value="<c:out value='${location}'/>" required>
     <datalist id="warehouseLocations">
         <c:forEach var="configuredLocation" items="${locations}"><option value="<c:out value='${configuredLocation.code}'/>"></option></c:forEach>

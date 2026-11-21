@@ -44,10 +44,8 @@
             <form method="post" action="${pageContext.request.contextPath}/warehouse/catalog" class="row g-2 align-items-end mb-3">
                 <input type="hidden" name="csrfToken" value="${sessionScope.csrf_token}">
                 <input type="hidden" name="action" value="addLocation">
-                <div class="col-4 col-sm-3"><label class="form-label small" for="newShelf">Scaffale</label><input id="newShelf" class="form-control" name="shelf" maxlength="40" placeholder="A" required></div>
-                <div class="col-4 col-sm-3"><label class="form-label small" for="newLevel">Ripiano</label><input id="newLevel" class="form-control" name="level" maxlength="40" placeholder="02" required></div>
-                <div class="col-4 col-sm-3"><label class="form-label small" for="newContainer">Contenitore</label><input id="newContainer" class="form-control" name="container" maxlength="40" placeholder="03" required></div>
-                <div class="col-12 col-sm-3"><button class="btn btn-outline-secondary w-100" type="submit">Aggiungi</button></div>
+                <div class="col-8 col-sm-9"><label class="form-label small" for="newLocation">Ubicazione</label><input id="newLocation" class="form-control" name="code" maxlength="120" placeholder="Es. A-02-03" required></div>
+                <div class="col-4 col-sm-3"><button class="btn btn-outline-secondary w-100" type="submit">Aggiungi</button></div>
             </form>
             <c:if test="${empty locations}"><p class="small text-muted">Nessuna ubicazione configurata.</p></c:if>
             <div class="d-grid gap-2">

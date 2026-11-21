@@ -86,7 +86,7 @@ public class EngineListServlet extends HttpServlet {
         request.setAttribute("customerNames", customerNames);
 
         request.setAttribute("archiveMode", archiveMode);
-        request.setAttribute("pageTitle", archiveMode ? "Archivio motori" : "Lista motori");
+        request.setAttribute("pageTitle", archiveMode ? "Archivio motori" : "Motori clienti");
 
         request.setAttribute("filterEngineCode", engineCode == null ? "" : engineCode);
         request.setAttribute("filterStatus", statusParam == null ? "" : statusParam);
