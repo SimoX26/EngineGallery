@@ -55,12 +55,6 @@ public class WarehouseListServlet extends HttpServlet {
                     .toList());
             request.setAttribute("selectedComponentType", selectedComponentType == null ? "" : selectedComponentType.name());
             request.setAttribute("selectedComponentTypeLabel", selectedComponentType == null ? "" : selectedComponentType.getLabel());
-            Object message = request.getSession().getAttribute("warehouseCatalogMessage");
-            Object catalogError = request.getSession().getAttribute("warehouseCatalogError");
-            request.setAttribute("catalogMessage", message);
-            request.setAttribute("catalogError", catalogError);
-            request.getSession().removeAttribute("warehouseCatalogMessage");
-            request.getSession().removeAttribute("warehouseCatalogError");
         } catch (Exception e) {
             request.setAttribute("error", "Errore durante il caricamento del magazzino");
         }

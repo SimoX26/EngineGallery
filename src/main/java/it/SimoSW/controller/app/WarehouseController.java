@@ -31,19 +31,6 @@ public class WarehouseController {
 
     public List<WarehouseCategory> getCategories() { return catalogDAO.categories(); }
 
-    public void addCategory(String department, String name, boolean injectorFields) {
-        if (department == null || !Set.of("Alimentazione", "Motori", "Distribuzione", "Altri ricambi").contains(department))
-            throw new IllegalArgumentException("Reparto non valido");
-        catalogDAO.addCategory(department, limitedRequired(name, 100, "Nome categoria obbligatorio"), injectorFields);
-    }
-
-    public void renameCategory(Long id, String name) {
-        if (catalogDAO.category(id).isEmpty()) throw new IllegalArgumentException("Categoria non trovata");
-        catalogDAO.renameCategory(id, limitedRequired(name, 100, "Nome categoria obbligatorio"));
-    }
-
-    public void deleteCategory(Long id) { catalogDAO.deleteCategory(id); }
-
     public List<WarehouseItem> getAllItems() {
         return warehouseItemDAO.findAll();
     }

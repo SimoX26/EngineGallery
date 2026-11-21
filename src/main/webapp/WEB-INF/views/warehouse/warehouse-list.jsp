@@ -92,7 +92,6 @@
                         id="warehouseFiltersToggle">
                     Filtri
                 </button>
-                <a class="btn btn-outline-secondary btn-sm ms-2" href="#warehouse-config">Configura</a>
             </div>
 
             <div class="page-header-actions page-header-actions--view">
@@ -244,7 +243,6 @@
             </a>
         </c:forEach>
     </div>
-    <jsp:include page="warehouse-config.jsp"/>
 </div>
 
 <a class="section-add-fab" href="<%= request.getContextPath() %>/warehouse/new">
@@ -305,17 +303,6 @@
     warehouseViewListBtn.addEventListener('click', () => applyWarehouseViewMode('list'));
     warehouseViewGalleryBtn.addEventListener('click', () => applyWarehouseViewMode('gallery'));
     applyWarehouseViewMode(sessionStorage.getItem(warehouseViewStorageKey) || 'gallery');
-    const warehouseConfig = document.getElementById('warehouse-config');
-    const openWarehouseConfig = () => {
-        if (window.location.hash === '#warehouse-config') {
-            warehouseConfig.open = true;
-        }
-    };
-    document.querySelectorAll('a[href="#warehouse-config"]').forEach(link => {
-        link.addEventListener('click', () => { warehouseConfig.open = true; });
-    });
-    window.addEventListener('hashchange', openWarehouseConfig);
-    openWarehouseConfig();
     if (filterController) {
         filterController.apply();
     }

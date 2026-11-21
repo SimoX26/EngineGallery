@@ -3851,10 +3851,6 @@ body.modal-open {
     letter-spacing: -0.025em;
 }
 
-#warehouse-config {
-    scroll-margin-top: calc(var(--nav-menu-offset) + 1rem);
-}
-
 @media (max-width: 575px) {
     .warehouse-overview__grid {
         grid-template-columns: 1fr;
