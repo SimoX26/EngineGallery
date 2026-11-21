@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=41">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=42">
 </head>
 
 <body>
@@ -21,11 +21,6 @@
 <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
 <div class="container section-add-page">
-    <c:url var="warehouseFuelUrl" value="/warehouse/list"><c:param name="department" value="Alimentazione"/></c:url>
-    <c:url var="warehouseEngineUrl" value="/warehouse/list"><c:param name="department" value="Motori"/></c:url>
-    <c:url var="warehouseTimingUrl" value="/warehouse/list"><c:param name="department" value="Distribuzione"/></c:url>
-    <c:url var="warehouseOtherUrl" value="/warehouse/list"><c:param name="department" value="Altri ricambi"/></c:url>
-
     <div class="page-header-with-search warehouse-list-header" id="warehouse-items">
         <div class="page-header"><h2 class="mb-0">Magazzino</h2></div>
 
@@ -36,6 +31,13 @@
                    class="form-control"
                    placeholder="cerca..."
                    value="<c:out value='${param.keyword}'/>">
+            <div class="warehouse-quick-filters mt-3" aria-label="Filtra per reparto">
+                <button type="button" class="warehouse-quick-filter ${empty param.department ? 'is-active' : ''}" data-department-filter="">Tutti</button>
+                <button type="button" class="warehouse-quick-filter ${param.department == 'Alimentazione' ? 'is-active' : ''}" data-department-filter="Alimentazione">Alimentazione</button>
+                <button type="button" class="warehouse-quick-filter ${param.department == 'Motori' ? 'is-active' : ''}" data-department-filter="Motori">Motori</button>
+                <button type="button" class="warehouse-quick-filter ${param.department == 'Distribuzione' ? 'is-active' : ''}" data-department-filter="Distribuzione">Distribuzione</button>
+                <button type="button" class="warehouse-quick-filter ${param.department == 'Altri ricambi' ? 'is-active' : ''}" data-department-filter="Altri ricambi">Altri ricambi</button>
+            </div>
             <div class="modal fade filters-modal" id="warehouseFiltersModal" tabindex="-1" aria-labelledby="warehouseFiltersModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <form class="modal-content" method="get" action="${pageContext.request.contextPath}/warehouse/list">
@@ -53,14 +55,6 @@
                                 </c:forEach>
                             </select>
                             <div class="row g-2 mt-1">
-                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterDepartment">Reparto</label>
-                                    <select id="warehouseFilterDepartment" name="department" class="form-select">
-                                        <option value="">Tutti i reparti</option>
-                                        <option value="Alimentazione" ${param.department == 'Alimentazione' ? 'selected' : ''}>Alimentazione</option>
-                                        <option value="Motori" ${param.department == 'Motori' ? 'selected' : ''}>Motori</option>
-                                        <option value="Distribuzione" ${param.department == 'Distribuzione' ? 'selected' : ''}>Distribuzione</option>
-                                        <option value="Altri ricambi" ${param.department == 'Altri ricambi' ? 'selected' : ''}>Altri ricambi</option>
-                                    </select></div>
                                 <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterCategory">Categoria</label>
                                     <select id="warehouseFilterCategory" name="categoryId" class="form-select">
                                         <option value="">Tutte le categorie</option>
@@ -126,31 +120,6 @@
 
         </div>
     </div>
-
-    <section class="warehouse-overview" aria-label="Reparti del magazzino">
-        <nav class="warehouse-overview__grid" aria-label="Reparti del magazzino">
-            <a class="warehouse-overview__card ${param.department == 'Alimentazione' ? 'is-active' : ''}" href="<c:out value='${warehouseFuelUrl}'/>#warehouse-items" aria-current="${param.department == 'Alimentazione' ? 'page' : 'false'}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M4 9h10M3 21h13M14 7l3 2v7a2 2 0 0 0 4 0v-5l-3-3"/></svg>
-                <span class="warehouse-overview__card-title">Alimentazione</span>
-                <span class="warehouse-overview__description">Iniettori, rail, pompe</span>
-            </a>
-            <a class="warehouse-overview__card ${param.department == 'Motori' ? 'is-active' : ''}" href="<c:out value='${warehouseEngineUrl}'/>#warehouse-items" aria-current="${param.department == 'Motori' ? 'page' : 'false'}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5a5 5 0 0 0-6 6L3 16a2 2 0 0 0 3 3l5-5a5 5 0 0 0 6-6l-3 3-3-3 3-3Z"/></svg>
-                <span class="warehouse-overview__card-title">Motori</span>
-                <span class="warehouse-overview__description">Testate, alberi motore, pistoni</span>
-            </a>
-            <a class="warehouse-overview__card ${param.department == 'Distribuzione' ? 'is-active' : ''}" href="<c:out value='${warehouseTimingUrl}'/>#warehouse-items" aria-current="${param.department == 'Distribuzione' ? 'page' : 'false'}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m10 2-.5 2.2-2.1 1.2-2.1-.7-2 3.4 1.6 1.6v2.5L3.3 14l2 3.4 2.1-.7 2.1 1.2L10 20h4l.5-2.1 2.1-1.2 2.1.7 2-3.4-1.6-1.8V9.7L20.7 8l-2-3.4-2.1.7-2.1-1.2L14 2h-4Z"/></svg>
-                <span class="warehouse-overview__card-title">Distribuzione</span>
-                <span class="warehouse-overview__description">Componenti della distribuzione</span>
-            </a>
-            <a class="warehouse-overview__card ${param.department == 'Altri ricambi' ? 'is-active' : ''}" href="<c:out value='${warehouseOtherUrl}'/>#warehouse-items" aria-current="${param.department == 'Altri ricambi' ? 'page' : 'false'}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5ZM3 7l9 5 9-5M12 12v10"/></svg>
-                <span class="warehouse-overview__card-title">Altri ricambi</span>
-                <span class="warehouse-overview__description">Turbocompressori e componenti vari</span>
-            </a>
-        </nav>
-    </section>
 
     <div id="warehouseKeywordEmptyState" class="system-empty-state mb-3 ${empty items ? '' : 'd-none'}" role="status">
         Nessun articolo da mostrare.
@@ -289,6 +258,18 @@
 
     warehouseFiltersResetBtn.addEventListener('click', () => {
         window.location.assign(window.location.pathname);
+    });
+
+    document.querySelectorAll('[data-department-filter]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const params = new URLSearchParams(window.location.search);
+            const department = button.dataset.departmentFilter;
+            if (department) params.set('department', department);
+            else params.delete('department');
+            params.delete('categoryId');
+            const query = params.toString();
+            window.location.href = `${window.location.pathname}${query ? `?${query}` : ''}#warehouse-items`;
+        });
     });
 
     const applyWarehouseViewMode = (mode) => {
