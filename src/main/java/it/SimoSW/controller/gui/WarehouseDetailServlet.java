@@ -38,6 +38,13 @@ public class WarehouseDetailServlet extends HttpServlet {
         }
 
         request.setAttribute("item", itemOpt.get());
+        if (itemOpt.get().getDetails() != null && itemOpt.get().getDetails().getLotCode() != null) {
+            String lotCode = itemOpt.get().getDetails().getLotCode();
+            request.setAttribute("lotItems", warehouseController.getAllItems().stream()
+                    .filter(other -> !other.getId().equals(itemId) && other.getDetails() != null
+                            && lotCode.equalsIgnoreCase(other.getDetails().getLotCode()))
+                    .toList());
+        }
         request.setAttribute("itemImages", warehouseController.findImagesByItemId(itemId));
         request.setAttribute("updated", "1".equals(request.getParameter("updated")));
         request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-detail.jsp").forward(request, response);

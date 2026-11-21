@@ -110,7 +110,8 @@
                 <input type="text"
                        name="sku"
                        class="form-control"
-                       value="${sku}">
+                       value="${sku}"
+                       required>
             </div>
 
             <div class="mb-3 text-start">
@@ -123,13 +124,7 @@
                        required>
             </div>
 
-            <div class="mb-3 text-start">
-                <label class="form-label fw-semibold">Ubicazione</label>
-                <input type="text"
-                       name="location"
-                       class="form-control"
-                       value="${location}">
-            </div>
+            <jsp:include page="warehouse-extra-fields.jsp"/>
 
             <div class="mb-4 text-start">
                 <label class="form-label fw-semibold">Note</label>

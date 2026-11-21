@@ -54,6 +54,12 @@
                 <dt>Tipologia:</dt>
                 <dd><c:out value="${item.componentType.label}" default="Non classificato" /></dd>
 
+                <dt>Reparto:</dt>
+                <dd><c:out value="${item.details.department}" default="—" /></dd>
+
+                <dt>Categoria:</dt>
+                <dd><c:out value="${item.details.categoryName}" default="—" /></dd>
+
                 <dt>Nome:</dt>
                 <dd><c:out value="${item.name}" default="—" /></dd>
 
@@ -66,10 +72,50 @@
                 <dt>Ubicazione:</dt>
                 <dd><c:out value="${item.location}" default="—" /></dd>
 
+                <dt>Produttore:</dt>
+                <dd><c:out value="${item.details.manufacturer}" default="—" /></dd>
+
+                <dt>Codice OE:</dt>
+                <dd><c:out value="${item.details.oeCode}" default="—" /></dd>
+
+                <dt>Codici alternativi:</dt>
+                <dd><c:out value="${item.details.alternativeCodes}" default="—" /></dd>
+
+                <dt>Condizione:</dt>
+                <dd><c:out value="${item.details.condition}" default="—" /></dd>
+
+                <dt>Lotto:</dt>
+                <dd><c:out value="${item.details.lotCode}" default="—" /></dd>
+
+                <dt>Motore di provenienza:</dt>
+                <dd><c:out value="${item.details.sourceEngineCode}" default="—" /></dd>
+
+                <dt>Note tecniche:</dt>
+                <dd class="record-detail-notes"><c:out value="${item.details.technicalNotes}" default="—" /></dd>
+
+                <c:if test="${item.details.injectorCategory}">
+                    <dt>Codice produttore:</dt><dd><c:out value="${item.details.manufacturerCode}" default="—"/></dd>
+                    <dt>Codice calibrazione:</dt><dd><c:out value="${item.details.calibrationCode}" default="—"/></dd>
+                    <dt>Cilindro di provenienza:</dt><dd><c:out value="${item.details.sourceCylinder}" default="—"/></dd>
+                    <dt>Stato del collaudo:</dt><dd><c:out value="${item.details.testStatus}" default="—"/></dd>
+                    <dt>Stato della revisione:</dt><dd><c:out value="${item.details.revisionStatus}" default="—"/></dd>
+                </c:if>
+
+                <dt>Motori compatibili:</dt>
+                <dd><c:forEach var="compatibility" items="${item.details.compatibilities}" varStatus="status"><c:if test="${!status.first}">, </c:if><c:out value="${compatibility.engineCode}"/> (${compatibility.verified ? 'verificata' : 'da verificare'})</c:forEach></dd>
+
                 <dt>Note:</dt>
                 <dd class="record-detail-notes"><c:out value="${item.notes}" default="—" /></dd>
             </dl>
         </div>
+        <c:if test="${not empty lotItems}">
+            <section class="record-detail-panel mt-4" aria-labelledby="warehouse-lot-items-title">
+                <h2 class="mb-3" id="warehouse-lot-items-title">Altri componenti del lotto</h2>
+                <ul class="mb-0"><c:forEach var="lotItem" items="${lotItems}">
+                    <li><a href="${pageContext.request.contextPath}/warehouse/detail?id=${lotItem.id}"><c:out value="${lotItem.name}"/></a> · <c:out value="${lotItem.quantity}"/> pz · <c:out value="${lotItem.location}"/></li>
+                </c:forEach></ul>
+            </section>
+        </c:if>
         <div id="warehouseShareMedia" class="d-none"><c:forEach var="image" items="${itemImages}"><span data-media-url="<%= request.getContextPath() %>/uploads/warehouse/${item.id}/${fn:escapeXml(image.filename)}"></span></c:forEach></div>
 
         <c:if test="${not empty itemImages}">

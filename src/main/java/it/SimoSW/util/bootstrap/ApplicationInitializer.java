@@ -64,7 +64,7 @@ public class ApplicationInitializer {
                 userActivityLogDAO
         );
 
-        this.warehouseController = new WarehouseController(warehouseItemDAO, warehouseImageDAO);
+        this.warehouseController = new WarehouseController(warehouseItemDAO, warehouseImageDAO, new DatabaseWarehouseCatalogDAO());
         this.hydraulicTestController = new HydraulicTestController(hydraulicTestDAO);
         this.userActivityLogController = new UserActivityLogController(userActivityLogDAO);
         this.catalogController = new CatalogController(catalogItemDAO);

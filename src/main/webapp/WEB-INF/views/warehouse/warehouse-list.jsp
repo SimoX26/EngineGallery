@@ -13,7 +13,7 @@
     <title>Engine Gallery • Magazzino</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=39">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=40">
 </head>
 
 <body>
@@ -21,9 +21,55 @@
 <jsp:include page="/WEB-INF/views/includes/nav-menu.jsp"/>
 
 <div class="container section-add-page">
+    <c:url var="warehouseAllUrl" value="/warehouse/list"/>
+    <c:url var="warehouseFuelUrl" value="/warehouse/list"><c:param name="department" value="Alimentazione"/></c:url>
+    <c:url var="warehouseEngineUrl" value="/warehouse/list"><c:param name="department" value="Motori"/></c:url>
+    <c:url var="warehouseTimingUrl" value="/warehouse/list"><c:param name="department" value="Distribuzione"/></c:url>
+    <c:url var="warehouseOtherUrl" value="/warehouse/list"><c:param name="department" value="Altri ricambi"/></c:url>
 
-    <div class="page-header-with-search">
-        <div class="page-header"><h1 class="mb-0">Magazzino</h1></div>
+    <section class="warehouse-overview" aria-labelledby="warehouse-overview-title">
+        <h1 class="warehouse-overview__title" id="warehouse-overview-title">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20V7l9-4 9 4v13H3ZM7 20V10h10v10M7 14h10M7 17h10"/></svg>
+            Magazzino
+        </h1>
+        <a class="warehouse-overview__summary ${empty param.department ? 'is-active' : ''}" href="<c:out value='${warehouseAllUrl}'/>#warehouse-items" aria-current="${empty param.department ? 'page' : 'false'}">
+            <span class="warehouse-overview__heading">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Panoramica generale
+            </span>
+            <span class="warehouse-overview__description">Tutti i ricambi, ricerca globale, disponibilità e lotti</span>
+        </a>
+        <nav class="warehouse-overview__grid" aria-label="Reparti e ubicazioni del magazzino">
+            <a class="warehouse-overview__card ${param.department == 'Alimentazione' ? 'is-active' : ''}" href="<c:out value='${warehouseFuelUrl}'/>#warehouse-items" aria-current="${param.department == 'Alimentazione' ? 'page' : 'false'}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M4 9h10M3 21h13M14 7l3 2v7a2 2 0 0 0 4 0v-5l-3-3"/></svg>
+                <span class="warehouse-overview__card-title">Alimentazione</span>
+                <span class="warehouse-overview__description">Iniettori, rail, pompe</span>
+            </a>
+            <a class="warehouse-overview__card ${param.department == 'Motori' ? 'is-active' : ''}" href="<c:out value='${warehouseEngineUrl}'/>#warehouse-items" aria-current="${param.department == 'Motori' ? 'page' : 'false'}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5a5 5 0 0 0-6 6L3 16a2 2 0 0 0 3 3l5-5a5 5 0 0 0 6-6l-3 3-3-3 3-3Z"/></svg>
+                <span class="warehouse-overview__card-title">Motori</span>
+                <span class="warehouse-overview__description">Testate, alberi motore, pistoni</span>
+            </a>
+            <a class="warehouse-overview__card ${param.department == 'Distribuzione' ? 'is-active' : ''}" href="<c:out value='${warehouseTimingUrl}'/>#warehouse-items" aria-current="${param.department == 'Distribuzione' ? 'page' : 'false'}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m10 2-.5 2.2-2.1 1.2-2.1-.7-2 3.4 1.6 1.6v2.5L3.3 14l2 3.4 2.1-.7 2.1 1.2L10 20h4l.5-2.1 2.1-1.2 2.1.7 2-3.4-1.6-1.8V9.7L20.7 8l-2-3.4-2.1.7-2.1-1.2L14 2h-4Z"/></svg>
+                <span class="warehouse-overview__card-title">Distribuzione</span>
+                <span class="warehouse-overview__description">Componenti della distribuzione</span>
+            </a>
+            <a class="warehouse-overview__card ${param.department == 'Altri ricambi' ? 'is-active' : ''}" href="<c:out value='${warehouseOtherUrl}'/>#warehouse-items" aria-current="${param.department == 'Altri ricambi' ? 'page' : 'false'}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5ZM3 7l9 5 9-5M12 12v10"/></svg>
+                <span class="warehouse-overview__card-title">Altri ricambi</span>
+                <span class="warehouse-overview__description">Turbocompressori e componenti vari</span>
+            </a>
+            <a class="warehouse-overview__card warehouse-overview__card--wide" href="#warehouse-locations-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <span class="warehouse-overview__card-title">Ubicazioni</span>
+                <span class="warehouse-overview__description">Scaffali, ripiani, contenitori e posizioni fisiche</span>
+            </a>
+        </nav>
+    </section>
+
+    <div class="page-header-with-search warehouse-list-header" id="warehouse-items">
+        <div class="page-header"><h2 class="mb-0">Tutti i ricambi</h2></div>
 
         <div class="search-panel-compact">
             <label for="warehouseKeywordSearch" class="form-label fw-semibold mb-2">Ricerca per parola chiave</label>
@@ -33,7 +79,7 @@
                    placeholder="cerca..."
                    value="<c:out value='${param.keyword}'/>">
             <div class="modal fade filters-modal" id="warehouseFiltersModal" tabindex="-1" aria-labelledby="warehouseFiltersModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <form class="modal-content" method="get" action="${pageContext.request.contextPath}/warehouse/list">
                         <input type="hidden" id="warehouseFiltersKeywordInput" name="keyword" value="<c:out value='${param.keyword}'/>">
                         <div class="modal-header">
@@ -48,6 +94,27 @@
                                     <option value="${type.code}" ${selectedComponentType == type.code ? 'selected' : ''}><c:out value="${type.label}" /></option>
                                 </c:forEach>
                             </select>
+                            <div class="row g-2 mt-1">
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterDepartment">Reparto</label>
+                                    <select id="warehouseFilterDepartment" name="department" class="form-select">
+                                        <option value="">Tutti i reparti</option>
+                                        <option value="Alimentazione" ${param.department == 'Alimentazione' ? 'selected' : ''}>Alimentazione</option>
+                                        <option value="Motori" ${param.department == 'Motori' ? 'selected' : ''}>Motori</option>
+                                        <option value="Distribuzione" ${param.department == 'Distribuzione' ? 'selected' : ''}>Distribuzione</option>
+                                        <option value="Altri ricambi" ${param.department == 'Altri ricambi' ? 'selected' : ''}>Altri ricambi</option>
+                                    </select></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterCategory">Categoria</label>
+                                    <select id="warehouseFilterCategory" name="categoryId" class="form-select">
+                                        <option value="">Tutte le categorie</option>
+                                        <c:forEach var="category" items="${categories}"><option value="${category.id}" ${param.categoryId == category.id ? 'selected' : ''}><c:out value="${category.department}"/> · <c:out value="${category.name}"/></option></c:forEach>
+                                    </select></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterManufacturer">Produttore</label><input id="warehouseFilterManufacturer" class="form-control" name="manufacturer" value="<c:out value='${param.manufacturer}'/>"></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterSku">Codice ricambio</label><input id="warehouseFilterSku" class="form-control" name="sku" value="<c:out value='${param.sku}'/>"></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterEngine">Codice motore</label><input id="warehouseFilterEngine" class="form-control" name="engineCode" value="<c:out value='${param.engineCode}'/>"></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterCondition">Condizione</label><input id="warehouseFilterCondition" class="form-control" name="condition" value="<c:out value='${param.condition}'/>"></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterLocation">Ubicazione</label><input id="warehouseFilterLocation" class="form-control" name="location" list="warehouseFilterLocations" value="<c:out value='${param.location}'/>"><datalist id="warehouseFilterLocations"><c:forEach var="loc" items="${locations}"><option value="<c:out value='${loc.code}'/>"></option></c:forEach></datalist></div>
+                                <div class="col-12 col-sm-6"><label class="form-label small mb-1" for="warehouseFilterLot">Lotto</label><input id="warehouseFilterLot" class="form-control" name="lotCode" value="<c:out value='${param.lotCode}'/>"></div>
+                            </div>
                         </div>
                         <div class="modal-footer filters-modal-footer">
                             <button type="button" id="warehouseFiltersResetBtn" class="btn btn-sm filters-btn-secondary">Rimuovi filtri</button>
@@ -67,6 +134,7 @@
                         id="warehouseFiltersToggle">
                     Filtri
                 </button>
+                <a class="btn btn-outline-secondary btn-sm ms-2" href="#warehouse-config">Configura</a>
             </div>
 
             <div class="page-header-actions page-header-actions--view">
@@ -115,7 +183,7 @@
             <c:set var="previewFilename" value="${previewImages[item.id]}"/>
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="engine-list-row record-list-card warehouse-list-row-item"
-               data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
+               data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.details.searchText)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
                 <c:choose>
                     <c:when test="${not empty previewFilename}">
                         <img class="record-list-card__media warehouse-preview-image warehouse-preview-image--list"
@@ -129,7 +197,7 @@
                     </c:otherwise>
                 </c:choose>
                 <div class="engine-list-row__body record-list-card__content">
-                    <div class="record-card__eyebrow"><c:out value="${item.componentType.label}" /> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
+                    <div class="record-card__eyebrow"><c:out value="${item.details.department}" default="Magazzino"/> · <c:out value="${item.details.categoryName}" default="${item.componentType.label}"/> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
                     <div class="engine-list-row__main record-card__title"><c:out value="${item.name}" /></div>
                     <div class="record-card__facts">
                         <span class="record-card__fact"><strong>Quantità</strong> <c:out value="${item.quantity}" /></span>
@@ -155,7 +223,7 @@
             <c:set var="previewFilename" value="${previewImages[item.id]}"/>
             <a href="<%= request.getContextPath() %>/warehouse/detail?id=${item.id}"
                class="customer-card-link warehouse-card-item"
-               data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
+               data-search="${fn:escapeXml(item.componentType.label)} ${fn:escapeXml(item.details.searchText)} ${fn:escapeXml(item.name)} ${fn:escapeXml(item.sku)} ${fn:escapeXml(item.location)} ${item.quantity} ${fn:escapeXml(item.notes)} ${fn:escapeXml(item.createdBy)} ${fn:escapeXml(item.createdAtLabel)}">
                 <article class="record-gallery-card">
                     <c:choose>
                         <c:when test="${not empty previewFilename}">
@@ -170,7 +238,7 @@
                         </c:otherwise>
                     </c:choose>
                     <div class="record-card__body">
-                        <div class="record-card__eyebrow"><c:out value="${item.componentType.label}" /> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
+                        <div class="record-card__eyebrow"><c:out value="${item.details.department}" default="Magazzino"/> · <c:out value="${item.details.categoryName}" default="${item.componentType.label}"/> · Codice <c:out value="${item.sku}" default="non disponibile" /></div>
                         <div class="record-card__title"><c:out value="${item.name}" /></div>
                         <div class="record-card__facts">
                             <span class="record-card__fact"><strong>Quantità</strong> <c:out value="${item.quantity}" /></span>
@@ -193,6 +261,7 @@
             </a>
         </c:forEach>
     </div>
+    <jsp:include page="warehouse-config.jsp"/>
 </div>
 
 <a class="section-add-fab" href="<%= request.getContextPath() %>/warehouse/new">
@@ -253,6 +322,17 @@
     warehouseViewListBtn.addEventListener('click', () => applyWarehouseViewMode('list'));
     warehouseViewGalleryBtn.addEventListener('click', () => applyWarehouseViewMode('gallery'));
     applyWarehouseViewMode(sessionStorage.getItem(warehouseViewStorageKey) || 'gallery');
+    const warehouseConfig = document.getElementById('warehouse-config');
+    const openWarehouseConfig = () => {
+        if (window.location.hash === '#warehouse-config' || window.location.hash === '#warehouse-locations-title') {
+            warehouseConfig.open = true;
+        }
+    };
+    document.querySelectorAll('a[href="#warehouse-config"], a[href="#warehouse-locations-title"]').forEach(link => {
+        link.addEventListener('click', () => { warehouseConfig.open = true; });
+    });
+    window.addEventListener('hashchange', openWarehouseConfig);
+    openWarehouseConfig();
     if (filterController) {
         filterController.apply();
     }

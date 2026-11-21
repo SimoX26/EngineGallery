@@ -47,12 +47,13 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
         List<WarehouseItem> items = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(FIND_ALL_SQL);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                items.add(mapRow(rs));
+             PreparedStatement stmt = conn.prepareStatement(FIND_ALL_SQL)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapRow(rs));
+                }
             }
+            WarehouseItemDetailsDAO.attach(conn, items);
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore nel recupero articoli magazzino", e);
@@ -69,17 +70,18 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
 
             stmt.setLong(1, id);
 
+            WarehouseItem item;
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapRow(rs));
-                }
+                if (!rs.next()) return Optional.empty();
+                item = mapRow(rs);
             }
+            WarehouseItemDetailsDAO.attach(conn, List.of(item));
+            return Optional.of(item);
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore nel recupero articolo magazzino ID: " + id, e);
         }
 
-        return Optional.empty();
     }
 
     @Override
@@ -98,6 +100,7 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
                     items.add(mapRow(rs));
                 }
             }
+            WarehouseItemDetailsDAO.attach(conn, items);
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore nel recupero ultimi articoli magazzino", e);
@@ -108,10 +111,11 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
 
     @Override
     public Long save(WarehouseItem item) {
-
+        if (item.getDetails() == null) throw new IllegalArgumentException("Dati ricambio obbligatori");
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-
+            conn.setAutoCommit(false);
+            try {
             stmt.setString(1, item.getComponentType().name());
             stmt.setString(2, item.getName());
             stmt.setString(3, item.getSku());
@@ -124,23 +128,32 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getLong(1);
+                    Long id = rs.getLong(1);
+                    item.setId(id);
+                    WarehouseItemDetailsDAO.write(conn, item);
+                    conn.commit();
+                    return id;
                 }
+            }
+            throw new SQLException("ID articolo non generato");
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
             }
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante il salvataggio articolo magazzino", e);
         }
 
-        throw new RuntimeException("Impossibile ottenere ID generato per articolo magazzino");
     }
 
     @Override
     public void update(WarehouseItem item) {
-
+        if (item.getDetails() == null) throw new IllegalArgumentException("Dati ricambio obbligatori");
         try (Connection conn = ConnectionFactory.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
-
+            conn.setAutoCommit(false);
+            try {
             stmt.setString(1, item.getComponentType().name());
             stmt.setString(2, item.getName());
             stmt.setString(3, item.getSku());
@@ -150,6 +163,12 @@ public class DatabaseWarehouseItemDAO implements WarehouseItemDAO {
             stmt.setLong(7, item.getId());
 
             stmt.executeUpdate();
+            WarehouseItemDetailsDAO.write(conn, item);
+            conn.commit();
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException("Errore durante l'aggiornamento articolo magazzino ID: " + item.getId(), e);

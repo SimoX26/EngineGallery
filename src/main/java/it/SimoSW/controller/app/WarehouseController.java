@@ -3,22 +3,61 @@ package it.SimoSW.controller.app;
 import it.SimoSW.model.WarehouseItem;
 import it.SimoSW.model.WarehouseComponentType;
 import it.SimoSW.model.WarehouseImage;
+import it.SimoSW.model.WarehouseDetails;
+import it.SimoSW.model.WarehouseCategory;
+import it.SimoSW.model.WarehouseLocation;
+import it.SimoSW.model.WarehouseCompatibility;
 import it.SimoSW.model.dao.WarehouseItemDAO;
 import it.SimoSW.model.dao.WarehouseImageDAO;
+import it.SimoSW.model.dao.database.DatabaseWarehouseCatalogDAO;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 
 public class WarehouseController {
 
     private final WarehouseItemDAO warehouseItemDAO;
     private final WarehouseImageDAO warehouseImageDAO;
+    private final DatabaseWarehouseCatalogDAO catalogDAO;
 
-    public WarehouseController(WarehouseItemDAO warehouseItemDAO, WarehouseImageDAO warehouseImageDAO) {
+    public WarehouseController(WarehouseItemDAO warehouseItemDAO, WarehouseImageDAO warehouseImageDAO,
+                               DatabaseWarehouseCatalogDAO catalogDAO) {
         this.warehouseItemDAO = warehouseItemDAO;
         this.warehouseImageDAO = warehouseImageDAO;
+        this.catalogDAO = catalogDAO;
     }
+
+    public List<WarehouseCategory> getCategories() { return catalogDAO.categories(); }
+    public List<WarehouseLocation> getLocations() { return catalogDAO.locations(); }
+
+    public void addCategory(String department, String name, boolean injectorFields) {
+        if (department == null || !Set.of("Alimentazione", "Motori", "Distribuzione", "Altri ricambi").contains(department))
+            throw new IllegalArgumentException("Reparto non valido");
+        catalogDAO.addCategory(department, limitedRequired(name, 100, "Nome categoria obbligatorio"), injectorFields);
+    }
+
+    public void renameCategory(Long id, String name) {
+        if (catalogDAO.category(id).isEmpty()) throw new IllegalArgumentException("Categoria non trovata");
+        catalogDAO.renameCategory(id, limitedRequired(name, 100, "Nome categoria obbligatorio"));
+    }
+
+    public void deleteCategory(Long id) { catalogDAO.deleteCategory(id); }
+
+    public void addLocation(String shelf, String level, String container) {
+        WarehouseLocation location = new WarehouseLocation(
+                limitedRequired(shelf, 40, "Scaffale obbligatorio"),
+                limitedRequired(level, 40, "Ripiano obbligatorio"),
+                limitedRequired(container, 40, "Contenitore obbligatorio"));
+        if (location.getShelf().contains("-") || location.getLevel().contains("-") || location.getContainer().contains("-"))
+            throw new IllegalArgumentException("Usa codici senza trattino per scaffale, ripiano e contenitore");
+        if (location.getCode().length() > 120) throw new IllegalArgumentException("Ubicazione troppo lunga");
+        catalogDAO.addLocation(location);
+    }
+
+    public void deleteLocation(String code) { catalogDAO.deleteLocation(limitedRequired(code, 120, "Ubicazione obbligatoria")); }
 
     public List<WarehouseItem> getAllItems() {
         return warehouseItemDAO.findAll();
@@ -37,7 +76,8 @@ public class WarehouseController {
                            Integer quantity,
                            String location,
                            String notes,
-                           String createdBy) {
+                           String createdBy,
+                           WarehouseDetails details) {
 
         String normalizedName = normalizeRequired(name, "Nome articolo obbligatorio");
         int normalizedQuantity = normalizeQuantity(quantity);
@@ -46,12 +86,15 @@ public class WarehouseController {
         WarehouseItem item = new WarehouseItem(
                 normalizedComponentType,
                 normalizedName,
-                normalizeOptional(sku),
+                limitedRequired(sku, 80, "Codice ricambio obbligatorio"),
                 normalizedQuantity,
-                normalizeOptional(location),
+                limitedRequired(location, 120, "Ubicazione obbligatoria"),
                 normalizeOptional(notes),
                 normalizeOptional(createdBy)
         );
+
+        item.setDetails(normalizeDetails(details));
+        validateLotEngine(item);
 
         return warehouseItemDAO.save(item);
     }
@@ -62,7 +105,8 @@ public class WarehouseController {
                            String sku,
                            Integer quantity,
                            String location,
-                           String notes) {
+                           String notes,
+                           WarehouseDetails details) {
 
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID articolo non valido");
@@ -80,13 +124,16 @@ public class WarehouseController {
                 id,
                 normalizedComponentType,
                 normalizedName,
-                normalizeOptional(sku),
+                limitedRequired(sku, 80, "Codice ricambio obbligatorio"),
                 normalizedQuantity,
-                normalizeOptional(location),
+                limitedRequired(location, 120, "Ubicazione obbligatoria"),
                 normalizeOptional(notes),
                 null,
                 null
         );
+
+        item.setDetails(normalizeDetails(details));
+        validateLotEngine(item);
 
         warehouseItemDAO.update(item);
     }
@@ -174,5 +221,57 @@ public class WarehouseController {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private WarehouseDetails normalizeDetails(WarehouseDetails details) {
+        if (details == null || details.getCategoryId() == null) throw new IllegalArgumentException("Categoria obbligatoria");
+        WarehouseCategory category = catalogDAO.category(details.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Categoria non valida"));
+        boolean injector = category.isInjectorFields();
+        Set<String> seen = new HashSet<>();
+        List<WarehouseCompatibility> compatibilities = details.getCompatibilities().stream().map(c ->
+                new WarehouseCompatibility(limitedRequired(c.getEngineCode(), 120, "Codice motore obbligatorio"), c.isVerified()))
+                .filter(c -> seen.add(c.getEngineCode().toUpperCase(java.util.Locale.ROOT)))
+                .toList();
+        if (compatibilities.size() > 50) throw new IllegalArgumentException("Massimo 50 motori compatibili");
+        if (compatibilities.isEmpty()) throw new IllegalArgumentException("Inserisci almeno un motore compatibile");
+        return new WarehouseDetails(details.getCategoryId(), limitedRequired(details.getManufacturer(), 120, "Produttore obbligatorio"),
+                limitedRequired(details.getOeCode(), 120, "Codice OE obbligatorio"),
+                limitedRequired(details.getAlternativeCodes(), 5000, "Codici alternativi obbligatori"),
+                limitedRequired(details.getCondition(), 80, "Condizione obbligatoria"),
+                limitedRequired(details.getLotCode(), 120, "Lotto obbligatorio"),
+                limitedRequired(details.getSourceEngineCode(), 120, "Codice motore di provenienza obbligatorio"),
+                limitedRequired(details.getTechnicalNotes(), 10000, "Note tecniche obbligatorie"),
+                injector ? limitedRequired(details.getManufacturerCode(), 120, "Codice produttore obbligatorio") : null,
+                injector ? limitedRequired(details.getCalibrationCode(), 120, "Codice calibrazione obbligatorio") : null,
+                injector ? limitedRequired(details.getSourceCylinder(), 40, "Cilindro di provenienza obbligatorio") : null,
+                injector ? limitedRequired(details.getTestStatus(), 80, "Stato collaudo obbligatorio") : null,
+                injector ? limitedRequired(details.getRevisionStatus(), 80, "Stato revisione obbligatorio") : null,
+                compatibilities);
+    }
+
+    private void validateLotEngine(WarehouseItem item) {
+        WarehouseDetails details = item.getDetails();
+        for (WarehouseItem other : warehouseItemDAO.findAll()) {
+            if (item.getId() != null && item.getId().equals(other.getId())) continue;
+            WarehouseDetails otherDetails = other.getDetails();
+            if (otherDetails != null && details.getLotCode().equalsIgnoreCase(otherDetails.getLotCode())
+                    && otherDetails.getSourceEngineCode() != null
+                    && !details.getSourceEngineCode().equalsIgnoreCase(otherDetails.getSourceEngineCode())) {
+                throw new IllegalArgumentException("Gli articoli dello stesso lotto devono avere lo stesso motore di provenienza");
+            }
+        }
+    }
+
+    private static String limitedRequired(String value, int max, String message) {
+        String result = limited(value, max);
+        if (result == null) throw new IllegalArgumentException(message);
+        return result;
+    }
+
+    private static String limited(String value, int max) {
+        String result = normalizeOptional(value);
+        if (result != null && result.length() > max) throw new IllegalArgumentException("Valore troppo lungo (massimo " + max + " caratteri)");
+        return result;
     }
 }

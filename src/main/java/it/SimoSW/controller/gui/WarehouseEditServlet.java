@@ -64,6 +64,8 @@ public class WarehouseEditServlet extends HttpServlet {
         }
 
         bindFormData(request, itemOpt.get());
+        WarehouseFormData.bindOptions(request, warehouseController);
+        WarehouseFormData.bind(request, itemOpt.get().getDetails());
         bindImagesForEdit(request, itemId);
         request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-edit.jsp").forward(request, response);
     }
@@ -91,11 +93,14 @@ public class WarehouseEditServlet extends HttpServlet {
         request.setAttribute("quantity", safeTrim(quantityParam));
         request.setAttribute("location", safeTrim(location));
         request.setAttribute("notes", safeTrim(notes));
+        WarehouseFormData.bindOptions(request, warehouseController);
         bindImagesForEdit(request, itemId);
 
         try {
             Integer quantity = parseQuantity(quantityParam);
-            warehouseController.updateItem(itemId, componentType, name, sku, quantity, location, notes);
+            var details = WarehouseFormData.read(request);
+            WarehouseFormData.bind(request, details, warehouseController);
+            warehouseController.updateItem(itemId, componentType, name, sku, quantity, location, notes, details);
             applyImageDeletions(request, itemId);
             applyImageAdditions(request, itemId);
             activityAuditLogger.logFromRequest(

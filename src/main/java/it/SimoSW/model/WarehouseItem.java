@@ -18,6 +18,7 @@ public class WarehouseItem {
     private final String notes;
     private final LocalDateTime createdAt;
     private final String createdBy;
+    private WarehouseDetails details;
 
     public WarehouseItem(String name,
                          String sku,
@@ -101,6 +102,8 @@ public class WarehouseItem {
         return id;
     }
 
+    public void setId(Long id) { this.id = id; }
+
     public WarehouseComponentType getComponentType() {
         return componentType;
     }
@@ -132,6 +135,10 @@ public class WarehouseItem {
     public String getCreatedBy() {
         return createdBy;
     }
+
+    public WarehouseDetails getDetails() { return details; }
+
+    public void setDetails(WarehouseDetails details) { this.details = details; }
 
     public String getCreatedAtLabel() {
         return createdAt != null ? CREATED_AT_FORMATTER.format(createdAt) : "";

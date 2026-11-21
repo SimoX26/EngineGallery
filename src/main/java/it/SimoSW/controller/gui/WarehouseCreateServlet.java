@@ -49,6 +49,7 @@ public class WarehouseCreateServlet extends HttpServlet {
             return;
         }
         request.setAttribute("componentTypes", selectableComponentTypes());
+        WarehouseFormData.bindOptions(request, warehouseController);
         request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-new.jsp").forward(request, response);
     }
 
@@ -64,12 +65,15 @@ public class WarehouseCreateServlet extends HttpServlet {
 
         bindFormData(request, componentType, name, sku, quantityParam, location, notes);
         request.setAttribute("componentTypes", selectableComponentTypes());
+        WarehouseFormData.bindOptions(request, warehouseController);
 
         Long id;
         try {
             Integer quantity = parseQuantity(quantityParam);
+            var details = WarehouseFormData.read(request);
+            WarehouseFormData.bind(request, details, warehouseController);
             id = warehouseController.createItem(
-                    componentType, name, sku, quantity, location, notes, resolveLoggedUsername(request));
+                    componentType, name, sku, quantity, location, notes, resolveLoggedUsername(request), details);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             request.setAttribute("error", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/warehouse/warehouse-new.jsp").forward(request, response);
